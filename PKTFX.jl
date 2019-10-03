@@ -6,6 +6,7 @@ using Distributions: Uniform
 using Plots
 include("utilities/ReadWrite.jl"); using .ReadWrite
 include("utilities/CLI.jl")
+include("utilities/Cytoscape.jl")
 include("Plotting.jl")
 include("ODEs.jl")
 include("ModelIteration.jl")
@@ -129,6 +130,11 @@ end
 @main function iteratemodel(Wₜ="WT.mat", Wₚ="WP.mat"; o=stdout)
 	X = ModelIteration.converge(loaddlm(Wₜ), loaddlm(Wₚ))
 	savedlm(o, X)
+end
+
+@main function xgmml(Wₜ="WT.mat", Wₚ="WP.mat"; X=nothing, o=stdout)
+	if X != nothing X = loaddlm(X) end
+	write(o, Cytoscape.xgmml(loaddlm(Wₜ), loaddlm(Wₚ), X))
 end
 
 end;

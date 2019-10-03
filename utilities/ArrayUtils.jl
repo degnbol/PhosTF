@@ -5,6 +5,7 @@ using Random: shuffle
 using Distributions
 
 export binary, TruncNormal, eye
+export tostring
 
 """
 Convert a decimal number to binary and return it as a 1D bool array.
@@ -39,5 +40,12 @@ shuffle_rows_(matrix) = @view matrix[shuffle(1:end), :]
 shuffle_columns(matrix) = matrix[:, shuffle(1:end)]
 shuffle_columns_(matrix) = @view matrix[:, shuffle(1:end)]
 
+"""
+A conversion of array to string that writes empty array as [] instead of e.g. Any[].
+"""
+function tostring(array)
+	str = "$array"
+	str[findfirst("[", str)[1]:end]
+end
 
 end;

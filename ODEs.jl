@@ -4,7 +4,8 @@ include("./GeneRegulation.jl")
 Module intended to hold all code for defining and solving ODEs to the point of having the resulting simulated logFC values.
 """
 module ODEs
-using DifferentialEquations: TerminateSteadyState, ODEProblem, solve, ODESolution
+using DifferentialEquations: ODEProblem, solve, ODESolution
+using DiffEqCallbacks: TerminateSteadyState
 using Distributions: Uniform
 using LinearAlgebra: I
 using Main.GeneRegulation
