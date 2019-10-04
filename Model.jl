@@ -21,24 +21,29 @@ struct Constants
 	Constants(n::Int, nₜ::Int, nₚ::Int, K::Int) = Constants(n, nₜ, nₚ, eye(n,K))
 	function default_Mₜ(n::Int, nₜ::Int, nₚ::Int)
 		mat = zeros(Bool, n, n)
-		mat[:, 1:nₜ] .= 1
+		mat[:, nₚ+1:nₚ+nₜ] .= 1
 		mat[diagind(mat)] .= 0
 		mat
 	end
 	function default_Mₚ(n::Int, nₜ::Int, nₚ::Int)
 		mat = zeros(Bool, n, n)
-		mat[1:nₜ+nₚ, nₜ+1:nₜ+nₚ] .= 1
+		mat[1:nₜ+nₚ, 1:nₚ] .= 1
 		mat[diagind(mat)] .= 0
 		mat
 	end
 	default_U(J) = 1 .- J
 end
 
-function _W(Wₜ, Wₚ)
-	(n, nₜ), nₚ = size(Wₜ), size(Wₚ,2)
-	nₒ = n-(nₜ+nₚ)
-	[Wₜ [Wₚ; zeros(nₒ,nₚ)] zeros(n,nₒ)]
+function nₓnₜnₚ(Wₜ::T where T<:AbstractMatrix, Wₚ::T where T<:AbstractMatrix)
+	(n,nₜ), nₚ = size(Wₜ), size(Wₚ,2)
+	n-(nₜ+nₚ),nₜ,nₚ
 end
+
+function _W(Wₜ, Wₚ)
+	nₓ, nₜ, nₚ = nₓnₜnₚ(Wₜ, Wₚ)
+	[[Wₚ; zeros(nₓ,nₚ)] Wₜ zeros(nₓ+nₜ+nₚ,nₓ)]
+end
+WₜWₚ(W, nₜ, nₚ) = W[:,nₚ+1:nₚ+nₜ], W[1:nₜ+nₚ,1:nₚ]
 
 random_W(n::Int, m::Int) = FluxUtils.zerodiag(FluxUtils.random_weight(n::Int, m::Int))
 

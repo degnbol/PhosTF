@@ -6,10 +6,11 @@ using Distributions: Uniform
 using Plots
 include("utilities/ReadWrite.jl"); using .ReadWrite
 include("utilities/CLI.jl")
-include("utilities/Cytoscape.jl")
+include("Cytoscape.jl")
 include("Plotting.jl")
 include("ODEs.jl")
 include("ModelIteration.jl")
+include("Model.jl"); using .Model: nₓnₜnₚ
 
 default_Wₜ = "WT.mat"
 default_Wₚ = "WP.mat"
@@ -30,8 +31,7 @@ end
 Create a random network from W.
 """
 @main function network(Wₜ_fname::String=default_Wₜ, Wₚ_fname::String=default_Wₚ; o::String=default_net)
-	net = Main.GeneRegulation.Network(loaddlm(Wₜ_fname), loaddlm(Wₚ_fname))
-	save(o, net)
+	save(o, Main.GeneRegulation.Network(loaddlm(Wₜ_fname), loaddlm(Wₚ_fname)))
 end
 
 @main function display(i=default_net; v::Int=0)
@@ -133,8 +133,13 @@ end
 end
 
 @main function xgmml(Wₜ="WT.mat", Wₚ="WP.mat"; X=nothing, o=stdout)
+	Wₜ, Wₚ = loaddlm(Wₜ), loaddlm(Wₚ)
 	if X != nothing X = loaddlm(X) end
-	write(o, Cytoscape.xgmml(loaddlm(Wₜ), loaddlm(Wₚ), X))
+	_,nₜ,nₚ = nₓnₜnₚ(Wₜ,Wₚ)
+	K = size(X,2)
+	# highlight each of the proteins if there are as many experiments as PKs+TFs
+	highlight = nₜ+nₚ == K ? (1:K) : nothing
+	write(o, Cytoscape.xgmml(Wₜ, Wₚ, X, highlight))
 end
 
 end;

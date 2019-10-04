@@ -6,6 +6,7 @@ module GeneRegulation
 using Distributions: Normal, Uniform, mean, TruncatedNormal
 import JSON3
 include("utilities/ArrayUtils.jl"); using .ArrayUtils
+include("Model.jl"); using .Model: WₜWₚ
 
 export Network
 export drdt, dpdt, dϕdt
@@ -174,31 +175,32 @@ struct Network
 		new(genes, Wₚ, n, nₜ, nₚ, max_transcription, max_translation, λ_mRNA, λ_prot, λ_phos, r₀, p₀, ϕ₀, phos_activation)
 	end
 	function Network(genes::Vector{Gene}, Wₚ::Vector{Float64}, n::Int, nₜ::Int, nₚ::Int, max_transcription::Vector{Float64}, max_translation::Vector{Float64}, λ_mRNA::Vector{Float64}, λ_prot::Vector{Float64}, λ_phos::Vector{Float64}, r₀::Vector{Float64}, p₀::Vector{Float64}, ϕ₀::Vector{Float64}, phos_activation::BitVector)
-		Wₚ = reshape(Wₚ, (nₜ+nₚ,nₚ))  # un-flatten matrix
+		Wₚ = reshape(Wₚ, (nₚ+nₜ,nₚ))  # un-flatten matrix
 		new(genes, Wₚ, n, nₜ, nₚ, max_transcription, max_translation, λ_mRNA, λ_prot, λ_phos, r₀, p₀, ϕ₀, phos_activation)
 	end
 	function Network(genes::Vector{Gene}, Wₚ::Matrix{Float64})
-		n = length(genes)
-		nₚ = size(Wₚ, 2)
+		n, nₚ = length(genes), size(Wₚ, 2)
 		nₜ = size(Wₚ, 1) - nₚ
 		@assert n >= nₜ + nₚ
 		# In the non-dimensionalized model, max_transcription == λ_mRNA and max_translation == λ_prot
 		max_transcription = λ_mRNA = random_λ(n)
 		max_translation = λ_prot = random_λ(n)
-		λ_phos = random_λ(nₜ+nₚ)
+		λ_phos = random_λ(nₚ+nₜ)
 		r₀ = initial_r(max_transcription, λ_mRNA, genes)
 		p₀ = initial_p(max_translation, λ_prot, r₀)
-		ϕ₀ = initial_ϕ(Wₚ, λ_phos, p₀[1:nₜ+nₚ])
+		ϕ₀ = initial_ϕ(Wₚ, λ_phos, p₀[1:nₚ+nₜ])
 		# activated by phosphorylation if there is kinase regulation on a protein (and more kinases than phosphatases)
-		phos_activation = [vec(sum(Wₚ, dims=2)) .> 0; falses(n-(nₜ+nₚ))]
+		phos_activation = [vec(sum(Wₚ, dims=2)) .> 0; falses(n-(nₚ+nₜ))]
 		new(genes, Wₚ, n, nₜ, nₚ, max_transcription, max_translation, λ_mRNA, λ_prot, λ_phos, r₀, p₀, ϕ₀, phos_activation)
 	end
 	function Network(Wₜ::Matrix, Wₚ::Matrix{Float64})
+		nₚ = size(Wₚ,2)
 		# == 0 → no edge, > 0 → activator, < 0 → repressor.
-		genes = [Gene(findall(row .> 0), findall(row .< 0)) for row in eachrow(Wₜ)]
+		# .+ nₚ because the indexes among all proteins referring to TFs starts after PKs
+		genes = [Gene(findall(row .> 0) .+ nₚ, findall(row .< 0) .+ nₚ) for row in eachrow(Wₜ)]
 		Network(genes, Wₚ)
 	end
-	Network(W, nₜ, nₚ) = Network(W[:,1:nₜ], W[1:nₜ+nₚ,nₜ+1:end])
+	Network(W, nₜ, nₚ) = Network(WₜWₚ(W,nₜ,nₚ)...)
 	function Network(net::Network)
 		new(net.genes, net.Wₚ, net.n, net.nₜ, net.nₚ, net.max_transcription, net.max_translation, net.λ_mRNA, net.λ_prot, net.λ_phos, net.r₀, net.p₀, net.ϕ₀, net.phos_activation)
 	end
@@ -213,7 +215,7 @@ struct Network
 	end
 	function Network(net::Network, mutate::T, value=1e-7) where T<:AbstractVector
 		max_transcription = copy(net.max_transcription)
-		mutatable = @view max_transcription[1:net.nₜ+net.nₚ]
+		mutatable = @view max_transcription[1:net.nₚ+net.nₜ]
 		mutatable[mutate] .= value
 		new(net.genes, net.Wₚ, net.n, net.nₜ, net.nₚ, max_transcription, net.max_translation, net.λ_mRNA, net.λ_prot, net.λ_phos, net.r₀, net.p₀, net.ϕ₀, net.phos_activation)
 	end
@@ -238,9 +240,7 @@ struct Network
 	Initial protein concentrations. Estimated as
 	0 = dp/dt = max_translation*r - λ_prot*p ⟹ p = max_translation*r / λ_prot
 	"""
-	function initial_p(max_translation::Vector, λ_prot::Vector, r::Vector)
-		max_translation .* r ./ λ_prot
-	end
+	initial_p(max_translation::Vector, λ_prot::Vector, r::Vector) = max_translation .* r ./ λ_prot
 	"""
 	Initial phosphorylated protein concentrations. Estimated as (p is used in place of ϕ)
 	0 = dϕ/dt = (Wₚ * p) * (p - ϕ) - λ_phos * ϕ ⟹
@@ -250,13 +250,12 @@ struct Network
 	"""
 	function initial_ϕ(Wₚ::Matrix, λ_phos::Vector, p::Vector)
 		# using ϕ = p from the PKs, meaning we use fully phosphorylated PKs as the origin of calculation
-		Wp = Wₚ * (p[end-size(Wₚ, 2)+1:end])
+		nₚ = size(Wₚ,2)
+		Wp = Wₚ * (p[1:nₚ])
 		clamp.(Wp .* p ./ (Wp .- λ_phos), 0, p)
 	end
 	
-	function Base.show(io::IO, net::Network)
-		print("Network(n=",net.n,", nₜ=",net.nₜ,", nₚ=",net.nₚ,")")
-	end
+	Base.show(io::IO, net::Network) = print("Network(n=$(net.n), nₜ=$(net.nₜ), nₚ=$(net.nₚ))")
 end
 
 
@@ -301,7 +300,7 @@ Concentration of active protein, which is either phosphorylated or unphosphoryla
 
 drdt(network::Network, r, p, ϕ) = network.max_transcription .* f(network.genes, ψ(p, ϕ, network.phos_activation)) .- network.λ_mRNA .* r
 dpdt(network::Network, r, p) = network.max_translation .* r .- network.λ_prot .* p
-dϕdt(network::Network, p, ϕ) = (network.Wₚ * ϕ[network.nₜ+1:end]) .* (p .- ϕ) .- network.λ_phos .* ϕ
+dϕdt(network::Network, p, ϕ) = (network.Wₚ * ϕ[1:network.nₚ]) .* (p .- ϕ) .- network.λ_phos .* ϕ
 
 "Estimate the effect on f for all genes when a given TF has either ϕ=weak or ϕ=strong."
 function estimate_Wₜ(net::Network, i::Int, basal_activation::Float64)
@@ -313,7 +312,7 @@ function estimate_Wₜ(net::Network, i::Int)
 	mean(estimate_Wₜ(net, i, activation) for activation in [0, noise_activation, weak_activation])
 end
 "Estimate Wₜ by comparing the effect on f when any TF has ϕ=weak or ϕ=strong."
-estimate_Wₜ(net::Network) = hcat([estimate_Wₜ(net, i) for i in 1:net.nₜ]...)
+estimate_Wₜ(net::Network) = hcat([estimate_Wₜ(net, i) for i in net.nₚ+1:net.nₚ+net.nₜ]...)
 
 # define struct types for JSON3 to be able to read/write them
 JSON3.StructType(::Type{RegulatoryModule}) = JSON3.Struct()

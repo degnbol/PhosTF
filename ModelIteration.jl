@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 module ModelIteration
 using Distributions: Normal, mean
-include("Model.jl")
+include("Model.jl"); using .Model: nₓnₜnₚ
 
 export converge
 
@@ -25,9 +25,9 @@ function converge(W, constants::Model.Constants, C=random_C(constants.U), X₀=C
 	Xₜ
 end
 function converge(Wₜ, Wₚ, C=nothing, X₀=nothing; tolerance=default_tolerance, max_iterations=default_max_iterations)
-	(n, nₜ), nₚ = size(Wₜ), size(Wₚ,2)
+	nₓ,nₜ,nₚ = nₓnₜnₚ(Wₜ, Wₚ)
 	K = C == nothing ? nₜ+nₚ : size(C,2)
-	constants = Model.Constants(n, nₜ, nₚ, K)
+	constants = Model.Constants(nₓ+nₜ+nₚ, nₜ, nₚ, K)
 	if C == nothing C = random_C(constants.U) end
 	if X₀ == nothing X₀ = C end
 	converge(Model._W(Wₜ, Wₚ), constants, C, X₀, tolerance=tolerance, max_iterations=max_iterations)
