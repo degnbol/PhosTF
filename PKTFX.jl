@@ -82,15 +82,14 @@ If "mutate" is not provided, the first (and ideally only) column of the file wil
 	if mutations != nothing
 		if mutate == nothing mutate = 1 end
 		mutations = loaddlm(mutations, Int)[:,mutate]
-		if length(mutations) == net.nₜ+net.nₚ
-			try mutations = convert(BitVector, mutations)
-			catch InexactError end
+		if length(mutations) == net.nₚ+net.nₜ
+			try mutations = convert(BitVector, mutations) catch InexactError end
 		end
 		solution = ODEs.steady_state(net, mutations)
 	else
 		solution = mutate == nothing ? ODEs.steady_state(net) : ODEs.steady_state(net, mutate)
 	end
-	println(solution.retcode)
+	@info(solution.retcode)
 	if solution.retcode in [:Success, :Terminated]
 		savedlm(r, solution[:,1,end])
 		savedlm(p, solution[:,2,end])

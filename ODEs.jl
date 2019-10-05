@@ -14,16 +14,16 @@ export simulate, steady_state
 export logFC
 
 """ ϕ₀ == 0 for non-regulating proteins in order to have vectors match in length """
-get_u₀(network::Network) = [network.r₀ network.p₀ [network.ϕ₀; zeros(network.n - (network.nₜ+network.nₚ))]]
+get_u₀(net::Network) = [net.r₀ net.p₀ [net.ϕ₀; zeros(net.n - (net.nₚ+net.nₜ))]]
 
-function ODE!(du,u,net,t)
+function ODE!(du, u, net, t)
 	r = @view u[:,1]
 	p = @view u[:,2]
 	ϕ = @view u[:,3]
 	ϕ .= max.(0., ϕ)
 	du[:,1] .= drdt(net, r, p, ϕ)
 	du[:,2] .= dpdt(net, r, p)
-	du[1:net.nₜ+net.nₚ,3] .= dϕdt(net, view(p,1:net.nₜ+net.nₚ), view(ϕ,1:net.nₜ+net.nₚ))
+	du[1:net.nₚ+net.nₜ,3] .= dϕdt(net, view(p,1:net.nₚ+net.nₜ), view(ϕ,1:net.nₚ+net.nₜ))
 end
 
 steady_state_callback = TerminateSteadyState(1e-4, 1e-6)
