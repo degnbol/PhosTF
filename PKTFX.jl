@@ -26,6 +26,29 @@ Create random W.
 	savedlm(WP_fname, Weight.Wₜ(nₜ, nₚ))
 end
 
+@main function correct(Wₜ_fname::String=default_Wₜ, Wₚ_fname::String=default_Wₚ; ot="WT_cor.mat", op="WP_cor.mat")
+	Wₜ, Wₚ = loaddlm(Wₜ_fname), loaddlm(Wₚ_fname)
+	if Weight.correct!(Wₜ, Wₚ) @info("Corrections made.") end
+	savedlm(ot, Wₜ)
+	savedlm(op, Wₚ)
+end
+
+@main function iteratemodel(Wₜ="WT.mat", Wₚ="WP.mat"; o=stdout)
+	X = ModelIteration.converge(loaddlm(Wₜ), loaddlm(Wₚ))
+	savedlm(o, X)
+end
+
+@main function xgmml(Wₜ="WT.mat", Wₚ="WP.mat"; X=nothing, o=stdout)
+	Wₜ, Wₚ = loaddlm(Wₜ), loaddlm(Wₚ)
+	if X != nothing X = loaddlm(X) end
+	_,nₜ,nₚ = nₓnₜnₚ(Wₜ,Wₚ)
+	K = size(X,2)
+	# highlight each of the proteins if there are as many experiments as PKs+TFs
+	highlight = nₜ+nₚ == K ? (1:K) : nothing
+	write(o, Cytoscape.xgmml(Wₜ, Wₚ, X, highlight))
+end
+
+
 """
 Create a random network from W.
 """
@@ -50,10 +73,11 @@ end
 	savedlm(o, Wₜ)
 end
 
+
 """
 Simulate a network.
 """
-@main function simulate(i=default_net, r="simulated_r.mat", p="simulated_p.mat", ϕ="simulated_phi.mat", t="simulated_t.mat")
+@main function simulate(i=default_net, r="sim_r.mat", p="sim_p.mat", ϕ="sim_phi.mat", t="sim_t.mat")
 	net = load(i, Main.GeneRegulation.Network)
 	solution = ODEs.simulate(net)
 	println(solution.retcode)
@@ -66,6 +90,28 @@ Simulate a network.
 end
 
 """
+Plot simulations.
+- i: matrices with size=(#proteins, #times)
+- o: optional file to write plot to
+- ids: list of protein ids to only plot those.
+"""
+@main function plot(i...; t="sim_t.mat", o=stdout, ids=[])
+	simulations = [loaddlm(fname) for fname in i]
+	if !isempty(ids)
+		simulations = [sim[ids,:] for sim in simulations]
+	end
+	time = loaddlm(t)
+	p = Plotting.plot_simulation(time, simulations)
+	Plotting.save(o, p)
+	if o == stdout
+		println("plotting complete")
+		readline()
+	end
+	nothing
+end
+
+
+"""
 Get the steady state levels for a network optionally mutating it.
 - mutate: index indicating which mutation to perform.
 If "mutations" is not provided, it refers to index of the protein to mutate.
@@ -76,7 +122,7 @@ If "mutations" is not provided, it refers to index of the protein to mutate.
 - mutations: optional fname to provided where "mutate" will then be the index of a column.
 If "mutate" is not provided, the first (and ideally only) column of the file will be used.
 """
-@main function steadystate(mutate=nothing, i=default_net, r="steady_state_r" * (mutate == nothing ? ".mat" : "_$mutate.mat"), p="steady_state_p" * (mutate == nothing ? ".mat" : "_$mutate.mat"), ϕ="steady_state_phi" * (mutate == nothing ? ".mat" : "_$mutate.mat"); mutations=nothing)
+@main function steadystate(mutate=nothing, i=default_net, r="steady_r" * (mutate == nothing ? ".mat" : "_$mut.mat"), p="steady_p" * (mutate == nothing ? ".mat" : "_$mut.mat"), ϕ="steady_phi" * (mutate == nothing ? ".mat" : "_$mut.mat"); mutations=nothing)
 	net = load(i, Main.GeneRegulation.Network)
 	if mutations != nothing
 		if mutate == nothing mutate = 1 end
@@ -113,31 +159,5 @@ Get the log fold-change values comparing mutant transcription levels to wildtype
 	savedlm(o, measurements)
 end
 
-@main function plot(i...; t="simulated_t.mat", o=stdout)
-	simulations = [loaddlm(fname) for fname in i]
-	time = loaddlm(t)
-	p = Plotting.plot_simulation(time, simulations)
-	Plotting.save(o, p)
-	if o == stdout
-		println("plotting complete")
-		readline()
-	end
-	nothing
-end
-
-@main function iteratemodel(Wₜ="WT.mat", Wₚ="WP.mat"; o=stdout)
-	X = ModelIteration.converge(loaddlm(Wₜ), loaddlm(Wₚ))
-	savedlm(o, X)
-end
-
-@main function xgmml(Wₜ="WT.mat", Wₚ="WP.mat"; X=nothing, o=stdout)
-	Wₜ, Wₚ = loaddlm(Wₜ), loaddlm(Wₚ)
-	if X != nothing X = loaddlm(X) end
-	_,nₜ,nₚ = nₓnₜnₚ(Wₜ,Wₚ)
-	K = size(X,2)
-	# highlight each of the proteins if there are as many experiments as PKs+TFs
-	highlight = nₜ+nₚ == K ? (1:K) : nothing
-	write(o, Cytoscape.xgmml(Wₜ, Wₚ, X, highlight))
-end
 
 end;

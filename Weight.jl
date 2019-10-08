@@ -46,6 +46,7 @@ silent_nodes(W, nₜ::Integer, nₚ::Integer) = silent_nodes(W, Model.Iₜ(size(
 
 """
 Proteins regulated only by phosphatases, which means the phosphate edges serve no purpose since the protein will always be unphosphorylated.
+return: 1D bit vector, length size(Wₚ,1). true for each protein regulated by only phosphatases (and at least 1), false otherwise.
 """
 function silent_phosphatases(Wₚ)
 	kinase_reg, phosphate_reg = vec(any(Wₚ.>0, dims=2)), vec(any(Wₚ.<0, dims=2))
@@ -65,12 +66,52 @@ function check(arr, msg)
 	end
 end
 
-
-function correct(Wₜ, Wₚ)
-	nₓ, nₜ, nₚ = nₓnₜnₚ(Wₜ, Wₚ)
-	self_loops_Wₜ, self_loops_Wₚ = self_loops(Wₜ), self_loops(Wₚ)
-	check(self_loops_Wₜ, )
-	check(self_loops_Wₚ)
+"""
+Set self-loops to zero and show a warning if self-loops are found.
+return: bool indicating if any were found.
+"""
+function correct_self_loops!(Wₜ, Wₚ)
+	nₚ = size(Wₚ,2)
+	self_loops_Wₜ, self_loops_Wₚ = self_loops(Wₜ,-nₚ), self_loops(Wₚ)
+	check(self_loops_Wₜ, "self loops in Wₜ")
+	check(self_loops_Wₚ, "self loops in Wₚ")
+	Wₜ[diagind(Wₜ,-nₚ)[self_loops_Wₜ]] .= 0
+	Wₚ[diagind(Wₚ)[self_loops_Wₚ]] .= 0
+	return any(self_loops_Wₜ) || any(self_loops_Wₚ)
+end
+"""
+Set silent (PK/PP) edges to zero and show a warning if any are found.
+return: bool indicating if any were found.
+"""
+function correct_silent_edges!(Wₜ, Wₚ)
+	_, nₜ, nₚ = nₓnₜnₚ(Wₜ, Wₚ)
+	W = Model._W(Wₜ, Wₚ)
+	edges = silent_edges(W, nₜ, nₚ)
+	check(edges, "silent edges")
+	W[edges] .= 0
+	Wₜ[:], Wₚ[:] = Model.WₜWₚ(W, nₜ, nₚ)
+	return any(edges)
+end
+"""
+Set (PK/PP) phosphate edges to zero if they will be silent in simulation and show a warning if any are found.
+return: bool indicating if any were found.
+"""
+function correct_silent_phosphates!(Wₚ)
+	phosphates = silent_phosphatases(Wₚ)
+	check(phosphates, "silent phosphate regulations")
+	Wₚ[phosphates,:] .= 0
+	return any(phosphates)
+end
+"""
+Correct self loops, silent edges, and silent phosphorylation regulations.
+return: bool indicating if anything was corrected.
+"""
+function correct!(Wₜ, Wₚ)
+	corrected = correct_self_loops!(Wₜ, Wₚ)
+	while correct_silent_edges!(Wₜ, Wₚ) | correct_silent_phosphates!(Wₚ)
+		corrected = true
+	end
+	corrected
 end
 
 end;

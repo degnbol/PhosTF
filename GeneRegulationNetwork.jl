@@ -2,11 +2,10 @@
 """
 Module intended to hold all structs with data defining our gene regulation network and its regulation mechanisms. All functions for initializing the values are found here, including randomized initialization.
 """
-module GeneRegulation
-using Distributions: Normal, Uniform, mean, TruncatedNormal
-import JSON3
-include("utilities/ArrayUtils.jl"); using .ArrayUtils
+module GeneRegulationNetwork
+include("utilities/ArrayUtils.jl"); using .ArrayUtils: TruncNormal
 include("Model.jl"); using .Model: WₜWₚ
+include("GeneRegulationGene.jl"); using .GeneRegulationGene
 
 export Network
 export drdt, dpdt, dϕdt
@@ -116,6 +115,8 @@ struct Network
 	end
 end
 
+Base.show(io::IO, net::Network) = print(io, "Network(n=$(net.n), nₜ=$(net.nₜ), nₚ=$(net.nₚ))")
+
 function WₚₖWₚₚ(Wₚ::AbstractMatrix)
 	Wₚₖ = +Wₚ; Wₚₖ[Wₚₖ .< 0] .= 0
 	Wₚₚ = -Wₚ; Wₚₚ[Wₚₚ .< 0] .= 0
@@ -124,9 +125,8 @@ end
 
 drdt(net::Network, r, p, ϕ) = net.max_transcription .* f(net.genes, ψ(p, ϕ, net.phos_activation)) .- net.λ_mRNA .* r
 dpdt(net::Network, r, p) = net.max_translation .* r .- net.λ_prot .* p
-dϕdt(net::Network, p, ϕ) = (net.Wₚₖ * ϕ[1:net.nₚ]) .* (p .- ϕ) .- (net.Wₚₚ * ϕ[1:net.nₚ] .+ net.λ_phos) .* ϕ
-
-
+dϕdt(net::Network, p, ϕ) = dϕdt(net, p, ϕ, ψ(p, ϕ, net.phos_activation))
+dϕdt(net::Network, p, ϕ, ψ) = (net.Wₚₖ * ψ[1:net.nₚ]) .* (p .- ϕ) .- (net.Wₚₚ * ψ[1:net.nₚ] .+ net.λ_phos) .* ϕ
 
 end;
 
