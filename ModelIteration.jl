@@ -1,4 +1,5 @@
 #!/usr/bin/env julia
+"Iterating the equations from the model intended for inference until convergence in order to generate naive data."
 module ModelIteration
 using Distributions: Normal, mean
 include("Model.jl"); using .Model: nₓnₜnₚ

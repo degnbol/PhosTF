@@ -179,7 +179,7 @@ begin # setters
 			if nes[i].id == nothing set_id(nes[i], i) end
 		end
 	end
-	function set_id(ne::Union{Node,Edge}, id)
+	function set_id(ne, id)
 		ne.id = id
 		if ne.label == nothing set_label(ne, id) end
 		if ne.atts["shared name"] == nothing set_shared_name(ne, id) end
@@ -192,11 +192,11 @@ begin # setters
 		e.label = label
 		if e.graphics["EDGE_LABEL"] == nothing e.graphics["EDGE_LABEL"] = label end
 	end
-	function set_shared_name(ne::Union{Node,Edge}, name)
+	function set_shared_name(ne, name)
 		ne.atts["shared name"] = name
 		if ne.atts["name"] == nothing ne.atts["name"] = name end
 	end
-	set_shared_name(ne::Union{Node,Edge}, name::Int) = set_shared_name(ne, string(name))
+	set_shared_name(ne, name::Integer) = set_shared_name(ne, string(name))
 
 	translate_x(g::Graph, Δ) = for node in g.nodes translate_x(node, Δ) end
 	translate_y(g::Graph, Δ) = for node in g.nodes translate_y(node, Δ) end
@@ -216,8 +216,8 @@ begin # setters
 		append_source(g.edges, Δ)
 		append_target(g.edges, Δ)
 	end
-	increment_source(es::Vector{Edge}, Δ::Int) = for e in es e.source += Δ end
-	increment_target(es::Vector{Edge}, Δ::Int) = for e in es e.target += Δ end
+	increment_source(es::Vector{Edge}, Δ::Integer) = for e in es e.source += Δ end
+	increment_target(es::Vector{Edge}, Δ::Integer) = for e in es e.target += Δ end
 	append_source(es::Vector{Edge}, Δ::String) = for e in es e.source = "$(e.source)$Δ" end
 	append_target(es::Vector{Edge}, Δ::String) = for e in es e.target = "$(e.target)$Δ" end
 end

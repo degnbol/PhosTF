@@ -1,4 +1,5 @@
 #!/usr/bin/env julia
+"Flux machine learning for gradient descent of errors defined by model loss functions."
 module Inference
 using LinearAlgebra
 using Flux, Flux.Tracker

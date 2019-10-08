@@ -1,5 +1,6 @@
 #!/usr/bin/env julia
 include("GeneRegulation.jl")
+"Main caller for calling all project functions through command-line or julia REPL."
 module PKTFX
 using Fire
 using Distributions: Uniform
@@ -11,6 +12,7 @@ include("Plotting.jl")
 include("ODEs.jl")
 include("ModelIteration.jl")
 include("Model.jl"); using .Model: nₓnₜnₚ
+include("Weight.jl")
 
 default_Wₜ = "WT.mat"
 default_Wₚ = "WP.mat"
@@ -19,12 +21,9 @@ default_net = "net.bson"
 """
 Create random W.
 """
-@main function W(n::Int, nₜ::Int=Int(round(n/2 * .7)), nₚ::Int=Int(round(n/2 * .3)); WT_fname::String=default_Wₜ, WP_fname::String=default_Wₚ)
-	Wₜ = rand([-1, 0, 1], (n, nₜ))
-	Wₚ = rand(Uniform(.5, 1.), (nₜ+nₚ, nₚ))
-	Wₚ[rand([false, true], size(Wₚ))] .= 0
-	savedlm(WT_fname, Wₜ)
-	savedlm(WP_fname, Wₚ)
+@main function W(n::Integer, nₜ::Integer=Integer(round(n/2 * .7)), nₚ::Integer=Integer(round(n/2 * .3)); WT_fname::String=default_Wₜ, WP_fname::String=default_Wₚ)
+	savedlm(WT_fname, Weight.Wₜ(n , nₜ, nₚ))
+	savedlm(WP_fname, Weight.Wₜ(nₜ, nₚ))
 end
 
 """
@@ -34,7 +33,7 @@ Create a random network from W.
 	save(o, Main.GeneRegulation.Network(loaddlm(Wₜ_fname), loaddlm(Wₚ_fname)))
 end
 
-@main function display(i=default_net; v::Int=0)
+@main function display(i=default_net; v::Integer=0)
 	net = load(i, Main.GeneRegulation.Network)
 	println(net)
 	if v > 0 for g in net.genes

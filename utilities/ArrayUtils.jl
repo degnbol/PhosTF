@@ -23,7 +23,7 @@ TruncNormal(l, u) = TruncatedNormal((l+u)/2, (u-l)/6, l, u)
 """
 Ability to create non-square identity matrices by using dense matrix type.
 """
-function eye(n::Int, m::Int)
+function eye(n::Integer, m::Integer)
 	mat = zeros(n, m)
 	mat[diagind(mat)] .= 1
 	mat

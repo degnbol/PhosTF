@@ -1,7 +1,8 @@
 #!/usr/bin/env julia
 include("./GeneRegulation.jl")
 """
-Module intended to hold all code for defining and solving ODEs to the point of having the resulting simulated logFC values.
+Defining and solving ODEs to the point of having the resulting simulated logFC values.
+Used for simulation of gene expression levels.
 """
 module ODEs
 using DifferentialEquations: ODEProblem, solve, ODESolution
@@ -32,7 +33,7 @@ default_duration = 24
 """
 Save progression through time for plotting and inspection.
 """
-function simulate(network::Network, duration::Int=default_duration)
+function simulate(network::Network, duration::Integer=default_duration)
 	problem = ODEProblem(ODE!, get_u₀(network), (0., duration*60.), network)
 	solve(problem, callback=steady_state_callback, save_everystep=true)
 end
@@ -40,20 +41,20 @@ end
 """
 Find the steady-state solution.
 """
-function steady_state(network::Network, u₀::Matrix=get_u₀(network), duration::Int=default_duration)
+function steady_state(network::Network, u₀::Matrix=get_u₀(network), duration::Integer=default_duration)
 	problem = ODEProblem(ODE!, u₀, (0., duration*60.), network)
 	solve(problem, callback=steady_state_callback, save_everystep=false, save_start=false)
 end
 """
 Mutate a wildtype and get the steady state solution.
 """
-function steady_state(network::Network, mutation::Union{<:AbstractVector,<:Int}, u₀::Matrix=get_u₀(network), duration::Int=default_duration)
+function steady_state(network::Network, mutation::Union{<:AbstractVector,<:Int}, u₀::Matrix=get_u₀(network), duration::Integer=default_duration)
 	steady_state(Network(network, mutation), u₀, duration)
 end
-function steady_states(network::Network, mutations::Matrix, u₀::Matrix=get_u₀(network), duration::Int=default_duration)
+function steady_states(network::Network, mutations::Matrix, u₀::Matrix=get_u₀(network), duration::Integer=default_duration)
 	[steady_state(network, mutation, u₀, duration) for mutation in eachcol(mutations)]
 end
-function steady_states(network::Network, mutations, u₀::Matrix=get_u₀(network), duration::Int=default_duration)
+function steady_states(network::Network, mutations, u₀::Matrix=get_u₀(network), duration::Integer=default_duration)
 	[steady_state(network, mutation, u₀, duration) for mutation in mutations]
 end
 

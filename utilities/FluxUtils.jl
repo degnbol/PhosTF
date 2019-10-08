@@ -20,7 +20,7 @@ end
 """
 Set Gaussian random values where μ is set by the number of values.
 """
-random_weight(n::Int, m::Int) = randn(n, m) ./ √(n*m)
+random_weight(n::Integer, m::Integer) = randn(n, m) ./ √(n*m)
 
 # overloading missing multiplication signature that gives ambiguity.
 # we are selecting the tracker multiplication over the LinearAlgebra one since we obviously want tracking.

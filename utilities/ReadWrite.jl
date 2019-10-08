@@ -69,7 +69,7 @@ function save(fname::String, x)
 	else savedlm(fname, x) end
 end
 
-function savedlm(fname::String, x::Array)
+function savedlm(fname::String, x::AbstractArray)
 	ext = splitext(fname)[2]
 	if ext in [".mat", ".txt", ".ssv"] writedlm(fname, x, ' ')
 	elseif ext == ".csv" writedlm(fname, x, ',')
