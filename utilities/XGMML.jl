@@ -1,12 +1,15 @@
 #!/usr/bin/env julia
+include("StringUtils.jl")
+include("ArrayUtils.jl")
+
 """
 Module for code to export a network in .xgmml format.
 """
 module XGMML
+using Statistics: mean
 import Base.show
 import Base.merge
-include("StringUtils.jl"); using .StringUtils
-include("ArrayUtils.jl")
+using ..StringUtils
 
 mutable struct Node
 	atts::Dict{Any,Any}
@@ -63,15 +66,16 @@ mutable struct Edge
 	directed::Bool
 	width
 	color
-	function Edge(attributes, graphics, source, target; id=nothing, label="", directed=true, width=2., color="#000000", extra_atts...)
-		new(merge(attributes, extra_atts), graphics, id, label, source, target, directed, width, color)
+	anchor
+	function Edge(attributes, graphics, source, target; id=nothing, label="", directed=true, width=2., color="#000000", anchor=nothing, extra_atts...)
+		new(merge(attributes, extra_atts), graphics, id, label, source, target, directed, width, color, anchor)
 	end
-	function Edge(graphics, source, target; id=nothing, label="", directed=true, width=2., color=nothing, extra_atts...)
+	function Edge(graphics, source, target; id=nothing, label="", directed=true, width=2., color=nothing, anchor=nothing, extra_atts...)
 		if color == nothing color = graphics["EDGE_TARGET_ARROW_UNSELECTED_PAINT"] end
-		new(merge(attributes(id, label), extra_atts), graphics, id, label, source, target, directed, width, color)
+		new(merge(attributes(id, label), extra_atts), graphics, id, label, source, target, directed, width, color, anchor)
 	end
-	function Edge(source, target; id=nothing, label="", directed=true, width=2., arrow="DELTA", color="#000000", opacity=255, extra_atts...)
-		new(merge(attributes(id, label), extra_atts), graphics(label, arrow=arrow, color=color, opacity=opacity), id, label, source, target, directed, width, color)
+	function Edge(source, target; id=nothing, label="", directed=true, width=2., arrow="DELTA", color="#000000", opacity=255, anchor=nothing, extra_atts...)
+		new(merge(attributes(id, label), extra_atts), graphics(label, arrow=arrow, color=color, opacity=opacity), id, label, source, target, directed, width, color, anchor)
 	end
 	
 	function attributes(shared_name=nothing, name=shared_name; shared_interaction="", interaction=shared_interaction)
@@ -137,12 +141,16 @@ begin # printing
 		
 		print(io, """<node id="$(n.id)" label="$(n.label)">\n""" * indent(att_repr(n.atts) * graphics) * "</node>\n")
 	end
+	function edge_graphics_repr(e::Edge)
+		out = """<graphics width="$(e.width)" fill="$(e.color)">
+		""" * indent(att_repr(e.graphics))
+		if e.anchor != nothing out *= indent(att_repr("EDGE_BEND", join(e.anchor,','))) end
+		out *= "</graphics>\n"
+		out
+	end
 	function Base.show(io::IO, e::Edge)
-		graphics = """<graphics width="$(e.width)" fill="$(e.color)">
-		""" * indent(att_repr(e.graphics)) * "</graphics>\n"
 		directed = e.directed ? 1 : 0
-		
-		print(io, """<edge id="$(e.id)" label="$(e.label)" source="$(e.source)" target="$(e.target)" cy:directed="$directed">\n""" * indent(att_repr(e.atts) * graphics) * "</edge>\n")
+		print(io, """<edge id="$(e.id)" label="$(e.label)" source="$(e.source)" target="$(e.target)" cy:directed="$directed">\n""" * indent(att_repr(e.atts) * edge_graphics_repr(e)) * "</edge>\n")
 	end
 	function Base.show(io::IO, g::Graph)
 		directed = g.directed ? 1 : 0
@@ -169,6 +177,9 @@ begin # getters
 		edge_ids = get_edge_ids(g)
 		length(node_ids) > length(unique(node_ids)) || length(edge_ids) > length(unique(edge_ids))
 	end
+	
+	"Center of mass."
+	get_center(ns::Vector{Node}) = [mean(n.x for n in ns), mean(n.y for n in ns)]
 end
 
 
@@ -220,6 +231,13 @@ begin # setters
 	increment_target(es::Vector{Edge}, Δ::Integer) = for e in es e.target += Δ end
 	append_source(es::Vector{Edge}, Δ::String) = for e in es e.source = "$(e.source)$Δ" end
 	append_target(es::Vector{Edge}, Δ::String) = for e in es e.target = "$(e.target)$Δ" end
+	
+	function set_anchor(e::Edge, source::Vector, target::Vector, bend::Real)
+		v = target - source
+		v̂ = [-v[2], v[1]] # hat the vector. 90 degree rotation
+		e.anchor = @. source + .5v + bend*v̂
+	end
+	set_anchor(e::Edge, source::Node, target::Node, bend::Real) = set_anchor(e, [source.x, source.y], [target.x, target.y], bend)
 end
 
 

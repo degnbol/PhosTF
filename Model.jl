@@ -1,11 +1,13 @@
 #!/usr/bin/env julia
+include("utilities/ArrayUtils.jl")
+include("utilities/FluxUtils.jl")
+
 "Core model describing the equations of the model etc."
 module Model
 using LinearAlgebra
 using Statistics: mean
 using Flux
-include("utilities/ArrayUtils.jl"); using .ArrayUtils: eye
-include("utilities/FluxUtils.jl")
+using ..ArrayUtils: eye
 
 struct Constants
 	# Masking matrix for TF. Square.
@@ -39,6 +41,8 @@ function nₓnₜnₚ(Wₜ::AbstractMatrix, Wₚ::AbstractMatrix)
 	(n,nₜ), nₚ = size(Wₜ), size(Wₚ,2)
 	n-(nₜ+nₚ),nₜ,nₚ
 end
+nₓnₜnₚ(WₜWₚ::Array) = nₓnₜnₚ(WₜWₚ...)
+nₓnₜnₚ(WₜWₚ::Tuple) = nₓnₜnₚ(WₜWₚ...)
 
 function _W(Wₜ, Wₚ)
 	nₓ, nₜ, nₚ = nₓnₜnₚ(Wₜ, Wₚ)

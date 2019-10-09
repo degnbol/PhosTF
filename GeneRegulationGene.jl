@@ -1,10 +1,12 @@
 #!/usr/bin/env julia
+include("utilities/ArrayUtils.jl")
+
 """
 Gene and regulatory module structs for gene regulation simulation.
 """
 module GeneRegulationGene
 using Distributions: Uniform, TruncatedNormal
-include("utilities/ArrayUtils.jl"); using .ArrayUtils
+using ..ArrayUtils
 
 export Gene
 export f, ψ

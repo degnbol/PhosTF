@@ -1,8 +1,10 @@
 #!/usr/bin/env julia
+include("Model.jl")
+
 "Iterating the equations from the model intended for inference until convergence in order to generate naive data."
 module ModelIteration
 using Distributions: Normal, mean
-include("Model.jl"); using .Model: nₓnₜnₚ
+using ..Model
 
 export converge
 
@@ -26,7 +28,7 @@ function converge(W, constants::Model.Constants, C=random_C(constants.U), X₀=C
 	Xₜ
 end
 function converge(Wₜ, Wₚ, C=nothing, X₀=nothing; tolerance=default_tolerance, max_iterations=default_max_iterations)
-	nₓ,nₜ,nₚ = nₓnₜnₚ(Wₜ, Wₚ)
+	nₓ,nₜ,nₚ = Model.nₓnₜnₚ(Wₜ, Wₚ)
 	K = C == nothing ? nₜ+nₚ : size(C,2)
 	constants = Model.Constants(nₓ+nₜ+nₚ, nₜ, nₚ, K)
 	if C == nothing C = random_C(constants.U) end

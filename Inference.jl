@@ -1,11 +1,13 @@
 #!/usr/bin/env julia
+include("Model.jl")
+include("utilities/ArrayUtils.jl")
+
 "Flux machine learning for gradient descent of errors defined by model loss functions."
 module Inference
 using LinearAlgebra
 using Flux, Flux.Tracker
 using Flux.Tracker: grad, update!
-include("Model.jl")
-include("utilities/ArrayUtils.jl"); using .ArrayUtils: eye, shuffle_columns
+using ..ArrayUtils: eye, shuffle_columns
 
 loss(X) = Model.mse(constants, W, X) + norm(W)
 

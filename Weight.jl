@@ -1,9 +1,11 @@
 #!/usr/bin/env julia
+include("Model.jl")
+
 "Construction of valid and random weight matrices, detection of silent edges and weight matrix correction."
 module Weight
 using LinearAlgebra
 using SparseArrays
-include("Model.jl"); using .Model: nₓnₜnₚ
+using ..Model: nₓnₜnₚ
 
 function Wₜ(n::Integer, nₜ::Integer, nₚ::Integer)
 	mat = rand([-1, 0, 1], (n, nₜ))

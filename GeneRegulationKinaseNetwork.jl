@@ -1,12 +1,16 @@
 #!/usr/bin/env julia
+include("utilities/ArrayUtils.jl")
+include("Model.jl")
+include("GeneRegulationGene.jl")
+
 """
 Backup version which assumes all phosphorylation regulators are kinases, so no negative (phosphatase) edges.
 Module intended to hold all structs with data defining our gene regulation network and its regulation mechanisms. All functions for initializing the values are found here, including randomized initialization.
 """
 module GeneRegulationNetwork
-include("utilities/ArrayUtils.jl"); using .ArrayUtils: TruncNormal
-include("Model.jl"); using .Model: WₜWₚ
-include("GeneRegulationGene.jl"); using .GeneRegulationGene
+using ..ArrayUtils: TruncNormal
+using ..Model: WₜWₚ
+using ..GeneRegulationGene
 
 export Network
 export drdt, dpdt, dϕdt
