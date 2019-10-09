@@ -1,9 +1,9 @@
 #!/usr/bin/env julia
 include("simulation/GeneRegulation.jl")
+include("simulation/ODEs.jl")
 include("utilities/ReadWrite.jl")
 include("Cytoscape.jl")
 include("Plotting.jl")
-include("ODEs.jl")
 include("ModelIteration.jl")
 include("Model.jl")
 include("Weight.jl")

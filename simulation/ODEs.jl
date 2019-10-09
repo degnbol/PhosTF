@@ -1,5 +1,5 @@
 #!/usr/bin/env julia
-include("simulation/GeneRegulation.jl")
+include("GeneRegulation.jl")
 
 """
 Defining and solving ODEs to the point of having the resulting simulated logFC values.
