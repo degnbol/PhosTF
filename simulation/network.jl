@@ -1,18 +1,11 @@
 #!/usr/bin/env julia
-include("utilities/ArrayUtils.jl")
-include("Model.jl")
-include("GeneRegulationGene.jl")
+include("../utilities/ArrayUtils.jl")
 
 """
-Module intended to hold all structs with data defining our gene regulation network and its regulation mechanisms. All functions for initializing the values are found here, including randomized initialization.
+Network struct containing genes for simulation.
 """
-module GeneRegulationNetwork
-using ..ArrayUtils: TruncNormal
-using ..Model: WₜWₚ
-using ..GeneRegulationGene
 
-export Network
-export drdt, dpdt, dϕdt
+using .ArrayUtils: TruncNormal
 
 struct Network
 	genes::Vector{Gene}
@@ -131,6 +124,4 @@ drdt(net::Network, r, p, ϕ) = net.max_transcription .* f(net.genes, ψ(p, ϕ, n
 dpdt(net::Network, r, p) = net.max_translation .* r .- net.λ_prot .* p
 dϕdt(net::Network, p, ϕ) = dϕdt(net, p, ϕ, ψ(p, ϕ, net.phos_activation))
 dϕdt(net::Network, p, ϕ, ψ) = (net.Wₚₖ * ψ[1:net.nₚ]) .* (p .- ϕ) .- (net.Wₚₚ * ψ[1:net.nₚ] .+ net.λ_phos) .* ϕ
-
-end;
 

@@ -10,6 +10,7 @@ using Statistics: mean
 import Base.show
 import Base.merge
 using ..StringUtils
+import ..ArrayUtils
 
 mutable struct Node
 	atts::Dict{Any,Any}

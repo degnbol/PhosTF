@@ -1,65 +1,17 @@
 #!/usr/bin/env julia
-include("utilities/ArrayUtils.jl")
+include("../utilities/ArrayUtils.jl")
 
 """
 Gene and regulatory module structs for gene regulation simulation.
 """
-module GeneRegulationGene
-using Distributions: Uniform, TruncatedNormal
-using ..ArrayUtils
-
-export Gene
-export f, ψ
-
-const weak_activation = .25
-const noise_activation = .25weak_activation
+using Distributions: TruncatedNormal
+using .ArrayUtils: TruncNormal, binary
 
 """
 State s is interpreted as a binary number, where bit k indicates whether module k is active (True) or inactive (False) in this state.
 n: number of modules to combine in each unique way
 """
 states(n) = (binary(i-1, n) for i in 1:2^n)
-
-
-struct RegulatoryModule
-	n_activators::Int
-	n_repressors::Int
-	inputs::Vector{Int}  # int indexes for activators then repressors among all proteins
-	ν::Vector{Float64}
-	k::Vector{Float64}
-	complex::Bool
-	inhibitor::Bool
-	# constructor for JSON3
-	function RegulatoryModule(n_activators::Integer, n_repressors::Integer, inputs::Vector{<:Integer}, ν::Vector{<:AbstractFloat}, k::Vector{<:AbstractFloat}, complex::Bool, inhibitor::Bool)
-		new(n_activators, n_repressors, inputs, ν, k, complex, inhibitor)
-	end
-	function RegulatoryModule(activators::Vector, repressors::Vector, ν::Vector, k::Vector, complex::Bool, inhibitor::Bool)
-		new(length(activators), length(repressors), vcat(activators, repressors), ν, k, complex, inhibitor)
-	end
-	function RegulatoryModule(activators::Vector, repressors::Vector)
-		n = length(activators) + length(repressors)
-		ν = random_ν(n)
-		k = random_k(n)
-		complex = rand([true, false])
-		inhibitor = random_inhibitor(length(activators), length(repressors))
-		if inhibitor
-			activators, repressors = repressors, activators
-		end
-		RegulatoryModule(activators, repressors, ν, k, complex, inhibitor)
-	end
-	
-	"""
-	Hill coeficient ν for each input protein.
-	"""
-	random_ν(n::Integer) = rand(TruncatedNormal(2, 2, 1, 10), n)
-	"""
-	Dissociation constant k for each input protein.
-	"""
-	random_k(n::Integer) = rand(Uniform(.01, 1), n)
-	function random_inhibitor(n_activators, n_repressors)
-		n_activators == n_repressors ? rand([true, false]) : n_activators < n_repressors
-	end
-end
 
 struct Gene
 	modules::Vector{RegulatoryModule}
@@ -138,14 +90,6 @@ struct Gene
 	random_medium_α₀() = rand(TruncNormal(weak_activation, 1 - weak_activation))
 end
 
-function Base.show(io::IO, m::RegulatoryModule)
-	activators = m.inputs[1:m.n_activators]
-	repressors = m.inputs[m.n_activators+1:end]
-	inputs = []
-	if !isempty(activators) push!(inputs, "activators=$activators") end
-	if !isempty(repressors) push!(inputs, "repressors=$repressors") end
-	print(io, "RegulatoryModule(", join(inputs, ", "), ")")
-end
 function Base.show(io::IO, g::Gene)
 	n_modules = length(g.modules)
 	# we take inhibitor status of modules into account when counting activators and repressors of a gene
@@ -159,40 +103,3 @@ function Base.show(io::IO, g::Gene)
 	repressors = isempty(repressors) ? "" : ", repressors=$repressors"
 	print(io, "Gene(n_modules=$n_modules$activators$repressors)")
 end
-
-
-"""
-Mean activation μ given ψ.
-ψ: 1D array. Active nondim concentrations.
-"""
-function μ(m::RegulatoryModule, ψ::Vector{<:AbstractFloat})
-	χ = (ψ[m.inputs] ./ m.k) .^ m.ν
-	activator_prod = prod(χ[1:m.n_activators])
-	if m.complex
-		denom = 1 .+ activator_prod
-		if m.n_repressors > 0 denom += prod(χ) end
-	else
-		denom = prod(1 .+ χ)
-	end
-	activator_prod / denom
-end
-μ(ms::Vector{RegulatoryModule}, ψ::Vector{<:AbstractFloat}) = [μ(m, ψ) for m in ms]
-"""
-Fraction of max activation for a given gene when active TFs are found at a given concentration.
-"""
-function f(gene::Gene, ψ::Vector{<:AbstractFloat})
-	if isempty(gene.modules) return 1 end
-	μs = μ(gene.modules, ψ)
-	# get P{state} for all states, each state is a unique combination of modules
-	P = [prod(μs[state]) * prod(1 .- μs[.!state]) for state in states(length(gene.modules))]
-	sum(gene.α .* P)
-end
-f(genes::Vector{Gene}, ψ::Vector{<:AbstractFloat}) = [f(gene, ψ) for gene in genes]
-
-"""
-Concentration of active protein, which is either phosphorylated or unphosphorylated concentration of the protein, depending on a bool.
-"""
-ψ(p, ϕ, phos_activation) = @. phos_activation * ϕ + (!phos_activation) * (p-ϕ)
-
-end;
-

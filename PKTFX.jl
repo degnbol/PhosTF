@@ -1,7 +1,6 @@
 #!/usr/bin/env julia
-include("GeneRegulation.jl")
+include("simulation/GeneRegulation.jl")
 include("utilities/ReadWrite.jl")
-include("utilities/CLI.jl")
 include("Cytoscape.jl")
 include("Plotting.jl")
 include("ODEs.jl")
@@ -16,13 +15,13 @@ using Fire
 using Distributions: Uniform
 using Plots
 using ..ReadWrite
+import ..Cytoscape, ..Plotting, ..ODEs, ..ModelIteration, ..Model, ..Weight
 using ..Model: nₓnₜnₚ
 
-default_Wₜ = "WT.mat"
-default_Wₚ = "WP.mat"
+default_Wₜ, default_Wₚ = "WT.mat", "WP.mat"
 default_net = "net.bson"
 
-loadnet(i) = load(i, GeneRegulation.Network)
+loadnet(i) = load(i, Main.GeneRegulation.Network)
 
 """
 Create random W.
@@ -78,7 +77,7 @@ end
 Create a random network from W.
 """
 @main function network(Wₜ_fname::String=default_Wₜ, Wₚ_fname::String=default_Wₚ; o::String=default_net)
-	save(o, GeneRegulation.Network(loaddlm(Wₜ_fname), loaddlm(Wₚ_fname)))
+	save(o, Main.GeneRegulation.Network(loaddlm(Wₜ_fname), loaddlm(Wₚ_fname)))
 end
 
 @main function display(i=default_net; v::Integer=0)

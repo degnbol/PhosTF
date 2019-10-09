@@ -2,14 +2,14 @@
 include("utilities/XGMML.jl")
 include("utilities/ColorUtils.jl")
 include("utilities/MathUtils.jl")
-include("GeneRegulation.jl")
+include("simulation/GeneRegulation.jl")
 
 module Cytoscape
 using Statistics
 using DataFrames
 using SparseArrays
 using Colors: hex  # override hex so we can take hex of color
-using ..XGMML: Graph, set_anchor, get_center
+import ..XGMML
 using ..ColorUtils: divergent_lerp
 using ..MathUtils
 using ..GeneRegulation: nₓnₜnₚ, estimate_Wₜ
@@ -102,8 +102,8 @@ xgmml_edges(net) = xgmml_edges(estimate_Wₜ(net), net.Wₚₖ-net.Wₚₚ)
 Bend the edges if the target is 2 or more places away from the source within the same row of nodes.
 Bend away from graph center of mass.
 """
-function xgmml_bend!(graph::Graph, bend=.3; space=default_space)
-	center = get_center(graph.nodes)
+function xgmml_bend!(graph::XGMML.Graph, bend=.3; space=default_space)
+	center = XGMML.get_center(graph.nodes)
 	for e in graph.edges
 		source = [graph.nodes[e.source].x, graph.nodes[e.source].y]
 		target = [graph.nodes[e.target].x, graph.nodes[e.target].y]
@@ -113,7 +113,7 @@ function xgmml_bend!(graph::Graph, bend=.3; space=default_space)
 			# decide which direction to bend
 			b = source[1] < target[1] ? bend : -bend
 			if source[2] < center[2] b = -b end
-			set_anchor(e, source, target, b)
+			XGMML.set_anchor(e, source, target, b)
 		end
 	end
 end
@@ -143,7 +143,7 @@ function xgmml(net, X::Matrix, highlight=nothing; title="pktfx")
 	nₓ, nₜ, nₚ = nₓnₜnₚ(net); K = size(X,2)
 	fills = xgmml_fills(X, -1, 1)
 	
-	graphs::Vector{Graph} = []
+	graphs::Vector{XGMML.Graph} = []
 	for k in 1:K
 		Δy = sum([nₓ,nₜ,nₚ] .> 0) * default_space*k
 		nodes = xgmml_nodes(net, y=xgmml_y(nₓ,nₜ,nₚ) .+ Δy, fills=fills[:,k], value=X[:,k])
