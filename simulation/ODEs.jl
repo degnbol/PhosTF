@@ -1,5 +1,6 @@
 #!/usr/bin/env julia
-include("GeneRegulation.jl")
+# overriding aloready loaded modules causes problems
+if !isdefined(Main, :GeneRegulation) include("GeneRegulation.jl") end
 
 """
 Defining and solving ODEs to the point of having the resulting simulated logFC values.
@@ -16,16 +17,17 @@ export simulate, steady_state
 export logFC
 
 """ ϕ₀ == 0 for non-regulating proteins in order to have vectors match in length """
-get_u₀(net::Network) = [net.r₀ net.p₀ [net.ϕ₀; zeros(net.n - (net.nₚ+net.nₜ))]]
+get_u₀(net::Network) = [net.r₀ net.p₀ [net.ϕ₀; zeros(net.nₓ)]]
 
 function ODE!(du, u, net, t)
 	r = @view u[:,1]
 	p = @view u[:,2]
 	ϕ = @view u[:,3]
-	ϕ .= max.(0., ϕ)
-	du[:,1] .= drdt(net, r, p, ϕ)
+	ϕ .= max.(0., ϕ) # helps against dt <= dtmin warnings.
+	ϕₜₚ = @view ϕ[1:net.nₜ+net.nₚ]
+	du[:,1] .= drdt(net, r, p, ϕₜₚ)
 	du[:,2] .= dpdt(net, r, p)
-	du[1:net.nₚ+net.nₜ,3] .= dϕdt(net, view(p,1:net.nₚ+net.nₜ), view(ϕ,1:net.nₚ+net.nₜ))
+	du[1:net.nₚ+net.nₜ,3] .= dϕdt(net, view(p,1:net.nₚ+net.nₜ), ϕₜₚ)
 end
 
 steady_state_callback = TerminateSteadyState(1e-4, 1e-6)

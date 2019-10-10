@@ -1,10 +1,10 @@
 #!/usr/bin/env julia
+include("../utilities/ArrayUtils.jl")
+using Distributions: Uniform, TruncatedNormal
+
 """
 Regulatory module struct for gene regulation simulation.
 """
-
-using Distributions: Uniform, TruncatedNormal
-
 struct RegulatoryModule
 	n_activators::Int
 	n_repressors::Int

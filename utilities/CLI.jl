@@ -5,13 +5,13 @@ export inout
 export stdread, stdwrite
 
 """
-Get (in, out) from two positional arguments: inout, out.
+Get (i, o) from two positional arguments: io, o.
 They should default to nothing.
 
 Example:
 ```
-@main function main(inout=nothing, out=nothing)
-	i, o = inout(inout, out)
+@main function main(io=nothing, o=nothing)
+	i, o = inout(io, o)
 	...
 end
 ```

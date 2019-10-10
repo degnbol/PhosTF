@@ -1,9 +1,5 @@
 #!/usr/bin/env julia
 include("../utilities/ArrayUtils.jl")
-
-"""
-Gene and regulatory module structs for gene regulation simulation.
-"""
 using Distributions: TruncatedNormal
 using .ArrayUtils: TruncNormal, binary
 
@@ -13,6 +9,9 @@ n: number of modules to combine in each unique way
 """
 states(n) = (binary(i-1, n) for i in 1:2^n)
 
+"""
+Gene struct for gene regulation simulation.
+"""
 struct Gene
 	modules::Vector{RegulatoryModule}
 	α::Vector{Float64}

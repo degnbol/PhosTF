@@ -116,4 +116,7 @@ function correct!(Wₜ, Wₚ)
 	corrected
 end
 
+
+threshold!(W, thres=0.001) = W[abs.(W) .< thres] .= 0
+
 end;

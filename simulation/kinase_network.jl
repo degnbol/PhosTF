@@ -110,8 +110,28 @@ end
 
 Base.show(io::IO, net::Network) = print(io, "Network(n=$(net.n), nₜ=$(net.nₜ), nₚ=$(net.nₚ))")
 
-drdt(net::Network, r, p, ϕ) = net.max_transcription .* f(net.genes, ψ(p, ϕ, net.phos_activation)) .- net.λ_mRNA .* r
-dpdt(net::Network, r, p) = net.max_translation .* r .- net.λ_prot .* p
-dϕdt(net::Network, p, ϕ) = dϕdt(net, p, ϕ, ψ(p, ϕ, net.phos_activation))
-dϕdt(net::Network, p, ϕ, ψ) = (net.Wₚ * ψ[1:net.nₚ]) .* (p .- ϕ) .- net.λ_phos .* ϕ
 
+"""
+- r: size n.
+- p: size n.
+- ϕₜₚ: size nₜ+nₚ.
+"""
+function drdt(net::Network, r, p, ϕₜₚ)
+	net.max_transcription .* f(net.genes, ψ(view(p,1:net.nₜ+net.nₚ), ϕₜₚ, net.phos_activation)) .- net.λ_mRNA .* r
+end
+"""
+- r: size n.
+- p: size n.
+"""
+dpdt(net::Network, r, p) = net.max_translation .* r .- net.λ_prot .* p
+"""
+- pₜₚ: size nₜ+nₚ.
+- ϕₜₚ: size nₜ+nₚ.
+"""
+dϕdt(net::Network, pₜₚ, ϕₜₚ) = dϕdt(net, pₜₚ, ϕₜₚ, view(ψ(pₜₚ, ϕₜₚ, net.phos_activation), 1:net.nₚ))
+"""
+- pₜₚ: size nₜ+nₚ. Protein concentrations.
+- ϕₜₚ: size nₜ+nₚ. Phosphorylated protein concentrations.
+- ψₚ: size nₚ. Active protein concentrations.
+"""
+dϕdt(net::Network, pₜₚ, ϕₜₚ, ψₚ) = (net.Wₚ * ψₚ) .* (pₜₚ .- ϕₜₚ) .- net.λ_phos .* ϕₜₚ

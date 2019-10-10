@@ -1,5 +1,5 @@
 #!/usr/bin/env julia
-include("Model.jl")
+include("../Model.jl")
 
 """
 Structs with data defining a gene regulation network and its regulation mechanisms. All functions for initializing the values are found here, including randomized initialization.
@@ -23,9 +23,13 @@ include("gene.jl")
 include("network.jl")
 
 # define struct types for JSON3 to be able to read/write them
-JSON3.StructType(::Type{GeneRegulationGene.RegulatoryModule}) = JSON3.Struct()
+JSON3.StructType(::Type{RegulatoryModule}) = JSON3.Struct()
 JSON3.StructType(::Type{Gene}) = JSON3.Struct()
 JSON3.StructType(::Type{Network}) = JSON3.Struct()
+
+
+nₓnₜnₚ(net::Network) = net.nₓ,net.nₜ,net.nₚ
+
 
 """
 Concentration of active protein, which is either phosphorylated or unphosphorylated concentration of the protein, depending on a bool.
@@ -69,13 +73,11 @@ function estimate_Wₜ(net::Network, i::Integer, basal_activation::AbstractFloat
 end
 function estimate_Wₜ(net::Network, i::Integer)
 	mean(estimate_Wₜ(net, i, activation)
-	for activation in [0, GeneRegulationGene.noise_activation, GeneRegulationGene.weak_activation])
+	for activation in [0, noise_activation, weak_activation])
 end
 "Estimate Wₜ by comparing the effect on f when any TF has ϕ=weak or ϕ=strong."
 estimate_Wₜ(net::Network) = hcat([estimate_Wₜ(net, i) for i in net.nₚ+1:net.nₚ+net.nₜ]...)
 
-
-nₓnₜnₚ(net::Network) = net.n-(net.nₜ+net.nₚ),net.nₜ,net.nₚ
 
 end;
 

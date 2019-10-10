@@ -2,7 +2,7 @@
 include("utilities/XGMML.jl")
 include("utilities/ColorUtils.jl")
 include("utilities/MathUtils.jl")
-include("simulation/GeneRegulation.jl")
+if !isdefined(Main, :GeneRegulation) include("simulation/GeneRegulation.jl") end
 
 module Cytoscape
 using Statistics
@@ -72,8 +72,8 @@ xgmml_nodes(WₜWₚ::Tuple; kwargs...) = xgmml_nodes(WₜWₚ...; kwargs...)
 function xgmml_nodes(net; kwargs...)
 	xgmml_nodes(nₓnₜnₚ(net)...;
 	max_transcription=net.max_transcription, max_translation=net.max_translation,
-	λ_mRNA=net.λ_mRNA, λ_prot=net.λ_prot, λ_phos=net.λ_prot,
-	phos_activation=net.phos_activation, kwargs...)
+	λ_mRNA=net.λ_mRNA, λ_prot=net.λ_prot, λ_phos=[net.λ_phos; zeros(net.nₓ)],
+	phos_activation=[net.phos_activation; fill(missing, net.nₓ)], kwargs...)
 end
 
 function xgmml_edges(Wₜ::Matrix, Wₚ::Matrix)
@@ -86,10 +86,10 @@ function xgmml_edges(Wₜ::Matrix, Wₚ::Matrix)
 	PK_arrow(weight) = weight >= 0 ? "CIRCLE" : "SQUARE"
 	
 	PK_edges = [
-	XGMML.Edge(source, target, arrow=PK_arrow(weight), color=color(weight), opacity=opacity(weight), weight=weight, bend=1)
+	XGMML.Edge(source, target, arrow=PK_arrow(weight), color=color(weight), opacity=opacity(weight), weight=weight)
 	for (target,source,weight) in zip(findnz(sparse(Wₚ))...)]
 	TF_edges = [
-	XGMML.Edge(source+nₚ, target, arrow=TF_arrow(weight), color=color(weight), opacity=opacity(weight), weight=weight, bend=1)
+	XGMML.Edge(source+nₚ, target, arrow=TF_arrow(weight), color=color(weight), opacity=opacity(weight), weight=weight)
 	for (target,source,weight) in zip(findnz(sparse(Wₜ))...)]
 	
 	[PK_edges; TF_edges]

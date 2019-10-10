@@ -9,6 +9,7 @@ using Statistics: mean
 using Flux
 using ..ArrayUtils: eye
 
+"Constant terms in the equations of the inference model."
 struct Constants
 	# Masking matrix for TF. Square.
 	Mₜ::Matrix
@@ -37,6 +38,7 @@ struct Constants
 	default_U(J) = 1 .- J
 end
 
+nnₜnₚ(Wₜ::AbstractMatrix, Wₚ::AbstractMatrix) = size(Wₜ,1), size(Wₜ,2), size(Wₚ,2)
 function nₓnₜnₚ(Wₜ::AbstractMatrix, Wₚ::AbstractMatrix)
 	(n,nₜ), nₚ = size(Wₜ), size(Wₚ,2)
 	n-(nₜ+nₚ),nₜ,nₚ
@@ -53,8 +55,6 @@ WₜWₚ(W, nₜ, nₚ) = W[:,nₚ+1:nₚ+nₜ], W[1:nₜ+nₚ,1:nₚ]
 
 Iₚ(n::Integer, nₜ::Integer, nₚ::Integer) = diagm([[1 for _ in 1:nₚ]; [0 for _ in nₚ+1:n]])
 Iₜ(n::Integer, nₜ::Integer, nₚ::Integer) = diagm([[0 for _ in 1:nₚ]; [1 for _ in 1:nₚ]; [0 for _ in nₚ+nₜ+1:n]])
-
-random_W(n::Int, m::Int) = FluxUtils.zerodiag(FluxUtils.random_weight(n::Int, m::Int))
 
 "I has to have a known size to not produce an error that might be fixed in later release."
 _B(cs::Constants, W::AbstractMatrix) = W.*cs.Mₜ * (I(size(W,1)) - W.*cs.Mₚ)^-1

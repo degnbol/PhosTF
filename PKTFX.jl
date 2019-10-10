@@ -2,11 +2,13 @@
 include("simulation/GeneRegulation.jl")
 include("simulation/ODEs.jl")
 include("utilities/ReadWrite.jl")
+include("utilities/CLI.jl")
 include("Cytoscape.jl")
 include("Plotting.jl")
 include("ModelIteration.jl")
 include("Model.jl")
 include("Weight.jl")
+include("Inference.jl")
 
 
 "Main caller for calling all project functions through command-line or julia REPL."
@@ -15,13 +17,14 @@ using Fire
 using Distributions: Uniform
 using Plots
 using ..ReadWrite
-import ..Cytoscape, ..Plotting, ..ODEs, ..ModelIteration, ..Model, ..Weight
-using ..Model: nₓnₜnₚ
+using ..Cytoscape, ..Plotting, ..ODEs, ..ModelIteration, ..Model, ..Weight
+using ..GeneRegulation, ..Inference, ..CLI
+
 
 default_Wₜ, default_Wₚ = "WT.mat", "WP.mat"
 default_net = "net.bson"
 
-loadnet(i) = load(i, Main.GeneRegulation.Network)
+loadnet(i) = load(i, Network)
 
 """
 Create random W.
@@ -51,7 +54,7 @@ Write a graph defined by weight matrices to xgmml format.
 	Wₜ, Wₚ = loaddlm(Wₜ), loaddlm(Wₚ)
 	if X == nothing write(o, Cytoscape.xgmml(Wₜ, Wₚ))
 	else
-		X = loaddlm(X)
+		X = loaddlm(X, Float64)
 		K = size(X,2)
 		_,nₜ,nₚ = nₓnₜnₚ(Wₜ,Wₚ)
 		# highlight each of the proteins if there are as many experiments as PKs+TFs
@@ -66,7 +69,7 @@ Write a graph defined by a simulation network file to xgmml format.
 	net = loadnet(i)
 	if X == nothing write(o, Cytoscape.xgmml(net))
 	else
-		X = loaddlm(X)
+		X = loaddlm(X, Float64)
 		K = size(X,2)
 		# highlight each of the proteins if there are as many experiments as PKs+TFs
 		highlight = net.nₜ+net.nₚ == K ? (1:K) : nothing
@@ -77,7 +80,7 @@ end
 Create a random network from W.
 """
 @main function network(Wₜ_fname::String=default_Wₜ, Wₚ_fname::String=default_Wₚ; o::String=default_net)
-	save(o, Main.GeneRegulation.Network(loaddlm(Wₜ_fname), loaddlm(Wₚ_fname)))
+	save(o, Network(loaddlm(Wₜ_fname), loaddlm(Wₚ_fname)))
 end
 
 @main function display(i=default_net; v::Integer=0)
@@ -181,5 +184,21 @@ Get the log fold-change values comparing mutant transcription levels to wildtype
 	savedlm(o, measurements)
 end
 
+"""
+Infer a weight matrix from logFC data.
+"""
+@main function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; epochs::Integer=10000, lambda::AbstractFloat=.1)
+	W = Inference.infer(loaddlm(X, Float64), nₜ, nₚ; epochs=epochs, λ=lambda)
+	Wₜ, Wₚ = Model.WₜWₚ(W, nₜ, nₚ)
+	savedlm(ot, Wₜ)
+	savedlm(op, Wₚ)
+end
+
+@main function thres(io=nothing, o=nothing; thres=0.01)
+	i, o = inout(io, o)
+	mat = loaddlm(i)
+	Weight.threshold!(mat, thres)
+	savedlm(o, mat)
+end
 
 end;
