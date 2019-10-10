@@ -50,30 +50,32 @@ end
 """
 Write a graph defined by weight matrices to xgmml format.
 """
-@main function xgmml(Wₜ, Wₚ; o=stdout, X=nothing)
+@main function xgmml(Wₜ, Wₚ; o=stdout, X=nothing, title=nothing)
 	Wₜ, Wₚ = loaddlm(Wₜ), loaddlm(Wₚ)
-	if X == nothing write(o, Cytoscape.xgmml(Wₜ, Wₚ))
+	title = o == stdout ? "pktfx" : splitext(basename(o))[1]
+	if X == nothing write(o, Cytoscape.xgmml(Wₜ, Wₚ; title=title))
 	else
 		X = loaddlm(X, Float64)
 		K = size(X,2)
 		_,nₜ,nₚ = nₓnₜnₚ(Wₜ,Wₚ)
 		# highlight each of the proteins if there are as many experiments as PKs+TFs
 		highlight = nₜ+nₚ == K ? (1:K) : nothing
-		write(o, Cytoscape.xgmml(Wₜ, Wₚ, X, highlight))
+		write(o, Cytoscape.xgmml(Wₜ, Wₚ, X, highlight; title=title))
 	end
 end
 """
 Write a graph defined by a simulation network file to xgmml format.
 """
-@main function xgmml(i=default_net; o=stdout, X=nothing)
+@main function xgmml(i=default_net; o=stdout, X=nothing, title=nothing)
 	net = loadnet(i)
-	if X == nothing write(o, Cytoscape.xgmml(net))
+	title = o == stdout ? "pktfx" : splitext(basename(o))[1]
+	if X == nothing write(o, Cytoscape.xgmml(net; title=title))
 	else
 		X = loaddlm(X, Float64)
 		K = size(X,2)
 		# highlight each of the proteins if there are as many experiments as PKs+TFs
 		highlight = net.nₜ+net.nₚ == K ? (1:K) : nothing
-		write(o, Cytoscape.xgmml(net, X, highlight))
+		write(o, Cytoscape.xgmml(net, X, highlight; title=title))
 	end
 end
 """
@@ -181,6 +183,7 @@ Get the log fold-change values comparing mutant transcription levels to wildtype
 		mutants = [loaddlm(mutant) for mutant in i[2:end]]
 		measurements = ODEs.logFC(wildtype, mutants)
 	end
+	@info("logFC values simulated")
 	savedlm(o, measurements)
 end
 

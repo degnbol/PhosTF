@@ -23,10 +23,6 @@ function L_cas(X, W, constants, λ::Real)
 	mse(X, W, constants) + 0 # TODO
 end
 
-function callback(X, W, constants, λ)
-	println(loss(X, W, constants, λ))
-end
-
 """
 - throttle: seconds between prints
 - opt: ADAMW or maybe NADAM
@@ -35,7 +31,7 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs=10000, λ
 	n, K = size(X)
 	constants = Model.Constants(n, nₜ, nₚ, K)
 	W = param(random_W(n, n))
-	train!(W, X, constants, Flux.throttle(()->callback(X, W, constants, λ), throttle), epochs, λ, opt)
+	train!(W, X, constants, Flux.throttle(()->println(L1(X, W, constants, λ)), throttle), epochs, λ, opt)
 	collect(W)
 end
 function train!(W, X::AbstractMatrix, constants, cb, epochs, λ, opt)

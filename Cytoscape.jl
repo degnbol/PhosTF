@@ -67,8 +67,8 @@ function xgmml_nodes(nₓ::Integer, nₜ::Integer, nₚ::Integer; x=xgmml_x(nₓ
 	[XGMML.Node(x[i], y[i]; label=labels[i], fill=fills[i], shape=shapes[i], (k=>v[i] for (k,v) in extra_atts)...)
 	for i in 1:nₓ+nₚ+nₜ]
 end
-xgmml_nodes(WₜWₚ::Array; kwargs...) = xgmml_nodes(WₜWₚ...; kwargs...)
-xgmml_nodes(WₜWₚ::Tuple; kwargs...) = xgmml_nodes(WₜWₚ...; kwargs...)
+xgmml_nodes(WₜWₚ::Array; kwargs...) = xgmml_nodes(nₓnₜnₚ(WₜWₚ)...; kwargs...)
+xgmml_nodes(WₜWₚ::Tuple; kwargs...) = xgmml_nodes(nₓnₜnₚ(WₜWₚ)...; kwargs...)
 function xgmml_nodes(net; kwargs...)
 	xgmml_nodes(nₓnₜnₚ(net)...;
 	max_transcription=net.max_transcription, max_translation=net.max_translation,
@@ -118,28 +118,24 @@ function xgmml_bend!(graph::XGMML.Graph, bend=.3; space=default_space)
 	end
 end
 
-function _graph(Wₜ::Matrix, Wₚ::Matrix; title="pktfx")
-	graph = XGMML.Graph(title, xgmml_nodes(nₓnₜnₚ(Wₜ, Wₚ)...), xgmml_edges(Wₜ, Wₚ))
-	xgmml_bend!(graph)
-	graph
-end
-function _graph(net; title="pktfx")
+function _graph(net; title="net")
 	graph = XGMML.Graph(title, xgmml_nodes(net), xgmml_edges(net))
 	xgmml_bend!(graph)
 	graph
 end
+_graph(Wₜ::Matrix, Wₚ::Matrix; title="net") = _graph([Wₜ, Wₚ]; title=title)
 
 "Get a PK, TF, X network defined by its Wₜ and Wₚ in .xgmml format which can be imported into Cytoscape."
-xgmml(Wₜ::Matrix, Wₚ::Matrix) = XGMML.xgmml(_graph(Wₜ, Wₚ))
-xgmml(Wₜ::Matrix, Wₚ::Matrix, X::Nothing) = xgmml(Wₜ::Matrix, Wₚ::Matrix)
-xgmml(net) = XGMML.xgmml(_graph(net))
+xgmml(Wₜ::Matrix, Wₚ::Matrix; title="net") = XGMML.xgmml(_graph(Wₜ, Wₚ; title=title))
+xgmml(Wₜ::Matrix, Wₚ::Matrix, X::Nothing; title="net") = xgmml(Wₜ, Wₚ; title=title)
+xgmml(net; title="net") = XGMML.xgmml(_graph(net; title=title))
 
 """
 - net: [Wₜ,Wₚ] or simulation Network
 - X: each column is node values to visualize (not to be confused with Xs referring to genes).
 - highlight: index(es) of node(s) to highlight for each column in X.
 """
-function xgmml(net, X::Matrix, highlight=nothing; title="pktfx")
+function xgmml(net, X::Matrix, highlight=nothing; title="net")
 	nₓ, nₜ, nₚ = nₓnₜnₚ(net); K = size(X,2)
 	fills = xgmml_fills(X, -1, 1)
 	
@@ -155,6 +151,6 @@ function xgmml(net, X::Matrix, highlight=nothing; title="pktfx")
 	end
 	XGMML.xgmml(graphs)
 end
-xgmml(Wₜ::Matrix, Wₚ::Matrix, X::Matrix, highlight=nothing; title="pktfx") = xgmml((Wₜ,Wₚ), X, highlight, title)
+xgmml(Wₜ::Matrix, Wₚ::Matrix, X::Matrix, highlight=nothing; title="net") = xgmml((Wₜ,Wₚ), X, highlight; title=title)
 
 end;
