@@ -60,15 +60,31 @@ Iₜ(n::Integer, nₜ::Integer, nₚ::Integer) = diagm([[0 for _ in 1:nₚ]; [1 
 _B(cs::Constants, W::AbstractMatrix) = W.*cs.Mₜ * (I(size(W,1)) - W.*cs.Mₚ)^-1
 
 """
+The cummulative effects thorugh cascades.
+Explicitly setting size of I so Flux can handle it.
+"""
+function node_cas(W::AbstractMatrix, Iₜ::AbstractMatrix)
+	n = size(W,1)
+	W′ = abs.(W')
+	(I(n) - W′) \ (Iₜ * W′ * ones(n))
+end
+"Loss function for PK/PP cascades."
+l_cas(W::AbstractMatrix, Iₜ::AbstractMatrix, Iₚ::AbstractMatrix) = sum((I(size(W,1)) - Iₚ*abs.(W')) \ vec(sum(Iₜ,dims=2)))
+l1(W::AbstractMatrix, Iₜ::AbstractMatrix) = norm(W * Iₜ, 1)
+
+"""
 - cs: struct containing the constants Mₜ, Mₚ, and U
 - W: Trainable parameters. Square matrix.
 - X: Matrix holding column vectors of measured (simulated) logFC values. No need to be square but has to have the same shape as J.
 """
-function mse(cs::Constants, W::AbstractMatrix, X::Matrix)
+function sse(cs::Constants, W::AbstractMatrix, X::Matrix)
 	Ue = (I - _B(cs,W)) * X .* cs.U
-	mean(Ue.^2)
+	sum(Ue.^2)
 end
 
+l1(W::AbstractMatrix) = norm(W,1)
+
+"For iterating the model."
 step(X::Matrix, W, cs::Constants, C::Matrix) = _B(cs,W) * X .* cs.U .+ C
 step(X::Matrix, W, cs::Constants, C::Matrix, E::Matrix) = (_B(cs,W) * X + E) .* cs.U .+ C
 step!(X::Matrix, W, cs::Constants, C::Matrix) = X .= _B(cs,W) * X .* cs.U .+ C

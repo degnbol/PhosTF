@@ -181,6 +181,7 @@ begin # getters
 	
 	"Center of mass."
 	get_center(ns::Vector{Node}) = [mean(n.x for n in ns), mean(n.y for n in ns)]
+	get_position(g::Graph, node::Integer) = [g.nodes[node].x, g.nodes[node].y]
 end
 
 

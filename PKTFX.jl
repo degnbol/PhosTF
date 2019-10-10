@@ -190,8 +190,8 @@ end
 """
 Infer a weight matrix from logFC data.
 """
-@main function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; epochs::Integer=10000, lambda::AbstractFloat=.1)
-	W = Inference.infer(loaddlm(X, Float64), nₜ, nₚ; epochs=epochs, λ=lambda)
+@main function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; epochs::Integer=22000, lambda::AbstractFloat=.1, conf=1)
+	W = Inference.infer(loaddlm(X, Float64), nₜ, nₚ; epochs=epochs, λ=lambda, conf=conf)
 	Wₜ, Wₚ = Model.WₜWₚ(W, nₜ, nₚ)
 	savedlm(ot, Wₜ)
 	savedlm(op, Wₚ)

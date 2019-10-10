@@ -100,20 +100,14 @@ xgmml_edges(net) = xgmml_edges(estimate_Wₜ(net), net.Wₚₖ-net.Wₚₚ)
 
 """
 Bend the edges if the target is 2 or more places away from the source within the same row of nodes.
-Bend away from graph center of mass.
+Bend to the left relative to direction of edge, in order to avoid visual overlap when two nodes both have an edge to one another.
 """
 function xgmml_bend!(graph::XGMML.Graph, bend=.3; space=default_space)
-	center = XGMML.get_center(graph.nodes)
 	for e in graph.edges
-		source = [graph.nodes[e.source].x, graph.nodes[e.source].y]
-		target = [graph.nodes[e.target].x, graph.nodes[e.target].y]
-		seps = abs.(target .- source) ./ space
-		# should we bend or not
+		source, target = XGMML.get_position(graph, e.source), XGMML.get_position(graph, e.target)
+		seps = abs.(target .- source) ./ space  # seps = n spaces separating source and target
 		if seps[1] >= 2 && seps[2] == 0
-			# decide which direction to bend
-			b = source[1] < target[1] ? bend : -bend
-			if source[2] < center[2] b = -b end
-			XGMML.set_anchor(e, source, target, b)
+			XGMML.set_anchor(e, source, target, -bend)
 		end
 	end
 end

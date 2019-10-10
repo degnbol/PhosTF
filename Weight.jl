@@ -5,7 +5,7 @@ include("Model.jl")
 module Weight
 using LinearAlgebra
 using SparseArrays
-using ..Model: nₓnₜnₚ
+using ..Model
 
 function Wₜ(n::Integer, nₜ::Integer, nₚ::Integer)
 	mat = rand([-1, 0, 1], (n, nₜ))
@@ -38,11 +38,7 @@ function silent_edges(W, Iₜ, Iₚ)
 end
 silent_edges(W, nₜ::Integer, nₚ::Integer) = silent_edges(W, Model.Iₜ(size(W,1),nₜ,nₚ), Model.Iₚ(size(W,1),nₜ,nₚ))
 "Nodes where ongoing edges will be silent."
-function silent_nodes(W, Iₜ)
-	n = size(W,1)
-	W′ = (W .!= 0)'
-	(I - W′)^-1 * Iₜ * W′ * ones(n) .== 0
-end
+silent_nodes(W, Iₜ::AbstractMatrix) = Model.node_cas(W .!= 0, Iₜ) .== 0
 silent_nodes(W, nₜ::Integer, nₚ::Integer) = silent_nodes(W, Model.Iₜ(size(W,1),nₜ,nₚ))
 
 
@@ -86,7 +82,7 @@ Set silent (PK/PP) edges to zero and show a warning if any are found.
 return: bool indicating if any were found.
 """
 function correct_silent_edges!(Wₜ, Wₚ)
-	_, nₜ, nₚ = nₓnₜnₚ(Wₜ, Wₚ)
+	_, nₜ, nₚ = Model.nₓnₜnₚ(Wₜ, Wₚ)
 	W = Model._W(Wₜ, Wₚ)
 	edges = silent_edges(W, nₜ, nₚ)
 	check(edges, "silent edges")

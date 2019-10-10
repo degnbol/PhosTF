@@ -8,16 +8,6 @@ export zerodiag
 export random_weight
 
 """
-A differentiable way to set the diagonal of a matrix to zeros.
-"""
-function zerodiag(matrix)
-	remove = zeros(size(matrix))
-	# collect converts the tracked values to normal values, meaning that we cannot differentiate this step.
-	remove[diagind(remove)] = collect(diag(matrix))
-	matrix - remove
-end
-
-"""
 Set Gaussian random values where μ is set by the number of values.
 """
 random_weight(n::Integer, m::Integer) = randn(n, m) ./ √(n*m)
