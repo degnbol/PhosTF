@@ -188,10 +188,28 @@ Get the log fold-change values comparing mutant transcription levels to wildtype
 end
 
 """
-Infer a weight matrix from logFC data.
+Get priors from files with the indicators 0=no edge, 1=possible edge, "+"=positive edge, "-"=negative edge.
+Can be fed nothing values, and produces nothing values when a matrix would otherwise provide no additional information.
+return: priors, priors_sign
 """
-@main function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; epochs::Integer=22000, lambda::AbstractFloat=.1, conf=1)
-	W = Inference.infer(loaddlm(X, Float64), nₜ, nₚ; epochs=epochs, λ=lambda, conf=conf)
+function _priors(WT_prior, WP_prior, n::Integer, nₜ::Integer, nₚ::Integer)
+	if WT_prior == nothing && WP_prior == nothing return nothing, nothing end
+	M, S = Model.priors(
+	WT_prior == nothing ? n  : loaddlm(WT_prior),
+	WP_prior == nothing ? nₚ : loaddlm(WP_prior))
+	if all(Model._Wₜ(M,nₜ,nₚ) .== 1) && all(Model._Wₚ(M,nₜ,nₚ) .== 1) M = nothing end
+	if all(S == 0) S = nothing end
+	M, S
+end
+
+"""
+Infer a weight matrix from logFC data.
+- WT_prior/WP_prior: optionally limit Wₜ/Wₚ if they are partially known.
+"""
+@main function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; WT_prior=nothing, WP_prior=nothing, epochs::Integer=40000, lambda::AbstractFloat=.1, conf=1)
+	X = loaddlm(X, Float64)
+	M, S = _priors(WT_prior, WP_prior, size(X,1), nₜ, nₚ)
+	W = Inference.infer(X, nₜ, nₚ; epochs=epochs, λ=lambda, M=M, S=S, conf=conf)
 	Wₜ, Wₚ = Model.WₜWₚ(W, nₜ, nₚ)
 	savedlm(ot, Wₜ)
 	savedlm(op, Wₚ)
