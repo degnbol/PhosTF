@@ -1,5 +1,5 @@
 #!/usr/bin/env julia
-cd("data")
+cd("../data_cas_neg")
 
 include("PKTFX.jl")
 
@@ -7,10 +7,13 @@ PKTFX.network()
 PKTFX.xgmml("WT.mat", "WP.mat", o="net.xgmml")
 
 PKTFX.steadystate()
+run(`cp steady_phi.mat steady_phi0.mat`)  # copy phi values to file where we will append a single zero
+run(pipeline(`echo 0.0`, stdout="steady_phi0.mat", append=true))  # append a single zero bc nₓ==1
+run(pipeline(`paste -d" " steady_r.mat steady_p.mat steady_phi0.mat`, "steady_rpphi.mat"))
 PKTFX.xgmml(o="steady.xgmml", X="steady_rpphi.mat")
 
-PKTFX.iteratemodel(o="X_iter.mat")
-PKTFX.xgmml("WT.mat", "WP.mat", o="iter.xgmml", X="X_iter.mat")
+# PKTFX.iteratemodel(o="X_iter.mat")
+# PKTFX.xgmml("WT.mat", "WP.mat", o="iter.xgmml", X="X_iter.mat")
 
 PKTFX.logFC("net.bson", o="X_sim.mat")
 PKTFX.xgmml(o="sim.xgmml", X="X_sim.mat")
@@ -22,7 +25,7 @@ for i in 1:length(Inference.loss)
 	# PKTFX.thres("WP_iter_infer.mat", "WP_iter_infer_thres.mat")
 	# PKTFX.xgmml("WT_iter_infer_thres.mat", "WP_iter_infer_thres.mat", o="iter_infer_$i.xgmml")
 
-	PKTFX.infer("X_sim.mat", 3, 3, "WT_sim_infer.mat", "WP_sim_infer.mat"; conf=i, lambda=1.)
+	PKTFX.infer("X_sim.mat", 3, 3, "WT_sim_infer.mat", "WP_sim_infer.mat"; conf=i, lambda=.1)
 	sleep(2)
 	PKTFX.thres("WT_sim_infer.mat", "WT_sim_infer_thres.mat")
 	PKTFX.thres("WP_sim_infer.mat", "WP_sim_infer_thres.mat")

@@ -8,6 +8,7 @@ using LinearAlgebra
 using Statistics: mean
 using Flux, Flux.Tracker
 using Flux.Tracker: grad, update!
+using Printf
 using ..ArrayUtils: eye, shuffle_columns
 include("Model.jl"); using .Model
 import ..FluxUtils
@@ -29,8 +30,9 @@ end
 L1(X, W, W′, constants, λ::Real) = Model.sse(constants, W′, X) + λ*Model.l1(W)
 loss = [
 (X, W, W′, constants, Iₜ, Iₚ, λ::Real) -> L1(X, W, W′, constants, λ::Real),
-(X, W, W′, constants, Iₜ, Iₚ, λ::Real) -> Model.sse(constants, W′, X) + λ*(Model.l_cas(W′, Iₜ, Iₚ) + Model.l1(W*Iₜ)),
-(X, W, W′, constants, Iₜ, Iₚ, λ::Real) -> Model.sse(constants, W′, X) + λ*(Model.l_cas(W′, Iₜ, Iₚ) + Model.l1(W*Iₜ) + Model.l1(W)),
+(X, W, W′, constants, Iₜ, Iₚ, λ::Real) -> Model.sse(constants, W′, X) + λ*(Model.l_cas(W′, Iₜ, Iₚ) + Model.l1(W)),
+(X, W, W′, constants, Iₜ, Iₚ, λ::Real) -> Model.sse(constants, W′, X) + λ*(Model.l_cas(W′, Iₜ, Iₚ) + Model.l1(W) + Model.l1(W*Iₜ)),
+(X, W, W′, constants, Iₜ, Iₚ, λ::Real) -> Model.sse(constants, W′, X) + λ*(Model.l_cas(W′, Iₜ, Iₚ) + .01Model.l1(W) + Model.l1(W*Iₜ))
 ]
 
 
@@ -48,7 +50,9 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 	L(X) = loss[conf](X, W, Model.apply_priors(W, M, S), constants, Model.Iₜ(n, nₜ, nₚ), Model.Iₚ(n, nₜ, nₚ), λ)
 	
 	function cb()
-		println(L(X)/length(W))
+		l = L(X)/length(W)
+		mse = mean(abs.(Model.sse(constants, Model.apply_priors(W, M, S), X)))
+		@printf("%.5f\t%.5f\n", l, mse)
 		d = diag(W); if any(abs.(d) .> .001) Flux.error("Nonzero diagonal") end
 	end
 	
@@ -56,6 +60,8 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 	# not using M just to make it clear if values supposed to be zero for some reason are not (sanity check)
 	collect(Model.apply_priors(W, nothing, S))
 end
+
+
 function train!(W, X::AbstractMatrix, L, cb, epochs, opt)
 	data = ((X,) for _ in 1:epochs)
 	Flux.train!(L, [W], data, opt, cb=cb)

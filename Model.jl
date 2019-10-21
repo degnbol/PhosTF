@@ -64,7 +64,6 @@ _B(cs::Constants, W::AbstractMatrix) = W.*cs.Mₜ * (I(size(W,1)) - W.*cs.Mₚ)^
 _B(cs::Constants, W::AbstractMatrix, x) = W.*cs.Mₜ * ((I(size(W,1)) - W.*cs.Mₚ) \ x)
 
 
-
 """
 - cs: struct containing the constants Mₜ, Mₚ, and U
 - W: Trainable parameters. Square matrix.
