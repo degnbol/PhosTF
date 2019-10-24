@@ -1,22 +1,24 @@
 #!/usr/bin/env julia
-cd("../data_cas_neg")
+cd("testdata/data_cas")
 
 include("PKTFX.jl")
 
 PKTFX.network()
-PKTFX.xgmml("WT.mat", "WP.mat", o="net.xgmml")
+PKTFX.xgmml(o="net.xgmml")
+
+PKTFX.simulate()
+PKTFX.plot(o="tmp.pdf")
 
 PKTFX.steadystate()
 run(`cp steady_phi.mat steady_phi0.mat`)  # copy phi values to file where we will append a single zero
 run(pipeline(`echo 0.0`, stdout="steady_phi0.mat", append=true))  # append a single zero bc nₓ==1
 run(pipeline(`paste -d" " steady_r.mat steady_p.mat steady_phi0.mat`, "steady_rpphi.mat"))
-PKTFX.xgmml(o="steady.xgmml", X="steady_rpphi.mat")
+PKTFX.xgmml(X="steady_rpphi.mat", o="steady.xgmml")
 
 # PKTFX.iteratemodel(o="X_iter.mat")
 # PKTFX.xgmml("WT.mat", "WP.mat", o="iter.xgmml", X="X_iter.mat")
-
-PKTFX.logFC("net.bson", o="X_sim.mat")
-PKTFX.xgmml(o="sim.xgmml", X="X_sim.mat")
+rm("X_sim.mat"); PKTFX.logFC(o="X_sim.mat")
+rm("sim.xgmml"); PKTFX.xgmml(X="X_sim.mat", o="sim.xgmml")
 
 for i in 1:length(Inference.loss)
 	println("conf=$i")
@@ -34,3 +36,5 @@ for i in 1:length(Inference.loss)
 end
 
 # now open xgmml files in cytoscape and have a look
+
+

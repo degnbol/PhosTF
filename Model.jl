@@ -9,6 +9,16 @@ using Statistics: mean
 using Flux
 using ..ArrayUtils: eye
 
+export offdiag
+
+"A mask to remove diagonal of a matrix."
+function offdiag(matrix)
+	out = ones(size(matrix))
+	out[diagind(out)] .= 0
+	out
+end
+
+
 "Constant terms in the equations of the inference model."
 struct Constants
 	# Masking matrix for TF. Square.
@@ -62,7 +72,21 @@ Iₜ(n::Integer, nₜ::Integer, nₚ::Integer) = diagm([[0 for _ in 1:nₚ]; [1 
 _B(cs::Constants, W::AbstractMatrix) = W.*cs.Mₜ * (I(size(W,1)) - W.*cs.Mₚ)^-1
 "To avoid finding inverse matrix, we can instead solve if given the x in B^-1 * x"
 _B(cs::Constants, W::AbstractMatrix, x) = W.*cs.Mₜ * ((I(size(W,1)) - W.*cs.Mₚ) \ x)
+function _B_alt(cs::Constants, W::AbstractMatrix)
+	wt = W.*cs.Mₜ
+	wp = W.*cs.Mₚ
+	i = I(size(W,1))
+	(i - wp) * (wp+wt) * (i - wp)^-1
+end
+function _B_alt(cs::Constants, W::AbstractMatrix, x)
+	wt = W.*cs.Mₜ
+	wp = W.*cs.Mₚ
+	i = I(size(W,1))
+	(i - wp) * (wp+wt) * ((i - wp) \ x)
+end
 
+_T(B) = (I(size(B,1)) - (B.*offdiag(B))) \ B
+_T_alt(B) = (I(size(B,1)) - B) \ B
 
 """
 - cs: struct containing the constants Mₜ, Mₚ, and U
@@ -72,6 +96,29 @@ _B(cs::Constants, W::AbstractMatrix, x) = W.*cs.Mₜ * ((I(size(W,1)) - W.*cs.M�
 function sse(cs::Constants, W::AbstractMatrix, X::Matrix)
 	E = X - _B(cs,W,X)
 	sum((E .* cs.U).^2)
+end
+"""
+SSE made to separate loss on Ex and Ey from overall SSE.
+- Ex: error term specifically for x
+- Ey: error term specifically for y
+"""
+function sse(cs::Constants, W::AbstractMatrix, X::Matrix, Ex::AbstractMatrix, Ey::AbstractMatrix)
+	# K = size(X,2)
+	# Ex = repeat(Ex, outer=(1, K))
+	# Ey = repeat(Ey, outer=(1, K))
+	E = X .- (_B(cs,W,X + Ey) .+ Ex)
+	sum((cs.U .* E).^2)
+end
+function sse_alt(cs::Constants, W::AbstractMatrix, X::Matrix)
+	E = X .- _B_alt(cs,W,X)
+	sum((cs.U .* E).^2)
+end
+function sse_alt(cs::Constants, W::AbstractMatrix, X::Matrix, Ex::AbstractMatrix, Ey::AbstractMatrix)
+	# K = size(X,2)
+	# Ex = repeat(Ex, outer=(1, K))
+	# Ey = repeat(Ey, outer=(1, K))
+	E = X .- (_B_alt(cs,W,X + Ey) .+ Ex)
+	sum((cs.U .* E).^2)
 end
 
 l1(W::AbstractMatrix) = norm(W,1)
