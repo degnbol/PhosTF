@@ -6,7 +6,7 @@ include("utilities/CLI.jl")
 include("Cytoscape.jl")
 include("Plotting.jl")
 include("ModelIteration.jl")
-include("Model.jl")
+if !isdefined(Main, :Model) include("Model.jl") end # loaded by GeneRegulation
 include("Weight.jl")
 include("Inference.jl")
 
@@ -20,9 +20,10 @@ using ..ReadWrite
 using ..Cytoscape, ..Plotting, ..ODEs, ..ModelIteration, ..Model, ..Weight
 using ..GeneRegulation, ..Inference, ..CLI
 
-
+# defaults
 default_Wₜ, default_Wₚ = "WT.mat", "WP.mat"
 default_net = "net.bson"
+
 
 loadnet(i) = load(i, Network)
 
@@ -105,10 +106,11 @@ end
 """
 Simulate a network.
 """
-@main function simulate(i=default_net, r="sim_r.mat", p="sim_p.mat", ϕ="sim_phi.mat", t="sim_t.mat")
+@main function simulate(mut_id=nothing, i=default_net, r="sim_r.mat", p="sim_p.mat", ϕ="sim_phi.mat", t="sim_t.mat"; duration=nothing)
 	net = loadnet(i)
-	solution = ODEs.simulate(net)
-	println(solution.retcode)
+	solution = @domainerror ODEs.simulate(net, mut_id, duration)
+	if solution == nothing return end
+	@info(solution.retcode)
 	if solution.retcode in [:Success, :Terminated]
 		savedlm(r, solution[:,1,:])
 		savedlm(p, solution[:,2,:])
@@ -124,6 +126,7 @@ Plot simulations.
 - ids: list of protein ids to only plot those.
 """
 @main function plot(i...; t="sim_t.mat", o=stdout, ids=[])
+	if isempty(i) i = ["sim_r.mat", "sim_p.mat", "sim_phi.mat"] end
 	simulations = [loaddlm(fname) for fname in i]
 	if !isempty(ids)
 		simulations = [sim[ids,:] for sim in simulations]
@@ -141,50 +144,69 @@ end
 
 """
 Get the steady state levels for a network optionally mutating it.
-- mutate: index indicating which mutation to perform.
+- mut_id: index indicating which mutation to perform.
 If "mutations" is not provided, it refers to index of the protein to mutate.
 - i: network fname.
 - r: out fname for r values.
 - p: out fname for p values.
 - ϕ: out fname for ϕ values.
-- mutations: optional fname to provided where "mutate" will then be the index of a column.
-If "mutate" is not provided, the first (and ideally only) column of the file will be used.
+- mut_file: optional fname to provided where "mut_id" will then be the index of a column.
+If "mut" is not provided, the first (and ideally only) column of the file will be used.
 """
-@main function steadystate(mutate=nothing, i=default_net, r="steady_r" * (mutate == nothing ? ".mat" : "_$mut.mat"), p="steady_p" * (mutate == nothing ? ".mat" : "_$mut.mat"), ϕ="steady_phi" * (mutate == nothing ? ".mat" : "_$mut.mat"); mutations=nothing)
+@main function steadystate(mut_id=nothing, i=default_net; r=nothing, p=nothing, phi=nothing, mut_file=nothing)
+	if r   == nothing r   = "steady_r"   * (mut_id == nothing ? "" : "_$mut_id") * ".mat" end
+	if p   == nothing p   = "steady_p"   * (mut_id == nothing ? "" : "_$mut_id") * ".mat" end
+	if phi == nothing phi = "steady_phi" * (mut_id == nothing ? "" : "_$mut_id") * ".mat" end
 	net = loadnet(i)
-	if mutations != nothing
-		if mutate == nothing mutate = 1 end
-		mutations = loaddlm(mutations, Int)[:,mutate]
-		if length(mutations) == net.nₚ+net.nₜ
-			try mutations = convert(BitVector, mutations) catch InexactError end
-		end
-		solution = ODEs.steady_state(net, mutations)
-	else
-		solution = mutate == nothing ? ODEs.steady_state(net) : ODEs.steady_state(net, mutate)
-	end
+	solution = steady_state(net, mut_id, mut_file)
 	@info(solution.retcode)
 	if solution.retcode in [:Success, :Terminated]
-		savedlm(r, solution[:,1,end])
-		savedlm(p, solution[:,2,end])
-		savedlm(ϕ, solution[1:net.nₜ+net.nₚ,3,end])
+		savedlm(r,   solution[:,1,end])
+		savedlm(p,   solution[:,2,end])
+		savedlm(phi, solution[1:net.nₜ+net.nₚ,3,end])
 	end
+end
+steady_state(net, ::Nothing, ::Nothing) = ODEs.steady_state(net)
+steady_state(net, mutation::Integer, ::Nothing) = ODEs.steady_state(net, mut)
+steady_state(net, mutation_col, mutations_file::String) = steady_state(net, mutation_col, loaddlm(mutations_file, Int))
+function steady_state(net, ::Nothing, mutations::Matrix)
+	if size(mutations,2) == 1 return steady_state(net, 1, mutations)
+	else error("column in $mut_file not selected, use first arg") end
+end
+function steady_state(net, mutation_col::Integer, mutations::Matrix)
+	if size(mutations,1) == net.nₚ+net.nₜ
+		try mutations = convert(BitVector, mutations) catch InexactError end
+	end
+	ODEs.steady_state(net, mutations[:,mutation_col])
 end
 
 """
 Get the log fold-change values comparing mutant transcription levels to wildtype.
--	i: either a network or a list of expression levels where the first one listed is the wildtype
+-	net: a network
 -	o: stdout or file to write result to
 """
-@main function logFC(i...; o=stdout)
-	if length(i) == 1
-		measurements = ODEs.logFC(loadnet(i[1]))
-	else
-		wildtype = loaddlm(i[1])
-		mutants = [loaddlm(mutant) for mutant in i[2:end]]
-		measurements = ODEs.logFC(wildtype, mutants)
+@main function logFC(net=default_net; o=stdout)
+	measurements = @domainerror(ODEs.logFC(loadnet(net)))
+	if measurements != nothing
+		@info("logFC values simulated")
+		savedlm(o, measurements)
 	end
-	@info("logFC values simulated")
-	savedlm(o, measurements)
+end
+"""
+Get the log fold-change values comparing mutant transcription levels to wildtype.
+-	wt: wildtype expression level matrix. String fname
+-	mut: mutant expression level matrix. String fname
+-	muts...: additional mutant expression level matrices. list of string fname
+-	o: stdout or file to write result to
+"""
+@main function logFC(wt, mut, muts...; o=stdout)
+	wildtype = loaddlm(wt)
+	mutants = [loaddlm(mutant) for mutant in [mut; muts...]]
+	measurements = @domainerror ODEs.logFC(wildtype, mutants)
+	if measurements != nothing
+		@info("logFC values simulated")
+		savedlm(o, measurements)
+	end
 end
 
 """
@@ -206,7 +228,7 @@ end
 Infer a weight matrix from logFC data.
 - WT_prior/WP_prior: optionally limit Wₜ/Wₚ if they are partially known.
 """
-@main function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; WT_prior=nothing, WP_prior=nothing, epochs::Integer=40000, lambda::AbstractFloat=.1, conf=1)
+@main function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; WT_prior=nothing, WP_prior=nothing, epochs::Integer=30000, lambda::AbstractFloat=.1, conf=1)
 	X = loaddlm(X, Float64)
 	M, S = _priors(WT_prior, WP_prior, size(X,1), nₜ, nₚ)
 	W = Inference.infer(X, nₜ, nₚ; epochs=epochs, λ=lambda, M=M, S=S, conf=conf)
