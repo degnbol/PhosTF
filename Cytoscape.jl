@@ -73,7 +73,7 @@ function xgmml_nodes(net; kwargs...)
 	xgmml_nodes(nₓnₜnₚ(net)...;
 	max_transcription=net.max_transcription, max_translation=net.max_translation,
 	λ_mRNA=net.λ_mRNA, λ_prot=net.λ_prot, λ_phos=[net.λ_phos; zeros(net.nₓ)],
-	phos_activation=[net.phos_activation; fill(missing, net.nₓ)], kwargs...)
+	phos_activation=[net.phos_activation; fill(missing, net.nₓ)], α₀=[g.α[1] for g in net.genes], kwargs...)
 end
 
 function xgmml_edges(Wₜ::Matrix, Wₚ::Matrix)
