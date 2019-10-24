@@ -40,7 +40,7 @@ mutable struct Node
 	end
 	
 	attributes(shared_name=nothing, name=shared_name) = Dict("shared name" => shared_name, "name" => name)
-	function graphics(label; label_color="#000000", select_color="#FFFF00", opacity=255, stroke_opacity=255, label_opacity=255, font="SansSerif,plain", font_size=12, stroke="SOLID", tooltip="")
+	function graphics(label; label_color="#000000", select_color="#00FFFF", opacity=255, stroke_opacity=255, label_opacity=255, font="SansSerif,plain", font_size=12, stroke="SOLID", tooltip="")
 		Dict(
 		"NODE_LABEL" => label,
 		"NODE_LABEL_FONT_FACE" => font,
@@ -88,7 +88,7 @@ mutable struct Edge
 	- type: SOLID, LONG_DASH, ...
 	- arrow: DELTA, T, CIRCLE, ...
 	"""
-	function graphics(label="", tooltip=""; type="SOLID", arrow="DELTA", arrow_size=6., color="#000000", label_color="#000000", select_color="#FFFF00", opacity=255, label_opacity=255, font_size=10, font="Dialog,plain", curved=true, visible=true)
+	function graphics(label="", tooltip=""; type="SOLID", arrow="DELTA", arrow_size=6., color="#000000", label_color="#000000", select_color="#00FFFF", opacity=255, label_opacity=255, font_size=10, font="Dialog,plain", curved=true, visible=true)
 		Dict(
 		"EDGE_LABEL" => label,
 		"EDGE_TOOLTIP" => tooltip,
