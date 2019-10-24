@@ -1,5 +1,5 @@
 #!/usr/bin/env julia
-include("../utilities/ArrayUtils.jl")
+if !isdefined(Main, :ArrayUtils) include("../utilities/ArrayUtils.jl") end
 
 """
 Network struct containing genes for simulation.

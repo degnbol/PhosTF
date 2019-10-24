@@ -1,10 +1,10 @@
 #!/usr/bin/env julia
-include("../utilities/ArrayUtils.jl")
+include("../utilities/ArrayUtils.jl") # different scope, have to re-include
 using Distributions: TruncatedNormal
 using .ArrayUtils: TruncNormal, binary
 
 """
-State s is interpreted as a binary number, where bit k indicates whether module k is active (True) or inactive (False) in this state.
+State s is interpreted as a binary number, where bit k indicates whether module k is active (true) or inactive (false) in this state. The first returned value is all falses and the last is all trues.
 n: number of modules to combine in each unique way
 """
 states(n) = (binary(i-1, n) for i in 1:2^n)
@@ -50,7 +50,7 @@ struct Gene
 		if n_modules == 0 return [1.] end
 		inhibitors = [m.inhibitor for m in modules]
 		n_inhibitors = sum(inhibitors)
-		# effect on α₀ from each individual module.
+		# α′ is the effect added on top of α₀ by each individual module.
 		α′ = random_α′(n_modules)
 		α′_enhancer = @view α′[.!inhibitors]
 		α′_inhibitor = @view α′[inhibitors]
@@ -59,15 +59,15 @@ struct Gene
 		
 		α_max = α₀ + sum(α′_enhancer)
 		α_min = α₀ + sum(α′_inhibitor)
-		# make sure that the activation goes at least to 1 in the maximally activated state,
-		# when there is at least 1 activator.
+		# if there are ≥1 activators then
+		# make sure that activation α ≥ 1 in the maximally activated state.
 		if n_modules > n_inhibitors && α_max < 1
 			α′_enhancer[argmin(α′_enhancer)] += 1 - α_max
 		end
-		# make sure that the activation falls within [0 weak_activation] in the maximally repressed state,
-		# if there is a at least one repressor
+		# if there are ≥1 repressors then
+		# make sure that activation α ∈ [0,weak_activation] in the maximally repressed state.
 		if n_inhibitors > 0 && α_min > weak_activation
-			# decrease the weakest α′ so that: (α₀ + sum(α′_inhibitor)) in [0 weak_activation]
+			# decrease the weakest α′ so that: (α₀ + sum(α′_inhibitor)) ∈ [0,weak_activation]
 			α′_inhibitor[argmax(α′_inhibitor)] += random_low_α₀() - α_min
 		end
 		
@@ -76,17 +76,17 @@ struct Gene
 		clamp!(α, 0, 1)
 	end
 	
-	random_α′(n) = rand(TruncNormal(weak_activation, 1), n)
+	random_α′(n) = rand(TruncNormal(weak_activation, 1.), n)
 	"""
 	Basal transcription rate.
 	"""
 	function random_α₀(n_modules, n_inhibitors)
-		if n_modules == n_inhibitors return 1  # max expression before inhibitors bind
+		if n_modules == n_inhibitors return 1.  # max expression before inhibitors bind
 		elseif n_inhibitors == 0 return random_low_α₀()
 		else return random_medium_α₀() end
 	end
-	random_low_α₀() = rand(TruncatedNormal(0, weak_activation, 0, .05))
-	random_medium_α₀() = rand(TruncNormal(weak_activation, 1 - weak_activation))
+	random_low_α₀() = rand(TruncatedNormal(0., weak_activation, 0., .05))
+	random_medium_α₀() = rand(TruncNormal(weak_activation, 1. - weak_activation))
 end
 
 function Base.show(io::IO, g::Gene)

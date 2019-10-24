@@ -1,5 +1,5 @@
 #!/usr/bin/env julia
-include("../utilities/ArrayUtils.jl")
+if !isdefined(Main, :ArrayUtils) include("../utilities/ArrayUtils.jl") end
 
 """
 Backup version which assumes all phosphorylation regulators are kinases, so no negative (phosphatase) edges.

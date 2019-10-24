@@ -1,5 +1,5 @@
 #!/usr/bin/env julia
-# overriding aloready loaded modules causes problems
+# overriding already loaded modules causes problems
 if !isdefined(Main, :GeneRegulation) include("GeneRegulation.jl") end
 
 """
@@ -15,15 +15,16 @@ using ..GeneRegulation
 
 export simulate, steady_state
 export logFC
+export @domainerror
 
 """ ϕ₀ == 0 for non-regulating proteins in order to have vectors match in length """
 get_u₀(net::Network) = [net.r₀ net.p₀ [net.ϕ₀; zeros(net.nₓ)]]
 
 function ODE!(du, u, net, t)
+	u .= max.(0., u) # helps against dt <= dtmin warnings and domain errors.
 	r = @view u[:,1]
 	p = @view u[:,2]
 	ϕ = @view u[:,3]
-	ϕ .= max.(0., ϕ) # helps against dt <= dtmin warnings.
 	ϕₜₚ = @view ϕ[1:net.nₜ+net.nₚ]
 	du[:,1] .= drdt(net, r, p, ϕₜₚ)
 	du[:,2] .= dpdt(net, r, p)
@@ -36,23 +37,31 @@ default_duration = 24
 """
 Save progression through time for plotting and inspection.
 """
-function simulate(network::Network, duration::Integer=default_duration)
+function simulate(network::Network; duration::Real=default_duration)
 	problem = ODEProblem(ODE!, get_u₀(network), (0., duration*60.), network)
 	solve(problem, callback=steady_state_callback, save_everystep=true)
 end
+"""
+Mutate a wildtype and simulate through time.
+"""
+function simulate(network::Network, mutation, duration::Real=default_duration)
+	simulate(Network(network, mutation); duration=duration)
+end
+simulate(network::Network, ::Nothing) = simulate(network)
+simulate(network::Network, ::Nothing, ::Nothing) = simulate(network)
 
 """
 Find the steady-state solution.
 """
-function steady_state(network::Network, u₀::Matrix=get_u₀(network), duration::Integer=default_duration)
+function steady_state(network::Network; u₀::Matrix=get_u₀(network), duration::Integer=default_duration)
 	problem = ODEProblem(ODE!, u₀, (0., duration*60.), network)
 	solve(problem, callback=steady_state_callback, save_everystep=false, save_start=false)
 end
 """
 Mutate a wildtype and get the steady state solution.
 """
-function steady_state(network::Network, mutation::Union{<:AbstractVector,<:Int}, u₀::Matrix=get_u₀(network), duration::Integer=default_duration)
-	steady_state(Network(network, mutation), u₀, duration)
+function steady_state(network::Network, mutation::Union{<:AbstractVector,<:Integer}, u₀::Matrix=get_u₀(network), duration::Integer=default_duration)
+	steady_state(Network(network, mutation); u₀=u₀, duration=duration)
 end
 function steady_states(network::Network, mutations::Matrix, u₀::Matrix=get_u₀(network), duration::Integer=default_duration)
 	[steady_state(network, mutation, u₀, duration) for mutation in eachcol(mutations)]
@@ -71,7 +80,19 @@ Default KOs is each TF and PK are knocked out in each individual experiment.
 """
 function logFC(network::Network, mutations=1:network.nₜ+network.nₚ)
 	u₀ = get_u₀(network)
-	logFC(steady_state(network, u₀), steady_states(network, mutations, u₀))
+	logFC(steady_state(network; u₀=u₀), steady_states(network, mutations, u₀))
 end
+
+
+"""
+Call a function and catch any domain errors and turn them into serious error messages but not the verbose crash that is default.
+"""
+macro domainerror(ex)
+	quote try $(esc(ex)) catch e
+		if e isa DomainError @error("Domain error: $(e.val)")
+		else throw(e) end end
+	end
+end
+
 
 end;

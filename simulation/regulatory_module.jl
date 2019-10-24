@@ -1,5 +1,5 @@
 #!/usr/bin/env julia
-include("../utilities/ArrayUtils.jl")
+if !isdefined(Main, :ArrayUtils) include("../utilities/ArrayUtils.jl") end
 using Distributions: Uniform, TruncatedNormal
 
 """
@@ -35,11 +35,11 @@ struct RegulatoryModule
 	"""
 	Hill coeficient ν for each input protein.
 	"""
-	random_ν(n::Integer) = rand(TruncatedNormal(2, 2, 1, 10), n)
+	random_ν(n::Integer) = rand(TruncatedNormal(2., 2., 1., 10.), n)
 	"""
 	Dissociation constant k for each input protein.
 	"""
-	random_k(n::Integer) = rand(Uniform(.01, 1), n)
+	random_k(n::Integer) = rand(Uniform(.01, 1.), n)
 	function random_inhibitor(n_activators, n_repressors)
 		n_activators == n_repressors ? rand([true, false]) : n_activators < n_repressors
 	end
