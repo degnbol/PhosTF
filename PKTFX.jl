@@ -9,6 +9,7 @@ include("ModelIteration.jl")
 if !isdefined(Main, :Model) include("Model.jl") end # loaded by GeneRegulation
 include("Weight.jl")
 include("Inference.jl")
+if !isdefined(Main, :ArrayUtils) include("utilities/ArrayUtils.jl") end
 
 
 "Main caller for calling all project functions through command-line or julia REPL."
@@ -16,7 +17,7 @@ module PKTFX
 using Fire
 using Distributions: Uniform
 using Plots
-using ..ReadWrite
+using ..ReadWrite, ..ArrayUtils
 using ..Cytoscape, ..Plotting, ..ODEs, ..ModelIteration, ..Model, ..Weight
 using ..GeneRegulation, ..Inference, ..CLI
 
@@ -48,15 +49,19 @@ end
 	savedlm(o, X)
 end
 
+# load file(s) as a single 2D array regardless if they match in length along axis 1
+hcatpad_load(fnames::Vector) = hcatpad(loaddlm(fname, Float64) for fname ∈ fnames)
+hcatpad_load(fname::String) = loaddlm(fname, Float64)
+
 """
 Write a graph defined by weight matrices to xgmml format.
 """
-@main function xgmml(Wₜ, Wₚ; o=stdout, X=nothing, title=nothing)
+@main function xgmml(Wₜ, Wₚ; o=stdout, title=nothing, X=[])
 	Wₜ, Wₚ = loaddlm(Wₜ), loaddlm(Wₚ)
 	title = o == stdout ? "pktfx" : splitext(basename(o))[1]
-	if X == nothing write(o, Cytoscape.xgmml(Wₜ, Wₚ; title=title))
+	if isempty(X) write(o, Cytoscape.xgmml(Wₜ, Wₚ; title=title))
 	else
-		X = loaddlm(X, Float64)
+		X = hcatpad_load(X)
 		K = size(X,2)
 		_,nₜ,nₚ = nₓnₜnₚ(Wₜ,Wₚ)
 		# highlight each of the proteins if there are as many experiments as PKs+TFs
@@ -66,13 +71,14 @@ Write a graph defined by weight matrices to xgmml format.
 end
 """
 Write a graph defined by a simulation network file to xgmml format.
+- X: node values. Each column of X is used for a separate copy of the graph.
 """
-@main function xgmml(i=default_net; o=stdout, X=nothing, title=nothing)
+@main function xgmml(i=default_net; o=stdout, title=nothing, X=[])
 	net = loadnet(i)
 	title = o == stdout ? "pktfx" : splitext(basename(o))[1]
-	if X == nothing write(o, Cytoscape.xgmml(net; title=title))
+	if isempty(X) write(o, Cytoscape.xgmml(net; title=title))
 	else
-		X = loaddlm(X, Float64)
+		X = hcatpad_load(X)
 		K = size(X,2)
 		# highlight each of the proteins if there are as many experiments as PKs+TFs
 		highlight = net.nₜ+net.nₚ == K ? (1:K) : nothing
@@ -89,12 +95,13 @@ end
 @main function display(i=default_net; v::Integer=0)
 	net = loadnet(i)
 	println(net)
-	if v > 0 for g in net.genes
-		println("\t", g)
-		if v > 1 for m in g.modules
-			println("\t\t", m)
-		end end
-	end end
+	if v > 0
+		for g in net.genes println("\t", g)
+			if v > 1
+				for m in g.modules println("\t\t", m) end
+			end
+		end
+	end
 end
 
 @main function estimateWt(i=default_net; o=stdout)
@@ -109,7 +116,7 @@ Simulate a network.
 @main function simulate(mut_id=nothing, i=default_net, r="sim_r.mat", p="sim_p.mat", ϕ="sim_phi.mat", t="sim_t.mat"; duration=nothing)
 	net = loadnet(i)
 	solution = @domainerror ODEs.simulate(net, mut_id, duration)
-	if solution == nothing return end
+	if solution === nothing return end
 	@info(solution.retcode)
 	if solution.retcode in [:Success, :Terminated]
 		savedlm(r, solution[:,1,:])
@@ -154,9 +161,9 @@ If "mutations" is not provided, it refers to index of the protein to mutate.
 If "mut" is not provided, the first (and ideally only) column of the file will be used.
 """
 @main function steadystate(mut_id=nothing, i=default_net; r=nothing, p=nothing, phi=nothing, mut_file=nothing)
-	if r   == nothing r   = "steady_r"   * (mut_id == nothing ? "" : "_$mut_id") * ".mat" end
-	if p   == nothing p   = "steady_p"   * (mut_id == nothing ? "" : "_$mut_id") * ".mat" end
-	if phi == nothing phi = "steady_phi" * (mut_id == nothing ? "" : "_$mut_id") * ".mat" end
+	if r   === nothing r   = "steady_r"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
+	if p   === nothing p   = "steady_p"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
+	if phi === nothing phi = "steady_phi" * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
 	net = loadnet(i)
 	solution = steady_state(net, mut_id, mut_file)
 	@info(solution.retcode)
@@ -167,11 +174,11 @@ If "mut" is not provided, the first (and ideally only) column of the file will b
 	end
 end
 steady_state(net, ::Nothing, ::Nothing) = ODEs.steady_state(net)
-steady_state(net, mutation::Integer, ::Nothing) = ODEs.steady_state(net, mut)
+steady_state(net, mutation::Integer, ::Nothing) = ODEs.steady_state(net, mutation)
 steady_state(net, mutation_col, mutations_file::String) = steady_state(net, mutation_col, loaddlm(mutations_file, Int))
 function steady_state(net, ::Nothing, mutations::Matrix)
 	if size(mutations,2) == 1 return steady_state(net, 1, mutations)
-	else error("column in $mut_file not selected, use first arg") end
+	else error("column in mutation file not selected, use first arg") end
 end
 function steady_state(net, mutation_col::Integer, mutations::Matrix)
 	if size(mutations,1) == net.nₚ+net.nₜ
@@ -215,10 +222,10 @@ Can be fed nothing values, and produces nothing values when a matrix would other
 return: priors, priors_sign
 """
 function _priors(WT_prior, WP_prior, n::Integer, nₜ::Integer, nₚ::Integer)
-	if WT_prior == nothing && WP_prior == nothing return nothing, nothing end
+	if WT_prior === nothing && WP_prior === nothing return nothing, nothing end
 	M, S = Model.priors(
-	WT_prior == nothing ? n  : loaddlm(WT_prior),
-	WP_prior == nothing ? nₚ : loaddlm(WP_prior))
+	WT_prior === nothing ? n  : loaddlm(WT_prior),
+	WP_prior === nothing ? nₚ : loaddlm(WP_prior))
 	if all(Model._Wₜ(M,nₜ,nₚ) .== 1) && all(Model._Wₚ(M,nₜ,nₚ) .== 1) M = nothing end
 	if all(S == 0) S = nothing end
 	M, S
@@ -236,11 +243,33 @@ Infer a weight matrix from logFC data.
 	savedlm(ot, Wₜ)
 	savedlm(op, Wₚ)
 end
+@main function inferB(B_LLC, nₚ::Integer, ot="WT_inferB.mat", op="WP_inferB.mat"; WT_prior=nothing, WP_prior=nothing, epochs::Integer=30000, lambda::AbstractFloat=.1, conf=1)
+	B_LLC = loaddlm(B_LLC, Float64)
+	nₚₜ = size(B_LLC,1); nₜ = nₚₜ-nₚ
+	M, S = _priors(WT_prior, WP_prior, nₚₜ, nₜ, nₚ)
+	W = Inference.infer_B(B_LLC, nₚ; epochs=epochs, λ=lambda, M=M, S=S, conf=conf)
+	Wₜ, Wₚ = Model.WₜWₚ(W, nₜ, nₚ)
+	savedlm(ot, Wₜ)
+	savedlm(op, Wₚ)
+end
 
 @main function thres(io=nothing, o=nothing; thres=0.01)
 	i, o = inout(io, o)
-	mat = loaddlm(i)
+	mat = loaddlm(i, Float64)
 	Weight.threshold!(mat, thres)
+	savedlm(o, mat)
+end
+
+"""
+Swap order of PK and TF in matrix (swap between PK-TF-X and TF-PK-X).
+- n1: number of nodes in first group, which will be moved to become the second.
+- n2: number of nodes in the second group, which will be move to become the first.
+"""
+@main function swapPT(io=nothing, o=nothing; n1=nothing, n2=nothing)
+	i, o = inout(io, o)
+	if n1 === nothing || n2 === nothing @error("Provide --n1 and --n2.") end
+	mat = loaddlm(i, Float64)
+	mat = reorder(mat, [n1+1:n1+n2;1:n1;n1+n2+1:maximum(size(mat))])
 	savedlm(o, mat)
 end
 
