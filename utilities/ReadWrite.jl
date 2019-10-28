@@ -4,6 +4,7 @@ using DelimitedFiles
 import JSON3
 import BSON
 import JLD
+using Flux: TrackedArray, Tracker.data
 # problems for JLD2
 
 
@@ -76,7 +77,9 @@ function savedlm(fname::String, x::AbstractArray)
 	elseif ext == ".tsv" writedlm(fname, x, '\t')
 	else error("File format not recognized.") end
 end
+savedlm(fname::String, x::TrackedArray) = savedlm(fname, data(x))
 savedlm(o::Base.TTY, x::Matrix) = writedlm(o, x)
+savedlm(o::Base.TTY, x::TrackedArray) = writedlm(o, data(x))
 
 save_JSON(fname::String, x) = open(fname, "w") do io JSON3.write(io, x) end
 save_BSON(fname::String, x) = BSON.bson(fname, Dict(default_identifier => x))
