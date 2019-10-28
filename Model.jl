@@ -10,6 +10,9 @@ using Flux
 using ..ArrayUtils: eye
 
 export offdiag
+export sse, sse_B, sse_alt, sse_B_alt
+export l1, l_cas
+export _B, _T
 
 "A mask to remove diagonal of a matrix."
 function offdiag(matrix)
@@ -98,6 +101,11 @@ function sse(cs::Constants, W::AbstractMatrix, X::Matrix)
 	sum((E .* cs.U).^2)
 end
 """
+Loss function to train parameters in W to result in a B that is as similar to a solution to B from LLC method (Eberhardt).
+"""
+sse_B(cs::Constants, W::AbstractMatrix, B_LLC::Matrix) = sum((_B(cs,W) .- B_LLC).^2)
+sse_B_alt(cs::Constants, W::AbstractMatrix, B_LLC::Matrix) = sum((_B_alt(cs,W) .- B_LLC).^2)
+"""
 SSE made to separate loss on Ex and Ey from overall SSE.
 - Ex: error term specifically for x
 - Ey: error term specifically for y
@@ -161,16 +169,6 @@ apply_priors(W, M, S) = apply_priors(W .* M, nothing, S)
 apply_priors(W, ::Nothing, S) = W .* (S .== 0) .+ abs.(W) .* S
 apply_priors(W, M, ::Nothing) = W .* M
 apply_priors(W, ::Nothing, ::Nothing) = W
-
-
-"""
-For iterating the model.
-This is only for sanity checks and debugging since it imprecisely assumes equilibrium eq. B will work for each iteration, and naturally equilibrium assumption does not hold during each simulation step.
-"""
-step(X::Matrix, W, cs::Constants, C::Matrix) = _B(cs,W) * X .* cs.U .+ C
-step(X::Matrix, W, cs::Constants, C::Matrix, E::Matrix) = (_B(cs,W) * X + E) .* cs.U .+ C
-step!(X::Matrix, W, cs::Constants, C::Matrix) = X .= _B(cs,W) * X .* cs.U .+ C
-step!(X::Matrix, W, cs::Constants, C::Matrix, E::Matrix) = X .= (_B(cs,W) * X + E) .* cs.U .+ C
 
 
 end;
