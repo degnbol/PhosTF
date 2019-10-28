@@ -85,7 +85,8 @@ end
 
 
 """
-Call a function and catch any domain errors and turn them into serious error messages but not the verbose crash that is default.
+Call a function and catch any domain errors so we avoid the default verbose crash and instead display a non fatal error message and return nothing in that case.
+return: macro returns the result of expression ex if there are no errors, nothing if there is a domain error or crashes if there is another error.
 """
 macro domainerror(ex)
 	quote try $(esc(ex)) catch e
