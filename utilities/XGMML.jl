@@ -1,6 +1,7 @@
 #!/usr/bin/env julia
 include("StringUtils.jl")
-include("ArrayUtils.jl")
+if !isdefined(Main, :ArrayUtils) include("ArrayUtils.jl") end
+include("ColorUtils.jl")
 
 """
 Module for code to export a network in .xgmml format.
@@ -9,7 +10,7 @@ module XGMML
 using Statistics: mean
 import Base.show
 import Base.merge
-using ..StringUtils
+using ..StringUtils, ..ColorUtils
 import ..ArrayUtils
 
 mutable struct Node
@@ -72,11 +73,15 @@ mutable struct Edge
 		new(merge(attributes, extra_atts), graphics, id, label, source, target, directed, width, color, anchor)
 	end
 	function Edge(graphics, source, target; id=nothing, label="", directed=true, width=2., color=nothing, anchor=nothing, extra_atts...)
-		if color == nothing color = graphics["EDGE_TARGET_ARROW_UNSELECTED_PAINT"] end
+		if color === nothing color = graphics["EDGE_TARGET_ARROW_UNSELECTED_PAINT"] end
 		new(merge(attributes(id, label), extra_atts), graphics, id, label, source, target, directed, width, color, anchor)
 	end
-	function Edge(source, target; id=nothing, label="", directed=true, width=2., arrow="DELTA", color="#000000", opacity=255, anchor=nothing, extra_atts...)
+	function Edge(source, target; id=nothing, label="", directed=true, width=2., arrow="DELTA", color="#000000", opacity::Integer=255, anchor=nothing, extra_atts...)
 		new(merge(attributes(id, label), extra_atts), graphics(label, arrow=arrow, color=color, opacity=opacity), id, label, source, target, directed, width, color, anchor)
+	end
+	"Provide background color in order to emulate transparency in arrow head colors so they match edge line color."
+	function Edge(source, target, bg_color; id=nothing, label="", directed=true, width=2., arrow="DELTA", color="#000000", opacity::Integer=255, anchor=nothing, extra_atts...)
+		new(merge(attributes(id, label), extra_atts), graphics(label, arrow=arrow, color=lerp(bg_color, color, opacity), opacity=opacity), id, label, source, target, directed, width, color, anchor)
 	end
 	
 	function attributes(shared_name=nothing, name=shared_name; shared_interaction="", interaction=shared_interaction)
@@ -87,6 +92,7 @@ mutable struct Edge
 	"""
 	- type: SOLID, LONG_DASH, ...
 	- arrow: DELTA, T, CIRCLE, ...
+	- color: unselected arrow head color
 	"""
 	function graphics(label="", tooltip=""; type="SOLID", arrow="DELTA", arrow_size=6., color="#000000", label_color="#000000", select_color="#00FFFF", opacity=255, label_opacity=255, font_size=10, font="Dialog,plain", curved=true, visible=true)
 		Dict(
@@ -189,25 +195,25 @@ begin # setters
 	"If nodes/edges are without id, set it to their position in the vector."
 	function set_ids(nes::Union{Vector{Node},Vector{Edge}})
 		for i in 1:length(nes)
-			if nes[i].id == nothing set_id(nes[i], i) end
+			if nes[i].id === nothing set_id(nes[i], i) end
 		end
 	end
 	function set_id(ne, id)
 		ne.id = id
-		if ne.label == nothing set_label(ne, id) end
-		if ne.atts["shared name"] == nothing set_shared_name(ne, id) end
+		if ne.label === nothing set_label(ne, id) end
+		if ne.atts["shared name"] === nothing set_shared_name(ne, id) end
 	end
 	function set_label(n::Node, label)
 		n.label = label
-		if n.graphics["NODE_LABEL"] == nothing n.graphics["NODE_LABEL"] = label end
+		if n.graphics["NODE_LABEL"] === nothing n.graphics["NODE_LABEL"] = label end
 	end
 	function set_label(e::Edge, label)
 		e.label = label
-		if e.graphics["EDGE_LABEL"] == nothing e.graphics["EDGE_LABEL"] = label end
+		if e.graphics["EDGE_LABEL"] === nothing e.graphics["EDGE_LABEL"] = label end
 	end
 	function set_shared_name(ne, name)
 		ne.atts["shared name"] = name
-		if ne.atts["name"] == nothing ne.atts["name"] = name end
+		if ne.atts["name"] === nothing ne.atts["name"] = name end
 	end
 	set_shared_name(ne, name::Integer) = set_shared_name(ne, string(name))
 

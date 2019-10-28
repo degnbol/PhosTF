@@ -1,6 +1,6 @@
 #!/usr/bin/env julia
 include("utilities/XGMML.jl")
-include("utilities/ColorUtils.jl")
+if !isdefined(Main, :ColorUtils) include("utilities/ColorUtils.jl") end
 include("utilities/MathUtils.jl")
 if !isdefined(Main, :GeneRegulation) include("simulation/GeneRegulation.jl") end
 
@@ -16,6 +16,7 @@ using ..GeneRegulation: nₓnₜnₚ, estimate_Wₜ
 
 
 const default_space = 100
+const bg_color = "#FFFFFF"
 
 """
 Get a matrix containing text in node file format.
@@ -86,10 +87,10 @@ function xgmml_edges(Wₜ::Matrix, Wₚ::Matrix)
 	PK_arrow(weight) = weight >= 0 ? "CIRCLE" : "SQUARE"
 	
 	PK_edges = [
-	XGMML.Edge(source, target, arrow=PK_arrow(weight), color=color(weight), opacity=opacity(weight), weight=weight)
+	XGMML.Edge(source, target, bg_color; arrow=PK_arrow(weight), color=color(weight), opacity=opacity(weight), weight=weight)
 	for (target,source,weight) in zip(findnz(sparse(Wₚ))...)]
 	TF_edges = [
-	XGMML.Edge(source+nₚ, target, arrow=TF_arrow(weight), color=color(weight), opacity=opacity(weight), weight=weight)
+	XGMML.Edge(source+nₚ, target, bg_color; arrow=TF_arrow(weight), color=color(weight), opacity=opacity(weight), weight=weight)
 	for (target,source,weight) in zip(findnz(sparse(Wₜ))...)]
 	
 	[PK_edges; TF_edges]

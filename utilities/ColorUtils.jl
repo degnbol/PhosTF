@@ -6,6 +6,7 @@ using PerceptualColourMaps
 include("MathUtils.jl"); using .MathUtils
 
 export divergent_lerp
+export lerp
 
 
 D7 = convert.(RGB, cmap("D7"))
@@ -18,5 +19,14 @@ function divergent_lerp(v, min=-1, max=1, center=0; cmap=D7)
 	cmap[clamp(Int(round(v)), 1, l)]
 end
 
+"""
+Mix two hex colors and return as hex.
+- amount: 0 → hex1, 1 → hex2
+"""
+function lerp(hex1, hex2, amount::AbstractFloat)
+	col = weighted_color_mean(amount, parse(Colorant, hex2), parse(Colorant, hex1))
+	"#" * hex(col)
+end
+lerp(hex1, hex2, amount::Integer) = lerp(hex1, hex2, amount/255)
 
 end;
