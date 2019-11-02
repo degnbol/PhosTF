@@ -12,7 +12,7 @@ using ..ArrayUtils: eye
 export offdiag
 export sse, sse_B, sse_alt, sse_B_alt
 export l1, l_cas
-export _B, _T
+export _B, _B_alt, _T
 
 "A mask to remove diagonal of a matrix."
 function offdiag(matrix)
@@ -72,9 +72,9 @@ Iₚ(n::Integer, nₜ::Integer, nₚ::Integer) = diagm([[1 for _ in 1:nₚ]; [0 
 Iₜ(n::Integer, nₜ::Integer, nₚ::Integer) = diagm([[0 for _ in 1:nₚ]; [1 for _ in 1:nₚ]; [0 for _ in nₚ+nₜ+1:n]])
 
 "I has to have a known size to not produce an error that might be fixed in later release."
-_B(cs::Constants, W::AbstractMatrix) = W.*cs.Mₜ * (I(size(W,1)) - W.*cs.Mₚ)^-1
+_B(cs::Constants, W::AbstractMatrix) = (W.*cs.Mₜ) * inv(I(size(W,1)) - W.*cs.Mₚ)
 "To avoid finding inverse matrix, we can instead solve if given the x in B^-1 * x"
-_B(cs::Constants, W::AbstractMatrix, x) = W.*cs.Mₜ * ((I(size(W,1)) - W.*cs.Mₚ) \ x)
+_B(cs::Constants, W::AbstractMatrix, x) = (W.*cs.Mₜ) * ((I(size(W,1)) - W.*cs.Mₚ) \ x)
 function _B_alt(cs::Constants, W::AbstractMatrix)
 	wt = W.*cs.Mₜ
 	wp = W.*cs.Mₚ
@@ -98,7 +98,7 @@ _T_alt(B) = (I(size(B,1)) - B) \ B
 """
 function sse(cs::Constants, W::AbstractMatrix, X::Matrix)
 	E = X - _B(cs,W,X)
-	sum((E .* cs.U).^2)
+	sum((cs.U .* E) .^ 2)
 end
 """
 Loss function to train parameters in W to result in a B that is as similar to a solution to B from LLC method (Eberhardt).
@@ -133,7 +133,7 @@ l1(W::AbstractMatrix) = norm(W,1)
 
 
 "Loss function for PK/PP cascades."
-l_cas(W::AbstractMatrix, Iₜ::AbstractMatrix, Iₚ::AbstractMatrix) = sum((I(size(W,1)) - Iₚ*abs.(W')) \ vec(sum(Iₜ,dims=2)))
+l_cas(W::AbstractMatrix, Iₜ::AbstractMatrix, Iₚ::AbstractMatrix) = sum((I(size(W,1)) - (abs.(W)*Iₚ)') \ vec(sum(Iₜ,dims=2)))
 """
 The cummulative effects thorugh cascades.
 Explicitly setting size of I so Flux can handle it.
