@@ -1,4 +1,3 @@
-#!/usr/bin/env julia
 # overriding already loaded modules causes problems
 if !isdefined(Main, :GeneRegulation) include("GeneRegulation.jl") end
 
@@ -7,8 +6,8 @@ Defining and solving ODEs to the point of having the resulting simulated logFC v
 Used for simulation of gene expression levels.
 """
 module ODEs
-using DifferentialEquations: ODEProblem, solve, ODESolution
-using DiffEqCallbacks: TerminateSteadyState
+using DifferentialEquations: ODEProblem, solve, ODESolution, CallbackSet
+using DiffEqCallbacks: TerminateSteadyState, PositiveDomain
 using Distributions: Uniform
 using LinearAlgebra: I
 using ..GeneRegulation
@@ -17,11 +16,15 @@ export simulate, steady_state
 export logFC
 export @domainerror
 
+const default_duration = 24 # hours
+steady_state_callback = TerminateSteadyState(1e-4, 1e-6)
+dtmax = 1  # minutes. used to limit step size to avoid instability. Reduction increases computational cost and stability.
+
 """ ϕ₀ == 0 for non-regulating proteins in order to have vectors match in length """
 get_u₀(net::Network) = [net.r₀ net.p₀ [net.ϕ₀; zeros(net.nₓ)]]
 
 function ODE!(du, u, net, t)
-	u .= max.(0., u) # helps against dt <= dtmin warnings and domain errors.
+	u .= clamp.(u, 0., 1.) # can be used against dt <= dtmin warnings and domain errors.
 	r = @view u[:,1]
 	p = @view u[:,2]
 	ϕ = @view u[:,3]
@@ -31,15 +34,15 @@ function ODE!(du, u, net, t)
 	du[1:net.nₚ+net.nₜ,3] .= dϕdt(net, view(p,1:net.nₚ+net.nₜ), ϕₜₚ)
 end
 
-steady_state_callback = TerminateSteadyState(1e-4, 1e-6)
-default_duration = 24
+default_callback(u₀) = CallbackSet(steady_state_callback, PositiveDomain(u₀))
 
 """
 Save progression through time for plotting and inspection.
 """
 function simulate(network::Network; duration::Real=default_duration)
-	problem = ODEProblem(ODE!, get_u₀(network), (0., duration*60.), network)
-	solve(problem, callback=steady_state_callback, save_everystep=true)
+	u₀ = get_u₀(network)
+	problem = ODEProblem(ODE!, u₀, (0., duration*60.), network)
+	solve(problem, callback=default_callback(u₀), save_everystep=true, dtmax=dtmax, force_dtmin=true)
 end
 """
 Mutate a wildtype and simulate through time.
@@ -48,6 +51,7 @@ function simulate(network::Network, mutation, duration::Real=default_duration)
 	simulate(Network(network, mutation); duration=duration)
 end
 simulate(network::Network, ::Nothing) = simulate(network)
+simulate(network::Network, mutation, ::Nothing) = simulate(network, mutation)
 simulate(network::Network, ::Nothing, ::Nothing) = simulate(network)
 
 """
@@ -55,7 +59,7 @@ Find the steady-state solution.
 """
 function steady_state(network::Network; u₀::Matrix=get_u₀(network), duration::Integer=default_duration)
 	problem = ODEProblem(ODE!, u₀, (0., duration*60.), network)
-	solve(problem, callback=steady_state_callback, save_everystep=false, save_start=false)
+	solve(problem, callback=default_callback(u₀), save_everystep=false, save_start=false, dtmax=dtmax, force_dtmin=true)
 end
 """
 Mutate a wildtype and get the steady state solution.
