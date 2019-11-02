@@ -6,9 +6,7 @@ using Plots
 using ColorSchemes
 using DifferentialEquations: ODESolution
 
-
 color_scheme = ColorSchemes.phase
-
 
 function save(o, p)
 	if o == stdout display(p)
@@ -28,15 +26,32 @@ plot_ψ(solution::ODESolution) = plot(solution.t, solution[:,2,:]'-solution[:,3,
 plot_ϕ_frac(solution::ODESolution) = plot(solution.t, solution[:,3,:]'./solution[:,2,:]', leg=false)
 
 
-plot_simulation(time, array::Matrix, color) = plot(time, array', color=color, leg=false)
-plot_simulation!(time, array::Matrix, color) = plot!(time, array', color=color, leg=false)
-function plot_simulation(time, array::Vector{Matrix{Float64}})
-	n = length(array)
-	p = plot_simulation(time, array[1], get(color_scheme, 1/(n+1)))
-	for i in 2:n
-		p = plot_simulation!(time, array[i], get(color_scheme, i/(n+1)))
+"""
+Plot simulation for multiple nodes.
+- time: vector of time points for measurements.
+- array: node values along axis 1, time along axis 2.
+- labels for each column in array.
+"""
+function plot_simulation(time::Vector, values::Matrix, labels::Vector, styles::Vector, widths::Vector)
+	p = plot()
+	for i ∈ 1:length(labels)
+		series = values[i,:]
+		if all(series .== 0) continue end
+		plot!(time, series, color="black", label=labels[i], style=styles[i], width=widths[i])
 	end
+	ylabel!("value/max")
 	p
+end
+
+
+"""
+Plot subplots each with their own set of curves all with a shared time axis. 
+i-th subplot uses i-th element of values, labels, styles, widths and names.
+"""
+function plot_simulation(time::Vector, values::Vector{<:Matrix}, labels::Vector{<:Vector}, styles::Vector{<:Vector}, widths::Vector{<:Vector}, names::Vector{String})
+	n_subplots = length(names)
+	subplots = [plot_simulation(time, values[i], labels[i], styles[i], widths[i]) for i ∈ 1:n_subplots]
+	plot(subplots..., layout=(n_subplots,1))
 end
 
 
