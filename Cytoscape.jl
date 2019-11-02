@@ -22,12 +22,12 @@ const bg_color = "#FFFFFF"
 Get a matrix containing text in node file format.
 - n: total number of proteins
 - nₜ: number of TFs
-- nₚ: number of PKs
+- nₚ: number of PK/PPs
 rows are identifiers.
 """
 function nodes(n::Integer, nₜ::Integer, nₚ::Integer)
-	labels = [["TF$i" for i in 1:nₜ]; ["PK$i" for i in 1:nₚ]; ["X$i" for i in 1:(n-(nₜ+nₚ))]]
-	types = [["TF" for _ in 1:nₜ]; ["PK" for _ in 1:nₚ]; ["X" for _ in 1:(n-(nₜ+nₚ))]]
+	labels = [["T$i" for i in 1:nₜ]; ["P$i" for i in 1:nₚ]; ["X$i" for i in 1:(n-(nₜ+nₚ))]]
+	types = [["T" for _ in 1:nₜ]; ["P" for _ in 1:nₚ]; ["X" for _ in 1:(n-(nₜ+nₚ))]]
 	DataFrame(label=labels, type=types)
 end
 
@@ -43,9 +43,9 @@ xgmml_y(nₓ::Integer, nₜ::Integer, nₚ::Integer, space=default_space) = [[ 0
 
 function xgmml_labels(nₓ::Integer, nₜ::Integer, nₚ::Integer)
 	pad = max(nₓ, nₜ, nₚ) |> string |> length
-	[["PK"*lpad(i,pad,"0") for i in 1:nₚ];
-	 ["TF"*lpad(i,pad,"0") for i in 1:nₜ];
-	 ["X" *lpad(i,pad,"0") for i in 1:nₓ]]
+	[["P"*lpad(i,pad,"0") for i in 1:nₚ];
+	 ["T"*lpad(i,pad,"0") for i in 1:nₜ];
+	 ["X"*lpad(i,pad,"0") for i in 1:nₓ]]
 end
 
 function xgmml_fills(nₓ::Integer, nₜ::Integer, nₚ::Integer)
@@ -83,17 +83,17 @@ function xgmml_edges(Wₜ::Matrix, Wₚ::Matrix)
 	max_weight = maximum([maximum(Wₜ), maximum(Wₚ)])
 	color(weight) = "#" * hex(divergent_lerp(weight, min_weight, max_weight))
 	opacity(weight) = divergent(weight, min_weight, max_weight) |> abs |> to256
-	TF_arrow(weight) = weight >= 0 ? "DELTA" : "T"
-	PK_arrow(weight) = weight >= 0 ? "CIRCLE" : "SQUARE"
-	
-	PK_edges = [
-	XGMML.Edge(source, target, bg_color; arrow=PK_arrow(weight), color=color(weight), opacity=opacity(weight), weight=weight)
+	T_arrow(weight) = weight >= 0 ? "DELTA" : "T"
+	P_arrow(weight) = weight >= 0 ? "CIRCLE" : "SQUARE"
+
+	P_edges = [
+	XGMML.Edge(source, target, bg_color; arrow=P_arrow(weight), color=color(weight), opacity=opacity(weight), weight=weight)
 	for (target,source,weight) in zip(findnz(sparse(Wₚ))...)]
-	TF_edges = [
-	XGMML.Edge(source+nₚ, target, bg_color; arrow=TF_arrow(weight), color=color(weight), opacity=opacity(weight), weight=weight)
+	T_edges = [
+	XGMML.Edge(source+nₚ, target, bg_color; arrow=T_arrow(weight), color=color(weight), opacity=opacity(weight), weight=weight)
 	for (target,source,weight) in zip(findnz(sparse(Wₜ))...)]
 	
-	[PK_edges; TF_edges]
+	[P_edges; T_edges]
 end
 xgmml_edges(WₜWₚ::Array) = xgmml_edges(WₜWₚ...)
 xgmml_edges(WₜWₚ::Tuple) = xgmml_edges(WₜWₚ...)
@@ -120,7 +120,7 @@ function _graph(net; title="net")
 end
 _graph(Wₜ::Matrix, Wₚ::Matrix; title="net") = _graph([Wₜ, Wₚ]; title=title)
 
-"Get a PK, TF, X network defined by its Wₜ and Wₚ in .xgmml format which can be imported into Cytoscape."
+"Get a PK/PP, TF, X network defined by its Wₜ and Wₚ in .xgmml format which can be imported into Cytoscape."
 xgmml(Wₜ::Matrix, Wₚ::Matrix; title="net") = XGMML.xgmml(_graph(Wₜ, Wₚ; title=title))
 xgmml(Wₜ::Matrix, Wₚ::Matrix, X::Nothing; title="net") = xgmml(Wₜ, Wₚ; title=title)
 xgmml(net; title="net") = XGMML.xgmml(_graph(net; title=title))
