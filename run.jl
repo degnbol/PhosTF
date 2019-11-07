@@ -1,5 +1,5 @@
 #!/usr/bin/env julia
-include("../../PKTFX.jl")
+include("PKTFX.jl")
 tryrm(fname) = try rm(fname) catch IOError end
 
 nₜ, nₚ = 3, 3
