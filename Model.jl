@@ -8,15 +8,23 @@ using LinearAlgebra
 using Statistics: mean
 using Flux
 using ..ArrayUtils: eye
+import ..FluxUtils
 
-export offdiag
+export offdiag, random_W
 export sse, sse_B, sse_alt, sse_B_alt
 export l1, l_cas
 export _B, _B_alt, _T
+export lcas
 
 "A mask to remove diagonal of a matrix."
 function offdiag(matrix)
 	out = ones(size(matrix))
+	out[diagind(out)] .= 0
+	out
+end
+
+function random_W(n::Integer, m::Integer)
+	out = FluxUtils.random_weight(n::Int, m::Int)
 	out[diagind(out)] .= 0
 	out
 end
@@ -130,6 +138,33 @@ function sse_alt(cs::Constants, W::AbstractMatrix, X::Matrix, Ex::AbstractMatrix
 end
 
 l1(W::AbstractMatrix) = norm(W,1)
+
+
+function Ω(W::AbstractMatrix, i::Integer, j::Integer, modl)
+	n = size(W,1)
+	k = (1:n .!= i) .& (1:n .!= j)
+	if modl == 1
+		prod(1. .- (2 .* W[k,i] .* W[k,j] .- W[j,i]) ./ (abs.(W[k,i]) .+ abs.(W[k,j]))) # v1 sub
+	elseif modl == 2
+		prod(1. .- 2 .* W[k,i] .* W[k,j] ./ (abs.(W[k,i]) .+ abs.(W[k,j]) .+ abs.(W[j,i]))) # v1 div
+	elseif modl == 3
+		prod(1. .- (2 .* W[k,i] .* W[k,j] .- W[j,i]) ./ sqrt.(W[k,i] .^2 .+ W[k,j] .^2)) # v2 sub
+	elseif modl == 4
+		prod(1. .- 2 .* W[k,i] .* W[k,j] ./ sqrt.(W[k,i] .^2 .+ W[k,j] .^2 .+ W[j,i] .^2)) # v2 div
+	end
+end
+
+function Ω(W::AbstractMatrix)
+	n = size(W,1)
+	Ω.(Ref(W), 1:n, collect(1:n)')
+end
+
+function Ω(W::TrackedMatrix, modl)
+	n = size(W,1)
+	Tracker.collect(Ω.(Ref(W), 1:n, collect(1:n)', Ref(modl)))
+end
+
+lcas(W::AbstractMatrix, modl) = Ω(W, modl) .* W
 
 
 "Loss function for PK/PP cascades."
