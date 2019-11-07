@@ -1,16 +1,16 @@
 #!/usr/bin/env julia
 module ColorUtils
 using Colors
-# PerceptualColourMaps is using deprecated functions
-using PerceptualColourMaps
 include("MathUtils.jl"); using .MathUtils
+using DelimitedFiles: readdlm
 
 export divergent_lerp
 export lerp
 
-
-D7 = convert.(RGB, cmap("D7"))
-
+# Build D7 from PerceptualColourMaps. This was done and then it was saved to the file colormap_D7.txt
+# using PerceptualColourMaps # PerceptualColourMaps is using deprecated functions
+# D7 = convert.(RGB, cmap("D7"))
+D7 = [RGB(rgb...) for rgb in eachcol(readdlm(joinpath(@__DIR__, "colormap_D7.txt"), '\t'))]
 
 function divergent_lerp(v, min=-1, max=1, center=0; cmap=D7)
 	l = length(cmap)
