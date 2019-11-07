@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<graph label="infer" directed="1" cy:documentVersion="3.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:cy="http://www.cytoscape.org" xmlns="http://www.cs.rpi.edu/XGMML">
+	<att name="name" value="infer" type="string" cy:type="String"/>
+	<att name="__Annotations" value="[]" type="list" cy:type="List" cy:elementType="String"/>
+	<att name="shared name" value="infer" type="string" cy:type="String"/>
+	<graphics>
+		<att name="NETWORK_TITLE" value="infer" type="string" cy:type="String"/>
+		<att name="NETWORK_BACKGROUND_PAINT" value="#FFFFFF" type="string" cy:type="String"/>
+	</graphics>
+	<node id="1" label="PK1">
+		<att name="name" value="PK1" type="string" cy:type="String"/>
+		<att name="shared name" value="1" type="string" cy:type="String"/>
+		<graphics fill="#af6fb6" x="100" y="0" w="35.0" h="35.0" type="DIAMOND" width="0.0" outline="#000000">
+			<att name="NODE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="NODE_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="NODE_SELECTED_PAINT" value="#FFFF00" type="string" cy:type="String"/>
+			<att name="NODE_BORDER_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="NODE_LABEL_FONT_FACE" value="SansSerif,plain" type="string" cy:type="String"/>
+			<att name="NODE_LABEL" value="PK1" type="string" cy:type="String"/>
+			<att name="NODE_LABEL_FONT_SIZE" value="12" type="string" cy:type="String"/>
+			<att name="NODE_BORDER_STROKE" value="SOLID" type="string" cy:type="String"/>
+			<att name="NODE_LABEL_COLOR" value="#000000" type="string" cy:type="String"/>
+			<att name="NODE_TOOLTIP" value="" type="string" cy:type="String"/>
+		</graphics>
+	</node>
+	<node id="2" label="PK2">
+		<att name="name" value="PK2" type="string" cy:type="String"/>
+		<att name="shared name" value="2" type="string" cy:type="String"/>
+		<graphics fill="#af6fb6" x="200" y="0" w="35.0" h="35.0" type="DIAMOND" width="0.0" outline="#000000">
+			<att name="NODE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="NODE_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="NODE_SELECTED_PAINT" value="#FFFF00" type="string" cy:type="String"/>
+			<att name="NODE_BORDER_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="NODE_LABEL_FONT_FACE" value="SansSerif,plain" type="string" cy:type="String"/>
+			<att name="NODE_LABEL" value="PK2" type="string" cy:type="String"/>
+			<att name="NODE_LABEL_FONT_SIZE" value="12" type="string" cy:type="String"/>
+			<att name="NODE_BORDER_STROKE" value="SOLID" type="string" cy:type="String"/>
+			<att name="NODE_LABEL_COLOR" value="#000000" type="string" cy:type="String"/>
+			<att name="NODE_TOOLTIP" value="" type="string" cy:type="String"/>
+		</graphics>
+	</node>
+	<node id="3" label="PK3">
+		<att name="name" value="PK3" type="string" cy:type="String"/>
+		<att name="shared name" value="3" type="string" cy:type="String"/>
+		<graphics fill="#af6fb6" x="300" y="0" w="35.0" h="35.0" type="DIAMOND" width="0.0" outline="#000000">
+			<att name="NODE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="NODE_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="NODE_SELECTED_PAINT" value="#FFFF00" type="string" cy:type="String"/>
+			<att name="NODE_BORDER_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="NODE_LABEL_FONT_FACE" value="SansSerif,plain" type="string" cy:type="String"/>
+			<att name="NODE_LABEL" value="PK3" type="string" cy:type="String"/>
+			<att name="NODE_LABEL_FONT_SIZE" value="12" type="string" cy:type="String"/>
+			<att name="NODE_BORDER_STROKE" value="SOLID" type="string" cy:type="String"/>
+			<att name="NODE_LABEL_COLOR" value="#000000" type="string" cy:type="String"/>
+			<att name="NODE_TOOLTIP" value="" type="string" cy:type="String"/>
+		</graphics>
+	</node>
+	<node id="4" label="TF1">
+		<att name="name" value="TF1" type="string" cy:type="String"/>
+		<att name="shared name" value="4" type="string" cy:type="String"/>
+		<graphics fill="#86ac32" x="100" y="100" w="35.0" h="35.0" type="ELLIPSE" width="0.0" outline="#000000">
+			<att name="NODE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="NODE_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="NODE_SELECTED_PAINT" value="#FFFF00" type="string" cy:type="String"/>
+			<att name="NODE_BORDER_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="NODE_LABEL_FONT_FACE" value="SansSerif,plain" type="string" cy:type="String"/>
+			<att name="NODE_LABEL" value="TF1" type="string" cy:type="String"/>
+			<att name="NODE_LABEL_FONT_SIZE" value="12" type="string" cy:type="String"/>
+			<att name="NODE_BORDER_STROKE" value="SOLID" type="string" cy:type="String"/>
+			<att name="NODE_LABEL_COLOR" value="#000000" type="string" cy:type="String"/>
+			<att name="NODE_TOOLTIP" value="" type="string" cy:type="String"/>
+		</graphics>
+	</node>
+	<node id="5" label="TF2">
+		<att name="name" value="TF2" type="string" cy:type="String"/>
+		<att name="shared name" value="5" type="string" cy:type="String"/>
+		<graphics fill="#86ac32" x="200" y="100" w="35.0" h="35.0" type="ELLIPSE" width="0.0" outline="#000000">
+			<att name="NODE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="NODE_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="NODE_SELECTED_PAINT" value="#FFFF00" type="string" cy:type="String"/>
+			<att name="NODE_BORDER_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="NODE_LABEL_FONT_FACE" value="SansSerif,plain" type="string" cy:type="String"/>
+			<att name="NODE_LABEL" value="TF2" type="string" cy:type="String"/>
+			<att name="NODE_LABEL_FONT_SIZE" value="12" type="string" cy:type="String"/>
+			<att name="NODE_BORDER_STROKE" value="SOLID" type="string" cy:type="String"/>
+			<att name="NODE_LABEL_COLOR" value="#000000" type="string" cy:type="String"/>
+			<att name="NODE_TOOLTIP" value="" type="string" cy:type="String"/>
+		</graphics>
+	</node>
+	<node id="6" label="TF3">
+		<att name="name" value="TF3" type="string" cy:type="String"/>
+		<att name="shared name" value="6" type="string" cy:type="String"/>
+		<graphics fill="#86ac32" x="300" y="100" w="35.0" h="35.0" type="ELLIPSE" width="0.0" outline="#000000">
+			<att name="NODE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="NODE_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="NODE_SELECTED_PAINT" value="#FFFF00" type="string" cy:type="String"/>
+			<att name="NODE_BORDER_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="NODE_LABEL_FONT_FACE" value="SansSerif,plain" type="string" cy:type="String"/>
+			<att name="NODE_LABEL" value="TF3" type="string" cy:type="String"/>
+			<att name="NODE_LABEL_FONT_SIZE" value="12" type="string" cy:type="String"/>
+			<att name="NODE_BORDER_STROKE" value="SOLID" type="string" cy:type="String"/>
+			<att name="NODE_LABEL_COLOR" value="#000000" type="string" cy:type="String"/>
+			<att name="NODE_TOOLTIP" value="" type="string" cy:type="String"/>
+		</graphics>
+	</node>
+	<node id="7" label="X1">
+		<att name="name" value="X1" type="string" cy:type="String"/>
+		<att name="shared name" value="7" type="string" cy:type="String"/>
+		<graphics fill="#e6dd47" x="100" y="200" w="35.0" h="35.0" type="RECTANGLE" width="0.0" outline="#000000">
+			<att name="NODE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="NODE_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="NODE_SELECTED_PAINT" value="#FFFF00" type="string" cy:type="String"/>
+			<att name="NODE_BORDER_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="NODE_LABEL_FONT_FACE" value="SansSerif,plain" type="string" cy:type="String"/>
+			<att name="NODE_LABEL" value="X1" type="string" cy:type="String"/>
+			<att name="NODE_LABEL_FONT_SIZE" value="12" type="string" cy:type="String"/>
+			<att name="NODE_BORDER_STROKE" value="SOLID" type="string" cy:type="String"/>
+			<att name="NODE_LABEL_COLOR" value="#000000" type="string" cy:type="String"/>
+			<att name="NODE_TOOLTIP" value="" type="string" cy:type="String"/>
+		</graphics>
+	</node>
+	<edge id="1" label="" source="3" target="6" cy:directed="1">
+		<att name="name" value="" type="string" cy:type="String"/>
+		<att name="shared interaction" value="" type="string" cy:type="String"/>
+		<att name="weight" value="0.49091909200301986" type="string" cy:type="String"/>
+		<att name="interaction" value="" type="string" cy:type="String"/>
+		<att name="shared name" value="1" type="string" cy:type="String"/>
+		<graphics width="2.0" fill="#CAB867">
+			<att name="EDGE_TARGET_ARROW_UNSELECTED_PAINT" value="#CAB867" type="string" cy:type="String"/>
+			<att name="EDGE_CURVED" value="true" type="string" cy:type="String"/>
+			<att name="EDGE_LABEL_FONT_FACE" value="Dialog,plain" type="string" cy:type="String"/>
+			<att name="EDGE_VISIBLE" value="true" type="string" cy:type="String"/>
+			<att name="EDGE_SOURCE_ARROW_SHAPE" value="NONE" type="string" cy:type="String"/>
+			<att name="EDGE_TOOLTIP" value="" type="string" cy:type="String"/>
+			<att name="EDGE_TARGET_ARROW_SHAPE" value="CIRCLE" type="string" cy:type="String"/>
+			<att name="EDGE_SOURCE_ARROW_SELECTED_PAINT" value="#FFFF00" type="string" cy:type="String"/>
+			<att name="EDGE_SOURCE_ARROW_SIZE" value="6.0" type="string" cy:type="String"/>
+			<att name="EDGE_TARGET_ARROW_SELECTED_PAINT" value="#FFFF00" type="string" cy:type="String"/>
+			<att name="EDGE_STROKE_SELECTED_PAINT" value="#FFFF00" type="string" cy:type="String"/>
+			<att name="EDGE_TRANSPARENCY" value="126" type="string" cy:type="String"/>
+			<att name="EDGE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="EDGE_TARGET_ARROW_SIZE" value="6.0" type="string" cy:type="String"/>
+			<att name="EDGE_LABEL_FONT_SIZE" value="10" type="string" cy:type="String"/>
+			<att name="EDGE_LABEL" value="" type="string" cy:type="String"/>
+			<att name="EDGE_LINE_TYPE" value="SOLID" type="string" cy:type="String"/>
+			<att name="EDGE_SOURCE_ARROW_UNSELECTED_PAINT" value="#CAB867" type="string" cy:type="String"/>
+			<att name="EDGE_LABEL_COLOR" value="#000000" type="string" cy:type="String"/>
+		</graphics>
+	</edge>
+	<edge id="2" label="" source="4" target="1" cy:directed="1">
+		<att name="name" value="" type="string" cy:type="String"/>
+		<att name="shared interaction" value="" type="string" cy:type="String"/>
+		<att name="weight" value="0.8949000703355434" type="string" cy:type="String"/>
+		<att name="interaction" value="" type="string" cy:type="String"/>
+		<att name="shared name" value="2" type="string" cy:type="String"/>
+		<graphics width="2.0" fill="#F3DB2E">
+			<att name="EDGE_TARGET_ARROW_UNSELECTED_PAINT" value="#F3DB2E" type="string" cy:type="String"/>
+			<att name="EDGE_CURVED" value="true" type="string" cy:type="String"/>
+			<att name="EDGE_LABEL_FONT_FACE" value="Dialog,plain" type="string" cy:type="String"/>
+			<att name="EDGE_VISIBLE" value="true" type="string" cy:type="String"/>
+			<att name="EDGE_SOURCE_ARROW_SHAPE" value="NONE" type="string" cy:type="String"/>
+			<att name="EDGE_TOOLTIP" value="" type="string" cy:type="String"/>
+			<att name="EDGE_TARGET_ARROW_SHAPE" value="DELTA" type="string" cy:type="String"/>
+			<att name="EDGE_SOURCE_ARROW_SELECTED_PAINT" value="#FFFF00" type="string" cy:type="String"/>
+			<att name="EDGE_SOURCE_ARROW_SIZE" value="6.0" type="string" cy:type="String"/>
+			<att name="EDGE_TARGET_ARROW_SELECTED_PAINT" value="#FFFF00" type="string" cy:type="String"/>
+			<att name="EDGE_STROKE_SELECTED_PAINT" value="#FFFF00" type="string" cy:type="String"/>
+			<att name="EDGE_TRANSPARENCY" value="229" type="string" cy:type="String"/>
+			<att name="EDGE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="EDGE_TARGET_ARROW_SIZE" value="6.0" type="string" cy:type="String"/>
+			<att name="EDGE_LABEL_FONT_SIZE" value="10" type="string" cy:type="String"/>
+			<att name="EDGE_LABEL" value="" type="string" cy:type="String"/>
+			<att name="EDGE_LINE_TYPE" value="SOLID" type="string" cy:type="String"/>
+			<att name="EDGE_SOURCE_ARROW_UNSELECTED_PAINT" value="#F3DB2E" type="string" cy:type="String"/>
+			<att name="EDGE_LABEL_COLOR" value="#000000" type="string" cy:type="String"/>
+		</graphics>
+	</edge>
+	<edge id="3" label="" source="4" target="2" cy:directed="1">
+		<att name="name" value="" type="string" cy:type="String"/>
+		<att name="shared interaction" value="" type="string" cy:type="String"/>
+		<att name="weight" value="-0.795233389324879" type="string" cy:type="String"/>
+		<att name="interaction" value="" type="string" cy:type="String"/>
+		<att name="shared name" value="3" type="string" cy:type="String"/>
+		<graphics width="2.0" fill="#1431C1">
+			<att name="EDGE_TARGET_ARROW_UNSELECTED_PAINT" value="#1431C1" type="string" cy:type="String"/>
+			<att name="EDGE_CURVED" value="true" type="string" cy:type="String"/>
+			<att name="EDGE_LABEL_FONT_FACE" value="Dialog,plain" type="string" cy:type="String"/>
+			<att name="EDGE_VISIBLE" value="true" type="string" cy:type="String"/>
+			<att name="EDGE_SOURCE_ARROW_SHAPE" value="NONE" type="string" cy:type="String"/>
+			<att name="EDGE_TOOLTIP" value="" type="string" cy:type="String"/>
+			<att name="EDGE_TARGET_ARROW_SHAPE" value="T" type="string" cy:type="String"/>
+			<att name="EDGE_SOURCE_ARROW_SELECTED_PAINT" value="#FFFF00" type="string" cy:type="String"/>
+			<att name="EDGE_SOURCE_ARROW_SIZE" value="6.0" type="string" cy:type="String"/>
+			<att name="EDGE_TARGET_ARROW_SELECTED_PAINT" value="#FFFF00" type="string" cy:type="String"/>
+			<att name="EDGE_STROKE_SELECTED_PAINT" value="#FFFF00" type="string" cy:type="String"/>
+			<att name="EDGE_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="EDGE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="EDGE_TARGET_ARROW_SIZE" value="6.0" type="string" cy:type="String"/>
+			<att name="EDGE_LABEL_FONT_SIZE" value="10" type="string" cy:type="String"/>
+			<att name="EDGE_LABEL" value="" type="string" cy:type="String"/>
+			<att name="EDGE_LINE_TYPE" value="SOLID" type="string" cy:type="String"/>
+			<att name="EDGE_SOURCE_ARROW_UNSELECTED_PAINT" value="#1431C1" type="string" cy:type="String"/>
+			<att name="EDGE_LABEL_COLOR" value="#000000" type="string" cy:type="String"/>
+		</graphics>
+	</edge>
+	<edge id="4" label="" source="5" target="3" cy:directed="1">
+		<att name="name" value="" type="string" cy:type="String"/>
+		<att name="shared interaction" value="" type="string" cy:type="String"/>
+		<att name="weight" value="0.9963188465040409" type="string" cy:type="String"/>
+		<att name="interaction" value="" type="string" cy:type="String"/>
+		<att name="shared name" value="4" type="string" cy:type="String"/>
+		<graphics width="2.0" fill="#FDE409">
+			<att name="EDGE_TARGET_ARROW_UNSELECTED_PAINT" value="#FDE409" type="string" cy:type="String"/>
+			<att name="EDGE_CURVED" value="true" type="string" cy:type="String"/>
+			<att name="EDGE_LABEL_FONT_FACE" value="Dialog,plain" type="string" cy:type="String"/>
+			<att name="EDGE_VISIBLE" value="true" type="string" cy:type="String"/>
+			<att name="EDGE_SOURCE_ARROW_SHAPE" value="NONE" type="string" cy:type="String"/>
+			<att name="EDGE_TOOLTIP" value="" type="string" cy:type="String"/>
+			<att name="EDGE_TARGET_ARROW_SHAPE" value="DELTA" type="string" cy:type="String"/>
+			<att name="EDGE_SOURCE_ARROW_SELECTED_PAINT" value="#FFFF00" type="string" cy:type="String"/>
+			<att name="EDGE_SOURCE_ARROW_SIZE" value="6.0" type="string" cy:type="String"/>
+			<att name="EDGE_TARGET_ARROW_SELECTED_PAINT" value="#FFFF00" type="string" cy:type="String"/>
+			<att name="EDGE_STROKE_SELECTED_PAINT" value="#FFFF00" type="string" cy:type="String"/>
+			<att name="EDGE_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="EDGE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="EDGE_TARGET_ARROW_SIZE" value="6.0" type="string" cy:type="String"/>
+			<att name="EDGE_LABEL_FONT_SIZE" value="10" type="string" cy:type="String"/>
+			<att name="EDGE_LABEL" value="" type="string" cy:type="String"/>
+			<att name="EDGE_LINE_TYPE" value="SOLID" type="string" cy:type="String"/>
+			<att name="EDGE_SOURCE_ARROW_UNSELECTED_PAINT" value="#FDE409" type="string" cy:type="String"/>
+			<att name="EDGE_LABEL_COLOR" value="#000000" type="string" cy:type="String"/>
+		</graphics>
+	</edge>
+	<edge id="5" label="" source="6" target="7" cy:directed="1">
+		<att name="name" value="" type="string" cy:type="String"/>
+		<att name="shared interaction" value="" type="string" cy:type="String"/>
+		<att name="weight" value="0.49994036546415677" type="string" cy:type="String"/>
+		<att name="interaction" value="" type="string" cy:type="String"/>
+		<att name="shared name" value="5" type="string" cy:type="String"/>
+		<graphics width="2.0" fill="#CBB966">
+			<att name="EDGE_TARGET_ARROW_UNSELECTED_PAINT" value="#CBB966" type="string" cy:type="String"/>
+			<att name="EDGE_CURVED" value="true" type="string" cy:type="String"/>
+			<att name="EDGE_LABEL_FONT_FACE" value="Dialog,plain" type="string" cy:type="String"/>
+			<att name="EDGE_VISIBLE" value="true" type="string" cy:type="String"/>
+			<att name="EDGE_SOURCE_ARROW_SHAPE" value="NONE" type="string" cy:type="String"/>
+			<att name="EDGE_TOOLTIP" value="" type="string" cy:type="String"/>
+			<att name="EDGE_TARGET_ARROW_SHAPE" value="DELTA" type="string" cy:type="String"/>
+			<att name="EDGE_SOURCE_ARROW_SELECTED_PAINT" value="#FFFF00" type="string" cy:type="String"/>
+			<att name="EDGE_SOURCE_ARROW_SIZE" value="6.0" type="string" cy:type="String"/>
+			<att name="EDGE_TARGET_ARROW_SELECTED_PAINT" value="#FFFF00" type="string" cy:type="String"/>
+			<att name="EDGE_STROKE_SELECTED_PAINT" value="#FFFF00" type="string" cy:type="String"/>
+			<att name="EDGE_TRANSPARENCY" value="128" type="string" cy:type="String"/>
+			<att name="EDGE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
+			<att name="EDGE_TARGET_ARROW_SIZE" value="6.0" type="string" cy:type="String"/>
+			<att name="EDGE_LABEL_FONT_SIZE" value="10" type="string" cy:type="String"/>
+			<att name="EDGE_LABEL" value="" type="string" cy:type="String"/>
+			<att name="EDGE_LINE_TYPE" value="SOLID" type="string" cy:type="String"/>
+			<att name="EDGE_SOURCE_ARROW_UNSELECTED_PAINT" value="#CBB966" type="string" cy:type="String"/>
+			<att name="EDGE_LABEL_COLOR" value="#000000" type="string" cy:type="String"/>
+		</graphics>
+	</edge>
+</graph>
