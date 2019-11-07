@@ -144,11 +144,11 @@ function Ω(W::AbstractMatrix, i::Integer, j::Integer, modl)
 	n = size(W,1)
 	k = (1:n .!= i) .& (1:n .!= j)
 	if modl == 1
-		prod(1. .- (2 .* W[k,i] .* W[k,j] .- W[j,i]) ./ (abs.(W[k,i]) .+ abs.(W[k,j]))) # v1 sub
+		prod(1. .- (2 .* W[k,i] .* W[k,j] .- abs.(W[j,i])) ./ (abs.(W[k,i]) .+ abs.(W[k,j]))) # v1 sub
 	elseif modl == 2
 		prod(1. .- 2 .* W[k,i] .* W[k,j] ./ (abs.(W[k,i]) .+ abs.(W[k,j]) .+ abs.(W[j,i]))) # v1 div
 	elseif modl == 3
-		prod(1. .- (2 .* W[k,i] .* W[k,j] .- W[j,i]) ./ sqrt.(W[k,i] .^2 .+ W[k,j] .^2)) # v2 sub
+		prod(1. .- (2 .* W[k,i] .* W[k,j] .- abs.(W[j,i])) ./ sqrt.(W[k,i] .^2 .+ W[k,j] .^2)) # v2 sub
 	elseif modl == 4
 		prod(1. .- 2 .* W[k,i] .* W[k,j] ./ sqrt.(W[k,i] .^2 .+ W[k,j] .^2 .+ W[j,i] .^2)) # v2 div
 	end

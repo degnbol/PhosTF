@@ -28,22 +28,18 @@ loss2 = [
 
 
 loss = [
-	(X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + l1(lcas(W′, 1)),
-	(X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + l1(lcas(W′, 2)),
-	(X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + l1(lcas(W′, 3)),
-	(X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + l1(lcas(W′, 4)),
-	(X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + .1l1(lcas(W′, 1)),
-	(X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + .1l1(lcas(W′, 2)),
-	(X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + .1l1(lcas(W′, 3)),
-	(X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + .1l1(lcas(W′, 4)),
+	# (X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + l1(lcas(W′, 2)),
+	# (X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + l1(lcas(W′, 4)),
+	# (X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + .1l1(lcas(W′, 2)),
+	# (X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + .1l1(lcas(W′, 4)),
 	(X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + l1(lcas(W′, 1)*Iₚ) + l1(W*(I(size(W,1)) - Iₚ)),
-	(X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + l1(lcas(W′, 2)*Iₚ) + l1(W*(I(size(W,1)) - Iₚ)),
+	# (X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + l1(lcas(W′, 2)*Iₚ) + l1(W*(I(size(W,1)) - Iₚ)),
 	(X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + l1(lcas(W′, 3)*Iₚ) + l1(W*(I(size(W,1)) - Iₚ)),
-	(X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + l1(lcas(W′, 4)*Iₚ) + l1(W*(I(size(W,1)) - Iₚ)),
+	# (X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + l1(lcas(W′, 4)*Iₚ) + l1(W*(I(size(W,1)) - Iₚ)),
 	(X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + l1(Iₚ*lcas(W′, 1)*Iₚ) + l1(W - Iₚ*W*Iₚ),
-	(X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + l1(Iₚ*lcas(W′, 2)*Iₚ) + l1(W - Iₚ*W*Iₚ),
+	# (X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + l1(Iₚ*lcas(W′, 2)*Iₚ) + l1(W - Iₚ*W*Iₚ),
 	(X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + l1(Iₚ*lcas(W′, 3)*Iₚ) + l1(W - Iₚ*W*Iₚ),
-	(X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + l1(Iₚ*lcas(W′, 4)*Iₚ) + l1(W - Iₚ*W*Iₚ),
+	# (X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + l1(Iₚ*lcas(W′, 4)*Iₚ) + l1(W - Iₚ*W*Iₚ),
 ]
 
 
