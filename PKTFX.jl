@@ -249,19 +249,19 @@ end
 Infer a weight matrix from logFC data.
 - WT_prior/WP_prior: optionally limit Wₜ/Wₚ if they are partially known.
 """
-@main function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; WT_prior=nothing, WP_prior=nothing, epochs::Integer=30000, lambda::AbstractFloat=.1, conf=1)
+@main function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; WT_prior=nothing, WP_prior=nothing, epochs::Integer=5000, lambda::Real=10)
 	X = loaddlm(X, Float64)
 	M, S = _priors(WT_prior, WP_prior, size(X,1), nₜ, nₚ)
-	W = Inference.infer(X, nₜ, nₚ; epochs=epochs, λ=lambda, M=M, S=S, conf=conf)
+	W = Inference.infer(X, nₜ, nₚ; epochs=epochs, λ=lambda, M=M, S=S)
 	Wₜ, Wₚ = Model.WₜWₚ(W, nₜ, nₚ)
 	savedlm(ot, Wₜ)
 	savedlm(op, Wₚ)
 end
-@main function inferB(B_LLC, nₚ::Integer, ot="WT_inferB.mat", op="WP_inferB.mat"; WT_prior=nothing, WP_prior=nothing, epochs::Integer=30000, lambda::AbstractFloat=.1, conf=1)
+@main function inferB(B_LLC, nₚ::Integer, ot="WT_inferB.mat", op="WP_inferB.mat"; WT_prior=nothing, WP_prior=nothing, epochs::Integer=5000, lambda::Real=.1)
 	B_LLC = loaddlm(B_LLC, Float64)
 	nₚₜ = size(B_LLC,1); nₜ = nₚₜ-nₚ
 	M, S = _priors(WT_prior, WP_prior, nₚₜ, nₜ, nₚ)
-	W = Inference.infer_B(B_LLC, nₚ; epochs=epochs, λ=lambda, M=M, S=S, conf=conf)
+	W = Inference.infer_B(B_LLC, nₚ; epochs=epochs, λ=lambda, M=M, S=S)
 	Wₜ, Wₚ = Model.WₜWₚ(W, nₜ, nₚ)
 	savedlm(ot, Wₜ)
 	savedlm(op, Wₚ)

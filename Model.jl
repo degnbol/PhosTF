@@ -11,10 +11,10 @@ using ..ArrayUtils: eye
 import ..FluxUtils
 
 export offdiag, random_W
-export sse, sse_B, sse_alt, sse_B_alt
+export sse, sse_B
 export l1, l_cas
-export _B, _B_alt, _T
-export lcas
+export _B, _T
+export l_sim, l_cas
 
 "A mask to remove diagonal of a matrix."
 function offdiag(matrix)
@@ -83,21 +83,9 @@ Iₜ(n::Integer, nₜ::Integer, nₚ::Integer) = diagm([[0 for _ in 1:nₚ]; [1 
 _B(cs::Constants, W::AbstractMatrix) = (W.*cs.Mₜ) * inv(I(size(W,1)) - W.*cs.Mₚ)
 "To avoid finding inverse matrix, we can instead solve if given the x in B^-1 * x"
 _B(cs::Constants, W::AbstractMatrix, x) = (W.*cs.Mₜ) * ((I(size(W,1)) - W.*cs.Mₚ) \ x)
-function _B_alt(cs::Constants, W::AbstractMatrix)
-	wt = W.*cs.Mₜ
-	wp = W.*cs.Mₚ
-	i = I(size(W,1))
-	(i - wp) * (wp+wt) * (i - wp)^-1
-end
-function _B_alt(cs::Constants, W::AbstractMatrix, x)
-	wt = W.*cs.Mₜ
-	wp = W.*cs.Mₚ
-	i = I(size(W,1))
-	(i - wp) * (wp+wt) * ((i - wp) \ x)
-end
+
 
 _T(B) = (I(size(B,1)) - (B.*offdiag(B))) \ B
-_T_alt(B) = (I(size(B,1)) - B) \ B
 
 """
 - cs: struct containing the constants Mₜ, Mₚ, and U
@@ -112,52 +100,22 @@ end
 Loss function to train parameters in W to result in a B that is as similar to a solution to B from LLC method (Eberhardt).
 """
 sse_B(cs::Constants, W::AbstractMatrix, B_LLC::Matrix) = sum((_B(cs,W) .- B_LLC).^2)
-sse_B_alt(cs::Constants, W::AbstractMatrix, B_LLC::Matrix) = sum((_B_alt(cs,W) .- B_LLC).^2)
-"""
-SSE made to separate loss on Ex and Ey from overall SSE.
-- Ex: error term specifically for x
-- Ey: error term specifically for y
-"""
-function sse(cs::Constants, W::AbstractMatrix, X::Matrix, Ex::AbstractMatrix, Ey::AbstractMatrix)
-	# K = size(X,2)
-	# Ex = repeat(Ex, outer=(1, K))
-	# Ey = repeat(Ey, outer=(1, K))
-	E = X .- (_B(cs,W,X + Ey) .+ Ex)
-	sum((cs.U .* E).^2)
-end
-function sse_alt(cs::Constants, W::AbstractMatrix, X::Matrix)
-	E = X .- _B_alt(cs,W,X)
-	sum((cs.U .* E).^2)
-end
-function sse_alt(cs::Constants, W::AbstractMatrix, X::Matrix, Ex::AbstractMatrix, Ey::AbstractMatrix)
-	# K = size(X,2)
-	# Ex = repeat(Ex, outer=(1, K))
-	# Ey = repeat(Ey, outer=(1, K))
-	E = X .- (_B_alt(cs,W,X + Ey) .+ Ex)
-	sum((cs.U .* E).^2)
-end
 
 l1(W::AbstractMatrix) = norm(W,1)
 
 
-function Ω(W::AbstractMatrix, i::Integer, j::Integer, modl)
-	n = size(W,1)
-	k = (1:n .!= i) .& (1:n .!= j)
-	prod(1. .- W[k,i] .* (W[k,j] .+ W[i,j]) ./ (abs.(W[k,i]) .+ abs.(W[k,j])))
+function Ω(W::AbstractMatrix, i::Integer, j::Integer, steepness::Real)
+	similarity = sum(W[:,i] .* W[:,j])
+	2.0σ(-steepness*similarity)
 end
 
-function Ω(W::AbstractMatrix)
+function Ω(W::AbstractMatrix; steepness::Real=10)
 	n = size(W,1)
-	Ω.(Ref(W), 1:n, collect(1:n)')
+	Ω.(Ref(W), 1:n, collect(1:n)', Ref(steepness))
 end
+Ω(W::TrackedMatrix, steepness::Real) = Tracker.collect(Ω(W; steepness=steepness))
 
-function Ω(W::TrackedMatrix, modl)
-	n = size(W,1)
-	Tracker.collect(Ω.(Ref(W), 1:n, collect(1:n)', Ref(modl)))
-end
-
-lcas(W::AbstractMatrix, modl) = Ω(W, modl) .* W
-
+l_sim(W::AbstractMatrix, steepness::Real) = Ω(W, steepness) .* W
 
 "Loss function for PK/PP cascades."
 l_cas(W::AbstractMatrix, Iₜ::AbstractMatrix, Iₚ::AbstractMatrix) = sum((I(size(W,1)) - (abs.(W)*Iₚ)') \ vec(sum(Iₜ,dims=2)))

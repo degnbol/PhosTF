@@ -13,32 +13,16 @@ using Formatting
 
 "W is the param weight matrix, W′ is the masked version where untrainable entries are set to zero."
 L1(X, W, W′, cs, λ::Real) = sse(cs, W′, X) + λ*l1(W)
-L1(X, W, W′, Ex, Ey, cs, λ::Real) = sse(cs, W′, X, Ex, Ey) + λ*l1(W)
-L1_alt(X, W, W′, cs, λ::Real) = sse_alt(cs, W′, X) + λ*l1(W)
-L1_alt(X, W, W′, Ex, Ey, cs, λ::Real) = sse_alt(cs, W′, X, Ex, Ey) + λ*l1(W)
-
-loss1 = [
-	(X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + l1(lcas(W)*(.1Iₜ + Iₚ)) + l1((I(size(W,1))-(Iₜ+Iₚ))*W*Iₜ),
-	(X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + l1(lcas(W)*(Iₜ + Iₚ)) + l1((I(size(W,1))-(Iₜ+Iₚ))*W*Iₜ),
-]
-loss2 = [
-	(X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + .1l1(W*Iₜ) + l1(lcas(W)*Iₚ) + l1((I(size(W,1))-(Iₜ+Iₚ))*W*Iₜ),
-	(X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + .001l1(W*Iₜ) + l1(lcas(W)*Iₚ) + l1((I(size(W,1))-(Iₜ+Iₚ))*W*Iₜ),
-]
-
-
-loss = [
-	# (X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + l1(lcas(W′, 1)),
-	(X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + l1(lcas(W′, 1)*Iₚ) + l1(W*(I(size(W,1)) - Iₚ)),
-	(X, W, W′, cs, Iₜ, Iₚ, λ::Real) -> sse(cs, W′, X) + l1(Iₚ*lcas(W′, 1)*Iₚ) + l1(W - Iₚ*W*Iₚ),
-]
+Lsim(X, W′, cs, λ::Real) = sse(cs, W′, X) + l1(l_sim(W′, λ))
+Lcas(X, W′, cs, λ::Real, Iₜ, Iₚ) = sse(cs, W′, X) + l_cas(W′, Iₜ, Iₚ)
+loss(X, W′, cs, λ, Iₓ) = Lsim(X, W′, cs, λ) + l1(Iₓ*W)
 
 
 """
 - throttle: seconds between prints
 - opt: ADAMW or maybe NADAM
 """
-function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=10000, λ=.1, throttle=5, opt=ADAMW(), M=nothing, S=nothing, conf=0)
+function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=10000, λ::Real=10, throttle=5, opt=ADAMW(), M=nothing, S=nothing)
 	n, K = size(X)
 	if M === nothing M = ones(n, n) end # no prior knowledge
 	M[diagind(M)] .= 0  # enforce no self loops
@@ -46,8 +30,9 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 	W = param(random_W(n, n))
 	Iₜ = Model.Iₜ(n, nₜ, nₚ)
 	Iₚ = Model.Iₚ(n, nₜ, nₚ)
+	Iₓ = I(size(W,1)) - (Iₜ+Iₚ)
 
-	L(X) = loss[conf](X, W, Model.apply_priors(W, M, S), cs, Iₜ, Iₚ, λ)
+	L(X) = loss(X, Model.apply_priors(W, M, S), cs, λ, Iₓ)
 	
 	function cb()
 		l = L(X)
@@ -68,7 +53,7 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 	Model.apply_priors(W, nothing, S)
 end
 
-function infer_B(B_LLC::AbstractMatrix, nₚ::Integer; epochs::Integer=10000, λ=.1, throttle=5, opt=ADAMW(), M=nothing, S=nothing, conf=1)
+function infer_B(B_LLC::AbstractMatrix, nₚ::Integer; epochs::Integer=10000, λ::Real=.1, throttle=5, opt=ADAMW(), M=nothing, S=nothing)
 	nₚₜ, K = size(B_LLC); nₜ = nₚₜ-nₚ
 	cs = Model.Constants(nₚₜ, nₜ, nₚ, K)
 	W = param(random_W(nₚₜ, nₚₜ))
@@ -77,7 +62,7 @@ function infer_B(B_LLC::AbstractMatrix, nₚ::Integer; epochs::Integer=10000, λ
 	Iₜ = Model.Iₜ(nₚₜ, nₜ, nₚ)
 	Iₚ = Model.Iₚ(nₚₜ, nₜ, nₚ)
 
-	L(B_LLC) = loss_B_alt[conf](B_LLC, W, Model.apply_priors(W, M, S), cs, Iₜ, Iₚ, λ)
+	L(B_LLC) = loss_B(B_LLC, W, Model.apply_priors(W, M, S), cs, Iₜ, Iₚ, λ)
 	
 	function cb()
 		l = L(B_LLC)
