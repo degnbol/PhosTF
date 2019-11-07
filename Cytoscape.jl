@@ -79,10 +79,8 @@ end
 
 function xgmml_edges(Wₜ::Matrix, Wₚ::Matrix)
 	nₚ = size(Wₚ,2)
-	min_weight = minimum([minimum(Wₜ), minimum(Wₚ)])
-	max_weight = maximum([maximum(Wₜ), maximum(Wₚ)])
-	color(weight) = "#" * hex(divergent_lerp(weight, min_weight, max_weight))
-	opacity(weight) = divergent(weight, min_weight, max_weight) |> abs |> to256
+	color(weight) = "#" * hex(divergent_lerp(weight, -1, 1))
+	opacity(weight) = divergent(weight, -1, 1) |> abs |> to256
 	T_arrow(weight) = weight >= 0 ? "DELTA" : "T"
 	P_arrow(weight) = weight >= 0 ? "CIRCLE" : "SQUARE"
 
