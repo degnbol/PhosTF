@@ -1,5 +1,5 @@
-#!/usr/bin/env julia
 if !isdefined(Main, :ArrayUtils) include("../utilities/ArrayUtils.jl") end
+include("phos_edges.jl")
 
 """
 Network struct containing genes for simulation.
@@ -25,31 +25,42 @@ struct Network
 	p₀::Vector{Float64}
 	ϕ₀::Vector{Float64}
 	phos_activation::BitVector # size nₜ+nₚ
-	function Network(genes::Vector{Gene}, Wₚ::Matrix{<:AbstractFloat}, n::Integer, nₜ::Integer, nₚ::Integer, max_transcription::Vector{<:AbstractFloat}, max_translation::Vector{<:AbstractFloat}, λ_mRNA::Vector{<:AbstractFloat}, λ_prot::Vector{<:AbstractFloat}, λ_phos::Vector{<:AbstractFloat}, r₀::Vector{<:AbstractFloat}, p₀::Vector{<:AbstractFloat}, ϕ₀::Vector{<:AbstractFloat}, phos_activation::BitVector)
+	function Network(genes::Vector{Gene}, Wₚ::Matrix{<:AbstractFloat}, n::Integer, nₜ::Integer, nₚ::Integer, 
+		max_transcription::Vector{<:AbstractFloat}, max_translation::Vector{<:AbstractFloat}, 
+		λ_mRNA::Vector{<:AbstractFloat}, λ_prot::Vector{<:AbstractFloat}, λ_phos::Vector{<:AbstractFloat}, 
+		r₀::Vector{<:AbstractFloat}, p₀::Vector{<:AbstractFloat}, ϕ₀::Vector{<:AbstractFloat}, phos_activation::BitVector)
 		new(genes, WₚₖWₚₚ(Wₚ)..., n, n-(nₜ+nₚ), nₜ, nₚ, max_transcription, max_translation, λ_mRNA, λ_prot, λ_phos, r₀, p₀, ϕ₀, phos_activation)
 	end
-	function Network(genes::Vector{Gene}, Wₚ::Vector{<:AbstractFloat}, n::Integer, nₜ::Integer, nₚ::Integer, max_transcription::Vector{<:AbstractFloat}, max_translation::Vector{<:AbstractFloat}, λ_mRNA::Vector{<:AbstractFloat}, λ_prot::Vector{<:AbstractFloat}, λ_phos::Vector{<:AbstractFloat}, r₀::Vector{<:AbstractFloat}, p₀::Vector{<:AbstractFloat}, ϕ₀::Vector{<:AbstractFloat}, phos_activation::BitVector)
+	function Network(genes::Vector{Gene}, Wₚ::Vector{<:AbstractFloat}, n::Integer, nₜ::Integer, nₚ::Integer, 
+		max_transcription::Vector{<:AbstractFloat}, max_translation::Vector{<:AbstractFloat}, 
+		λ_mRNA::Vector{<:AbstractFloat}, λ_prot::Vector{<:AbstractFloat}, λ_phos::Vector{<:AbstractFloat}, 
+		r₀::Vector{<:AbstractFloat}, p₀::Vector{<:AbstractFloat}, ϕ₀::Vector{<:AbstractFloat}, phos_activation::BitVector)
 		Wₚ = reshape(Wₚ, (nₚ+nₜ,nₚ))  # un-flatten matrix
 		new(genes, WₚₖWₚₚ(Wₚ)..., n, n-(nₜ+nₚ), nₜ, nₚ, max_transcription, max_translation, λ_mRNA, λ_prot, λ_phos, r₀, p₀, ϕ₀, phos_activation)
 	end
-	function Network(genes::Vector{Gene}, Wₚ::Matrix{Float64})
-		n, nₚ = length(genes), size(Wₚ, 2)
-		nₜ = size(Wₚ, 1) - nₚ
+	function Network(genes::Vector{Gene}, Wₚ::Matrix{<:Integer})
+		phos_activation=vec(init_phos_activation(Wₚ))
+		λ_phos = random_λ(size(Wₚ,1))
+		Network(genes, init_phos_edges(genes, Wₚ, phos_activation, λ_phos)..., phos_activation, λ_phos)
+	end
+	"""
+	Make sure to be exact about using either integer or float for Wₚ 
+	since a matrix of floats {-1.,0.,1.} will be seen as the exact edge values and not indication of repression, activation, etc.
+	"""
+	Network(genes::Vector{Gene}, Wₚ::Matrix{<:AbstractFloat}) = Network(genes, WₚₖWₚₚ(Wₚ)..., vec(init_phos_activation(Wₚ)), random_λ(size(Wₚ,1)))
+	function Network(genes::Vector{Gene}, Wₚₖ::Matrix{<:AbstractFloat}, Wₚₚ::Matrix{<:AbstractFloat}, phos_activation::BitVector, λ_phos::Vector)
+		n, nₚ = length(genes), size(Wₚₖ,2)
+		nₜ = size(Wₚₖ, 1) - nₚ
 		@assert n >= nₜ + nₚ
-		
-		Wₚₖ, Wₚₚ = WₚₖWₚₚ(Wₚ)
 		# In the non-dimensionalized model, max_transcription == λ_mRNA and max_translation == λ_prot
 		max_transcription = λ_mRNA = random_λ(n)
 		max_translation = λ_prot = random_λ(n)
-		λ_phos = random_λ(nₜ+nₚ)
 		r₀ = initial_r(max_transcription, λ_mRNA, genes)
 		p₀ = initial_p(max_translation, λ_prot, r₀)
 		ϕ₀ = initial_ϕ(Wₚₖ, Wₚₚ, λ_phos, p₀[1:nₜ+nₚ])
-		# activated by phosphorylation if there is kinase regulation on a protein (and more kinases than phosphatases)
-		phos_activation = vec(sum(Wₚ, dims=2)) .> 0
 		new(genes, Wₚₖ, Wₚₚ, n, n-(nₜ+nₚ), nₜ, nₚ, max_transcription, max_translation, λ_mRNA, λ_prot, λ_phos, r₀, p₀, ϕ₀, phos_activation)
 	end
-	function Network(Wₜ::Matrix, Wₚ::Matrix{Float64})
+	function Network(Wₜ::Matrix, Wₚ::Matrix)
 		nₚ = size(Wₚ,2)
 		# == 0 → no edge, > 0 → activator, < 0 → repressor.
 		# .+ nₚ because the indexes among all proteins referring to TFs starts after PKs
@@ -64,16 +75,18 @@ struct Network
 	"""
 	Create a mutant by making a copy of a wildtype network and changing the max transcription level of 1 or more genes.
 	"""
-	function Network(net::Network, mutate::Integer, value=1e-7)
+	function Network(net::Network, mutate::Integer, value=1e-5)
 		max_transcription = copy(net.max_transcription)
 		max_transcription[mutate] = value
-		new(net.genes, net.Wₚₖ, net.Wₚₚ, net.n, net.n-(net.nₜ+net.nₚ), net.nₜ, net.nₚ, max_transcription, net.max_translation, net.λ_mRNA, net.λ_prot, net.λ_phos, net.r₀, net.p₀, net.ϕ₀, net.phos_activation)
+		new(net.genes, net.Wₚₖ, net.Wₚₚ, net.n, net.n-(net.nₜ+net.nₚ), net.nₜ, net.nₚ, max_transcription, net.max_translation, 
+			net.λ_mRNA, net.λ_prot, net.λ_phos, net.r₀, net.p₀, net.ϕ₀, net.phos_activation)
 	end
-	function Network(net::Network, mutate::AbstractVector, value=1e-7)
+	function Network(net::Network, mutate::AbstractVector, value=1e-5)
 		max_transcription = copy(net.max_transcription)
 		mutatable = @view max_transcription[1:net.nₚ+net.nₜ]
 		mutatable[mutate] .= value
-		new(net.genes, net.Wₚₖ, net.Wₚₚ, net.n, net.n-(net.nₜ+net.nₚ), net.nₜ, net.nₚ, max_transcription, net.max_translation, net.λ_mRNA, net.λ_prot, net.λ_phos, net.r₀, net.p₀, net.ϕ₀, net.phos_activation)
+		new(net.genes, net.Wₚₖ, net.Wₚₚ, net.n, net.n-(net.nₜ+net.nₚ), net.nₜ, net.nₚ, max_transcription, net.max_translation, 
+			net.λ_mRNA, net.λ_prot, net.λ_phos, net.r₀, net.p₀, net.ϕ₀, net.phos_activation)
 	end
 	
 	"""
@@ -83,6 +96,9 @@ struct Network
 	"""
 	random_λ(n) = log(2) ./ rand(random_t½(), n)
 	random_t½() = TruncNormal(5, 50)
+	
+	"Activated by phosphorylation if there is phos regulation on a protein (and at least as many kinases as phosphatases)"
+	init_phos_activation(Wₚ::Matrix) = (sum(abs.(Wₚ), dims=2) .> 0) .& (sum(Wₚ, dims=2) .>= 0)
 	
 	"""
 	Initial mRNA. Estimated as
@@ -116,8 +132,8 @@ end
 Base.show(io::IO, net::Network) = print(io, "Network(n=$(net.n), nₜ=$(net.nₜ), nₚ=$(net.nₚ))")
 
 function WₚₖWₚₚ(Wₚ::AbstractMatrix)
-	Wₚₖ = +Wₚ; Wₚₖ[Wₚₖ .< 0] .= 0
-	Wₚₚ = -Wₚ; Wₚₚ[Wₚₚ .< 0] .= 0
+	Wₚₖ = +Wₚ; Wₚₖ[Wₚₖ .<= 0] .= 0
+	Wₚₚ = -Wₚ; Wₚₚ[Wₚₚ .<= 0] .= 0
 	Wₚₖ, Wₚₚ
 end
 

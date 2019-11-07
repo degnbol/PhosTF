@@ -7,7 +7,7 @@ Structs with data defining a gene regulation network and its regulation mechanis
 module GeneRegulation
 using Statistics: mean
 import JSON3
-import ..Model: nₓnₜnₚ
+import ..Model: nₓnₜnₚ, WₜWₚ
 
 export Network, Gene
 export drdt, dpdt, dϕdt
@@ -15,12 +15,14 @@ export nₓnₜnₚ, estimate_Wₜ
 
 
 const weak_activation = .25
+const strong_activation = .9
 const noise_activation = .25weak_activation
 
 
 include("regulatory_module.jl")
 include("gene.jl")
 include("network.jl")
+include("phos_edges.jl")
 
 # define struct types for JSON3 to be able to read/write them
 JSON3.StructType(::Type{RegulatoryModule}) = JSON3.Struct()

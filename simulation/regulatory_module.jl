@@ -1,4 +1,3 @@
-#!/usr/bin/env julia
 if !isdefined(Main, :ArrayUtils) include("../utilities/ArrayUtils.jl") end
 using Distributions: Uniform, TruncatedNormal
 
@@ -39,7 +38,7 @@ struct RegulatoryModule
 	"""
 	Dissociation constant k for each input protein.
 	"""
-	random_k(n::Integer) = rand(Uniform(.01, 1.), n)
+	random_k(n::Integer) = rand(Uniform(.05, .7), n) # GNW uses (.01, 1.)
 	function random_inhibitor(n_activators, n_repressors)
 		n_activators == n_repressors ? rand([true, false]) : n_activators < n_repressors
 	end

@@ -1,4 +1,3 @@
-#!/usr/bin/env julia
 include("../utilities/ArrayUtils.jl") # different scope, have to re-include
 using Distributions: TruncatedNormal
 using .ArrayUtils: TruncNormal, binary
@@ -13,8 +12,8 @@ states(n) = (binary(i-1, n) for i in 1:2^n)
 Gene struct for gene regulation simulation.
 """
 struct Gene
-	modules::Vector{RegulatoryModule}
-	α::Vector{Float64}
+	modules::Vector{RegulatoryModule} # regulatory modules regulating this gene
+	α::Vector{Float64} # values associated with each state of regulation
 	# constructor for JSON3
 	Gene(modules::Vector{RegulatoryModule}, α::Vector{<:AbstractFloat}) = new(modules, α)
 	function Gene(activators::Vector{<:Integer}, repressors::Vector{<:Integer})
@@ -60,9 +59,9 @@ struct Gene
 		α_max = α₀ + sum(α′_enhancer)
 		α_min = α₀ + sum(α′_inhibitor)
 		# if there are ≥1 activators then
-		# make sure that activation α ≥ 1 in the maximally activated state.
+		# make sure that activation α ≥ random_high_α in the maximally activated state. In GNW it was 1 instead of random high α
 		if n_modules > n_inhibitors && α_max < 1
-			α′_enhancer[argmin(α′_enhancer)] += 1 - α_max
+			α′_enhancer[argmin(α′_enhancer)] += random_high_α₀() - α_max
 		end
 		# if there are ≥1 repressors then
 		# make sure that activation α ∈ [0,weak_activation] in the maximally repressed state.
@@ -85,8 +84,10 @@ struct Gene
 		elseif n_inhibitors == 0 return random_low_α₀()
 		else return random_medium_α₀() end
 	end
-	random_low_α₀() = rand(TruncatedNormal(0., weak_activation, 0., .05))
+	"GNW has both used (0,.05,0,weak) and (.001,.05,.001,weak)"
+	random_low_α₀()    = rand(TruncatedNormal(.05, .05, .01, weak_activation))
 	random_medium_α₀() = rand(TruncNormal(weak_activation, 1. - weak_activation))
+	random_high_α₀()   = rand(TruncNormal(strong_activation, 1.))
 end
 
 function Base.show(io::IO, g::Gene)
