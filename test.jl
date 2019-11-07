@@ -1,29 +1,32 @@
 #!/usr/bin/env julia
-cd("testdata/data_cas")
-tryrm(fname) = try rm(fname) catch IOError end
-include("../../utilities/UnitTest.jl")
-include("../../PKTFX.jl")
-
+cd("testdata/pres18c")
+cd("../data_cas")
 nₜ, nₚ = 3, 3
 
-# PKTFX.network()
+
+tryrm(fname) = try rm(fname) catch IOError end
+# include("../../utilities/UnitTest.jl")
+include("../../PKTFX.jl")
+
+PKTFX.network()
 # PKTFX.xgmml(o="net.xgmml")
 
-# PKTFX.simulate()
-# PKTFX.plot(o="tmp.pdf")
+PKTFX.simulate()
+PKTFX.simulate(2)
+PKTFX.simulate(4)
 
 # PKTFX.steadystate()
 # PKTFX.xgmml(X=["steady_r.mat", "steady_p.mat", "steady_phi.mat"], o="steady.xgmml")
 
-# tryrm("X_sim.mat"); PKTFX.logFC(o="X_sim.mat")
-# tryrm("sim.xgmml"); PKTFX.xgmml(X="X_sim.mat", o="sim.xgmml")
-# PKTFX.swapPT("X_sim.mat", "X_sim_TP.mat"; n1=3, n2=3) # in case you wanna use the python code
+tryrm("X_sim.mat"); PKTFX.logFC(o="X_sim.mat")
+tryrm("sim.xgmml"); PKTFX.xgmml(X="X_sim.mat", o="sim.xgmml")
 
+include("../../PKTFX.jl")
 for i in 1:2length(Inference.loss) tryrm("sim_infer_$i.xgmml") end
 for i in 1:length(Inference.loss)
 	println("conf=$i")
 	tryrm("WT_sim_infer.mat"); tryrm("WP_sim_infer.mat")
-	PKTFX.infer("X_sim.mat", nₜ, nₚ, "WT_sim_infer.mat", "WP_sim_infer.mat"; conf=i, lambda=.1)
+	PKTFX.infer("X_sim.mat", nₜ, nₚ, "WT_sim_infer.mat", "WP_sim_infer.mat"; conf=i, lambda=.1, epochs=4000)
 	sleep(2)
 	PKTFX.thres("WT_sim_infer.mat", "WT_sim_infer_thres.mat")
 	PKTFX.thres("WP_sim_infer.mat", "WP_sim_infer_thres.mat")
@@ -49,12 +52,16 @@ end
 
 # now open xgmml files in cytoscape and have a look
 
+
 begin # for using the old python code
-	PKTFX.swapPT("W_TP.mat", "W_py.mat"; n1=3, n2=3)
-	PKTFX.thres("W_py.mat", "W_py_thres.mat")
-	wt, wp = Model.WₜWₚ(PKTFX.loaddlm("W_py_thres.mat"), 3, 3)
+	# PKTFX.swapPT("X_sim.mat", "X_sim_TP.mat"; n1=3, n2=3) # in case you wanna use the python code
+	PKTFX.swapPT("weight.mat", "weight_PT.mat"; n1=3, n2=3)
+	PKTFX.thres("weight_PT.mat", "weight_PT_thres.mat")
+	wt, wp = Model.WₜWₚ(PKTFX.loaddlm("weight_PT_thres.mat"), 3, 3)
 	PKTFX.savedlm("WT_py_thres.mat", wt)
 	PKTFX.savedlm("WP_py_thres.mat", wp)
 	PKTFX.xgmml("WT_py_thres.mat", "WP_py_thres.mat", o="py_infer.xgmml")
 end
+
+
 
