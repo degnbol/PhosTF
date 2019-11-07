@@ -1,17 +1,18 @@
 # settings ####
-setwd("/Users/christian/GoogleDrev/PKTFX/testdata/pres18c")
-nt = 3; np = 3; nx = 0; n = nt+np+nx
+setwd("/Users/christian/GoogleDrev/PKTFX/testdata/data_cas")
+nt = 3; np = 3; nx = 1; n = nt+np+nx
 wt_fnames = list(
     r = "sim_r.mat",
     p = "sim_p.mat",
     phi = "sim_phi.mat",
     t = "sim_t.mat"
 )
+mut = 4
 mut_fnames = list(
-    r = "sim_r_2.mat",
-    p = "sim_p_2.mat",
-    phi = "sim_phi_2.mat",
-    t = "sim_t_2.mat"
+    r = paste0("sim_r_", mut, ".mat"),
+    p = paste0("sim_p_", mut, ".mat"),
+    phi = paste0("sim_phi_", mut, ".mat"),
+    t = paste0("sim_t_", mut, ".mat")
 )
 # packages ####
 library(ggplot2)
@@ -96,6 +97,7 @@ readfunc = function(fnames) {
 }
 
 # process ####
+
 wt  = readfunc(wt_fnames);   wt["experiment"] = wildtype
 mut = readfunc(mut_fnames); mut["experiment"] = mutant
 data = rbind(wt, mut)
