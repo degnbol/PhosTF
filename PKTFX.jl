@@ -89,7 +89,7 @@ end
 Create a random network from W.
 """
 @main function network(Wₜ_fname::String=default_Wₜ, Wₚ_fname::String=default_Wₚ; o::String=default_net)
-	save(o, Network(loaddlm(Wₜ_fname), loaddlm(Wₚ_fname)))
+	save(o, Network(loaddlm(Wₜ_fname), loaddlm(Wₚ_fname, Int64)))
 end
 
 @main function display(i=default_net; v::Integer=0)
@@ -113,33 +113,47 @@ end
 """
 Simulate a network.
 """
-@main function simulate(mut_id=nothing, i=default_net, r="sim_r.mat", p="sim_p.mat", ϕ="sim_phi.mat", t="sim_t.mat"; duration=nothing)
+@main function simulate(mut_id=nothing, i=default_net; r=nothing, p=nothing, phi=nothing, t=nothing, duration=nothing)
+	if r   === nothing r   = "sim_r"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
+	if p   === nothing p   = "sim_p"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
+	if phi === nothing phi = "sim_phi" * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
+	if t   === nothing t   = "sim_t"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
 	net = loadnet(i)
 	solution = @domainerror ODEs.simulate(net, mut_id, duration)
 	if solution === nothing return end
 	@info(solution.retcode)
 	if solution.retcode in [:Success, :Terminated]
-		savedlm(r, solution[:,1,:])
-		savedlm(p, solution[:,2,:])
-		savedlm(ϕ, solution[1:net.nₜ+net.nₚ,3,:])
-		savedlm(t, solution.t)
+		savedlm(r,   solution[:,1,:])
+		savedlm(p,   solution[:,2,:])
+		savedlm(phi, solution[1:net.nₜ+net.nₚ,3,:])
+		savedlm(t,   solution.t)
 	end
 end
 
 """
 Plot simulations.
-- i: matrices with size=(#proteins, #times)
+- nₚ: number of PK/PP.
+- r,p,ϕ: fname. matrices with size=(#proteins, #times)
+- t: fname. time vector
 - o: optional file to write plot to
-- ids: list of protein ids to only plot those.
 """
-@main function plot(i...; t="sim_t.mat", o=stdout, ids=[])
-	if isempty(i) i = ["sim_r.mat", "sim_p.mat", "sim_phi.mat"] end
-	simulations = [loaddlm(fname) for fname in i]
-	if !isempty(ids)
-		simulations = [sim[ids,:] for sim in simulations]
-	end
-	time = loaddlm(t)
-	p = Plotting.plot_simulation(time, simulations)
+@main function plot(nₚ::Integer, nₜ::Integer, r="sim_r.mat", p="sim_p.mat", ϕ="sim_phi.mat", t="sim_t.mat"; o=stdout)
+	r, p, ϕ, t = loaddlm(r), loaddlm(p), loaddlm(ϕ), loaddlm(t)
+	t = dropdims(t; dims=2)  # should be a column vector in file
+	n = size(r,1); nₓ = n-(nₜ+nₚ)
+	# protein along axis=1, mRNA,prot,phos along axis=2 and for measurements: time along axis=3
+	values = zeros(n, 3, length(t))
+	values[:,1,:], values[:,2,:], values[1:nₜ+nₚ,3,:] = r, p, ϕ
+	nodes  = [["P$i" for i ∈ 1:nₚ]; ["T$i" for i ∈ 1:nₜ]; ["X$i" for i ∈ 1:nₓ]]
+	labels = ["$i $l" for i ∈ nodes, l ∈ ["mRNA", "prot", "phos"]]
+	styles = [s for i ∈ nodes, s ∈ [:solid, :solid, :dash]]
+	widths = [w for i ∈ nodes, w ∈ [1, 2, 1]]
+	# get [P, T, X] collections of data
+	values = [reshape(values[1:nₚ,:,:], 3nₚ, :), reshape(values[nₚ+1:nₚ+nₜ,:,:], 3nₜ, :), values[nₚ+nₜ+1:end,1,:]]
+	labels = [reshape(labels[1:nₚ,:], :), reshape(labels[nₚ+1:nₚ+nₜ,:], :), labels[nₚ+nₜ+1:end,1]]
+	styles = [reshape(styles[1:nₚ,:], :), reshape(styles[nₚ+1:nₚ+nₜ,:], :), styles[nₚ+nₜ+1:end,1]]
+	widths = [reshape(widths[1:nₚ,:], :), reshape(widths[nₚ+1:nₚ+nₜ,:], :), widths[nₚ+nₜ+1:end,1]]
+	p = Plotting.plot_simulation(t, values, labels, styles, widths, ["PK/PP", "TF", "X"])
 	Plotting.save(o, p)
 	if o == stdout
 		println("plotting complete")
