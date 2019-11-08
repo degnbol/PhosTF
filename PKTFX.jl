@@ -112,14 +112,21 @@ end
 
 """
 Simulate a network.
+- r,p,phi: fname. output files with time along axis 2 and protein along axis 1
+- r0, p0, phi0: fname. starting values. Use this to let a mutated network start where the wildtype converged. 
+Make them with either another simulate call, a steaady state call or write them manually.
 """
-@main function simulate(mut_id=nothing, i=default_net; r=nothing, p=nothing, phi=nothing, t=nothing, duration=nothing)
-	if r   === nothing r   = "sim_r"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
-	if p   === nothing p   = "sim_p"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
-	if phi === nothing phi = "sim_phi" * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
-	if t   === nothing t   = "sim_t"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
+@main function simulate(mut_id=nothing, i=default_net; r=nothing, p=nothing, phi=nothing, t=nothing, duration=nothing, r0=nothing, p0=nothing, phi0=nothing)
+	if   r  === nothing   r  = "sim_r"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
+	if   p  === nothing   p  = "sim_p"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
+	if phi  === nothing phi  = "sim_phi" * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
+	if   t  === nothing   t  = "sim_t"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
+	if   r0 !== nothing   r0 = loaddlm(  r0)[:,end] end
+	if   p0 !== nothing   p0 = loaddlm(  p0)[:,end] end
+	if phi0 !== nothing phi0 = loaddlm(phi0)[:,end] end
 	net = loadnet(i)
-	solution = @domainerror ODEs.simulate(net, mut_id, duration)
+	u₀ = get_u₀(net, r0, p0, phi0)
+	solution = @domainerror ODEs.simulate(net, mut_id, u₀, duration)
 	if solution === nothing return end
 	@info(solution.retcode)
 	if solution.retcode in [:Success, :Terminated]
