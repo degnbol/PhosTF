@@ -12,6 +12,7 @@ using Distributions: Uniform
 using LinearAlgebra: I
 using ..GeneRegulation
 
+export get_u₀
 export simulate, steady_state
 export logFC
 export @domainerror
@@ -20,8 +21,13 @@ const default_duration = 24 # hours
 steady_state_callback = TerminateSteadyState(1e-4, 1e-6)
 dtmax = 1  # minutes. used to limit step size to avoid instability. Reduction increases computational cost and stability.
 
+"Helper function that uses a default value if given nothing, and otherwise uses what is given."
+_dflt(::Nothing, default) = default
+_dflt(value, ::Any) = value
+
 """ ϕ₀ == 0 for non-regulating proteins in order to have vectors match in length """
 get_u₀(net::Network) = [net.r₀ net.p₀ [net.ϕ₀; zeros(net.nₓ)]]
+get_u₀(net::Network, r₀, p₀, ϕ₀) = [_dflt(r₀,net.r₀) _dflt(p₀,net.p₀) [_dflt(ϕ₀,net.ϕ₀); zeros(net.nₓ)]]
 
 function ODE!(du, u, net, t)
 	u .= clamp.(u, 0., 1.) # can be used against dt <= dtmin warnings and domain errors.
@@ -39,20 +45,21 @@ default_callback(u₀) = CallbackSet(steady_state_callback, PositiveDomain(u₀)
 """
 Save progression through time for plotting and inspection.
 """
-function simulate(network::Network; duration::Real=default_duration)
-	u₀ = get_u₀(network)
+function simulate(network::Network; u₀::Matrix=get_u₀(network), duration::Real=default_duration)
 	problem = ODEProblem(ODE!, u₀, (0., duration*60.), network)
 	solve(problem, callback=default_callback(u₀), save_everystep=true, dtmax=dtmax, force_dtmin=true)
 end
 """
 Mutate a wildtype and simulate through time.
 """
-function simulate(network::Network, mutation, duration::Real=default_duration)
-	simulate(Network(network, mutation); duration=duration)
-end
+simulate(network::Network, mutation, u₀::Matrix, duration::Real) = simulate(Network(network, mutation); u₀=u₀, duration=duration)
+simulate(network::Network, mutation,  ::Nothing, duration::Real) = simulate(Network(network, mutation); duration=duration)
+simulate(network::Network, mutation, u₀::Matrix,      ::Nothing) = simulate(Network(network, mutation); u₀=u₀)
+simulate(network::Network, mutation,  ::Nothing,      ::Nothing) = simulate(Network(network, mutation))
+simulate(network::Network, ::Nothing, ::Nothing,      ::Nothing) = simulate(network)
+simulate(network::Network, mutation, u₀::Matrix) = simulate(Network(network, mutation); u₀=u₀)
+simulate(network::Network,  mutation) = simulate(Network(network, mutation))
 simulate(network::Network, ::Nothing) = simulate(network)
-simulate(network::Network, mutation, ::Nothing) = simulate(network, mutation)
-simulate(network::Network, ::Nothing, ::Nothing) = simulate(network)
 
 """
 Find the steady-state solution.
@@ -83,8 +90,8 @@ logFC(wildtype, mutants::Vector) = hcat([log.(m[:,1,end] ./ wildtype[:,1,end]) f
 Default KOs is each TF and PK are knocked out in each individual experiment.
 """
 function logFC(network::Network, mutations=1:network.nₜ+network.nₚ)
-	u₀ = get_u₀(network)
-	logFC(steady_state(network; u₀=u₀), steady_states(network, mutations, u₀))
+	wildtype = steady_state(network; u₀=get_u₀(network))
+	logFC(wildtype, steady_states(network, mutations, wildtype[:,:,end]))
 end
 
 
