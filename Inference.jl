@@ -13,9 +13,12 @@ using Formatting
 
 "W is the param weight matrix, W′ is the masked version where untrainable entries are set to zero."
 L1(X, W, W′, cs, λ::Real) = sse(cs, W′, X) + λ*l1(W)
-Lsim(X, W′, cs, λ::Real) = sse(cs, W′, X) + l1(l_sim(W′, λ))
+Lsim1(X, W, W′, cs, λ::Real, Iₚ, Iₜ) = sse(cs, W′, X) + l1(l_sim(W′,λ))
+Lsim2(X, W, W′, cs, λ::Real, Iₚ, Iₜ) = sse(cs, W′, X) + l1(l_sim(W′,λ)*Iₚ) + l1(W*Iₜ)
+Lsim3(X, W, W′, cs, λ::Real, Iₚ, Iₜ) = sse(cs, W′, X) + l1(Iₚ*l_sim(W′,λ)*Iₚ) + l1(W - Iₚ*W*Iₚ)
+Lsim = Lsim1
 Lcas(X, W′, cs, λ::Real, Iₜ, Iₚ) = sse(cs, W′, X) + l_cas(W′, Iₜ, Iₚ)
-loss(X, W′, cs, λ, Iₓ) = Lsim(X, W′, cs, λ) + l1(Iₓ*W)
+loss(X, W, W′, cs, λ, Iₚ, Iₜ, Iₓ) = Lsim(X, W, W′, cs, λ, Iₚ, Iₜ) + l1(Iₓ*W)
 
 
 """
@@ -28,11 +31,11 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 	M[diagind(M)] .= 0  # enforce no self loops
 	cs = Model.Constants(n, nₜ, nₚ, K)
 	W = param(random_W(n, n))
-	Iₜ = Model.Iₜ(n, nₜ, nₚ)
 	Iₚ = Model.Iₚ(n, nₜ, nₚ)
-	Iₓ = I(size(W,1)) - (Iₜ+Iₚ)
+	Iₜ = Model.Iₜ(n, nₜ, nₚ)
+	Iₓ = I(n) - (Iₜ+Iₚ)
 
-	L(X) = loss(X, Model.apply_priors(W, M, S), cs, λ, Iₓ)
+	L(X) = loss(X, W, Model.apply_priors(W, M, S), cs, λ, Iₚ, Iₜ, Iₓ)
 	
 	function cb()
 		l = L(X)
