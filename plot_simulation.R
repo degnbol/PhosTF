@@ -1,19 +1,3 @@
-# settings ####
-setwd("/Users/christian/GoogleDrev/PKTFX/testdata/data_cas")
-nt = 3; np = 3; nx = 1; n = nt+np+nx
-wt_fnames = list(
-    r = "sim_r.mat",
-    p = "sim_p.mat",
-    phi = "sim_phi.mat",
-    t = "sim_t.mat"
-)
-mut = 4
-mut_fnames = list(
-    r = paste0("sim_r_", mut, ".mat"),
-    p = paste0("sim_p_", mut, ".mat"),
-    phi = paste0("sim_phi_", mut, ".mat"),
-    t = paste0("sim_t_", mut, ".mat")
-)
 # packages ####
 library(ggplot2)
 library(reshape2)
@@ -96,6 +80,23 @@ readfunc = function(fnames) {
     else return(rbind(P_mRNA, P_prot, P_phos, T_mRNA, T_prot, T_phos))
 }
 
+# settings ####
+# setwd("/Users/christian/GoogleDrev/PKTFX/testdata/data_cas")
+setwd("/Users/christian/GoogleDrev/PKTFX/testdata/pres18c")
+nt = 3; np = 3; nx = 0; n = nt+np+nx
+wt_fnames = list(
+    r = "sim_r.mat",
+    p = "sim_p.mat",
+    phi = "sim_phi.mat",
+    t = "sim_t.mat"
+)
+mut = 2
+mut_fnames = list(
+    r = paste0("sim_r_", mut, ".mat"),
+    p = paste0("sim_p_", mut, ".mat"),
+    phi = paste0("sim_phi_", mut, ".mat"),
+    t = paste0("sim_t_", mut, ".mat")
+)
 # process ####
 
 wt  = readfunc(wt_fnames);   wt["experiment"] = wildtype
