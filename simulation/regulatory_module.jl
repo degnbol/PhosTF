@@ -33,8 +33,9 @@ struct RegulatoryModule
 	
 	"""
 	Hill coeficient ν for each input protein.
+	GNW defaults are μ=2, σ=2, min=1, max=10
 	"""
-	random_ν(n::Integer) = rand(TruncatedNormal(2., 2., 1., 10.), n)
+	random_ν(n::Integer) = rand(TruncatedNormal(2., 2., .5, 8.), n)
 	"""
 	Dissociation constant k for each input protein.
 	"""
