@@ -52,12 +52,8 @@ end
 """
 Mutate a wildtype and simulate through time.
 """
-simulate(network::Network, mutation, u₀::Matrix, duration::Real) = simulate(Network(network, mutation); u₀=u₀, duration=duration)
-simulate(network::Network, mutation,  ::Nothing, duration::Real) = simulate(Network(network, mutation); duration=duration)
-simulate(network::Network, mutation, u₀::Matrix,      ::Nothing) = simulate(Network(network, mutation); u₀=u₀)
-simulate(network::Network, mutation,  ::Nothing,      ::Nothing) = simulate(Network(network, mutation))
-simulate(network::Network, ::Nothing, ::Nothing,      ::Nothing) = simulate(network)
-simulate(network::Network, mutation, u₀::Matrix) = simulate(Network(network, mutation); u₀=u₀)
+simulate(network::Network,  mutation, u₀, duration) = simulate(Network(network, mutation); u₀=_dflt(u₀,get_u₀(network)), duration=_dflt(duration,default_duration))
+simulate(network::Network, ::Nothing, u₀, duration) = simulate(network; u₀=_dflt(u₀,get_u₀(network)), duration=_dflt(duration,default_duration))
 simulate(network::Network,  mutation) = simulate(Network(network, mutation))
 simulate(network::Network, ::Nothing) = simulate(network)
 
