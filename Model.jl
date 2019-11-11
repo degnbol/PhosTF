@@ -12,9 +12,8 @@ import ..FluxUtils
 
 export offdiag, random_W
 export sse, sse_B
-export l1, l_cas
+export l1
 export _B, _T
-export l_sim, l_cas
 
 "A mask to remove diagonal of a matrix."
 function offdiag(matrix)
@@ -77,15 +76,15 @@ _Wₚ(W, nₜ::Integer, nₚ::Integer) = W[1:nₜ+nₚ,1:nₚ]
 WₜWₚ(W, nₜ::Integer, nₚ::Integer) = _Wₜ(W,nₜ,nₚ), _Wₚ(W,nₜ,nₚ)
 
 Iₚ(n::Integer, nₜ::Integer, nₚ::Integer) = diagm([[1 for _ in 1:nₚ]; [0 for _ in nₚ+1:n]])
-Iₜ(n::Integer, nₜ::Integer, nₚ::Integer) = diagm([[0 for _ in 1:nₚ]; [1 for _ in 1:nₚ]; [0 for _ in nₚ+nₜ+1:n]])
+Iₜ(n::Integer, nₜ::Integer, nₚ::Integer) = diagm([[0 for _ in 1:nₚ]; [1 for _ in 1:nₜ]; [0 for _ in nₚ+nₜ+1:n]])
 
 "I has to have a known size to not produce an error that might be fixed in later release."
 _B(cs::Constants, W::AbstractMatrix) = (W.*cs.Mₜ) * inv(I(size(W,1)) - W.*cs.Mₚ)
 "To avoid finding inverse matrix, we can instead solve if given the x in B^-1 * x"
 _B(cs::Constants, W::AbstractMatrix, x) = (W.*cs.Mₜ) * ((I(size(W,1)) - W.*cs.Mₚ) \ x)
 
-
 _T(B) = (I(size(B,1)) - (B.*offdiag(B))) \ B
+_T(cs::Constants, W::AbstractMatrix) = _T(_B(cs, W))
 
 """
 - cs: struct containing the constants Mₜ, Mₚ, and U
@@ -102,33 +101,6 @@ Loss function to train parameters in W to result in a B that is as similar to a 
 sse_B(cs::Constants, W::AbstractMatrix, B_LLC::Matrix) = sum((_B(cs,W) .- B_LLC).^2)
 
 l1(W::AbstractMatrix) = norm(W,1)
-
-
-function Ω(W::AbstractMatrix, i::Integer, j::Integer, steepness::Real)
-	similarity = sum(W[:,i] .* W[:,j])
-	2.0σ(-steepness*similarity)
-end
-
-function Ω(W::AbstractMatrix; steepness::Real=10)
-	n = size(W,1)
-	Ω.(Ref(W), 1:n, collect(1:n)', Ref(steepness))
-end
-Ω(W::TrackedMatrix, steepness::Real) = Tracker.collect(Ω(W; steepness=steepness))
-
-l_sim(W::AbstractMatrix, steepness::Real) = Ω(W, steepness) .* W
-
-"Loss function for PK/PP cascades."
-l_cas(W::AbstractMatrix, Iₜ::AbstractMatrix, Iₚ::AbstractMatrix) = sum((I(size(W,1)) - (abs.(W)*Iₚ)') \ vec(sum(Iₜ,dims=2)))
-"""
-The cummulative effects thorugh cascades.
-Explicitly setting size of I so Flux can handle it.
-Use for finding silent edges and nodes, NOT functional as a replacement for l_cas for loss function.
-"""
-function node_cas(W::AbstractMatrix, Iₜ::AbstractMatrix)
-	n = size(W,1)
-	W′ = abs.(W')
-	(I(n) - W′) \ Iₜ * W′ * ones(n)
-end
 
 
 """

@@ -13,19 +13,14 @@ using Formatting
 
 "W is the param weight matrix, W′ is the masked version where untrainable entries are set to zero."
 L1(X, W, W′, cs, λ::Real) = sse(cs, W′, X) + λ*l1(W)
-Lsim1(X, W, W′, cs, λ::Real, Iₚ, Iₜ) = sse(cs, W′, X) + l1(l_sim(W′,λ))
-Lsim2(X, W, W′, cs, λ::Real, Iₚ, Iₜ) = sse(cs, W′, X) + l1(l_sim(W′,λ)*Iₚ) + l1(W*Iₜ)
-Lsim3(X, W, W′, cs, λ::Real, Iₚ, Iₜ) = sse(cs, W′, X) + l1(Iₚ*l_sim(W′,λ)*Iₚ) + l1(W - Iₚ*W*Iₚ)
-Lsim = Lsim1
-Lcas(X, W′, cs, λ::Real, Iₜ, Iₚ) = sse(cs, W′, X) + l_cas(W′, Iₜ, Iₚ)
-loss(X, W, W′, cs, λ, Iₚ, Iₜ, Iₓ) = Lsim(X, W, W′, cs, λ, Iₚ, Iₜ) + l1(Iₓ*W)
+loss(X, W, W′, cs, λ, Iₚ, Iₜ, Iₓ) = L1(X, W, W′, cs, λ) + l1(_B(cs, abs.(W)))
 
 
 """
 - throttle: seconds between prints
 - opt: ADAMW or maybe NADAM
 """
-function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=10000, λ::Real=10, throttle=5, opt=ADAMW(), M=nothing, S=nothing)
+function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=10000, λ::Real=1e-5, throttle=5, opt=ADAMW(), M=nothing, S=nothing)
 	n, K = size(X)
 	if M === nothing M = ones(n, n) end # no prior knowledge
 	M[diagind(M)] .= 0  # enforce no self loops
@@ -43,20 +38,17 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 		e = Model.sse(cs, w′, X)
 		lt = l1(W*Iₜ)
 		lp = l1(W*Iₚ)
-		cas = l_cas(w′, Iₜ, Iₚ)
-		T = l1(_T(_B(cs, w′)))
-		T_abs = l1(_T(abs.(_B(cs, w′))))
-		printfmtln(5, l, e, lt, lp, cas, T, T_abs)
+		printfmtln(5, l, e, lt, lp)
 		d = diag(W); if any(abs.(d) .> .001) Flux.error("Nonzero diagonal") end
 	end
 	
-	println("loss\tsse\tLt\tLp\tcas\tT\tT_abs")
+	println("loss\tsse\tLt\tLp")
 	train!(W, X, L, Flux.throttle(cb, throttle), epochs, opt)
 	# not using M just to make it clear if values supposed to be zero for some reason are not (sanity check)
 	Model.apply_priors(W, nothing, S)
 end
 
-function infer_B(B_LLC::AbstractMatrix, nₚ::Integer; epochs::Integer=10000, λ::Real=.1, throttle=5, opt=ADAMW(), M=nothing, S=nothing)
+function infer_B(B_LLC::AbstractMatrix, nₚ::Integer; epochs::Integer=10000, λ::Real=1e-5, throttle=5, opt=ADAMW(), M=nothing, S=nothing)
 	nₚₜ, K = size(B_LLC); nₜ = nₚₜ-nₚ
 	cs = Model.Constants(nₚₜ, nₜ, nₚ, K)
 	W = param(random_W(nₚₜ, nₚₜ))
@@ -73,14 +65,11 @@ function infer_B(B_LLC::AbstractMatrix, nₚ::Integer; epochs::Integer=10000, λ
 		sse = sse_B(cs, w′, B_LLC)
 		lt = l1(W*Iₜ)
 		lp = l1(W*Iₚ)
-		cas = l_cas(w′, Iₜ, Iₚ)
-		T = l1(_T(_B(cs, w′)))
-		T_abs = l1(_T(abs.(_B(cs, w′))))
-		printfmtln(5, l, sse, lt, lp, cas, T, T_abs)
+		printfmtln(5, l, sse, lt, lp)
 		d = diag(W); if any(abs.(d) .> .001) Flux.error("Nonzero diagonal") end
 	end
 
-	println("loss\tsse\tLt\tLp\tcas\tT\tT_abs")
+	println("loss\tsse\tLt\tLp")
 	train!(W, B_LLC, L, Flux.throttle(cb, throttle), epochs, opt)
 	# not using M just to make it clear if values supposed to be zero for some reason are not (sanity check)
 	Model.apply_priors(W, nothing, S)
