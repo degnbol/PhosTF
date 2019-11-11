@@ -92,7 +92,7 @@ end
 function xgmml_edges(Wₜ::Matrix, Wₚ::Matrix)
 	nₚ = size(Wₚ,2)
 	color(weight) = "#" * hex(divergent_lerp(weight, -1, 1))
-	opacity(weight) = divergent(weight, -1, 1) |> abs |> to256
+	opacity(weight) = divergent(weight, -.1, .1) |> abs |> to256
 	T_arrow(weight) = weight >= 0 ? "DELTA" : "T"
 	P_arrow(weight) = weight >= 0 ? "CIRCLE" : "SQUARE"
 
@@ -146,7 +146,7 @@ function xgmml(net, X::Matrix, highlight=nothing; title="net")
 	
 	graphs::Vector{XGMML.Graph} = []
 	for k in 1:K
-		Δy = sum([nₓ,nₜ,nₚ] .> 0) * default_space*k
+		Δy = sum([nₓ,nₜ,nₚ] .> 0) * default_vspace*k
 		nodes = xgmml_nodes(net, y=xgmml_y(nₓ,nₜ,nₚ) .+ Δy, fills=fills[:,k], value=X[:,k])
 		edges = xgmml_edges(net)
 		if highlight != nothing nodes[highlight[k]].stroke_width = 5. end
