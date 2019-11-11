@@ -51,7 +51,6 @@ struct Network
 	function Network(genes::Vector{Gene}, Wₚₖ::Matrix{<:AbstractFloat}, Wₚₚ::Matrix{<:AbstractFloat}, phos_activation::BitVector, λ_phos::Vector)
 		n, nₚ = length(genes), size(Wₚₖ,2)
 		nₜ = size(Wₚₖ, 1) - nₚ
-		@assert n >= nₜ + nₚ
 		# In the non-dimensionalized model, max_transcription == λ_mRNA and max_translation == λ_prot
 		max_transcription = λ_mRNA = random_λ(n)
 		max_translation = λ_prot = random_λ(n)
