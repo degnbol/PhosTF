@@ -3,6 +3,7 @@ cd("testdata/pres18c")
 cd("../data_cas"); nₜ, nₚ = 3, 3
 cd("../pres18c"); nₜ, nₚ = 3, 3
 cd("../simi"); nₜ, nₚ = 2, 3
+cd("../simi_neg"); nₜ, nₚ = 2, 3
 cd("../cycl"); nₜ, nₚ = 2, 2
 cd("../cycl_neg"); nₜ, nₚ = 2, 2
 
