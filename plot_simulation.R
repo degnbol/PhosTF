@@ -13,11 +13,11 @@ mRNA = "mRNA"
 prot = "protein"
 phos = "phos. protein"
 wildtype = "Wildtype"
-mutant = "Mutant"
+mutant = "P1 Knockout"
 
-P_colors = c("#af70b6", "#654169", "#9f3b5a")
-T_colors = c("#87ac33", "#50661e", "#2fa540")
-X_colors = c("#79712f")
+P_colors = c("#af70b6", "#654169", "#9f3b5a", "#9400d3")
+T_colors = c("#87ac33", "#50661e", "#2fa540", "#8FBC8F")
+X_colors = c("#79712f", "#DAA520")
 
 # functions ####
 readfunc = function(fnames) {
@@ -81,16 +81,17 @@ readfunc = function(fnames) {
 }
 
 # settings ####
-# setwd("/Users/christian/GoogleDrev/PKTFX/testdata/data_cas")
-setwd("/Users/christian/GoogleDrev/PKTFX/testdata/pres18c")
-nt = 3; np = 3; nx = 0; n = nt+np+nx
+# setwd("/Users/christian/GoogleDrev/PKTFX/testdata/data_cas"); nt = 3; np = 3; nx = 1
+# setwd("/Users/christian/GoogleDrev/PKTFX/testdata/pres18c"); nt = 3; np = 3; nx = 0
+setwd("/Users/christian/GoogleDrev/PKTFX/testdata/simi"); nt = 2; np = 3; nx = 1
+n = nt+np+nx
 wt_fnames = list(
     r = "sim_r.mat",
     p = "sim_p.mat",
     phi = "sim_phi.mat",
     t = "sim_t.mat"
 )
-mut = 2
+mut = 1
 mut_fnames = list(
     r = paste0("sim_r_", mut, ".mat"),
     p = paste0("sim_p_", mut, ".mat"),
@@ -113,7 +114,7 @@ data$node = sapply(as.character(data$variable), function(x) strsplit(x, " ")[[1]
 p = ggplot(data, aes(x=time, y=value, group=variable, color=node)) +
     geom_line(aes(linetype=measure, size=measure)) +
     scale_linetype_manual(values=c("solid", "solid", "dashed")) +
-    scale_size_manual(values=c(.5, 1.2, .5)) +
+    scale_size_manual(values=c(1.2, .5, .5)) +
     scale_color_manual(values=c(P_colors[1:np], T_colors[1:nt], X_colors[1:nx])) +
     xlab("time [min]") +
     ylab("nondimensionalized concentration") + 
@@ -125,10 +126,10 @@ p = ggplot(data, aes(x=time, y=value, group=variable, color=node)) +
 
 
 # without flipping x-axis of mutant
-# p + facet_grid(vars(type), vars(experiment), scales="free_x")
+p + facet_grid(vars(type), vars(experiment), scales="free_x")
 # or with flipping x-axis of mutant
-x_scales = list(Wildtype=scale_x_continuous(), Mutant=scale_x_reverse())
-p + facet_grid_sc(vars(type), vars(experiment), scales=list(x=x_scales))
+# x_scales = list(Wildtype=scale_x_continuous(), Mutant=scale_x_reverse())
+# p + facet_grid_sc(vars(type), vars(experiment), scales=list(x=x_scales))
 
 
 
