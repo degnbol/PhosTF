@@ -27,6 +27,9 @@ PKTFX.xgmml(X=["steady_r.mat", "steady_p.mat", "steady_phi.mat"], o="steady.xgmm
 tryrm("X_sim.mat"); PKTFX.logFC(o="X_sim.mat")
 tryrm("sim.xgmml"); PKTFX.xgmml(X="X_sim.mat", o="sim.xgmml")
 
+PKTFX.T("X_sim.mat", "T_sim.mat")
+PKTFX.thres("T_sim.mat", "T_sim_thres.mat")
+PKTFX.xgmml("T_sim_thres.mat", nₜ, nₚ; o="T.xgmml")
 
 tryrm("WT_infer.mat"); tryrm("WP_infer.mat"); tryrm("WT_infer_thres.mat"); tryrm("WP_infer_thres.mat"); tryrm("sim_infer.xgmml")
 PKTFX.infer("X_sim.mat", nₜ, nₚ; lambda=0., epochs=20000)

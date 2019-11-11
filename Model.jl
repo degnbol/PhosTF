@@ -32,9 +32,9 @@ end
 "Constant terms in the equations of the inference model."
 struct Constants
 	# Masking matrix for TF. Square.
-	Mₜ::Matrix
+	Mₜ::Matrix{Bool}
 	# Masking matrix for PK. Square.
-	Mₚ::Matrix
+	Mₚ::Matrix{Bool}
 	# Matrix holding column vectors of non-KO indexes for each experiment. No need to be square but has to have same shape as X.
 	U::Matrix
 	"""
@@ -85,6 +85,12 @@ _B(cs::Constants, W::AbstractMatrix, x) = (W.*cs.Mₜ) * ((I(size(W,1)) - W.*cs.
 
 _T(B) = (I(size(B,1)) - (B.*offdiag(B))) \ B
 _T(cs::Constants, W::AbstractMatrix) = _T(_B(cs, W))
+"""
+Get the total effects from each node to each node as a simple linear regression coefficient.
+Section 6.1 of Eberhardt report "Learning Linear Cyclic Causal Models with Latent Variables".
+Note that self-loops are removed.
+"""
+X2T(X) = X.*offdiag(X) ./ repeat(diag(X)', size(X,1), 1)
 
 """
 - cs: struct containing the constants Mₜ, Mₚ, and U

@@ -60,42 +60,41 @@ end
 	savedlm(o, X)
 end
 
-# load file(s) as a single 2D array regardless if they match in length along axis 1
+"Load file(s) as a single 2D array regardless if they match in length along axis 1."
 hcatpad_load(fnames::Vector) = hcatpad(loaddlm(fname, Float64) for fname ∈ fnames)
 hcatpad_load(fname::String) = loaddlm(fname, Float64)
 
 """
 Write a graph defined by weight matrices to xgmml format.
-"""
-@main function xgmml(Wₜ, Wₚ; o=stdout, title=nothing, X=[])
-	Wₜ, Wₚ = loaddlm(Wₜ), loaddlm(Wₚ)
-	title = o == stdout ? "pktfx" : splitext(basename(o))[1]
-	if isempty(X) write(o, Cytoscape.xgmml(Wₜ, Wₚ; title=title))
-	else
-		X = hcatpad_load(X)
-		K = size(X,2)
-		_,nₜ,nₚ = nₓnₜnₚ(Wₜ,Wₚ)
-		# highlight each of the proteins if there are as many experiments as PKs+TFs
-		highlight = nₜ+nₚ == K ? (1:K) : nothing
-		write(o, Cytoscape.xgmml(Wₜ, Wₚ, X, highlight; title=title))
-	end
-end
-"""
-Write a graph defined by a simulation network file to xgmml format.
 - X: node values. Each column of X is used for a separate copy of the graph.
 """
+@main function xgmml(Wₜ, Wₚ::String; o=stdout, title=nothing, X=[])
+	Wₜ, Wₚ = loaddlm(Wₜ), loaddlm(Wₚ)
+	_,nₜ,nₚ = nₓnₜnₚ(Wₜ,Wₚ)
+	xgmml([Wₜ, Wₚ], o, nₜ, nₚ, title, X)
+end
 @main function xgmml(i=default_net; o=stdout, title=nothing, X=[])
 	net = loadnet(i)
-	title = o == stdout ? "pktfx" : splitext(basename(o))[1]
-	if isempty(X) write(o, Cytoscape.xgmml(net; title=title))
+	xgmml([net], o, net.nₜ, net.nₚ, title, X)
+end
+@main function xgmml(W, nₜ::Integer, nₚ::Integer; o=stdout, title=nothing, X=[])
+	W = loaddlm(W)
+	Wₜ, Wₚ = W[:,nₚ+1:nₚ+nₜ], W[:,1:nₚ] # we don't use the Model.WₜWₚ function since we want to allow P→X edges in case W==T
+	xgmml([Wₜ, Wₚ], o, nₜ, nₚ, title, X)
+end
+function xgmml(i, o, nₜ, nₚ, title=nothing, X=[])
+	if title === nothing title = o == stdout ? "pktfx" : splitext(basename(o))[1] end
+	if isempty(X) write(o, Cytoscape.xgmml(i...; title=title))
 	else
 		X = hcatpad_load(X)
 		K = size(X,2)
 		# highlight each of the proteins if there are as many experiments as PKs+TFs
-		highlight = net.nₜ+net.nₚ == K ? (1:K) : nothing
-		write(o, Cytoscape.xgmml(net, X, highlight; title=title))
+		highlight = nₜ+nₚ == K ? (1:K) : nothing
+		write(o, Cytoscape.xgmml(i..., X, highlight; title=title))
 	end
 end
+
+
 """
 Create a random network from W.
 """
@@ -301,6 +300,14 @@ Remove edges less than a given threshold.
 	savedlm(o, mat)
 end
 
+"""
+Get the total effects T from single KO experiments.
+"""
+@main function T(io=nothing, o=nothing)
+	i, o = inout(io, o)
+	X = loaddlm(i)
+	savedlm(o, Model.X2T(X))
+end
 
 """
 Swap order of PK and TF in matrix (swap between PK-TF-X and TF-PK-X).
