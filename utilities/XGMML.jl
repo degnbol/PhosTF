@@ -13,6 +13,8 @@ import Base.merge
 using ..StringUtils, ..ColorUtils
 import ..ArrayUtils
 
+default_h = 25.
+
 mutable struct Node
 	atts::Dict{Any,Any}
 	graphics::Dict
@@ -27,16 +29,16 @@ mutable struct Node
 	stroke_width
 	stroke_color
 	"- shape: ELLIPSE, DIAMOND, RECTANGLE, ..."
-	function Node(x, y, attributes, graphics; id=nothing, label=id, fill="#999999", shape="ELLIPSE", stroke=0., stroke_color="#000000", h=35.0, w=h, extra_atts...)
+	function Node(x, y, attributes, graphics; id=nothing, label=id, fill="#999999", shape="ELLIPSE", stroke=0., stroke_color="#000000", h=default_h, w=h, extra_atts...)
 		new(merge(attributes, extra_atts), graphics, id, label, x, y, w, h, shape, fill, stroke, stroke_color)
 	end
-	function Node(x, y, graphics; id=nothing, label=id, fill="#999999", shape="ELLIPSE", stroke=0., stroke_color="#000000", h=35.0, w=h, extra_atts...)
+	function Node(x, y, graphics; id=nothing, label=id, fill="#999999", shape="ELLIPSE", stroke=0., stroke_color="#000000", h=default_h, w=h, extra_atts...)
 		new(merge(attributes(id, label), extra_atts), graphics, id, label, x, y, w, h, shape, fill, stroke, stroke_color)
 	end
-	function Node(x, y; id=nothing, label=id, fill="#999999", shape="ELLIPSE", stroke=0., stroke_color="#000000", h=35.0, w=h, extra_atts...)
+	function Node(x, y; id=nothing, label=id, fill="#999999", shape="ELLIPSE", stroke=0., stroke_color="#000000", h=default_h, w=h, extra_atts...)
 		new(merge(attributes(id, label), extra_atts), graphics(label), id, label, x, y, w, h, shape, fill, stroke, stroke_color)
 	end
-	function Node(pos; id=nothing, label=id, fill="#999999", shape="ELLIPSE", stroke=0., stroke_color="#000000", h=35.0, w=h, extra_atts...)
+	function Node(pos; id=nothing, label=id, fill="#999999", shape="ELLIPSE", stroke=0., stroke_color="#000000", h=default_h, w=h, extra_atts...)
 		new(merge(attributes(id, label), extra_atts), graphics(label), id, label, pos[1], pos[2], w, h, shape, fill, stroke, stroke_color)
 	end
 	
@@ -311,6 +313,11 @@ begin # methods
 
 	xgmml(graph::Graph) = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n""" * repr(graph)
 	xgmml(graphs::Vector{Graph}) = xgmml(merge(graphs))
+
+
+
+
+
 end
 
 end;

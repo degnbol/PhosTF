@@ -15,7 +15,7 @@ using ..MathUtils
 using ..GeneRegulation: nₓnₜnₚ, estimate_Wₜ
 
 
-const default_space = 100
+const default_hspace, default_vspace = 45, 80
 const bg_color = "#FFFFFF"
 
 """
@@ -37,9 +37,21 @@ function edges(matrix::SparseMatrixCSC)
 end
 edges(matrix::Matrix) = edges(sparse(matrix))
 
-
-xgmml_x(nₓ::Integer, nₜ::Integer, nₚ::Integer, space=default_space) = [[i*space for i in 1:nₚ]; [i*space for i in 1:nₜ]; [i*space for i in 1:nₓ]]
-xgmml_y(nₓ::Integer, nₜ::Integer, nₚ::Integer, space=default_space) = [[ 0space for i in 1:nₚ]; [ 1space for i in 1:nₜ]; [ 2space for i in 1:nₓ]]
+"""
+- space: minimum space that will be given horizontally.
+"""
+function xgmml_x(nₓ::Integer, nₜ::Integer, nₚ::Integer, space=default_hspace)
+	width = space*max(nₚ, nₜ, nₓ)
+	[
+		[(i-.5)*width/nₚ for i in 1:nₚ];
+		[(i-.5)*width/nₜ for i in 1:nₜ];
+		[(i-.5)*width/nₓ for i in 1:nₓ]
+	]
+end
+"""
+- space: space that will be given vertically.
+"""
+xgmml_y(nₓ::Integer, nₜ::Integer, nₚ::Integer, space=default_vspace) = [[ 0space for i in 1:nₚ]; [ 1space for i in 1:nₜ]; [ 2space for i in 1:nₓ]]
 
 function xgmml_labels(nₓ::Integer, nₜ::Integer, nₚ::Integer)
 	pad = max(nₓ, nₜ, nₚ) |> string |> length
@@ -101,10 +113,10 @@ xgmml_edges(net) = xgmml_edges(estimate_Wₜ(net), net.Wₚₖ-net.Wₚₚ)
 Bend the edges if the target is 2 or more places away from the source within the same row of nodes.
 Bend to the left relative to direction of edge, in order to avoid visual overlap when two nodes both have an edge to one another.
 """
-function xgmml_bend!(graph::XGMML.Graph, bend=.3; space=default_space)
+function xgmml_bend!(graph::XGMML.Graph, bend=.3; hspace=default_hspace, vspace=default_vspace)
 	for e in graph.edges
 		source, target = XGMML.get_position(graph, e.source), XGMML.get_position(graph, e.target)
-		seps = abs.(target .- source) ./ space  # seps = n spaces separating source and target
+		seps = abs.(target .- source) ./ [hspace, vspace]  # seps = n spaces separating source and target
 		if seps[1] >= 2 && seps[2] == 0
 			XGMML.set_anchor(e, source, target, -bend)
 		end
