@@ -32,10 +32,21 @@ loadnet(i) = load(i, Network)
 Create random W.
 """
 @main function W(n::Integer, nₜ::Integer=Integer(round(n/2 * .7)), nₚ::Integer=Integer(round(n/2 * .3)); WT_fname::String=default_Wₜ, WP_fname::String=default_Wₚ)
-	savedlm(WT_fname, Weight.Wₜ(n , nₜ, nₚ))
-	savedlm(WP_fname, Weight.Wₜ(nₜ, nₚ))
+	savedlm(WT_fname, Weight.random_Wₜ(n , nₜ, nₚ))
+	savedlm(WP_fname, Weight.random_Wₜ(nₜ, nₚ))
 end
 
+"""
+- np: mandatory arg to set nₚ
+"""
+@main function correct(io=nothing, o=nothing; np=nothing)
+	if np === nothing @error("supply --np"); return end
+	i, o = inout(io, o)
+	W = loaddlm(io)
+	if Weight.correct!(W, np) @info("Corrections made.")
+	else @info("NO corrections made.") end
+	savedlm(o, W)
+end
 @main function correct(Wₜ_fname::String=default_Wₜ, Wₚ_fname::String=default_Wₚ; ot="WT_cor.mat", op="WP_cor.mat")
 	Wₜ, Wₚ = loaddlm(Wₜ_fname), loaddlm(Wₚ_fname)
 	if Weight.correct!(Wₜ, Wₚ) @info("Corrections made.")
@@ -89,7 +100,12 @@ end
 Create a random network from W.
 """
 @main function network(Wₜ_fname::String=default_Wₜ, Wₚ_fname::String=default_Wₚ; o::String=default_net)
-	save(o, Network(loaddlm(Wₜ_fname), loaddlm(Wₚ_fname, Int64)))
+	Wₜ, Wₚ = loaddlm(Wₜ_fname), loaddlm(Wₚ_fname, Int64)
+	n, nₜ = size(Wₜ)
+	nₚ = size(Wₚ,2)
+	@assert nₜ == size(Wₚ,1) - nₚ
+	@assert n >= nₜ + nₚ
+	save(o, Network(Wₜ, Wₚ))
 end
 
 @main function display(i=default_net; v::Integer=0)
@@ -256,7 +272,7 @@ end
 Infer a weight matrix from logFC data.
 - WT_prior/WP_prior: optionally limit Wₜ/Wₚ if they are partially known.
 """
-@main function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; WT_prior=nothing, WP_prior=nothing, epochs::Integer=5000, lambda::Real=10)
+@main function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; WT_prior=nothing, WP_prior=nothing, epochs::Integer=5000, lambda::Real=1e-5)
 	X = loaddlm(X, Float64)
 	M, S = _priors(WT_prior, WP_prior, size(X,1), nₜ, nₚ)
 	W = Inference.infer(X, nₜ, nₚ; epochs=epochs, λ=lambda, M=M, S=S)
@@ -264,7 +280,7 @@ Infer a weight matrix from logFC data.
 	savedlm(ot, Wₜ)
 	savedlm(op, Wₚ)
 end
-@main function inferB(B_LLC, nₚ::Integer, ot="WT_inferB.mat", op="WP_inferB.mat"; WT_prior=nothing, WP_prior=nothing, epochs::Integer=5000, lambda::Real=.1)
+@main function inferB(B_LLC, nₚ::Integer, ot="WT_inferB.mat", op="WP_inferB.mat"; WT_prior=nothing, WP_prior=nothing, epochs::Integer=5000, lambda::Real=1e-5)
 	B_LLC = loaddlm(B_LLC, Float64)
 	nₚₜ = size(B_LLC,1); nₜ = nₚₜ-nₚ
 	M, S = _priors(WT_prior, WP_prior, nₚₜ, nₜ, nₚ)
@@ -274,12 +290,17 @@ end
 	savedlm(op, Wₚ)
 end
 
+"""
+Remove edges less than a given threshold.
+- thres: optional threshold
+"""
 @main function thres(io=nothing, o=nothing; thres=0.01)
 	i, o = inout(io, o)
 	mat = loaddlm(i, Float64)
 	Weight.threshold!(mat, thres)
 	savedlm(o, mat)
 end
+
 
 """
 Swap order of PK and TF in matrix (swap between PK-TF-X and TF-PK-X).
