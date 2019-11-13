@@ -271,7 +271,7 @@ function sort_PTX(W, P, T, X)
 	reorder(W, order)
 end
 
-
+"Random Wₜ, Wₚ from B."
 function random_W(B, nₚₖ::Integer, nₚₚ::Integer)
 	P, T, X = random_PTX(B, nₚₖ + nₚₚ)
 	W = rewire(B, P,T,X)
