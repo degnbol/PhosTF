@@ -3,10 +3,9 @@
 "PKTFX project plotting functions to visualize gene expression simulation etc."
 module Plotting
 using Plots
-using ColorSchemes
 using DifferentialEquations: ODESolution
 
-color_scheme = ColorSchemes.phase
+
 
 function save(o, p)
 	if o == stdout display(p)
