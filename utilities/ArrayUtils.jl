@@ -4,10 +4,21 @@ using LinearAlgebra: diagind
 using Random: shuffle
 using Distributions
 
+export tological
 export binary, TruncNormal, eye
 export tostring
 export hcatpad
 export reorder
+
+"""
+Convert a numerical index to a logical index.
+Examples:
+tological([2, 1], 3) → [1, 1, 0]
+tological([2], 3)    → [0, 1, 0]
+tological( 2 , 3)    → [0, 1, 0]
+"""
+tological(indices, length) = (out = falses(length); out[indices] .= true; out)
+tological(indices::Integer, length) = (out = falses(length); out[indices] = true; out)
 
 """
 Convert a decimal number to binary and return it as a 1D bool array.
@@ -84,6 +95,8 @@ function reorder(adj::AbstractMatrix, order)
 	end
 	adj[row_idx,:][:,col_idx]  # reorders rows then columns
 end
+
+
 
 
 end;
