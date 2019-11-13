@@ -29,11 +29,12 @@ default_net = "net.bson"
 loadnet(i) = load(i, Network)
 
 """
-Create random W.
+Create random W from a adjacency matrix containing B.
 """
-@main function W(n::Integer, nₜ::Integer=Integer(round(n/2 * .7)), nₚ::Integer=Integer(round(n/2 * .3)); WT_fname::String=default_Wₜ, WP_fname::String=default_Wₚ)
-	savedlm(WT_fname, Weight.random_Wₜ(n , nₜ, nₚ))
-	savedlm(WP_fname, Weight.random_Wₜ(nₜ, nₚ))
+@main function W(B::String, nₚₖ::Integer, nₚₚ::Integer; WT_fname::String=default_Wₜ, WP_fname::String=default_Wₚ)
+	Wₜ, Wₚ = Weight.random_W(B, nₚₖ, nₚₚ)
+	savedlm(WT_fname, Wₜ)
+	savedlm(WP_fname, Wₚ)
 end
 
 """
@@ -271,19 +272,10 @@ end
 Infer a weight matrix from logFC data.
 - WT_prior/WP_prior: optionally limit Wₜ/Wₚ if they are partially known.
 """
-@main function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; WT_prior=nothing, WP_prior=nothing, epochs::Integer=5000, lambda::Real=1e-5)
+@main function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; WT_prior=nothing, WP_prior=nothing, epochs::Integer=5000, lambda::Real=.1)
 	X = loaddlm(X, Float64)
 	M, S = _priors(WT_prior, WP_prior, size(X,1), nₜ, nₚ)
 	W = Inference.infer(X, nₜ, nₚ; epochs=epochs, λ=lambda, M=M, S=S)
-	Wₜ, Wₚ = Model.WₜWₚ(W, nₜ, nₚ)
-	savedlm(ot, Wₜ)
-	savedlm(op, Wₚ)
-end
-@main function inferB(B_LLC, nₚ::Integer, ot="WT_inferB.mat", op="WP_inferB.mat"; WT_prior=nothing, WP_prior=nothing, epochs::Integer=5000, lambda::Real=1e-5)
-	B_LLC = loaddlm(B_LLC, Float64)
-	nₚₜ = size(B_LLC,1); nₜ = nₚₜ-nₚ
-	M, S = _priors(WT_prior, WP_prior, nₚₜ, nₜ, nₚ)
-	W = Inference.infer_B(B_LLC, nₚ; epochs=epochs, λ=lambda, M=M, S=S)
 	Wₜ, Wₚ = Model.WₜWₚ(W, nₜ, nₚ)
 	savedlm(ot, Wₜ)
 	savedlm(op, Wₚ)

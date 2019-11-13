@@ -32,12 +32,12 @@ PKTFX.thres("T_sim.mat", "T_sim_thres.mat")
 PKTFX.xgmml("T_sim_thres.mat", nₜ, nₚ; o="T.xgmml")
 
 tryrm("WT_infer.mat"); tryrm("WP_infer.mat"); tryrm("WT_infer_thres.mat"); tryrm("WP_infer_thres.mat"); tryrm("sim_infer.xgmml")
-PKTFX.infer("X_sim.mat", nₜ, nₚ; lambda=0., epochs=20000)
+PKTFX.infer("X_sim.mat", nₜ, nₚ; lambda=.1, epochs=20000)
 PKTFX.thres("WT_infer.mat", "WT_infer_thres.mat")
 PKTFX.thres("WP_infer.mat", "WP_infer_thres.mat")
-PKTFX.correct("WT_infer_thres.mat", "WP_infer_thres.mat"; ot="WT_infer_correct.mat", op="WP_infer_correct.mat")
-PKTFX.xgmml("WT_infer_correct.mat", "WP_infer_correct.mat", o="sim_infer.xgmml")
+PKTFX.xgmml("WT_infer_thres.mat", "WP_infer_thres.mat", o="sim_infer.xgmml")
 
 
 
 # now open xgmml files in cytoscape and have a look
+

@@ -11,7 +11,7 @@ using ..ArrayUtils: eye
 import ..FluxUtils
 
 export offdiag, random_W
-export sse, sse_B
+export sse, sse2, sse_B, sse_T
 export l1
 export _B, _T
 
@@ -40,23 +40,24 @@ struct Constants
 	"""
 	- J: Matrix holding column vectors of KO indexes for each experiment. No need to be square but has to have same shape as X.
 	"""
-	Constants(n::Int, nₜ::Int, nₚ::Int, J) = new(default_Mₜ(n, nₜ, nₚ), default_Mₚ(n, nₜ, nₚ), default_U(J))
+	Constants(n::Int, nₜ::Int, nₚ::Int, J) = new(default_Mₜ(n, nₜ, nₚ), default_Mₚ(n, nₜ, nₚ), _U(J))
 	"- K: number of experiments (k in 1:K)"
-	Constants(n::Int, nₜ::Int, nₚ::Int, K::Int) = Constants(n, nₜ, nₚ, eye(n,K))
-	function default_Mₜ(n::Int, nₜ::Int, nₚ::Int)
-		mat = zeros(Bool, n, n)
-		mat[:, nₚ+1:nₚ+nₜ] .= 1
-		mat[diagind(mat)] .= 0
-		mat
-	end
-	function default_Mₚ(n::Int, nₜ::Int, nₚ::Int)
-		mat = zeros(Bool, n, n)
-		mat[1:nₜ+nₚ, 1:nₚ] .= 1
-		mat[diagind(mat)] .= 0
-		mat
-	end
-	default_U(J) = 1 .- J
+	Constants(n::Int, nₜ::Int, nₚ::Int, K::Int=nₜ+nₚ) = Constants(n, nₜ, nₚ, eye(n,K))
 end
+
+function default_Mₜ(n::Int, nₜ::Int, nₚ::Int)
+	mat = zeros(Bool, n, n)
+	mat[:, nₚ+1:nₚ+nₜ] .= 1
+	mat[diagind(mat)] .= 0
+	mat
+end
+function default_Mₚ(n::Int, nₜ::Int, nₚ::Int)
+	mat = zeros(Bool, n, n)
+	mat[1:nₜ+nₚ, 1:nₚ] .= 1
+	mat[diagind(mat)] .= 0
+	mat
+end
+_U(J) = 1 .- J
 
 nnₜnₚ(Wₜ::AbstractMatrix, Wₚ::AbstractMatrix) = size(Wₜ,1), size(Wₜ,2), size(Wₚ,2)
 function nₓnₜnₚ(Wₜ::AbstractMatrix, Wₚ::AbstractMatrix)
@@ -92,19 +93,32 @@ Note that self-loops are removed.
 """
 X2T(X) = X.*offdiag(X) ./ repeat(diag(X)', size(X,1), 1)
 
+
 """
 - cs: struct containing the constants Mₜ, Mₚ, and U
 - W: Trainable parameters. Square matrix.
 - X: Matrix holding column vectors of measured (simulated) logFC values. No need to be square but has to have the same shape as J.
 """
 function sse(cs::Constants, W::AbstractMatrix, X::Matrix)
-	E = X - _B(cs,W,X)
+	E = X .- _B(cs,W,X)
 	sum((cs.U .* E) .^ 2)
 end
+"Alternative SSE where both TF and PK/PP edges onto a KO are removed instead of only TF. Reduces edges among PK/PP."
+function sse_alt(cs::Constants, W::AbstractMatrix, X::Matrix)
+	i = I(size(W,1))
+	E = cs.U .* X .- hcat([(W.*cs.Mₜ .* uₖ) * ((i - W.*cs.Mₚ .* uₖ) \ x) for (uₖ, x) in zip(eachcol(cs.U), eachcol(X))]...)
+	sum(E.^2)
+end
+
 """
 Loss function to train parameters in W to result in a B that is as similar to a solution to B from LLC method (Eberhardt).
 """
 sse_B(cs::Constants, W::AbstractMatrix, B_LLC::Matrix) = sum((_B(cs,W) .- B_LLC).^2)
+
+function sse_T(cs::Constants, W::AbstractMatrix, X::Matrix)
+	n,K = size(X)
+	sum(([X2T(X) zeros(n,n-K)] - _T(cs, W)).^2)
+end
 
 l1(W::AbstractMatrix) = norm(W,1)
 
