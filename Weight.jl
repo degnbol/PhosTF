@@ -1,28 +1,16 @@
 #!/usr/bin/env julia
 if !isdefined(Main, :Model) include("Model.jl") end
+if !isdefined(Main, :ArrayUtils) include("utilities/ArrayUtils.jl") end
 
 "Construction of valid and random weight matrices, detection of silent edges and weight matrix correction."
 module Weight
 using LinearAlgebra
 using SparseArrays
-using ..Model
-
-function random_Wₜ(n::Integer, nₜ::Integer, nₚ::Integer)
-	mat = rand([-1, 0, 1], (n, nₜ))
-	mat[diagind(mat, -nₚ)] .= 0
-	mat
-end
-
-function random_Wₚ(nₜ::Integer, nₚ::Integer)
-	mat = rand(Uniform(.5, 1.), (nₜ+nₚ, nₚ))
-	mat[rand([false, true], size(mat))] .= 0
-	mat[diagind(mat)] .= 0
-	mat
-end
+using ..Model, ..ArrayUtils
+using Random
 
 
 self_loops(mat::AbstractMatrix, k::Integer=0) = (diag(mat, k) .!= 0)
-
 
 """
 Mask of edges that leads to deadends, which are phosphorylation regulation leading to nodes that regulate nothing.
@@ -131,4 +119,169 @@ end
 
 threshold!(W::AbstractMatrix, thres::AbstractFloat=0.001) = W[abs.(W) .< thres] .= 0
 
+
+
+"""
+Get an adjacency matrix where an edge indicates that target is a subset of source, 
+in the sense of which outgoing edges each node has.
+"""
+function subset_edges(B::BitMatrix)
+	out = B'B .>= sum(B, dims=1)'
+	out[diagind(out)] .= 0  # no self-loops
+	out[vec(sum(B,dims=1) .== 0),:] .= 0  # no subset defined for empty sets
+	out
+end
+
+"Get nodes that only has a single regulator"
+has_single_regulator(B) = vec(sum(B, dims=2) .== 1)
+"Get the nodes which are the only regulator of some other node."
+only_regulator(B::BitMatrix) = vec(sum(B[has_single_regulator(B),:], dims=1) .!= 0)
+
+"""
+Randomly split edges into sets P, T or X where X is nodes without outgoing edges, 
+P has to have edges in B to nodes that is also regulated by T.
+- nₚ: assign this many nodes to the set P.
+"""
+random_PTX(B, nₚ::Integer) = random_PTX(B .!= 0, nₚ)
+function random_PTX(B::BitMatrix, nₚ::Integer)
+	n = size(B,1)
+	# a node with zero outgoing edges belong to X
+	X = vec(sum(B,dims=1) .== 0)
+	# if a node is the only regulator of another, it will have to be in T,
+	# since there would be no way for it to perform its regulation otherwise
+	T = only_regulator(B)
+	# find edges that are a "subset" as a PK edge: the target does not control more than the source, 
+	# that is, bᵢⱼ is allowed if bₖⱼ >= bₖᵢ for any k.
+	subset = subset_edges(B)
+	# good candidates are all the nodes that has at least one "non-destructive" outgoing edge
+	P_candidates = .!(X .| T) .& vec(sum(subset, dims=1) .!= 0)
+	P = falses(n)
+	# find nodes to add to P one at a time
+	for i ∈ 1:nₚ
+		# add one node to P at a time from the good candidates if there are any
+		if any(P_candidates)
+			P[rand((1:n)[P_candidates])] = true
+		else  # otherwise add something random that changes B a bit
+			remain = .!(P .|T .|X)
+			if !any(remain)
+				@warn("It was not possible to add as many nodes to P as wanted")
+				break
+			end
+			P[rand((1:n)[remain])] = true
+		end
+		# T grows as well so we always make sure that a P does not end up being the only regulator of some node
+		T[.!P] .|= only_regulator(B[:,.!P])
+		P_candidates .&= .!(P .| T)  # remove anything in P or T from candidates
+	end
+	P, .!(P .|X), X
+end
+
+"""
+Rewire P edges to random Ts that regulate their final target given as a B edge
+"""
+rewire(B, P,T,X) = rewire(B .!= 0, P,T,X)
+function rewire(B::BitMatrix, P,T,X)
+	n = size(B,1)
+	W = falses(n,n)
+	W[:,T] .= B[:,T]  # T edges are the same
+	P_num = (1:n)[P]  # logical to numerical index
+	T_num = (1:n)[T]  # logical to numerical index
+	for j ∈ P_num  # each P
+		for i ∈ (1:n)[B[:,j]]  # each P b edge, numerical index
+			# randomly select a tf to re-route through
+			tf = rand(T_num[B[i,T]])
+			W[tf,j] = true
+			# check if we have fully described the intended effect
+			# ^10 to reach the ends of all cascades
+			if all(W^10 * W[:,j] >= B[:,j]) break end
+		end
+	end
+	W
+end
+
+"""
+Find Ps that regulate "subsets" of what other Ps regulate and connect a random pair so that the one regulating less is the target.
+Repeat until there is no more cascades edges to add.
+"""
+function add_cascades!(W, P)
+	nₚₖ = sum(P)
+	# which P can be a "subset" of another P?
+	subset = subset_edges(W[:,P])
+	while any(subset)
+		# choose a random "subsetting" edge to add (linear index)
+		idx = rand((1:nₚₖ^2)[vec(subset)])
+		view(W,P,P)[idx] = true  # add P->P edge
+		cartesian = CartesianIndices(subset)[idx]  # we need to know from and to which protein
+		view(W,:,P)[:,cartesian[2]] .-= view(W,:,P)[:,cartesian[1]]  # remove edges that are now described indirectly through the new P->P edge
+		# update
+		subset = subset_edges(W[:,P])
+	end
+	W
+end
+
+
+"""
+Set a number of nodes ∈ P as a node ∈ PP, with the requirement that it cannot be the only phos regulator of any node.
+- nₚₚ: number of phosphatases to create. If it is not possible to find all nₚₚ, then extra random kinase edges are added to balance out regulation.
+"""
+function phosphatases(W, P, nₚₚ::Integer)
+	n = size(W,1)
+	# find the nodes ∈ P that is not the only phos regulator of some node
+	good_PP = falses(n)
+	view(good_PP, P) .= vec(sum(W[has_single_regulator(W[:,P]), P], dims=1) .== 0)
+	good_nₚₚ = sum(good_PP)
+	
+	if good_nₚₚ >= nₚₚ # unlikely
+		PP = shuffle((1:n)[good_PP])[1:nₚₚ]
+	else
+		@info("Adding kinase edges so a PP is not only regulator.")
+		PK = P .& .!good_PP
+		bad_PP = shuffle((1:n)[PK])[1:nₚₚ-good_nₚₚ]
+		PK[bad_PP] .= false  # remove the new PPs from PK
+		# find the nodes that has a single PP as regulator
+		has_single_PP = has_single_regulator(W[:,bad_PP])
+		# add a single random PK edge onto each node that is currently only regulated by a single PP
+		for i ∈ (1:n)[has_single_PP]
+			W[i,rand((1:n)[PK])] = 1
+		end
+		PP = good_PP .| tological(bad_PP, n)
+	end
+	
+	W = 1W
+	W[:,PP] .*= -1
+	return W
+end
+
+
+"""
+Set about half the TF edges as repressing.
+- W: edges.
+- T: logical index of which nodes are Ts.
+"""
+function repressors(W, T)
+	W = 1W  # convert to int
+	W[:,T] .*= rand([-1, 1], size(W))[:,T]
+	W
+end
+
+"Sort an adjacency matrix so proteins are in order PK, PP, T, X."
+function sort_PTX(W, P, T, X)
+	n = size(W,1)
+	order = [(1:n)[P]; (1:n)[T]; (1:n)[X]]
+	reorder(W, order)
+end
+
+
+function random_W(B, nₚₖ::Integer, nₚₚ::Integer)
+	P, T, X = random_PTX(B, nₚₖ + nₚₚ)
+	W = rewire(B, P,T,X)
+	add_cascades!(W, P)
+	W = phosphatases(W, P, nₚₚ)
+	W = repressors(W, T)
+	W = sort_PTX(W, P, T, X)
+	Model.WₜWₚ(W, sum(T), sum(P))
+end
+
+
 end;
+
