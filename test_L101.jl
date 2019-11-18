@@ -6,7 +6,7 @@
 # cd("../simi_neg"); nₜ, nₚ = 2, 3
 # cd("../cycl"); nₜ, nₚ = 2, 2
 # cd("../cycl_neg"); nₜ, nₚ = 2, 2
-
+using Test
 include("PKTFX.jl")
 tryrm(fname) = try rm(fname) catch IOError end
 # include("../../utilities/UnitTest.jl")
