@@ -12,16 +12,16 @@ include("Model.jl"); using .Model
 using Formatting
 
 "W is the param weight matrix, W′ is the masked version where untrainable entries are set to zero."
-L1(X, W, W′, cs, λ::Real) = sse(cs, W′, X) + λ*l1(W)
+LB(X, W, W′, cs, λ::Real) = sse(cs, W′, X) + λ*l1(_B(cs, abs.(W)))
 LT(X, W, W′, cs, λ::Real) = sse_T(cs, W′, X) + λ*l1(_B(cs, abs.(W)))
-loss(X, W, W′, cs, λ, Iₚ, Iₜ, Iₓ) = sse(cs, W′, X) + l1(_B(cs, abs.(W)))
-
+L1(X, W, W′, cs, λ::Real) = sse(cs, W′, X) + λ*l1(W)
+lossfuns = Dict("LB"=>LB, "LT"=>LT, "L1"=>L1)
 
 """
 - throttle: seconds between prints
 - opt: ADAMW or maybe NADAM
 """
-function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=10000, λ::Real=.1, throttle=5, opt=ADAMW(), M=nothing, S=nothing)
+function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=10000, lossfun="LB", λ::Real=.1, throttle=5, opt=ADAMW(), M=nothing, S=nothing)
 	n, K = size(X)
 	if M === nothing M = ones(n, n) end # no prior knowledge
 	M[diagind(M)] .= 0  # enforce no self loops
@@ -31,8 +31,8 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 	Iₜ = Model.Iₜ(n, nₜ, nₚ)
 	Iₓ = I(n) - (Iₜ+Iₚ)
 
-	L(X) = loss(X, W, Model.apply_priors(W, M, S), cs, λ, Iₚ, Iₜ, Iₓ)
-	
+	L(X) = lossfuns[lossfun](X, W, Model.apply_priors(W, M, S), cs, λ)
+
 	function cb()
 		l = L(X)
 		w′ = Model.apply_priors(W, M, S)
