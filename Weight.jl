@@ -142,7 +142,7 @@ Randomly split edges into sets P, T or X where X is nodes without outgoing edges
 P has to have edges in B to nodes that is also regulated by T.
 - nₚ: assign this many nodes to the set P.
 """
-random_PTX(B, nₚ::Integer) = random_PTX(B .!= 0, nₚ)
+random_PTX(B::Matrix, nₚ::Integer) = random_PTX(B .!= 0, nₚ)
 function random_PTX(B::BitMatrix, nₚ::Integer)
 	n = size(B,1)
 	# a node with zero outgoing edges belong to X
@@ -179,7 +179,7 @@ end
 """
 Rewire P edges to random Ts that regulate their final target given as a B edge
 """
-rewire(B, P,T,X) = rewire(B .!= 0, P,T,X)
+rewire(B::Matrix, P,T,X) = rewire(B .!= 0, P,T,X)
 function rewire(B::BitMatrix, P,T,X)
 	n = size(B,1)
 	W = falses(n,n)
@@ -218,6 +218,25 @@ function add_cascades!(W, P)
 	W
 end
 
+"version where cascades are only added for half the places where it is possible"
+function add_cascades50!(W, P)
+	nₚₖ = sum(P)
+	# which P can be a "subset" of another P?
+	subset = subset_edges(W[:,P])
+	n_subs = sum(subset)
+	while sum(subset) > .5n_subs
+		# choose a random "subsetting" edge to add (linear index)
+		idx = rand((1:nₚₖ^2)[vec(subset)])
+		view(W,P,P)[idx] = true  # add P->P edge
+		cartesian = CartesianIndices(subset)[idx]  # we need to know from and to which protein
+		view(W,:,P)[:,cartesian[2]] .-= view(W,:,P)[:,cartesian[1]]  # remove edges that are now described indirectly through the new P->P edge
+		# update
+		subset = subset_edges(W[:,P])
+	end
+	W
+end
+
+add_cascades_funs = Dict("100"=>add_cascades!, "050"=>add_cascades50!)
 
 """
 Set a number of nodes ∈ P as a node ∈ PP, with the requirement that it cannot be the only phos regulator of any node.
@@ -227,14 +246,17 @@ Random extra kinase edges are added to balance out regulation.
 function phosphatases(W, P, nₚₚ::Integer)
 	n = size(W,1)
 
-	PP = tological(shuffle((1:n)[P])[1:nₚₚ])
+	PP = tological(shuffle((1:n)[P])[1:nₚₚ], n)
 	PK = P .& .!PP
 
 	# find the nodes that has a PP regulator but no PK regulator
 	only_has_PP = any(W[:,PP]; dims=2) .& .!any(W[:,PK]; dims=2)
-	# add a single random PK edge onto each node that is currently only regulated by PP
+	# add a single random PK edge onto each node that is currently only regulated by PP.
+	# make sure it is not a self-loop that is added.
 	for i ∈ (1:n)[vec(only_has_PP)]
-		W[i,rand((1:n)[PK])] = 1
+		available_PKs = copy(PK)
+		available_PKs[i] = false
+		W[i,rand((1:n)[available_PKs])] = 1
 	end
 	
 	# set the sign for PP
@@ -273,6 +295,15 @@ function random_W(B, nₚₖ::Integer, nₚₚ::Integer)
 	Model.WₜWₚ(W, sum(T), sum(P))
 end
 
+function random_W(B, nₚₖ::Integer, nₚₚ::Integer, fun)
+	P, T, X = random_PTX(B, nₚₖ + nₚₚ)
+	W = rewire(B, P,T,X)
+	add_cascades_funs[fun](W, P)
+	W = phosphatases(W, P, nₚₚ)
+	W = repressors(W, T)
+	W = sort_PTX(W, P, T, X)
+	Model.WₜWₚ(W, sum(T), sum(P))
+end
 
 end;
 

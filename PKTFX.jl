@@ -31,29 +31,41 @@ loadnet(i) = load(i, Network)
 """
 Create random W from a adjacency matrix containing B.
 """
-@main function W(B::String, nₚₖ::Integer, nₚₚ::Integer; WT_fname::String=default_Wₜ, WP_fname::String=default_Wₚ)
-	Wₜ, Wₚ = Weight.random_W(B, nₚₖ, nₚₚ)
+@main function W(B::String, nₚₖ::Integer, nₚₚ::Integer, fun; WT_fname::String=default_Wₜ, WP_fname::String=default_Wₚ)
+	Wₜ, Wₚ = Weight.random_W(loaddlm(B), nₚₖ, nₚₚ, fun)
 	savedlm(WT_fname, Wₜ)
 	savedlm(WP_fname, Wₚ)
 end
 
 """
 - np: mandatory arg to set nₚ
+- save: should we save files if no corrections are made?
 """
-@main function correct(io=nothing, o=nothing; np=nothing)
+@main function correct(io=nothing, o=nothing; np=nothing, save::Bool=false)
 	if np === nothing @error("supply --np"); return end
 	i, o = inout(io, o)
 	W = loaddlm(io)
-	if Weight.correct!(W, np) @info("Corrections made.")
-	else @info("NO corrections made.") end
-	savedlm(o, W)
+	if Weight.correct!(W, np)
+		@info("Corrections made.")
+		savedlm(o, W)
+	else
+		@info("NO corrections made.")
+		if save savedlm(o, W) end
+	end
 end
-@main function correct(Wₜ_fname::String=default_Wₜ, Wₚ_fname::String=default_Wₚ; ot="WT_cor.mat", op="WP_cor.mat")
+@main function correct(Wₜ_fname::String=default_Wₜ, Wₚ_fname::String=default_Wₚ; ot="WT_cor.mat", op="WP_cor.mat", save::Bool=false)
 	Wₜ, Wₚ = loaddlm(Wₜ_fname), loaddlm(Wₚ_fname)
-	if Weight.correct!(Wₜ, Wₚ) @info("Corrections made.")
-	else @info("NO corrections made.") end
-	savedlm(ot, Wₜ)
-	savedlm(op, Wₚ)
+	if Weight.correct!(Wₜ, Wₚ)
+		@info("Corrections made.")
+		savedlm(ot, Wₜ)
+		savedlm(op, Wₚ)
+	else
+		@info("NO corrections made.")
+		if save
+			savedlm(ot, Wₜ)
+			savedlm(op, Wₚ)
+		end
+	end
 end
 
 @main function iteratemodel(Wₜ="WT.mat", Wₚ="WP.mat"; o=stdout)
@@ -272,10 +284,10 @@ end
 Infer a weight matrix from logFC data.
 - WT_prior/WP_prior: optionally limit Wₜ/Wₚ if they are partially known.
 """
-@main function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; WT_prior=nothing, WP_prior=nothing, epochs::Integer=5000, lambda::Real=.1)
+@main function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; WT_prior=nothing, WP_prior=nothing, epochs::Integer=5000, lambda::Real=.1, lossfun="LB")
 	X = loaddlm(X, Float64)
 	M, S = _priors(WT_prior, WP_prior, size(X,1), nₜ, nₚ)
-	W = Inference.infer(X, nₜ, nₚ; epochs=epochs, λ=lambda, M=M, S=S)
+	W = Inference.infer(X, nₜ, nₚ; epochs=epochs, lossfun=lossfun, λ=lambda, M=M, S=S)
 	Wₜ, Wₚ = Model.WₜWₚ(W, nₜ, nₚ)
 	savedlm(ot, Wₜ)
 	savedlm(op, Wₚ)
