@@ -191,9 +191,8 @@ function rewire(B::BitMatrix, P,T,X)
 			# randomly select a tf to re-route through
 			tf = rand(T_num[B[i,T]])
 			W[tf,j] = true
-			# check if we have fully described the intended effect
-			# ^10 to reach the ends of all cascades
-			if all(W^10 * W[:,j] >= B[:,j]) break end
+			# check if we have fully described the intended effect (NO transcription cycles)
+			if all(W * W[:,j] >= B[:,j]) break end
 		end
 	end
 	W
@@ -201,7 +200,7 @@ end
 
 """
 Find Ps that regulate "subsets" of what other Ps regulate and connect a random pair so that the one regulating less is the target.
-Repeat until there is no more cascades edges to add.
+Repeat until there is no more cascade edges to add.
 """
 function add_cascades!(W, P)
 	nₚₖ = sum(P)
@@ -222,31 +221,23 @@ end
 
 """
 Set a number of nodes ∈ P as a node ∈ PP, with the requirement that it cannot be the only phos regulator of any node.
-- nₚₚ: number of phosphatases to create. If it is not possible to find all nₚₚ, then extra random kinase edges are added to balance out regulation.
+Random extra kinase edges are added to balance out regulation.
+- nₚₚ: number of phosphatases to create. 
 """
 function phosphatases(W, P, nₚₚ::Integer)
 	n = size(W,1)
-	# find the nodes ∈ P that is not the only phos regulator of some node
-	good_PP = falses(n)
-	view(good_PP, P) .= vec(sum(W[has_single_regulator(W[:,P]), P], dims=1) .== 0)
-	good_nₚₚ = sum(good_PP)
-	
-	if good_nₚₚ >= nₚₚ # unlikely
-		PP = shuffle((1:n)[good_PP])[1:nₚₚ]
-	else
-		@info("Adding kinase edges so a PP is not only regulator.")
-		PK = P .& .!good_PP
-		bad_PP = shuffle((1:n)[PK])[1:nₚₚ-good_nₚₚ]
-		PK[bad_PP] .= false  # remove the new PPs from PK
-		# find the nodes that has a single PP as regulator
-		has_single_PP = has_single_regulator(W[:,bad_PP])
-		# add a single random PK edge onto each node that is currently only regulated by a single PP
-		for i ∈ (1:n)[has_single_PP]
-			W[i,rand((1:n)[PK])] = 1
-		end
-		PP = good_PP .| tological(bad_PP, n)
+
+	PP = tological(shuffle((1:n)[P])[1:nₚₚ])
+	PK = P .& .!PP
+
+	# find the nodes that has a PP regulator but no PK regulator
+	only_has_PP = any(W[:,PP]; dims=2) .& .!any(W[:,PK]; dims=2)
+	# add a single random PK edge onto each node that is currently only regulated by PP
+	for i ∈ (1:n)[vec(only_has_PP)]
+		W[i,rand((1:n)[PK])] = 1
 	end
 	
+	# set the sign for PP
 	W = 1W
 	W[:,PP] .*= -1
 	return W
