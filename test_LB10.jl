@@ -17,8 +17,8 @@ tryrm(fname) = try rm(fname) catch IOError end
 
 nₚₖ, nₚₚ = 20, 5 # ≈ (144 - 30) / (144+266), 30 / (144+266)
 
-for lossfun ∈ ["LB", "LT", "L1"]
-    for lambda ∈ [1., .1]
+for lossfun ∈ ["LB"]
+    for lambda ∈ [1.]
         for gen_fun ∈ ["100", "050"]
             cd(lossfun * lpad(Int64(lambda*10), 2, '0') * "_" * gen_fun)
             for net ∈ 1:5
