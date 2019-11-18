@@ -21,8 +21,8 @@ const noise_activation = .25weak_activation
 
 include("regulatory_module.jl")
 include("gene.jl")
-include("network.jl")
 include("phos_edges.jl")
+include("network.jl")
 
 # define struct types for JSON3 to be able to read/write them
 JSON3.StructType(::Type{RegulatoryModule}) = JSON3.Struct()

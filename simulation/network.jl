@@ -1,5 +1,4 @@
 if !isdefined(Main, :ArrayUtils) include("../utilities/ArrayUtils.jl") end
-include("phos_edges.jl")
 
 """
 Network struct containing genes for simulation.
