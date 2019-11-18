@@ -30,8 +30,6 @@ for lossfun ∈ ["L1"]
 
                     PKTFX.W("goldstandard.mat", nₚₖ, nₚₚ, gen_fun)
                     PKTFX.correct()  # there should not be any corrections to make
-                    n, nₜ = size(PKTFX.loaddlm("WT.mat"))
-                    _, nₚ = size(PKTFX.loaddlm("WP.mat"))
                     
                     PKTFX.network()
                     # PKTFX.xgmml(o="net.xgmml")
@@ -51,6 +49,11 @@ for lossfun ∈ ["L1"]
                     end
                     break
                 end
+
+
+                n, nₜ = size(PKTFX.loaddlm("WT.mat"))
+                _, nₚ = size(PKTFX.loaddlm("WP.mat"))
+
                 # tryrm("sim.xgmml"); PKTFX.xgmml(X="X_sim.mat", o="sim.xgmml")
 
                 # PKTFX.T("X_sim.mat", "T_sim.mat")
