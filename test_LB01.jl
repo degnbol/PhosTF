@@ -21,7 +21,7 @@ for lossfun ∈ ["LB"]
     for lambda ∈ [.1]
         for gen_fun ∈ ["100", "050"]
             cd(lossfun * lpad(Int64(lambda*10), 2, '0') * "_" * gen_fun)
-            for net ∈ 1:5
+            for net ∈ 2:5
                 cd("$(net)_1")
                 println(pwd())
 
@@ -68,8 +68,9 @@ for lossfun ∈ ["LB"]
                 # PKTFX.xgmml("WT_infer_thres.mat", "WP_infer_thres.mat", o="infer.xgmml")
         
                 # now open xgmml files in cytoscape and have a look
-                cd("../..")
+                cd("..")
             end
+            cd("..")
         end
     end
 end

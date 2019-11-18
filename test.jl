@@ -67,8 +67,9 @@ for lossfun ∈ ["LB", "LT", "L1"]
                 # PKTFX.xgmml("WT_infer_thres.mat", "WP_infer_thres.mat", o="infer.xgmml")
         
                 # now open xgmml files in cytoscape and have a look
-                cd("../..")
+                cd("..")
             end
+            cd("..")
         end
     end
 end
