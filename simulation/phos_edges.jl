@@ -2,7 +2,7 @@ using Statistics
 using SparseArrays
 
 """
-Convert a Wₚ from float to int.
+Convert a Wₚ from int to float.
 Choosing the float values are done in a manner that will make it likely 
 that presence or absence of regulation should make a difference to down-stream gene expression levels.
 """
@@ -10,7 +10,7 @@ function init_phos_edges(genes::Vector, Wₚ::Matrix, phos_activation::BitVector
     nₚ = size(Wₚ,1); nₜ = size(Wₚ,2) - nₚ
     Wₚ = 1.0Wₚ # convert type
     
-    # value for an edge if it was the only regulator of its target
+    # here each edge is given the value that would make sense if we imagined it was the only regulator of its target
     Wₚ[1:nₚ,:] .*= 2λ_phos[1:nₚ,:]
     # mean_k = avg. dissociation constant k for the outgoing edges of each TF
     Wₚ[nₚ+1:nₚ+nₜ,:] .*= λ_phos[nₚ+1:nₚ+nₜ,:] .* mean_k(genes, nₜ, nₚ)

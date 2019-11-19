@@ -138,6 +138,18 @@ end
 	savedlm(o, Wₜ)
 end
 
+"Get the Wₚ matrix that contains edges indicating activation as opposed to phosphorylation since we don't infer phosphorylation but activation."
+@main function WP_activation(i=default_net; o=stdout)
+	net = loadnet(i)
+	Wₚ_activation = GeneRegulation.Wₚ_activation(net)
+	Wₚ = sign.(net.Wₚₖ .- net.Wₚₚ)
+	phos_regulated = sum(any(Wₚ .!= 0; dims=2))
+	changes = sum(Wₚ .!= Wₚ_activation)
+	@info("""$changes edges were changed.
+	$(sum(net.phos_activation)) out of $(length(net.phos_activation)) TFs/PKs/PPs are phos activated.
+	$phos_regulated are phos regulated.""")
+	savedlm(o, Wₚ_activation)
+end
 
 """
 Simulate a network.

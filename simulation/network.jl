@@ -38,7 +38,7 @@ struct Network
 		new(genes, WₚₖWₚₚ(Wₚ)..., n, n-(nₜ+nₚ), nₜ, nₚ, max_transcription, max_translation, λ_mRNA, λ_prot, λ_phos, r₀, p₀, ϕ₀, phos_activation)
 	end
 	function Network(genes::Vector{Gene}, Wₚ::Matrix{<:Integer})
-		phos_activation=vec(init_phos_activation(Wₚ))
+		phos_activation=init_phos_activation(Wₚ)
 		λ_phos = random_λ(size(Wₚ,1))
 		Network(genes, init_phos_edges(genes, Wₚ, phos_activation, λ_phos)..., phos_activation, λ_phos)
 	end
@@ -46,7 +46,7 @@ struct Network
 	Make sure to be exact about using either integer or float for Wₚ 
 	since a matrix of floats {-1.,0.,1.} will be seen as the exact edge values and not indication of repression, activation, etc.
 	"""
-	Network(genes::Vector{Gene}, Wₚ::Matrix{<:AbstractFloat}) = Network(genes, WₚₖWₚₚ(Wₚ)..., vec(init_phos_activation(Wₚ)), random_λ(size(Wₚ,1)))
+	Network(genes::Vector{Gene}, Wₚ::Matrix{<:AbstractFloat}) = Network(genes, WₚₖWₚₚ(Wₚ)..., init_phos_activation(Wₚ), random_λ(size(Wₚ,1)))
 	function Network(genes::Vector{Gene}, Wₚₖ::Matrix{<:AbstractFloat}, Wₚₚ::Matrix{<:AbstractFloat}, phos_activation::BitVector, λ_phos::Vector)
 		n, nₚ = length(genes), size(Wₚₖ,2)
 		nₜ = size(Wₚₖ, 1) - nₚ
@@ -96,7 +96,7 @@ struct Network
 	random_t½() = TruncNormal(5, 50)
 	
 	"Activated by phosphorylation if there is phos regulation on a protein (and at least as many kinases as phosphatases)"
-	init_phos_activation(Wₚ::Matrix) = (sum(abs.(Wₚ), dims=2) .> 0) .& (sum(Wₚ, dims=2) .>= 0)
+	init_phos_activation(Wₚ::Matrix) = (sum(abs.(Wₚ), dims=2) .> 0) .& (sum(Wₚ, dims=2) .>= 0) |> vec
 	
 	"""
 	Initial mRNA. Estimated as
