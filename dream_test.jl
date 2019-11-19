@@ -10,20 +10,18 @@ lambda_B = parse(Float64, '.' * lambda_B[2:end])
 
 nₚₖ, nₚₚ = 20, 5 # ≈ (144 - 30) / (144+266), 30 / (144+266)
 
-for net ∈ 1:5
-    for sample ∈ 1:5
-        cd("$(net)_$(sample)")
-        println(pwd())
+for net ∈ 1:5 for sample ∈ 1:5
+    cd("$(net)_$(sample)")
+    println(pwd())
 
-        n, nₜ = size(PKTFX.loaddlm("sim/WT.mat"))
-        _, nₚ = size(PKTFX.loaddlm("sim/WP.mat"))
+    n, nₜ = size(PKTFX.loaddlm("sim/WT.mat"))
+    _, nₚ = size(PKTFX.loaddlm("sim/WP.mat"))
 
-        PKTFX.infer("sim/X_sim.mat", nₜ, nₚ; lambda_W=lambda_W, lambda_B=lambda_B, epochs=10000, PKPP="sim/PKPP.mat")
-        PKTFX.thres("WT_infer.mat", "WT_infer_thres.mat")
-        PKTFX.thres("WP_infer.mat", "WP_infer_thres.mat")
+    PKTFX.infer("sim/X_sim.mat", nₜ, nₚ; lambda_W=lambda_W, lambda_B=lambda_B, epochs=10000, PKPP="sim/PKPP.mat")
+    PKTFX.thres("WT_infer.mat", "WT_infer_thres.mat")
+    PKTFX.thres("WP_infer.mat", "WP_infer_thres.mat")
 
-        cd("..")
-    end
-end
+    cd("..")
+end end
 
 
