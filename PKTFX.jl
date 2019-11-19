@@ -294,8 +294,8 @@ Infer a weight matrix from logFC data.
 	if PKPP !== nothing
 		PKPP = vec(loaddlm(PKPP))
 		padding = zeros(n-length(PKPP))
-		Iₚₖ = diagm([PKPP == +1; padding])
-		Iₚₚ = diagm([PKPP == -1; padding])
+		Iₚₖ = diagm([PKPP .== +1; padding])
+		Iₚₚ = diagm([PKPP .== -1; padding])
 	else
 		Iₚₖ, Iₚₚ = nothing, nothing
 	end

@@ -8,8 +8,6 @@ lambda_W, lambda_B = split(basename(pwd()), '_')[2:3]
 lambda_W = parse(Float64, '.' * lambda_W[2:end])
 lambda_B = parse(Float64, '.' * lambda_B[2:end])
 
-nₚₖ, nₚₚ = 20, 5 # ≈ (144 - 30) / (144+266), 30 / (144+266)
-
 for net ∈ 1:5 for sample ∈ 1:5
     cd("$(net)_$(sample)")
     println(pwd())

@@ -22,12 +22,6 @@ function offdiag(matrix)
 	out
 end
 
-function random_W(n::Integer, m::Integer)
-	out = FluxUtils.random_weight(n::Int, m::Int)
-	out[diagind(out)] .= 0
-	out
-end
-
 
 "Constant terms in the equations of the inference model."
 struct Constants
@@ -78,9 +72,9 @@ _Wₚ(W, nₜ::Integer, nₚ::Integer) = W[1:nₜ+nₚ,1:nₚ]
 wₚᵢⱼ := vᵢ⋅(|wₚₖᵢⱼ| - |wₚₚᵢⱼ|)
 As vector notation:
 Wₚ := V (Wₚₖ' - Wₚₚ')
-We use the diagonal values of Wₚ as V since they get deleted anyways so are unused.
+We use rowwise multiplication with .* here instead of diagonal matrix multiplication so make sure V is a 2D column vector.
 """
-_Wₚ(W, Iₚₖ::Matrix, Iₚₚ::Matrix) = (W.*(Iₚₖ.+Iₚₚ)) * (abs.(W*Iₚₖ) - abs.(W*Iₚₚ))
+_Wₚ(W, V, Iₚₖ::Matrix, Iₚₚ::Matrix) = V .* (abs.(W)*(Iₚₖ-Iₚₚ))
 WₜWₚ(W, nₜ::Integer, nₚ::Integer) = _Wₜ(W,nₜ,nₚ), _Wₚ(W,nₜ,nₚ)
 
 
@@ -154,7 +148,7 @@ apply_priors(W, ::Nothing, S) = W .* (S .== 0) .+ abs.(W) .* S
 apply_priors(W, M, ::Nothing) = W .* M
 apply_priors(W, ::Nothing, ::Nothing) = W
 "If we know which nodes are ∈ PK and ∈ PP, then use that information."
-apply_priors(W, M, S, Iₚₖ, Iₚₚ) = apply_priors(W*(I(size(W,1)).-Iₚₖ.-Iₚₚ) .+ _Wₚ(W,Iₚₖ,Iₚₚ), M, S)
-apply_priors(W, M, S, ::Nothing, ::Nothing) = apply_priors(W, M, S)
+apply_priors(W, V, M, S, Iₚₖ::Matrix, Iₚₚ::Matrix) = apply_priors(W*(I(size(W,1))-(Iₚₖ+Iₚₚ)) + _Wₚ(W,V,Iₚₖ,Iₚₚ), M, S)
+apply_priors(W, ::Nothing, M, S, ::Nothing, ::Nothing) = apply_priors(W, M, S)
 
 end;
