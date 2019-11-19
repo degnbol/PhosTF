@@ -283,11 +283,23 @@ end
 """
 Infer a weight matrix from logFC data.
 - WT_prior/WP_prior: optionally limit Wₜ/Wₚ if they are partially known.
+- PKPP: fname. vector, each element is -1 or 1 indicating PP or PK. 0s ignored.
 """
-@main function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; WT_prior=nothing, WP_prior=nothing, epochs::Integer=5000, lambda::Real=.1, lossfun="LB")
+@main function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; epochs::Integer=5000, lambda_W::Real=.1, lambda_B::Real=.1, WT_prior=nothing, WP_prior=nothing, PKPP=nothing)
 	X = loaddlm(X, Float64)
-	M, S = _priors(WT_prior, WP_prior, size(X,1), nₜ, nₚ)
-	W = Inference.infer(X, nₜ, nₚ; epochs=epochs, lossfun=lossfun, λ=lambda, M=M, S=S)
+	n = size(X,1)
+	M, S = _priors(WT_prior, WP_prior, n, nₜ, nₚ)
+	
+	if PKPP !== nothing
+		PKPP = vec(loaddlm(PKPP))
+		padding = zeros(n-length(PKPP))
+		Iₚₖ = diagm([PKPP == +1; padding])
+		Iₚₚ = diagm([PKPP == -1; padding])
+	else
+		Iₚₖ, Iₚₚ = nothing, nothing
+	end
+
+	W = Inference.infer(X, nₜ, nₚ; epochs=epochs, λ_W=lambda_W, λ_B=lambda_B, M=M, S=S, Iₚₖ=Iₚₖ, Iₚₚ=Iₚₚ)
 	Wₜ, Wₚ = Model.WₜWₚ(W, nₜ, nₚ)
 	savedlm(ot, Wₜ)
 	savedlm(op, Wₚ)
@@ -324,6 +336,11 @@ Swap order of PK and TF in matrix (swap between PK-TF-X and TF-PK-X).
 	mat = loaddlm(i, Float64)
 	mat = reorder(mat, [n1+1:n1+n2;1:n1;n1+n2+1:maximum(size(mat))])
 	savedlm(o, mat)
+end
+
+@main function PKPP(io=nothing, o=nothing)
+	i, o = inout(io, o)
+	savedlm(o, Weight.PKPP(loaddlm(i)))
 end
 
 end;

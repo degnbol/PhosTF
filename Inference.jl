@@ -12,26 +12,25 @@ include("Model.jl"); using .Model
 using Formatting
 
 "W is the param weight matrix, W′ is the masked version where untrainable entries are set to zero."
-LB(X, W, W′, cs, λ::Real) = sse(cs, W′, X) + λ*l1(_B(cs, abs.(W)))
-LT(X, W, W′, cs, λ::Real) = sse_T(cs, W′, X) + λ*l1(_B(cs, abs.(W)))
-L1(X, W, W′, cs, λ::Real) = sse(cs, W′, X) + λ*l1(W)
-lossfuns = Dict("LB"=>LB, "LT"=>LT, "L1"=>L1)
+L1(X, W′, cs, λ::Real) = sse(cs, W′, X) + λ*l1(W′)
+loss(X, W′, cs, λ_W::Real, λ_B::Real) = sse(cs, W′, X) + λ*l1(W′) + λ*l1(_B(cs, abs.(W′)))
 
 """
 - throttle: seconds between prints
 - opt: ADAMW or maybe NADAM
 """
-function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=10000, lossfun="LB", λ::Real=.1, throttle=5, opt=ADAMW(), M=nothing, S=nothing)
+function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=10000, λ_W::Real=.1, λ_B::Real=.1, throttle=5, opt=ADAMW(), 
+	M=nothing, S=nothing, Iₚₖ=nothing, Iₚₚ=nothing)
 	n, K = size(X)
 	if M === nothing M = ones(n, n) end # no prior knowledge
 	M[diagind(M)] .= 0  # enforce no self loops
 	cs = Model.Constants(n, nₜ, nₚ, K)
 	W = param(random_W(n, n))
-	Iₚ = Model.Iₚ(n, nₜ, nₚ)
+	Iₚ = (Iₚₖ === nothing || Iₚₚ === nothing) ? Model.Iₚ(n, nₜ, nₚ) : Iₚₖ + Iₚₚ
 	Iₜ = Model.Iₜ(n, nₜ, nₚ)
 	Iₓ = I(n) - (Iₜ+Iₚ)
 
-	L(X) = lossfuns[lossfun](X, W, Model.apply_priors(W, M, S), cs, λ)
+	L(X) = loss(X, Model.apply_priors(W, M, S, Iₚₖ, Iₚₚ), cs, λ_W, λ_B)
 
 	function cb()
 		l = L(X)
@@ -46,7 +45,7 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 	println("loss\tsse\tLt\tLp")
 	train!(W, X, L, Flux.throttle(cb, throttle), epochs, opt)
 	# not using M just to make it clear if values supposed to be zero for some reason are not (sanity check)
-	Model.apply_priors(W, nothing, S)
+	Model.apply_priors(W, nothing, S, Iₚₖ, Iₚₚ)
 end
 
 function train!(W, X::AbstractMatrix, L, cb, epochs, opt)

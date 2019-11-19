@@ -74,7 +74,15 @@ end
 
 _Wₜ(W, nₜ::Integer, nₚ::Integer) = W[:,nₚ+1:nₚ+nₜ]
 _Wₚ(W, nₜ::Integer, nₚ::Integer) = W[1:nₜ+nₚ,1:nₚ]
+"""
+wₚᵢⱼ := vᵢ⋅(|wₚₖᵢⱼ| - |wₚₚᵢⱼ|)
+As vector notation:
+Wₚ := V (Wₚₖ' - Wₚₚ')
+We use the diagonal values of Wₚ as V since they get deleted anyways so are unused.
+"""
+_Wₚ(W, Iₚₖ::Matrix, Iₚₚ::Matrix) = (W.*(Iₚₖ.+Iₚₚ)) * (abs.(W*Iₚₖ) - abs.(W*Iₚₚ))
 WₜWₚ(W, nₜ::Integer, nₚ::Integer) = _Wₜ(W,nₜ,nₚ), _Wₚ(W,nₜ,nₚ)
+
 
 Iₚ(n::Integer, nₜ::Integer, nₚ::Integer) = diagm([[1 for _ in 1:nₚ]; [0 for _ in nₚ+1:n]])
 Iₜ(n::Integer, nₜ::Integer, nₚ::Integer) = diagm([[0 for _ in 1:nₚ]; [1 for _ in 1:nₜ]; [0 for _ in nₚ+nₜ+1:n]])
@@ -141,11 +149,12 @@ end
 priors(Wₜ_prior::AbstractMatrix, nₚ::Integer) = priors(Wₜ_prior, ones(size(Wₜ_prior,2)+nₚ, nₚ))
 priors(n::Integer, Wₚ_prior::AbstractMatrix) = priors(ones(n, size(Wₚ_prior,1)-size(Wₚ_prior,2)), Wₚ_prior)
 
-
 apply_priors(W, M, S) = apply_priors(W .* M, nothing, S)
 apply_priors(W, ::Nothing, S) = W .* (S .== 0) .+ abs.(W) .* S
 apply_priors(W, M, ::Nothing) = W .* M
 apply_priors(W, ::Nothing, ::Nothing) = W
-
+"If we know which nodes are ∈ PK and ∈ PP, then use that information."
+apply_priors(W, M, S, Iₚₖ, Iₚₚ) = apply_priors(W*(I(size(W,1)).-Iₚₖ.-Iₚₚ) .+ _Wₚ(W,Iₚₖ,Iₚₚ), M, S)
+apply_priors(W, M, S, ::Nothing, ::Nothing) = apply_priors(W, M, S)
 
 end;

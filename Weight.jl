@@ -305,5 +305,13 @@ function random_W(B, nₚₖ::Integer, nₚₚ::Integer, fun)
 	Model.WₜWₚ(W, sum(T), sum(P))
 end
 
+"Get a vector with -1 and 1 indicating which nodes ∈ P are ∈ PP and ∈ PK. 0 means it is in neither."
+function PKPP(Wₚ::Matrix)
+	PK = all(Wₚ .>= 0; dims=1)
+	PP = all(Wₚ .<= 0; dims=1)
+	(PK .& .!PP) - (PP .& .!PK)
+end
+
+
 end;
 
