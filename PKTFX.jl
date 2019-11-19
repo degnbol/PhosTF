@@ -16,6 +16,7 @@ if !isdefined(Main, :ArrayUtils) include("utilities/ArrayUtils.jl") end
 module PKTFX
 using Fire
 using Distributions: Uniform
+using LinearAlgebra
 using Plots
 using ..ReadWrite, ..ArrayUtils
 using ..Cytoscape, ..Plotting, ..ODEs, ..ModelIteration, ..Model, ..Weight
