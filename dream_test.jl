@@ -8,8 +8,8 @@ lambda_W, lambda_B = split(basename(pwd()), '_')[2:3]
 lambda_W = parse(Float64, '.' * lambda_W[2:end])
 lambda_B = parse(Float64, '.' * lambda_B[2:end])
 
-for net ∈ 1:5 for sample ∈ 1:5
-    cd("$(net)_$(sample)")
+for net ∈ 1:5
+    cd("$(net)_$(net)")
     println(pwd())
 
     n, nₜ = size(PKTFX.loaddlm("sim/WT.mat"))
@@ -20,6 +20,6 @@ for net ∈ 1:5 for sample ∈ 1:5
     PKTFX.thres("WP_infer.mat", "WP_infer_thres.mat")
 
     cd("..")
-end end
+end
 
 
