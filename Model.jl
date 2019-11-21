@@ -105,6 +105,11 @@ function sse(cs::Constants, W::AbstractMatrix, X::Matrix)
 	E = X .- _B(cs,W,X)
 	sum((cs.U .* E) .^ 2)
 end
+"- ks: If we are using batches, then indicate which batches are used"
+function sse(cs::Constants, W::AbstractMatrix, X::Matrix, ks)
+	E = X .- _B(cs,W,X)
+	sum((cs.U[:,ks] .* E) .^ 2)
+end
 "Alternative SSE where both TF and PK/PP edges onto a KO are removed instead of only TF. Reduces edges among PK/PP."
 function sse_alt(cs::Constants, W::AbstractMatrix, X::Matrix)
 	i = I(size(W,1))
@@ -148,7 +153,7 @@ apply_priors(W, ::Nothing, S) = W .* (S .== 0) .+ abs.(W) .* S
 apply_priors(W, M, ::Nothing) = W .* M
 apply_priors(W, ::Nothing, ::Nothing) = W
 "If we know which nodes are ∈ PK and ∈ PP, then use that information."
-apply_priors(W, V, M, S, Iₚₖ::Matrix, Iₚₚ::Matrix) = apply_priors(W*(I(size(W,1))-(Iₚₖ+Iₚₚ)) + _Wₚ(W,V,Iₚₖ,Iₚₚ), M, S)
-apply_priors(W, ::Nothing, M, S, ::Nothing, ::Nothing) = apply_priors(W, M, S)
+apply_priors(W, V::AbstractArray, M, S, Iₚₖ::Matrix, Iₚₚ::Matrix) = apply_priors(W*(I(size(W,1))-(Iₚₖ+Iₚₚ)) + _Wₚ(W,V,Iₚₖ,Iₚₚ), M, S)
+apply_priors(W, ::Nothing, M, S, ::Any, ::Any) = apply_priors(W, M, S)
 
 end;

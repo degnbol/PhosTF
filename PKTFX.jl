@@ -297,8 +297,10 @@ end
 Infer a weight matrix from logFC data.
 - WT_prior/WP_prior: optionally limit Wₜ/Wₚ if they are partially known.
 - PKPP: fname. vector, each element is -1 or 1 indicating PP or PK. 0s ignored.
+- WT/WP: previous run to continue.
 """
-@main function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; epochs::Integer=5000, lambda_W::Real=.1, lambda_B::Real=.1, WT_prior=nothing, WP_prior=nothing, PKPP=nothing)
+@main function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; epochs::Integer=5000, 
+	lambda_W::Real=.1, lambda_B::Real=.1, WT_prior=nothing, WP_prior=nothing, PKPP=nothing, WT=nothing, WP=nothing)
 	X = loaddlm(X, Float64)
 	n = size(X,1)
 	M, S = _priors(WT_prior, WP_prior, n, nₜ, nₚ)
@@ -312,7 +314,9 @@ Infer a weight matrix from logFC data.
 		Iₚₖ, Iₚₚ = nothing, nothing
 	end
 
-	W = Inference.infer(X, nₜ, nₚ; epochs=epochs, λ_W=lambda_W, λ_B=lambda_B, M=M, S=S, Iₚₖ=Iₚₖ, Iₚₚ=Iₚₚ)
+	W = (WT === nothing || WP === nothing) ? nothing : Model._W(loaddlm(WT), loaddlm(WP))
+
+	W = Inference.infer(X, nₜ, nₚ; epochs=epochs, λ_W=lambda_W, λ_B=lambda_B, M=M, S=S, Iₚₖ=Iₚₖ, Iₚₚ=Iₚₚ, W=W)
 	Wₜ, Wₚ = Model.WₜWₚ(W, nₜ, nₚ)
 	savedlm(ot, Wₜ)
 	savedlm(op, Wₚ)
@@ -322,7 +326,7 @@ end
 Remove edges less than a given threshold.
 - thres: optional threshold
 """
-@main function thres(io=nothing, o=nothing; thres=0.01)
+@main function thres(io=nothing, o=nothing; thres=0.001)
 	i, o = inout(io, o)
 	mat = loaddlm(i, Float64)
 	Weight.threshold!(mat, thres)
@@ -351,6 +355,10 @@ Swap order of PK and TF in matrix (swap between PK-TF-X and TF-PK-X).
 	savedlm(o, mat)
 end
 
+"""
+input: WP.mat
+output: a vector indicating PK with -1, and PP with 1. 
+"""
 @main function PKPP(io=nothing, o=nothing)
 	i, o = inout(io, o)
 	savedlm(o, Weight.PKPP(loaddlm(i)))
