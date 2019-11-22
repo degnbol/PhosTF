@@ -218,26 +218,6 @@ function add_cascades!(W, P)
 	W
 end
 
-"version where cascades are only added for half the places where it is possible"
-function add_cascades50!(W, P)
-	nₚₖ = sum(P)
-	# which P can be a "subset" of another P?
-	subset = subset_edges(W[:,P])
-	n_subs = sum(subset)
-	while sum(subset) > .5n_subs
-		# choose a random "subsetting" edge to add (linear index)
-		idx = rand((1:nₚₖ^2)[vec(subset)])
-		view(W,P,P)[idx] = true  # add P->P edge
-		cartesian = CartesianIndices(subset)[idx]  # we need to know from and to which protein
-		view(W,:,P)[:,cartesian[2]] .-= view(W,:,P)[:,cartesian[1]]  # remove edges that are now described indirectly through the new P->P edge
-		# update
-		subset = subset_edges(W[:,P])
-	end
-	W
-end
-
-add_cascades_funs = Dict("100"=>add_cascades!, "050"=>add_cascades50!)
-
 """
 Set a number of nodes ∈ P as a node ∈ PP, with the requirement that it cannot be the only phos regulator of any node.
 Random extra kinase edges are added to balance out regulation.
@@ -265,7 +245,6 @@ function phosphatases(W, P, nₚₚ::Integer)
 	return W
 end
 
-
 """
 Set about half the TF edges as repressing.
 - W: edges.
@@ -289,16 +268,6 @@ function random_W(B, nₚₖ::Integer, nₚₚ::Integer)
 	P, T, X = random_PTX(B, nₚₖ + nₚₚ)
 	W = rewire(B, P,T,X)
 	add_cascades!(W, P)
-	W = phosphatases(W, P, nₚₚ)
-	W = repressors(W, T)
-	W = sort_PTX(W, P, T, X)
-	Model.WₜWₚ(W, sum(T), sum(P))
-end
-
-function random_W(B, nₚₖ::Integer, nₚₚ::Integer, fun)
-	P, T, X = random_PTX(B, nₚₖ + nₚₚ)
-	W = rewire(B, P,T,X)
-	add_cascades_funs[fun](W, P)
 	W = phosphatases(W, P, nₚₚ)
 	W = repressors(W, T)
 	W = sort_PTX(W, P, T, X)

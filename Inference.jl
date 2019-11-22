@@ -39,8 +39,8 @@ end
 
 "W is the param weight matrix, W′ is the masked version where untrainable entries are set to zero."
 L1(X, W′, cs, λ::Real) = sse(cs, W′, X) + λ*l1(W′)
-loss(X, W′, cs, λ_W::Real, λ_B::Real) = sse(cs, W′, X) + λ_W*l1(W′) + λ_B*l1(_B(cs, abs.(W′)))
-loss(X, W′, cs, λ_W::Real, λ_B::Real, ks) = sse(cs, W′, X, ks) + λ_W*l1(W′) + λ_B*l1(_B(cs, abs.(W′)))
+loss(X, W′, cs, λ::Real) = sse(cs, W′, X) + λ*l1(_B(cs, abs.(W′)))
+loss(X, W′, cs, λ::Real, ks) = sse(cs, W′, X, ks) + λ*l1(_B(cs, abs.(W′)))
 
 
 get_V(::Nothing, ::Nothing, ::Any) = nothing
@@ -54,7 +54,7 @@ get_V(Iₚₖ::Matrix, Iₚₚ::Matrix, W::Matrix) = sign.(sum(W*(Iₚₖ-Iₚ�
 - Iₚₖ, Iₚₚ: kinase and phosphatase indicator diagonal matrices
 - W: from previous training.
 """
-function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=10000, λ_W::Real=.1, λ_B::Real=.1, throttle=5, opt=ADAMW(), 
+function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=10000, λ::Real=.1, throttle=5, opt=ADAMW(), 
 	M=nothing, S=nothing, Iₚₖ=nothing, Iₚₚ=nothing, W=nothing)
 	n, K = size(X)
 	if M === nothing M = ones(n, n) end # no prior knowledge
@@ -66,8 +66,8 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 	Iₜ = Model.Iₜ(n, nₜ, nₚ)
 	Iₓ = I(n) - (Iₜ+Iₚ)
 
-	L(X) = loss(X, Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ), cs, λ_W, λ_B)
-	L(X, ks) = loss(X, Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ), cs, λ_W, λ_B, ks)
+	L(X) = loss(X, Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ), cs, λ)
+	L(X, ks) = loss(X, Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ), cs, λ, ks)
 
 	function cb()
 		l = L(X)

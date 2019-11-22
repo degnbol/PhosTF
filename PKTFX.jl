@@ -32,8 +32,8 @@ loadnet(i) = load(i, Network)
 """
 Create random W from a adjacency matrix containing B.
 """
-@main function W(B::String, nₚₖ::Integer, nₚₚ::Integer, fun; WT_fname::String=default_Wₜ, WP_fname::String=default_Wₚ)
-	Wₜ, Wₚ = Weight.random_W(loaddlm(B), nₚₖ, nₚₚ, fun)
+@main function W(B::String, nₚₖ::Integer, nₚₚ::Integer; WT_fname::String=default_Wₜ, WP_fname::String=default_Wₚ)
+	Wₜ, Wₚ = Weight.random_W(loaddlm(B), nₚₖ, nₚₚ)
 	savedlm(WT_fname, Wₜ)
 	savedlm(WP_fname, Wₚ)
 end
@@ -300,7 +300,7 @@ Infer a weight matrix from logFC data.
 - WT/WP: previous run to continue.
 """
 @main function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; epochs::Integer=5000, 
-	lambda_W::Real=.1, lambda_B::Real=.1, WT_prior=nothing, WP_prior=nothing, PKPP=nothing, WT=nothing, WP=nothing)
+	lambda::Real=.1, WT_prior=nothing, WP_prior=nothing, PKPP=nothing, WT=nothing, WP=nothing)
 	X = loaddlm(X, Float64)
 	n = size(X,1)
 	M, S = _priors(WT_prior, WP_prior, n, nₜ, nₚ)
@@ -316,7 +316,7 @@ Infer a weight matrix from logFC data.
 
 	W = (WT === nothing || WP === nothing) ? nothing : Model._W(loaddlm(WT), loaddlm(WP))
 
-	W = Inference.infer(X, nₜ, nₚ; epochs=epochs, λ_W=lambda_W, λ_B=lambda_B, M=M, S=S, Iₚₖ=Iₚₖ, Iₚₚ=Iₚₚ, W=W)
+	W = Inference.infer(X, nₜ, nₚ; epochs=epochs, λ=lambda, M=M, S=S, Iₚₖ=Iₚₖ, Iₚₚ=Iₚₚ, W=W)
 	Wₜ, Wₚ = Model.WₜWₚ(W, nₜ, nₚ)
 	savedlm(ot, Wₜ)
 	savedlm(op, Wₚ)
