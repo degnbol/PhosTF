@@ -39,8 +39,7 @@ end
 
 "W is the param weight matrix, W′ is the masked version where untrainable entries are set to zero."
 L1(X, W′, cs, λ::Real) = sse(cs, W′, X) + λ*l1(W′)
-loss(X, W′, cs, λ::Real) = sse(cs, W′, X) + λ*l1(_B(cs, abs.(W′)))
-loss(X, W′, cs, λ::Real, ks) = sse(cs, W′, X, ks) + λ*l1(_B(cs, abs.(W′)))
+loss(X, W, W′, cs, λ::Real) = sse(cs, W′, X) + λ*l1(_B(cs, abs.(W)))
 
 
 get_V(::Nothing, ::Nothing, ::Any) = nothing
@@ -66,8 +65,7 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 	Iₜ = Model.Iₜ(n, nₜ, nₚ)
 	Iₓ = I(n) - (Iₜ+Iₚ)
 
-	L(X) = loss(X, Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ), cs, λ)
-	L(X, ks) = loss(X, Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ), cs, λ, ks)
+	L(X) = loss(X, W, Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ), cs, λ)
 
 	function cb()
 		l = L(X)
