@@ -22,6 +22,12 @@ function offdiag(matrix)
 	out
 end
 
+function random_W(n::Integer)
+	out = FluxUtils.random_weight(n,n)
+	out[diagind(out)] .= 0
+	out
+end
+
 "Constant terms in the equations of the inference model."
 struct Constants
 	# Masking matrix for TF. Square.

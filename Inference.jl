@@ -60,9 +60,8 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 	M[diagind(M)] .= 0  # enforce no self loops
 	cs = Model.Constants(n, nₜ, nₚ, K)
 	V = get_V(Iₚₖ, Iₚₚ, W)
-	W !== nothing || (W = FluxUtils.random_weight(n,n))
-	# mask W before tracking it, so some entries are untrainable
-	W = param(W .* (cs.Mₜ .+ cs.Mₚ) .* M)
+	W !== nothing || (W = random_W(n))
+	W = param(W)
 	Iₚ = V === nothing ? Model.Iₚ(n, nₜ, nₚ) : Iₚₖ + Iₚₚ
 	Iₜ = Model.Iₜ(n, nₜ, nₚ)
 	Iₓ = I(n) - (Iₜ+Iₚ)
