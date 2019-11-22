@@ -22,7 +22,6 @@ function offdiag(matrix)
 	out
 end
 
-
 "Constant terms in the equations of the inference model."
 struct Constants
 	# Masking matrix for TF. Square.

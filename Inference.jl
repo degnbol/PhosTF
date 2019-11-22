@@ -38,7 +38,7 @@ end
 
 
 "W is the param weight matrix, W′ is the masked version where untrainable entries are set to zero."
-L1(X, W′, cs, λ::Real) = sse(cs, W′, X) + λ*l1(W′)
+L1(X, W′, cs, λ::Real) = sse(cs, W′, X) + λ*l1(W)
 loss(X, W, W′, cs, λ::Real) = sse(cs, W′, X) + λ*l1(_B(cs, abs.(W)))
 
 
@@ -60,7 +60,9 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 	M[diagind(M)] .= 0  # enforce no self loops
 	cs = Model.Constants(n, nₜ, nₚ, K)
 	V = get_V(Iₚₖ, Iₚₚ, W)
-	W = param(W === nothing ? FluxUtils.random_weight(n, n) : W)
+	W === nothing || (W = FluxUtils.random_weight(n,n))
+	# mask W before tracking it, so some entries are untrainable
+	W = param(W .* (cs.Mₜ .+ cs.Mₚ) .* M)
 	Iₚ = V === nothing ? Model.Iₚ(n, nₜ, nₚ) : Iₚₖ + Iₚₚ
 	Iₜ = Model.Iₜ(n, nₜ, nₚ)
 	Iₓ = I(n) - (Iₜ+Iₚ)
