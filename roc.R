@@ -1,12 +1,12 @@
 #!/usr/bin/env Rscript
-
 # packages
-library(ggplot2)
-library(plotROC)
-library(dplyr)
-library(extrafont)
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(plotROC))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(extrafont))
 # font_import(); loadfonts() # https://cran.r-project.org/web/packages/extrafont/README.html
 # fonts() # see available fonts
+suppressPackageStartupMessages(library(argparse))
 
 # functions
 read_vec = function(fname) {as.vector(as.matrix(read.table(fname)))}
@@ -14,7 +14,7 @@ get_pos = function(v) {out = +v; out[out <= 0] = 0; out}
 get_neg = function(v) {out = -v; out[out <= 0] = 0; out}
 
 
-main = function(true_fnames, marker_fnames, outfname) {
+main = function(true_fnames, marker_fnames, outfname, title) {
     # read
     trues = lapply(true_fnames, read_vec)
     markers = lapply(marker_fnames, read_vec)
@@ -36,9 +36,9 @@ main = function(true_fnames, marker_fnames, outfname) {
     
     plot = ggplot(df, aes(d=D, m=M, color=type)) +
         geom_abline(slope=1, intercept=0, color="lightgray") +
-        geom_roc(n.cuts=0, aes(fill=sample), linealpha=.2) + 
-        geom_roc(n.cuts=0) + 
+        geom_roc(n.cuts=0) +
         style_roc(theme=theme_bw, guide=F, xlab="FPR", ylab="TPR")
+    # + geom_roc(n.cuts=0, aes(fill=sample), linealpha=.1) # transparent individual curves
     
     # legend and title
     font = "DejaVu Sans Mono"
@@ -46,7 +46,7 @@ main = function(true_fnames, marker_fnames, outfname) {
         scale_color_manual(labels=labels, values=c("darkorchid", "red", "blue")) +
         theme(legend.text=element_text(family=font), legend.title=element_blank(), 
               legend.position=c(1,0), legend.justification=c(1,0), legend.box.margin=margin(1, 1, 1, 1)) +
-        ggtitle(basename(getwd()))
+        ggtitle(title)
     
     # plot
     
@@ -63,15 +63,30 @@ example = function() {
     true_fnames = list.files(pattern=true_fname, recursive=T)
     marker_fnames = list.files(pattern=marker_fname, recursive=T)
     
-    main(true_fnames, marker_fnames)
+    main(true_fnames, marker_fnames, "ROC.pdf", "ROC")
 }
 
-# Example run: roc.R */WP.mat */WP_infer.mat WP.pdf
-# first half of infiles are the trues, second half are the markers, except for the last argument that is the output
-args = commandArgs(trailingOnly=TRUE)
-n.args = length(args)
-stopifnot(n.args %% 2 == 1)
-true_fnames_idx = 1:((n.args-1)/2)
-marker_fnames_idx = ((n.args-1)/2+1):(n.args-1)
-outfname_idx = n.args
-main(args[true_fnames_idx], args[marker_fnames_idx], args[outfname_idx])
+
+get_parser = function() {
+    parser = ArgumentParser(description="Plot a ROC curve.")
+    parser$add_argument("-t", "--true",   type="character", nargs="+", help="Matrix files with true values. Same number of files as --marker.")
+    parser$add_argument("-m", "--marker", type="character", nargs="+", help="Matrix files with marker values. Same number of files as --true.")
+    parser$add_argument("-o", "--out", type="character", default="roc.pdf", help="output file name for roc plot. (default = %(default)s)")
+    parser$add_argument("--title", type="character", default=basename(getwd()), help="Title of plot. (default = %(default)s)")
+    parser
+}
+
+get_args = function() {
+    args = get_parser()$parse_args()
+    if(is.null(args$true) || is.null(args$marker)) {
+        stop("At least one --true and --marker file must be supplied.")
+    }
+    if(length(args$true) != length(args$marker)) {
+        stop("The same number of --true and --marker files must be supplied.")
+    }
+    args
+}
+
+args = get_args()
+
+main(args$true, args$marker, args$out, args$title)
