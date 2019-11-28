@@ -1,0 +1,2 @@
+Downloaded from http://www.moseslab.csb.utoronto.ca/KID/ with default settings (score=-5)
+Kinase substrate interactions with scores.

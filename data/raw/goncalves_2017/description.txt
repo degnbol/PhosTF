@@ -1,0 +1,4 @@
+Supplementary table S2 from "Systematic Analysis of Transcriptional and Post-transcriptional Regulation of Metabolism in Yeast" by Goncalves et al. 2017.
+Downloaded from https://dx.plos.org/10.1371/journal.pcbi.1005297
+direct link: https://doi.org/10.1371/journal.pcbi.1005297.s006
+Sheet 2 has pertubations that maybe can be used.
