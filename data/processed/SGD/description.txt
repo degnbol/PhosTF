@@ -1,0 +1,10 @@
+Extract columns with standard and systematic names and remove incomplete entries:
+cat SGD_features.tab | cut -d$'\t' -f4,5 | sed -e '/^[[:space:]]$/d' | sed -e 's/[[:space:]]$//' | sed $'/\t/!d' > gene2ORF.tsv
+
+We can check that all conversions are unique:
+wc -l gene2ORF.tsv
+cat gene2ORF.tsv | sort | uniq | wc -l
+cat gene2ORF.tsv | cut -d$'\t' -f1 | sort | uniq | wc -l
+cat gene2ORF.tsv | cut -d$'\t' -f2 | sort | uniq | wc -l
+
+They all have the same length.
