@@ -1,0 +1,16 @@
+# sed '1d' workman.tsv | sort | uniq > workman_sort.tsv
+# sed '1d' balaji.tsv | sort | uniq > balaji_sort.tsv
+# cat yeastract.tsv | cut -d$'\t' -f1,2 | sort | uniq > yeastract_sort.tsv
+
+# cat yeastract_sort.tsv balaji_sort.tsv | comm -13 - workman_sort.tsv > only_workman.tsv
+# cat yeastract_sort.tsv workman_sort.tsv  | comm -13 - balaji_sort.tsv > only_balaji.tsv
+# cat balaji_sort.tsv  workman_sort.tsv  | comm -13 - yeastract_sort.tsv > only_yeastract.tsv
+
+comm -12 workman_sort.tsv yeastract_sort.tsv | wc -l
+comm -12 workman_sort.tsv balaji_sort.tsv | wc -l
+comm -12 yeastract_sort.tsv balaji_sort.tsv | wc -l
+wc -l balaji_sort.tsv workman_sort.tsv yeastract_sort.tsv only_workman.tsv only_balaji.tsv only_yeastract.tsv
+
+# deciding to use all edges since the majority are only found in a single file.
+echo $'TF\tTarget\tRelationship' | cat - <(sed $'s/$/\t-/' only_workman.tsv) <(sed $'s/$/\t-/' only_balaji.tsv) yeastract.tsv > edges.tsv
+cat edges.tsv| cut -d$'\t' -f1 | sed '1d' | sort | uniq > T.txt

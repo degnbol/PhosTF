@@ -1,0 +1,2 @@
+Updated X since nodes that were from P but silent will be considered X (of course as long as they are still regulated by T).
+cat ../../T/edges.tsv | cut -d$'\t' -f2 | sed '1d' | sort | uniq | comm -23 - ../../T/T.txt | comm -23 - <(sort ../../P/detectable/P.txt | sort | uniq) > X.txt

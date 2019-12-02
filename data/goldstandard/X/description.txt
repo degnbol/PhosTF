@@ -1,0 +1,2 @@
+# we should have made the file P.txt in folder ../P now using the script there etc. and similarly made ../T/T.txt
+cat ../T/edges.tsv | cut -d$'\t' -f2 | sed '1d' | sort | uniq | comm -23 - ../T/T.txt | comm -23 - <(sort ../P/P.txt | uniq) > X.txt

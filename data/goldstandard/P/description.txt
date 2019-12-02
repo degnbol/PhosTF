@@ -1,0 +1,20 @@
+cat ../../processed/yeastkid/P_edges_thres452.tsv | cut -d$'\t' -f1,3 | sed '1d' > yeastkid.tsv
+
+cat fiedler_sort.tsv biogrid_sort.tsv | sort | uniq > has_relationship.tsv
+cat <(comm -13 has_relationship.tsv fasolo.tsv) <(comm -13 has_relationship.tsv parca.tsv) <(comm -13 has_relationship.tsv yeastkid_sort.tsv) | sort | uniq > no_relationship.tsv
+# check there is no overlap
+comm -12 has_relationship.tsv no_relationship.tsv | wc -l
+# add the edges without known relationship and the unique ones that has relationship.
+sed $'s/$/\t-/' no_relationship.tsv | cat - <(sed '1d' biogrid.tsv) <(sed '1d' fiedler.tsv) | sort | uniq > edges.tsv
+# add header
+echo $'P\tTarget\tRelationship' | cat - edges.tsv > temp && mv temp edges.tsv
+grep kinase edges.tsv | cut -d$'\t' -f1 | sort | uniq > PK.txt
+grep phosphatase edges.tsv | cut -d$'\t' -f1 | sort | uniq > PP.txt
+# then run code in process_P.R to add sign to nodes that has sign in another interaction resulting in file edges_resign.tsv
+grep -e '-$' edges_resign.tsv | cut -d$'\t' -f1 | sort | uniq > P_.txt
+# sanity check. should be zero overlap
+comm -12 PP.txt P_.txt
+comm -12 PK.txt P_.txt
+
+# let's assign P_ to PK since that fits the real amounts of PK and PP best
+cat PK.txt P_.txt PP.txt > P.txt
