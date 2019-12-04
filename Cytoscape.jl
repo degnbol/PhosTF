@@ -89,18 +89,34 @@ function xgmml_nodes(net; kwargs...)
 	phos_activation=[net.phos_activation; fill(missing, net.nₓ)], α₀=[g.α[1] for g in net.genes], kwargs...)
 end
 
+edge_color(weight::Real) = "#" * hex(divergent_lerp(weight, -1, 1))
+edge_color_T(weight::Real) = edge_color(weight::Real)
+edge_color_P(weight::Real) = edge_color(weight::Real)
+edge_color_T(weight::AbstractString) = weight == "-" ? "#4B562D" : "#A1CC2B" 
+edge_color_P(weight::AbstractString) = weight == "-" ? "#6D3775" : "#AF70B6"
+edge_opacity(weight::Real) = divergent(weight, -.1, .1) |> abs |> to256
+edge_opacity(weight::AbstractString) = 255
+arrow_T(weight::Real) = weight >= 0 ? "DELTA" : "T"
+function arrow_T(weight::AbstractString)
+	if weight == "+" return "DELTA"
+	elseif weight == "-" return "T"
+	else return "DELTA" end # default value
+end
+arrow_P(weight::Real) = weight >= 0 ? "CIRCLE" : "SQUARE"
+function arrow_P(weight::AbstractString)
+	if weight == "+" return "CIRCLE"
+	elseif weight == "-" return "SQUARE"
+	else return "DELTA" end # default value
+end
+
 function xgmml_edges(Wₜ::Matrix, Wₚ::Matrix)
 	nₚ = size(Wₚ,2)
-	color(weight) = "#" * hex(divergent_lerp(weight, -1, 1))
-	opacity(weight) = divergent(weight, -.1, .1) |> abs |> to256
-	T_arrow(weight) = weight >= 0 ? "DELTA" : "T"
-	P_arrow(weight) = weight >= 0 ? "CIRCLE" : "SQUARE"
 
 	P_edges = [
-	XGMML.Edge(source, target, bg_color; arrow=P_arrow(weight), color=color(weight), opacity=opacity(weight), weight=weight)
+	XGMML.Edge(source, target, bg_color; arrow=arrow_P(weight), color=edge_color_P(weight), opacity=edge_opacity(weight), weight=weight)
 	for (target,source,weight) in zip(findnz(sparse(Wₚ))...)]
 	T_edges = [
-	XGMML.Edge(source+nₚ, target, bg_color; arrow=T_arrow(weight), color=color(weight), opacity=opacity(weight), weight=weight)
+	XGMML.Edge(source+nₚ, target, bg_color; arrow=arrow_T(weight), color=edge_color_T(weight), opacity=edge_opacity(weight), weight=weight)
 	for (target,source,weight) in zip(findnz(sparse(Wₜ))...)]
 	
 	[P_edges; T_edges]
