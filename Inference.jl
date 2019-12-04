@@ -48,24 +48,26 @@ get_V(Iₚₖ::Matrix, Iₚₚ::Matrix, W::Matrix) = sign.(sum(W*(Iₚₖ-Iₚ�
 
 
 """
+- X: logFC values with measured nodes along axis=1, and different experiment or replicate along axis=2
 - throttle: seconds between prints
 - opt: ADAMW or maybe NADAM
 - Iₚₖ, Iₚₚ: kinase and phosphatase indicator diagonal matrices
 - W: from previous training.
+- J: matrix with 1 for KO and 0 for passive observed node. Shape like X.
 """
 function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=10000, λ::Real=.1, throttle=5, opt=ADAMW(), 
-	M=nothing, S=nothing, Iₚₖ=nothing, Iₚₚ=nothing, W=nothing)
+	M=nothing, S=nothing, Iₚₖ=nothing, Iₚₚ=nothing, W=nothing, J=nothing)
 	n, K = size(X)
 	if M === nothing M = ones(n, n) end # no prior knowledge
 	M[diagind(M)] .= 0  # enforce no self loops
-	cs = Model.Constants(n, nₜ, nₚ, K)
+	cs = Model.Constants(n, nₜ, nₚ, J === nothing ? K : J)
 	V = get_V(Iₚₖ, Iₚₚ, W)
 	W !== nothing || (W = random_W(n))
 	W = param(W)
 	Iₚ = V === nothing ? Model.Iₚ(n, nₜ, nₚ) : Iₚₖ + Iₚₚ
 	Iₜ = Model.Iₜ(n, nₜ, nₚ)
 	Iₓ = I(n) - (Iₜ+Iₚ)
-
+	
 	L(X) = loss(X, W, Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ), cs, λ)
 
 	function cb()

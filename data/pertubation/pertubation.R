@@ -53,7 +53,6 @@ colnames(pertubation) = gsub("\\.[0-9]", "", colnames(pertubation))
 
 write.table(pertubation, "logFC.mat", sep=" ", quote=F)
 
-
 # make idx of what is KOed/OEed
 library(Matrix)
 i = c(); j = c()
@@ -64,7 +63,7 @@ for (column in 1:ncol(pertubation)) {
     j = c(j, rep(column, length(new_i)))
 }
 pertubation_indices = sparseMatrix(i, j, x=1, dims=dim(pertubation), dimnames=dimnames(pertubation), use.last.ij=T)
-write.table(as.matrix(pertubation_indices), file="pertubation_indices.mat", sep=" ", quote=F)
+write.table(as.matrix(pertubation_indices), file="pertubation_indices.ssv", sep=" ", quote=F)
 
 
 # make a mask for WT edges
@@ -79,7 +78,7 @@ notfound = is.na(i) | is.na(j)
 i = i[!notfound]
 j = j[!notfound]
 WT_prior = sparseMatrix(i, j, x=1, dims=c(length(PTX_names), length(TF_names)), dimnames=list(PTX_names, TF_names), use.last.ij=T)
-write.table(as.matrix(WT_prior), file="WT_prior.mat", sep=" ", quote=F)
+write.table(as.matrix(WT_prior), file="WT_prior.ssv", sep=" ", quote=F)
 
 # this many prior edges
 sum(WT_prior)
@@ -88,7 +87,29 @@ edge_per_TF = apply(WT_prior, 2, sum)
 plot(density(edge_per_TF))
 mean(edge_per_TF)
 
+# mean wants matrix
+pertubation = as.matrix(pertubation)
+# we have to get rid of NaNs. We can try to copy logFC for a node under the same exp conditions
+avg_logFC = function(i, j) {
+    mean(pertubation[i, colnames(pertubation) == colnames(pertubation)[j]], na.rm=T)
+}
 
 
+pertubation_avg = pertubation
+for(i in 1:nrow(pertubation))
+    for(j in 1:ncol(pertubation))
+        if(is.na(pertubation_avg[i,j]))
+            pertubation_avg[i,j] = avg_logFC(i,j)
+
+# the remaining NA values are set to zero so will not be able to have any influence in those experiments.
+sum(is.na(pertubation))
+sum(is.na(pertubation_avg))
+pertubation_avg[is.na(pertubation_avg)] = 0
+write.table(pertubation_avg, file="logFC_nonan.ssv", sep=" ", quote=F)
+
+# we add entries that were NaN to J, which will result in their values being ignored in the SSE calculation during gradient descent
+J = as.matrix(pertubation_indices)
+J[is.na(pertubation)] = 1
+write.table(J, file="J.ssv", sep=" ", quote=F)
 
 

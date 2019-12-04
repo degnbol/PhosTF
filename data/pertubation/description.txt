@@ -1,3 +1,8 @@
 KP.txt and TF.txt have been compared to ../goldstandard/P/P.txt and ../goldstandard/T/T.txt
 One protein (KSS1) in workman dataset was found to be a PK which means it was categorized as TF wrongfully.
 This is now fixed. There are 32 PPs in KP.txt from comparison with ../goldstandard/P/PP.txt
+
+# remove header and row names from tables so julia code does not get confused. Also rename NA to NaN so it can be read
+sed '1d' logFC.ssv | cut -d' ' -f2- | sed 's/NA/NaN/g' > logFC.mat
+sed '1d' WT_prior.ssv | cut -d' ' -f2- > WT_prior.mat
+r WT_prior=pertubation_indices

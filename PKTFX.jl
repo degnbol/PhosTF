@@ -300,8 +300,12 @@ Infer a weight matrix from logFC data.
 - WT/WP: previous run to continue.
 """
 @main function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; epochs::Integer=5000, 
-	lambda::Real=.1, WT_prior=nothing, WP_prior=nothing, PKPP=nothing, WT=nothing, WP=nothing)
+	lambda::Real=.1, WT_prior=nothing, WP_prior=nothing, PKPP=nothing, WT=nothing, WP=nothing, J=nothing)
 	X = loaddlm(X, Float64)
+	if J !== nothing
+		J = loaddlm(J, Float64)
+		@assert size(J) == size(X)
+	end
 	n = size(X,1)
 	M, S = _priors(WT_prior, WP_prior, n, nₜ, nₚ)
 	
@@ -316,7 +320,7 @@ Infer a weight matrix from logFC data.
 
 	W = (WT === nothing || WP === nothing) ? nothing : Model._W(loaddlm(WT), loaddlm(WP))
 
-	W = Inference.infer(X, nₜ, nₚ; epochs=epochs, λ=lambda, M=M, S=S, Iₚₖ=Iₚₖ, Iₚₚ=Iₚₚ, W=W)
+	W = Inference.infer(X, nₜ, nₚ; epochs=epochs, λ=lambda, M=M, S=S, Iₚₖ=Iₚₖ, Iₚₚ=Iₚₚ, W=W, J=J)
 	Wₜ, Wₚ = Model.WₜWₚ(W, nₜ, nₚ)
 	savedlm(ot, Wₜ)
 	savedlm(op, Wₚ)

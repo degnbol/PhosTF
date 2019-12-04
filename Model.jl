@@ -39,18 +39,18 @@ struct Constants
 	"""
 	- J: Matrix holding column vectors of KO indexes for each experiment. No need to be square but has to have same shape as X.
 	"""
-	Constants(n::Int, nₜ::Int, nₚ::Int, J) = new(default_Mₜ(n, nₜ, nₚ), default_Mₚ(n, nₜ, nₚ), _U(J))
+	Constants(n::Integer, nₜ::Integer, nₚ::Integer, J::AbstractMatrix) = new(default_Mₜ(n, nₜ, nₚ), default_Mₚ(n, nₜ, nₚ), _U(J))
 	"- K: number of experiments (k in 1:K)"
-	Constants(n::Int, nₜ::Int, nₚ::Int, K::Int=nₜ+nₚ) = Constants(n, nₜ, nₚ, eye(n,K))
+	Constants(n::Integer, nₜ::Integer, nₚ::Integer, K::Integer=nₜ+nₚ) = Constants(n, nₜ, nₚ, eye(n,K))
 end
 
-function default_Mₜ(n::Int, nₜ::Int, nₚ::Int)
+function default_Mₜ(n::Integer, nₜ::Integer, nₚ::Integer)
 	mat = zeros(Bool, n, n)
 	mat[:, nₚ+1:nₚ+nₜ] .= 1
 	mat[diagind(mat)] .= 0
 	mat
 end
-function default_Mₚ(n::Int, nₜ::Int, nₚ::Int)
+function default_Mₚ(n::Integer, nₜ::Integer, nₚ::Integer)
 	mat = zeros(Bool, n, n)
 	mat[1:nₜ+nₚ, 1:nₚ] .= 1
 	mat[diagind(mat)] .= 0
