@@ -1,0 +1,2 @@
+cat ../../raw/STRING/4932.protein.links.v11.0.txt | sed 's/4932\.//g' | tr ' ' '\t' > interactions.tsv
+cat ../../raw/STRING/4932.protein.actions.v11.0.txt | sed 's/4932\.//g' > actions.tsv
