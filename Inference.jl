@@ -25,15 +25,12 @@ end
 
 
 function train!(W, V, X::AbstractMatrix, L, cb, epochs, opt)
-	data = ((X,) for epoch ∈ 1:epochs)
+	data = ((X,),)
 	params = (V === nothing) ? [W] : [W, V]
-	Flux.train!(L, params, data, opt, cb=cb)
-end
-"Using batches. Batch size should be K when training finishes. Changing batch size not implemented."
-function train!(W, V, X::AbstractMatrix, L, cb, epochs, opt, batch_size)
-	data = ((X[:,ks], ks) for epoch ∈ 1:epochs for ks ∈ batches(size(X,2), batch_size))
-	params = (V === nothing) ? [W] : [W, V]
-	Flux.train!(L, params, data, opt, cb=cb)
+	for epoch ∈ 1:epochs
+		Flux.train!(L, params, data, opt)
+		cb(epoch)
+	end
 end
 
 
@@ -55,7 +52,7 @@ get_V(Iₚₖ::Matrix, Iₚₚ::Matrix, W::Matrix) = sign.(sum(W*(Iₚₖ-Iₚ�
 - W: from previous training.
 - J: matrix with 1 for KO and 0 for passive observed node. Shape like X.
 """
-function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=10000, λ::Real=.1, throttle=5, opt=ADAMW(), 
+function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=10000, λ::Real=.1, opt=ADAMW(), 
 	M=nothing, S=nothing, Iₚₖ=nothing, Iₚₚ=nothing, W=nothing, J=nothing)
 	n, K = size(X)
 	if M === nothing M = ones(n, n) end # no prior knowledge
@@ -67,20 +64,21 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 	Iₚ = V === nothing ? Model.Iₚ(n, nₜ, nₚ) : Iₚₖ + Iₚₚ
 	Iₜ = Model.Iₜ(n, nₜ, nₚ)
 	Iₓ = I(n) - (Iₜ+Iₚ)
-	
+
 	L(X) = loss(X, W, Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ), cs, λ)
 
-	function cb()
+	function cb(epoch)
 		l = L(X)
 		w′ = Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ)
 		e = Model.sse(cs, w′, X)
 		lt = l1(w′*Iₜ)
 		lp = l1(w′*Iₚ)
-		printfmtln(5, l, e, lt, lp)
+		printfmt(5, l, e, lt, lp)
+		println("\t$epoch")
 	end
 	
-	println("loss\tsse\tLt\tLp")
-	train!(W, V, X, L, Flux.throttle(cb, throttle), epochs, opt)
+	println("loss\tsse\tLt\tLp\tepoch")
+	train!(W, V, X, L, Flux.throttle(cb, 5), epochs, opt)
 	Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ)
 end
 
