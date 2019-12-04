@@ -1,4 +1,4 @@
-
+#!/usr/bin/env Rscript
 # functions
 flatten = function(x) as.vector(as.matrix(x))
 

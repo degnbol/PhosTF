@@ -1,7 +1,8 @@
-cat ../../processed/yeastkid/P_edges_thres452.tsv | cut -d$'\t' -f1,3 | sed '1d' > yeastkid.tsv
+cat ../../processed/workman_2006/PK_edges.tsv | cut -d$'\t' -f1,2 | sed '1d' | sort | uniq > workman.tsv
+cat ../../processed/yeastkid/P_edges_thres452.tsv | cut -d$'\t' -f1,3 | sed '1d' | sort | uniq > yeastkid.tsv
 
 cat fiedler_sort.tsv biogrid_sort.tsv | sort | uniq > has_relationship.tsv
-cat <(comm -13 has_relationship.tsv fasolo.tsv) <(comm -13 has_relationship.tsv parca.tsv) <(comm -13 has_relationship.tsv yeastkid_sort.tsv) | sort | uniq > no_relationship.tsv
+cat <(comm -13 has_relationship.tsv fasolo.tsv) <(comm -13 has_relationship.tsv parca.tsv) <(comm -13 has_relationship.tsv yeastkid_sort.tsv) <(comm -13 has_relationship.tsv workman.tsv) | sort | uniq > no_relationship.tsv
 # check there is no overlap
 comm -12 has_relationship.tsv no_relationship.tsv | wc -l
 # add the edges without known relationship and the unique ones that has relationship.
@@ -10,7 +11,8 @@ sed $'s/$/\t-/' no_relationship.tsv | cat - <(sed '1d' biogrid.tsv) <(sed '1d' f
 echo $'P\tTarget\tRelationship' | cat - edges.tsv > temp && mv temp edges.tsv
 grep kinase edges.tsv | cut -d$'\t' -f1 | sort | uniq > PK.txt
 grep phosphatase edges.tsv | cut -d$'\t' -f1 | sort | uniq > PP.txt
-# then run code in process_P.R to add sign to nodes that has sign in another interaction resulting in file edges_resign.tsv
+# then run code in resign.R to add sign to nodes that has sign in another interaction resulting in file edges_resign.tsv
+./resign.R
 grep -e '-$' edges_resign.tsv | cut -d$'\t' -f1 | sort | uniq > P_.txt
 # sanity check. should be zero overlap
 comm -12 PP.txt P_.txt

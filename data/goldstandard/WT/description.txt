@@ -1,0 +1,3 @@
+Cytoscape matrix import assumes row names are source and column names are target, so we must transpose.
+WT_transpose.mat made by removing header and first row names from WT.mat, then transposing with cat WT_body.mat | rs -c' ' -C' ' -T > WT_body_transpose.mat
+Then adding back the header as row names and the row names as header.

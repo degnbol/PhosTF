@@ -1,0 +1,1 @@
+TF_KO_transpose.tsv is the logFC file from raw copied, renamed and . in header have been fixed to - since there are no ORF names with .

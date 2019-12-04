@@ -1,0 +1,7 @@
+Space added in header of WP.mat
+sed '1d' WP.mat | cut -d' ' -f2- > WP_body.mat
+cat WP_body.mat | rs -c' ' -C' ' -T > WP_body_tranpose.mat
+cat WP.mat | cut -d' ' -f1 | tr '\n' ' ' > header
+head -n1 WP.mat | tr ' ' '\n' | sed '1d' | paste -d' ' - WP_body_tranpose.mat | cat header - > WP_transpose.mat
+rm header
+cat WP_transpose.mat | tr '+' 2 | sed 's/ -/ 3/g' > WP_cyto.mat

@@ -1,0 +1,4 @@
+WP.mat taken from ../../goldstandard
+All unsigned edges made to kinases in WP.mat.
+WP_cor.mat has 3 dephosphorylation edges removed since they were the only P edges onto 2 nodes.
+The edges were in column 174, 176 onto row for target YBL103C, YML007W.
