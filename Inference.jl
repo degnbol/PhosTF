@@ -11,6 +11,7 @@ using Flux.Tracker: grad, update!
 using ..ArrayUtils: eye, shuffle_columns
 include("Model.jl"); using .Model
 using Formatting
+using Dates
 
 """
 Get random indexes taken from ∈ [1,K] in portions.
@@ -74,10 +75,10 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 		lt = l1(w′*Iₜ)
 		lp = l1(w′*Iₚ)
 		printfmt(5, l, e, lt, lp)
-		println("\t$epoch")
+		println("\t$epoch\t$(Dates.now())")
 	end
 	
-	println("loss\tsse\tLt\tLp\tepoch")
+	println("loss\tsse\tLt\tLp\tepoch\ttime")
 	train!(W, V, X, L, Flux.throttle(cb, 5), epochs, opt)
 	Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ)
 end
