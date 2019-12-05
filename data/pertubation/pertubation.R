@@ -216,6 +216,7 @@ sum(WT_prior)
 # how many per TF?
 edge_per_TF = apply(WT_prior, 2, sum)
 plot(density(edge_per_TF))
+hist(edge_per_TF, breaks=20)
 mean(edge_per_TF)
 
 
