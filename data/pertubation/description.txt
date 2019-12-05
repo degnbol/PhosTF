@@ -4,5 +4,9 @@ This is now fixed. There are 32 PPs in KP.txt from comparison with ../goldstanda
 
 # remove header and row names from tables so julia code does not get confused. Also rename NA to NaN so it can be read
 sed '1d' logFC.ssv | cut -d' ' -f2- | sed 's/NA/NaN/g' > logFC.mat
+r logFC=logFC_inner
 sed '1d' WT_prior.ssv | cut -d' ' -f2- > WT_prior.mat
-r WT_prior=pertubation_indices
+r WT_prior=KOOE_indices
+r KOOE_indices=KOOE_inner_indices
+r KOOE_inner_indices=J
+r J=J_inner

@@ -17,3 +17,6 @@ all(rownames(measurements2D) == WT$ORF)
 logFC = log2(measurements2D / WT$value)
 write.table(logFC, file="PK_KO.tsv", sep="\t", quote=F)
 
+
+dataset$ORF == dataset$KO_ORF
+
