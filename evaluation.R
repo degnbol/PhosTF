@@ -16,17 +16,36 @@ melt_matrix = function(x) {
 }
 
 
-setwd("/Users/christian/GoogleDrev/PKTFX")
+example = function() {
+    
+    setwd("/Users/christian/GoogleDrev/PKTFX")
+    
+    # read
+    WP_fname = "data/inference/05/WP_infer_1.mat"
+    WT_fname = "data/inference/05/WT_infer_1.mat"
+    WT_prior_fname = "data/pertubation/WT_prior.mat"
+    P_fname = "data/evaluation/P_eval.tsv"
+    T_fname = "data/evaluation/T_eval.tsv"
+    KP_fname = "data/pertubation/KP.txt"
+    TF_fname = "data/pertubation/TF.txt"
+    PTX_fname = "data/pertubation/PTX.txt"
+    
+}
 
+# assuming when run as a script that we are in a folder such as data/inference/??/
 # read
-P_fname = "data/evaluation/P_eval.tsv"
-T_fname = "data/evaluation/T_eval.tsv"
-WP_fname = "data/inference/05/WP_infer_1.mat"
-WT_fname = "data/inference/05/WT_infer_1.mat"
-WT_prior_fname = "data/pertubation/WT_prior.mat"
-KP_fname = "data/pertubation/KP.txt"
-TF_fname = "data/pertubation/TF.txt"
-PTX_fname = "data/pertubation/PTX.txt"
+args = commandArgs(trailingOnly=T)
+WP_fname = args[1]
+WT_fname = args[2]
+P_fname = "../../evaluation/P_eval.tsv"
+T_fname = "../../evaluation/T_eval.tsv"
+WT_prior_fname = "../../pertubation/WT_prior.mat"
+KP_fname = "../../pertubation/KP.txt"
+TF_fname = "../../pertubation/TF.txt"
+PTX_fname = "../../pertubation/PTX.txt"
+# end
+
+
 P_eval = read.table(P_fname, header=T, sep="\t", quote="", check.names=F)
 T_eval = read.table(T_fname, header=T, sep="\t", quote="", check.names=F)
 WP = read.matrix(WP_fname)
@@ -71,44 +90,91 @@ P_eval = P_eval[as.character(P_eval$Source) != as.character(P_eval$Target),]
 T_eval = T_eval[as.character(T_eval$Source) != as.character(T_eval$Target),]
 T_eval_masked = T_eval_masked[as.character(T_eval_masked$Source) != as.character(T_eval_masked$Target),]
 
-cor(P_eval$yeastkid[!is.na(P_eval$yeastkid)], abs(P_eval$marker[!is.na(P_eval$yeastkid)]))
-cor(P_eval$reaction[!is.na(P_eval$reaction)], abs(P_eval$marker[!is.na(P_eval$reaction)]))
-cor(P_eval$ptmod[!is.na(P_eval$ptmod)], abs(P_eval$marker[!is.na(P_eval$ptmod)]))
-cor(P_eval$inhibition[!is.na(P_eval$inhibition)], -(P_eval$marker[!is.na(P_eval$inhibition)]))
-cor(P_eval$activation[!is.na(P_eval$activation)], +(P_eval$marker[!is.na(P_eval$activation)]))
-cor(P_eval$expression[!is.na(P_eval$expression)], abs(P_eval$marker[!is.na(P_eval$expression)]))
-cor(P_eval$catalysis[!is.na(P_eval$catalysis)], abs(P_eval$marker[!is.na(P_eval$catalysis)]))
-cor(P_eval$n_datasets, abs(P_eval$marker))
-auc(roc(P_eval$n_datasets > 0, abs(P_eval$marker)))
-auc(roc(P_eval$parca, abs(P_eval$marker)))
-auc(roc(P_eval$fasolo, abs(P_eval$marker)))
-auc(roc(P_eval$biogrid != "", abs(P_eval$marker)))
-auc(roc(P_eval$biogrid == "kinase", +(P_eval$marker)))
-auc(roc(P_eval$biogrid == "phosphatase", -(P_eval$marker)))
+
+# stratification
+# summary(P_eval$undirected, na.rm=T)
+# summary(P_eval$yeastkid, na.rm=T)
+# summary(P_eval$ptmod, na.rm=T)
+# summary(P_eval$expression, na.rm=T)
+
+# sum(P_eval$yeastkid > 4.52, na.rm=T)
+# sum(P_eval$yeastkid < 0, na.rm=T)
+# sum(P_eval$undirected > 950, na.rm=T)
+# sum(P_eval$undirected < 155, na.rm=T)
+# sum(P_eval$ptmod > 300, na.rm=T)
+# sum(P_eval$ptmod < 300, na.rm=T)
+
+positives1 = (P_eval$yeastkid > 4.52) | (P_eval$undirected > 950) | (P_eval$ptmod > 300)
+negatives1 = (P_eval$yeastkid < 0.00) | (P_eval$undirected < 155) | (P_eval$ptmod < 300)
+positives2 = (P_eval$yeastkid > 4.52) | (P_eval$ptmod > 300)
+negatives2 = (P_eval$yeastkid < 0.00) | (P_eval$ptmod < 300)
+positives3 = P_eval$ptmod > 300
+negatives3 = P_eval$ptmod < 300
+P_eval$goldstandard1 = NA
+P_eval$goldstandard2 = NA
+P_eval$goldstandard3 = NA
+P_eval$goldstandard1[positives1] = 1
+P_eval$goldstandard1[negatives1] = 0
+P_eval$goldstandard2[positives2] = 1
+P_eval$goldstandard2[negatives2] = 0
+P_eval$goldstandard3[positives3] = 1
+P_eval$goldstandard3[negatives3] = 0
 
 
-evaluate_T = function(dataset) {
+
+
+evaluate_cor = function(dataset, cor_names, cor_names_pos, cor_names_neg) {
     out = c()
-    cor_names = c("n_datasets", "reaction", "expression", "catalysis", "workman SLL", "workman pval")
-    cor_names_pos = c("activation")
-    cor_names_neg = c()
     for (name in cor_names) {
         valid = !is.na(dataset[name])
-        PCC = cor(dataset[valid,name], abs(dataset$marker[valid]))
+        PCC = cor(dataset[valid,name], abs(dataset[valid, "marker"]))
         out = c(out, sprintf(paste(name, "cor:\t%.4f"), PCC))
     }
     for (name in cor_names_pos) {
         valid = !is.na(dataset[name])
-        PCC = cor(dataset[valid,name], +(dataset$marker[valid]))
+        PCC = cor(dataset[valid,name], +(dataset[valid, "marker"]))
         out = c(out, sprintf(paste(name, "cor:\t%.4f"), PCC))
     }
     for (name in cor_names_neg) {
         valid = !is.na(dataset[name])
-        PCC = cor(dataset[valid,name], -(dataset$marker[valid]))
+        PCC = cor(dataset[valid,name], -(dataset[valid, "marker"]))
         out = c(out, sprintf(paste(name, "cor:\t%.4f"), PCC))
     }
     paste(out, collapse="\n")
 }
+
+
+evaluate_P = function(dataset) {
+    cor_names = c("yeastkid", "reaction", "ptmod", "expression", "catalysis", "undirected", "n_datasets")
+    cor_names_pos = c("activation")
+    cor_names_neg = c("inhibition")
+    evaluate_cor(dataset, cor_names, cor_names_pos, cor_names_neg)
+}
+
+
+evaluate_T = function(dataset) {
+    cor_names = c("n_datasets", "reaction", "expression", "catalysis", "workman SLL", "workman pval", "undirected")
+    cor_names_pos = c("activation")
+    cor_names_neg = c()
+    evaluate_cor(dataset, cor_names, cor_names_pos, cor_names_neg)
+}
+
+
+evaluate_auc_P = function(dataset) {
+    aucs = c(
+        auc(roc(P_eval$n_datasets > 0, abs(P_eval$marker))),
+        auc(roc(!is.na(P_eval$parca), abs(P_eval$marker))),
+        auc(roc(!is.na(P_eval$fasolo), abs(P_eval$marker))),
+        auc(roc(P_eval$biogrid != "", abs(P_eval$marker))),
+        auc(roc(P_eval$biogrid == "kinase", +(P_eval$marker))),
+        auc(roc(P_eval$biogrid == "phosphatase", -(P_eval$marker))),
+        auc(roc(P_eval$goldstandard1[!is.na(P_eval$goldstandard1)], abs(P_eval$marker[!is.na(P_eval$goldstandard1)]))),
+        auc(roc(P_eval$goldstandard2[!is.na(P_eval$goldstandard2)], abs(P_eval$marker[!is.na(P_eval$goldstandard2)]))),
+        auc(roc(P_eval$goldstandard3[!is.na(P_eval$goldstandard3)], abs(P_eval$marker[!is.na(P_eval$goldstandard3)])))
+    )
+    paste(c("any", "parca", "fasolo", "biogrid", "kinase", "phosphatase", "gold1", "gold2", "gold3"), aucs, sep="\t", collapse="\n")
+}
+
 
 evaluate_auc_T = function(dataset) {
     aucs = c(
@@ -121,13 +187,15 @@ evaluate_auc_T = function(dataset) {
     paste(c("yeastract expression", "yeastract activator", "yeastract inhibitor", "yeastract binding", "balaji"), aucs, sep="\t", collapse="\n")
 }
 
-
-cat(evaluate_T(T_eval_masked), "\n")
+aucs_P = evaluate_auc_P(P_eval)
 aucs_T = evaluate_auc_T(T_eval_masked)
-cat(aucs_T, "\n")
+cat("KP aucs", aucs_P, "TF aucs", aucs_T, sep="\n")
+cat("KP", evaluate_P(P_eval), sep="\n")
+cat("TF", evaluate_T(T_eval_masked), sep="\n")
 
-# stratification
-# script
+
+# plot(roc(P_eval$goldstandard[!is.na(P_eval$goldstandard)], abs(P_eval$marker[!is.na(P_eval$goldstandard)])))
+
 
 
 
