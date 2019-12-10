@@ -38,6 +38,8 @@ end
 "W is the param weight matrix, W′ is the masked version where untrainable entries are set to zero."
 L1(X, W′, cs, λ::Real) = sse(cs, W′, X) + λ*l1(W)
 loss(X, W, W′, cs, λ::Real) = sse(cs, W′, X) + λ*l1(_B(cs, abs.(W)))
+loss(X, W, W′, cs, λ::Real, ::Nothing) = loss(X, W, W′, cs, λ::Real)
+loss(X, W, W′, cs, λ::Real, λW::Real) = sse(cs, W′, X) + λ*l1(_B(cs, abs.(W))) + λW*l1(W)
 
 
 get_V(::Nothing, ::Nothing, ::Any) = nothing
@@ -53,7 +55,7 @@ get_V(Iₚₖ::Matrix, Iₚₚ::Matrix, W::Matrix) = sign.(sum(W*(Iₚₖ-Iₚ�
 - W: from previous training.
 - J: matrix with 1 for KO and 0 for passive observed node. Shape like X.
 """
-function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=10000, λ::Real=.1, opt=ADAMW(), 
+function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=10000, λ::Real=.1, λW=0., opt=ADAMW(), 
 	M=nothing, S=nothing, Iₚₖ=nothing, Iₚₚ=nothing, W=nothing, J=nothing)
 	n, K = size(X)
 	if M === nothing M = ones(n, n) end # no prior knowledge
@@ -66,7 +68,9 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 	Iₜ = Model.Iₜ(n, nₜ, nₚ)
 	Iₓ = I(n) - (Iₜ+Iₚ)
 
-	L(X) = loss(X, W, Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ), cs, λ)
+	if λW == 0 λW = nothing end
+	L(X) = loss(X, W, Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ), cs, λ, λW)
+
 
 	function cb(epoch)
 		l = L(X)
