@@ -215,7 +215,7 @@ perturbation_updated[KO_indices] = perturbation[KO_indices] - 6
 perturbation_inner_updated[KO_inner_indices] = perturbation_inner[KO_inner_indices] - 6
 # increase OE with 1
 perturbation_updated[OE_indices] = perturbation[OE_indices] + 1
-perturbation_inner_updated[OE_inner_indices] = perturbation_inner[OE_indices_inner] + 1
+perturbation_inner_updated[OE_inner_indices] = perturbation_inner[OE_inner_indices] + 1
 # write
 write.table(perturbation_updated, file="logFC.ssv", sep=" ", quote=F)
 write.table(perturbation_inner_updated, "logFC_inner.ssv", sep=" ", quote=F)
