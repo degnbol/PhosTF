@@ -162,15 +162,15 @@ evaluate_T = function(dataset) {
 
 evaluate_auc_P = function(dataset) {
     aucs = c(
-        auc(roc(P_eval$n_datasets > 0, abs(P_eval$marker))),
-        auc(roc(!is.na(P_eval$parca), abs(P_eval$marker))),
-        auc(roc(!is.na(P_eval$fasolo), abs(P_eval$marker))),
-        auc(roc(P_eval$biogrid != "", abs(P_eval$marker))),
-        auc(roc(P_eval$biogrid == "kinase", +(P_eval$marker))),
-        auc(roc(P_eval$biogrid == "phosphatase", -(P_eval$marker))),
-        auc(roc(P_eval$goldstandard1[!is.na(P_eval$goldstandard1)], abs(P_eval$marker[!is.na(P_eval$goldstandard1)]))),
-        auc(roc(P_eval$goldstandard2[!is.na(P_eval$goldstandard2)], abs(P_eval$marker[!is.na(P_eval$goldstandard2)]))),
-        auc(roc(P_eval$goldstandard3[!is.na(P_eval$goldstandard3)], abs(P_eval$marker[!is.na(P_eval$goldstandard3)])))
+        auc(roc(dataset$n_datasets > 0, abs(dataset$marker))),
+        auc(roc(!is.na(dataset$parca), abs(dataset$marker))),
+        auc(roc(!is.na(dataset$fasolo), abs(dataset$marker))),
+        auc(roc(dataset$biogrid != "", abs(dataset$marker))),
+        auc(roc(dataset$biogrid == "kinase", +(dataset$marker))),
+        auc(roc(dataset$biogrid == "phosphatase", -(dataset$marker))),
+        auc(roc(dataset$goldstandard1[!is.na(dataset$goldstandard1)], abs(dataset$marker[!is.na(dataset$goldstandard1)]))),
+        auc(roc(dataset$goldstandard2[!is.na(dataset$goldstandard2)], abs(dataset$marker[!is.na(dataset$goldstandard2)]))),
+        auc(roc(dataset$goldstandard3[!is.na(dataset$goldstandard3)], abs(dataset$marker[!is.na(dataset$goldstandard3)])))
     )
     paste(c("any", "parca", "fasolo", "biogrid", "kinase", "phosphatase", "gold1", "gold2", "gold3"), aucs, sep="\t", collapse="\n")
 }
@@ -188,10 +188,12 @@ evaluate_auc_T = function(dataset) {
 }
 
 aucs_P = evaluate_auc_P(P_eval)
-aucs_T = evaluate_auc_T(T_eval_masked)
-cat("KP aucs", aucs_P, "TF aucs", aucs_T, sep="\n")
+aucs_T = evaluate_auc_T(T_eval)
+aucs_T_masked = evaluate_auc_T(T_eval_masked)
+cat("KP aucs", aucs_P, "TF aucs", aucs_T, "TF maskeed aucs", aucs_T_masked, sep="\n")
 cat("KP", evaluate_P(P_eval), sep="\n")
-cat("TF", evaluate_T(T_eval_masked), sep="\n")
+cat("TF", evaluate_T(T_eval), sep="\n")
+cat("TF masked", evaluate_T(T_eval_masked), sep="\n")
 
 
 # plot(roc(P_eval$goldstandard[!is.na(P_eval$goldstandard)], abs(P_eval$marker[!is.na(P_eval$goldstandard)])))

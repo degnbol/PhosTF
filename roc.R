@@ -41,17 +41,17 @@ main = function(true_fnames, marker_fnames, tf_true_fnames, tf_marker_fnames, ou
         PK = PKs[[i]]
         PP = PPs[[i]]
         dfs[[i]] = rbind(
-            data.frame(D=as.vector(P[1:nP,]),        M=as.vector(M_abs[1:nP,]),       sample=i, source="P ",  target="P  "),
-            data.frame(D=as.vector(PK[1:nP,]),       M=as.vector(M_pos[1:nP,]),       sample=i, source="PK",  target="P  "),
-            data.frame(D=as.vector(PP[1:nP,]),       M=as.vector(M_neg[1:nP,]),       sample=i, source="PP",  target="P  "),
-            data.frame(D=as.vector(P[(nP+1):nPT,]),  M=as.vector(M_abs[(nP+1):nPT,]), sample=i, source="P ",  target="T  "),
-            data.frame(D=as.vector(PK[(nP+1):nPT,]), M=as.vector(M_pos[(nP+1):nPT,]), sample=i, source="PK",  target="T  "),
-            data.frame(D=as.vector(PP[(nP+1):nPT,]), M=as.vector(M_neg[(nP+1):nPT,]), sample=i, source="PP",  target="T  "),
-            data.frame(D=as.vector(T_),              M=as.vector(M_tf),               sample=i, source="T ",  target="PTX"))
+            data.frame(D=as.vector(P[1:nP,]),        M=as.vector(M_abs[1:nP,]),       sample=i, source="KP",  target="KP"),
+            data.frame(D=as.vector(PK[1:nP,]),       M=as.vector(M_pos[1:nP,]),       sample=i, source="PK",  target="KP"),
+            data.frame(D=as.vector(PP[1:nP,]),       M=as.vector(M_neg[1:nP,]),       sample=i, source="PP",  target="KP"),
+            data.frame(D=as.vector(P[(nP+1):nPT,]),  M=as.vector(M_abs[(nP+1):nPT,]), sample=i, source="KP",  target="TF"),
+            data.frame(D=as.vector(PK[(nP+1):nPT,]), M=as.vector(M_pos[(nP+1):nPT,]), sample=i, source="PK",  target="TF"),
+            data.frame(D=as.vector(PP[(nP+1):nPT,]), M=as.vector(M_neg[(nP+1):nPT,]), sample=i, source="PP",  target="TF"),
+            data.frame(D=as.vector(T_),              M=as.vector(M_tf),               sample=i, source="TF",  target="V "))
     }
     df = bind_rows(dfs)
     df$sample = as.factor(df$sample)
-    lvls = c("T →PTX", "P →P  ", "PK→P  ", "PP→P  ", "P →T  ", "PK→T  ", "PP→T  ")
+    lvls = c("TF→V ", "KP→KP", "PK→KP", "PP→KP", "KP→TF", "PK→TF", "PP→TF")
     cols = c("#005000", "purple", "red", "blue", "purple", "red", "blue")
     ltyp = c(1, 2, 2, 2, 1, 1, 1)
     df$edge = factor(paste0(df$source, "→", df$target), levels=lvls)
@@ -62,7 +62,7 @@ main = function(true_fnames, marker_fnames, tf_true_fnames, tf_marker_fnames, ou
     plot = ggplot(df, aes(d=D, m=M, color=edge, linetype=edge)) +
         geom_abline(slope=1, intercept=0, color="lightgray") +
         geom_roc(n.cuts=0, size=.6) +
-        style_roc(theme=theme_bw, guide=F, xlab="FPR", ylab="TPR")
+        style_roc(theme=theme_bw, guide=F, xlab="False Positive Rate", ylab="True Positive Rate")
     # + geom_roc(n.cuts=0, aes(fill=sample), linealpha=.1) # transparent individual curves
     
     # legend and title

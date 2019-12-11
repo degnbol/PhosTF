@@ -121,7 +121,7 @@ NA2avg = function(x, avg_table) {
 }
 
 
-setwd("/Users/christian/GoogleDrev/PKTFX/data/pertubation")
+setwd("/Users/christian/GoogleDrev/PKTFX/data/perturbation")
 
 ## read
 holstege_PK_KO = read.table("../processed/holstege_2010/PK_KO.tsv", header=T, row.names=1, sep='\t', check.names=F)
@@ -151,36 +151,36 @@ data_frames_melt = melt_tables(data_frames)
 data_frames_melt_avg = aggregate(value ~ rownames + colnames, data=data_frames_melt, mean)
 data_frames_cast = acast(data_frames_melt_avg, rownames ~ colnames)
 
-# merge all pertubation data
-pertubation = merge_full(data_frames)
+# merge all perturbation data
+perturbation = merge_full(data_frames)
 
-X_names = sort(unique(rownames(pertubation)))
+X_names = sort(unique(rownames(perturbation)))
 X_names = X_names[!((X_names %in% KP_names) | (X_names %in% TF_names))]
 write.table(X_names, file="X.txt", row.names=F, col.names=F, quote=F)
 
-# check if any pertubation gene is not measured
-colnames(pertubation)[!(gsub(" OE", "", colnames(pertubation)) %in% rownames(pertubation))]
+# check if any perturbation gene is not measured
+colnames(perturbation)[!(gsub(" OE", "", colnames(perturbation)) %in% rownames(perturbation))]
 # they are only multi KO so all is good
 
 PTX_names = c(KP_names, TF_names, X_names)
 write.table(PTX_names, file="PTX.txt", row.names=F, col.names=F, quote=F)
 
 # sort rows according to PTX
-pertubation = sort_table(pertubation, PTX_names)
-pertubation_inner = sort_table(data_frames_cast, PTX_names)
+perturbation = sort_table(perturbation, PTX_names)
+perturbation_inner = sort_table(data_frames_cast, PTX_names)
 
 # make idx of what is KOed/OEed
-KO_indices = as.matrix(column_row_map(pertubation))
-KOOE_indices = as.matrix(column_row_map_space(pertubation))
-KO_inner_indices = as.matrix(column_row_map(pertubation_inner))
-KOOE_inner_indices = as.matrix(column_row_map_space(pertubation_inner))
+KO_indices = as.matrix(column_row_map(perturbation))
+KOOE_indices = as.matrix(column_row_map_space(perturbation))
+KO_inner_indices = as.matrix(column_row_map(perturbation_inner))
+KOOE_inner_indices = as.matrix(column_row_map_space(perturbation_inner))
 write.table(KOOE_indices, file="KOOE_indices.ssv", sep=" ", quote=F)
 write.table(KOOE_inner_indices, file="KOOE_inner_indices.ssv", sep=" ", quote=F)
 # we add NaN entries to J, which will result in their values being ignored in the SSE calculation during gradient descent
 J = KOOE_indices
 J_inner = KOOE_inner_indices
-J[is.na(pertubation)] = 1
-J_inner[is.na(pertubation_inner)] = 1
+J[is.na(perturbation)] = 1
+J_inner[is.na(perturbation_inner)] = 1
 write.table(J, file="J.ssv", sep=" ", quote=F)
 write.table(J_inner, file="J_inner.ssv", sep=" ", quote=F)
 
@@ -190,21 +190,21 @@ KOOE_indices = KOOE_indices == 1
 KO_inner_indices = KO_inner_indices == 1
 KOOE_inner_indices = KOOE_inner_indices == 1
 
-sum(is.na(pertubation))
+sum(is.na(perturbation))
 # we have to get rid of NaNs. We can try to copy logFC for a node under the same exp conditions
-pertubation = NA2avg(pertubation, pertubation_inner)
+perturbation = NA2avg(perturbation, perturbation_inner)
 # the remaining NA values are set to zero.
-sum(is.na(pertubation))
-sum(is.na(pertubation_inner))
+sum(is.na(perturbation))
+sum(is.na(perturbation_inner))
 # correct remaining nodes to zero
-pertubation[is.na(pertubation)] = 0
-pertubation_inner[is.na(pertubation_inner)] = 0
+perturbation[is.na(perturbation)] = 0
+perturbation_inner[is.na(perturbation_inner)] = 0
 # reducing KOs with 6
-pertubation[KO_indices] = pertubation[KO_indices] - 6
-pertubation_inner[KO_inner_indices] = pertubation_inner[KO_inner_indices] - 6
+perturbation[KO_indices] = perturbation[KO_indices] - 6
+perturbation_inner[KO_inner_indices] = perturbation_inner[KO_inner_indices] - 6
 # write
-write.table(pertubation, file="logFC.ssv", sep=" ", quote=F)
-write.table(pertubation_inner, "logFC_inner.ssv", sep=" ", quote=F)
+write.table(perturbation, file="logFC.ssv", sep=" ", quote=F)
+write.table(perturbation_inner, "logFC_inner.ssv", sep=" ", quote=F)
 
 
 # make a mask for WT edges
