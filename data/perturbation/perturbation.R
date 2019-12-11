@@ -2,6 +2,7 @@
 ## packages
 library(Matrix)
 library(reshape2)
+library(ggplot2)
 
 ## functions
 
@@ -12,6 +13,7 @@ column_row_map = function(x) {
     for (column in 1:ncol(x)) {
         column_names = strsplit(colnames(x)[column], "_")[[1]]
         new_i = match(column_names, rownames(x))
+        new_i = new_i[!is.na(new_i)] # NA means there was no match
         i = c(i, new_i)
         j = c(j, rep(column, length(new_i)))
     }
@@ -133,7 +135,6 @@ chua_TF_KO = read.table("../processed/chua_2006/TF_KO.tsv", header=T, row.names=
 chua_TF_OE = read.table("../processed/chua_2006/TF_OE.tsv", header=T, row.names=1, check.names=F)
 goncalves_KP_KO_TF = read.table("../processed/goncalves_2017/KP_KO_TF.tsv", header=T, row.names=1, sep='\t', check.names=F)
 goncalves_KP_KO_KP = read.table("../processed/goncalves_2017/KP_KO_KP.tsv", header=T, row.names=1, sep='\t', check.names=F)
-data_frames = list(holstege_PK_KO, luscombe_TF_KO, fiedler_PK_KO, zelezniak_PK_KO, chua_TF_KO, chua_TF_OE, goncalves_KP_KO_TF, goncalves_KP_KO_KP)
 
 KP_names = c(colnames(holstege_PK_KO), colnames(fiedler_PK_KO), colnames(zelezniak_PK_KO), colnames(goncalves_KP_KO_KP), colnames(goncalves_KP_KO_TF))
 TF_names = c(colnames(luscombe_TF_KO), colnames(chua_TF_KO), colnames(chua_TF_OE))
@@ -145,6 +146,7 @@ write.table(KP_names, file="KP.txt", row.names=F, col.names=F, quote=F)
 write.table(TF_names, file="TF.txt", row.names=F, col.names=F, quote=F)
 
 colnames(chua_TF_OE) = paste(colnames(chua_TF_OE), "OE")  # make sure to separate OE from KO
+data_frames = list(holstege_PK_KO, luscombe_TF_KO, fiedler_PK_KO, zelezniak_PK_KO, chua_TF_KO, chua_TF_OE, goncalves_KP_KO_TF, goncalves_KP_KO_KP)
 
 # all values in long format
 data_frames_melt = melt_tables(data_frames)
@@ -171,9 +173,14 @@ perturbation_inner = sort_table(data_frames_cast, PTX_names)
 
 # make idx of what is KOed/OEed
 KO_indices = as.matrix(column_row_map(perturbation))
-KOOE_indices = as.matrix(column_row_map_space(perturbation))
 KO_inner_indices = as.matrix(column_row_map(perturbation_inner))
+KOOE_indices = as.matrix(column_row_map_space(perturbation))
 KOOE_inner_indices = as.matrix(column_row_map_space(perturbation_inner))
+OE_indices = KOOE_indices & !KO_indices
+OE_inner_indices = KOOE_inner_indices & !KO_inner_indices
+# make sure OE is kept separate. should be TRUE
+any(OE_indices != 0)
+any(OE_inner_indices != 0)
 write.table(KOOE_indices, file="KOOE_indices.ssv", sep=" ", quote=F)
 write.table(KOOE_inner_indices, file="KOOE_inner_indices.ssv", sep=" ", quote=F)
 # we add NaN entries to J, which will result in their values being ignored in the SSE calculation during gradient descent
@@ -187,8 +194,10 @@ write.table(J_inner, file="J_inner.ssv", sep=" ", quote=F)
 # make them logical
 KO_indices = KO_indices == 1
 KOOE_indices = KOOE_indices == 1
+OE_indices = OE_indices == 1
 KO_inner_indices = KO_inner_indices == 1
 KOOE_inner_indices = KOOE_inner_indices == 1
+OE_inner_indices = OE_inner_indices == 1
 
 sum(is.na(perturbation))
 # we have to get rid of NaNs. We can try to copy logFC for a node under the same exp conditions
@@ -200,11 +209,16 @@ sum(is.na(perturbation_inner))
 perturbation[is.na(perturbation)] = 0
 perturbation_inner[is.na(perturbation_inner)] = 0
 # reducing KOs with 6
-perturbation[KO_indices] = perturbation[KO_indices] - 6
-perturbation_inner[KO_inner_indices] = perturbation_inner[KO_inner_indices] - 6
+perturbation_updated = perturbation
+perturbation_inner_updated = perturbation_inner
+perturbation_updated[KO_indices] = perturbation[KO_indices] - 6
+perturbation_inner_updated[KO_inner_indices] = perturbation_inner[KO_inner_indices] - 6
+# increase OE with 1
+perturbation_updated[OE_indices] = perturbation[OE_indices] + 1
+perturbation_inner_updated[OE_inner_indices] = perturbation_inner[OE_indices_inner] + 1
 # write
-write.table(perturbation, file="logFC.ssv", sep=" ", quote=F)
-write.table(perturbation_inner, "logFC_inner.ssv", sep=" ", quote=F)
+write.table(perturbation_updated, file="logFC.ssv", sep=" ", quote=F)
+write.table(perturbation_inner_updated, "logFC_inner.ssv", sep=" ", quote=F)
 
 
 # make a mask for WT edges
@@ -220,6 +234,25 @@ hist(edge_per_TF, breaks=20)
 mean(edge_per_TF)
 
 
+# plot perturbation values
+df1 = data.frame(logFC=perturbation[KO_indices], label="KO")
+df2 = data.frame(logFC=perturbation_updated[KO_indices], label="corrected KO")
+df3 = data.frame(logFC=perturbation[OE_indices], label="OE")
+df4 = data.frame(logFC=perturbation_updated[OE_indices], label="corrected OE")
+df5 = data.frame(logFC=perturbation[!J], label="others")
+plotdf = rbind(df1, df2, df3, df4, df5)
+plotdf$label = factor(plotdf$label, levels=c("KO", "OE", "corrected KO", "corrected OE", "others"))
+
+ggplot(plotdf, aes(logFC, y=..scaled.., fill=label)) + 
+    geom_density(alpha=0.8) +
+    scale_x_continuous(name="log fold-change", breaks=c(-10,-5,-1,0,1), labels=c("-10","-5","-1","0","1"), limits=c(-12,4)) +
+    ylab("scaled density") +
+    scale_fill_manual(values=c("pink", "cyan", "red", "blue", "black")) +
+    theme_linedraw() +
+    theme(legend.title=element_blank(), panel.grid.major=element_line(colour="lightgray"), panel.grid.minor=element_blank()) +
+    ggtitle("Perturbation corrections")
+
+ggsave("perturbation_corrections.pdf", width=7, height=1.7, units="in")
 
 
 
