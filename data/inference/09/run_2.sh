@@ -1,3 +1,3 @@
 export JULIA_NUM_THREADS=12
 export OPENBLAS_NUM_THREADS=12
-../../../PKTFX.jl infer ../../pertubation/logFC.mat 272 153 --epochs 500 --WT_prior ../../pertubation/WT_prior.mat --J ../../pertubation/J.mat --WT WT_infer_1.mat --WP WP_infer_1.mat
+../../../PKTFX.jl infer ../../perturbation/logFC.mat 272 153 --epochs 500 --WT_prior ../../perturbation/WT_prior.mat --J ../../perturbation/J.mat --WT WT_infer_1.mat --WP WP_infer_1.mat
