@@ -23,12 +23,12 @@ example = function() {
     # read
     WP_fname = "data/inference/05/WP_infer_1.mat"
     WT_fname = "data/inference/05/WT_infer_1.mat"
-    WT_prior_fname = "data/pertubation/WT_prior.mat"
+    WT_prior_fname = "data/perturbation/WT_prior.mat"
     P_fname = "data/evaluation/P_eval.tsv"
     T_fname = "data/evaluation/T_eval.tsv"
-    KP_fname = "data/pertubation/KP.txt"
-    TF_fname = "data/pertubation/TF.txt"
-    PTX_fname = "data/pertubation/PTX.txt"
+    KP_fname = "data/perturbation/KP.txt"
+    TF_fname = "data/perturbation/TF.txt"
+    PTX_fname = "data/perturbation/PTX.txt"
     
 }
 
@@ -39,10 +39,10 @@ WP_fname = args[1]
 WT_fname = args[2]
 P_fname = "../../evaluation/P_eval.tsv"
 T_fname = "../../evaluation/T_eval.tsv"
-WT_prior_fname = "../../pertubation/WT_prior.mat"
-KP_fname = "../../pertubation/KP.txt"
-TF_fname = "../../pertubation/TF.txt"
-PTX_fname = "../../pertubation/PTX.txt"
+WT_prior_fname = "../../perturbation/WT_prior.mat"
+KP_fname = "../../perturbation/KP.txt"
+TF_fname = "../../perturbation/TF.txt"
+PTX_fname = "../../perturbation/PTX.txt"
 # end
 
 
@@ -104,7 +104,7 @@ T_eval_masked = T_eval_masked[as.character(T_eval_masked$Source) != as.character
 # sum(P_eval$ptmod > 300, na.rm=T)
 # sum(P_eval$ptmod < 300, na.rm=T)
 
-positives1 = (P_eval$yeastkid > 4.52) | (P_eval$undirected > 950) | (P_eval$ptmod > 300)
+positives1 = (P_eval$yeastkid > 4.52) | (P_eval$undirected > 950) | (P_eval$ptmod > 300) | P_eval$fasolo
 negatives1 = (P_eval$yeastkid < 0.00) | (P_eval$undirected < 155) | (P_eval$ptmod < 300)
 positives2 = (P_eval$yeastkid > 4.52) | (P_eval$ptmod > 300)
 negatives2 = (P_eval$yeastkid < 0.00) | (P_eval$ptmod < 300)
@@ -145,7 +145,7 @@ evaluate_cor = function(dataset, cor_names, cor_names_pos, cor_names_neg) {
 
 
 evaluate_P = function(dataset) {
-    cor_names = c("yeastkid", "reaction", "ptmod", "expression", "catalysis", "undirected", "n_datasets")
+    cor_names = c("yeastkid", "reaction", "ptmod", "expression", "catalysis", "netphorest", "networkin", "networkin_biogrid", "undirected", "n_datasets")
     cor_names_pos = c("activation")
     cor_names_neg = c("inhibition")
     evaluate_cor(dataset, cor_names, cor_names_pos, cor_names_neg)
