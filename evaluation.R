@@ -91,38 +91,6 @@ T_eval = T_eval[as.character(T_eval$Source) != as.character(T_eval$Target),]
 T_eval_masked = T_eval_masked[as.character(T_eval_masked$Source) != as.character(T_eval_masked$Target),]
 
 
-# stratification
-# summary(P_eval$undirected, na.rm=T)
-# summary(P_eval$yeastkid, na.rm=T)
-# summary(P_eval$ptmod, na.rm=T)
-# summary(P_eval$expression, na.rm=T)
-
-# sum(P_eval$yeastkid > 4.52, na.rm=T)
-# sum(P_eval$yeastkid < 0, na.rm=T)
-# sum(P_eval$undirected > 950, na.rm=T)
-# sum(P_eval$undirected < 155, na.rm=T)
-# sum(P_eval$ptmod > 300, na.rm=T)
-# sum(P_eval$ptmod < 300, na.rm=T)
-
-positives1 = (P_eval$yeastkid > 4.52) | (P_eval$undirected > 950) | (P_eval$ptmod > 300) | P_eval$fasolo
-negatives1 = (P_eval$yeastkid < 0.00) | (P_eval$undirected < 155) | (P_eval$ptmod < 300)
-positives2 = (P_eval$yeastkid > 4.52) | (P_eval$ptmod > 300)
-negatives2 = (P_eval$yeastkid < 0.00) | (P_eval$ptmod < 300)
-positives3 = P_eval$ptmod > 300
-negatives3 = P_eval$ptmod < 300
-P_eval$goldstandard1 = NA
-P_eval$goldstandard2 = NA
-P_eval$goldstandard3 = NA
-P_eval$goldstandard1[positives1] = 1
-P_eval$goldstandard1[negatives1] = 0
-P_eval$goldstandard2[positives2] = 1
-P_eval$goldstandard2[negatives2] = 0
-P_eval$goldstandard3[positives3] = 1
-P_eval$goldstandard3[negatives3] = 0
-
-
-
-
 evaluate_cor = function(dataset, cor_names, cor_names_pos, cor_names_neg) {
     out = c()
     for (name in cor_names) {
@@ -165,6 +133,7 @@ evaluate_auc_P = function(dataset) {
         auc(roc(dataset$n_datasets > 0, abs(dataset$marker))),
         auc(roc(!is.na(dataset$parca), abs(dataset$marker))),
         auc(roc(!is.na(dataset$fasolo), abs(dataset$marker))),
+        auc(roc(dataset$fiedler != "", abs(dataset$marker))),
         auc(roc(dataset$biogrid != "", abs(dataset$marker))),
         auc(roc(dataset$biogrid == "kinase", +(dataset$marker))),
         auc(roc(dataset$biogrid == "phosphatase", -(dataset$marker))),
@@ -172,7 +141,7 @@ evaluate_auc_P = function(dataset) {
         auc(roc(dataset$goldstandard2[!is.na(dataset$goldstandard2)], abs(dataset$marker[!is.na(dataset$goldstandard2)]))),
         auc(roc(dataset$goldstandard3[!is.na(dataset$goldstandard3)], abs(dataset$marker[!is.na(dataset$goldstandard3)])))
     )
-    paste(c("any", "parca", "fasolo", "biogrid", "kinase", "phosphatase", "gold1", "gold2", "gold3"), aucs, sep="\t", collapse="\n")
+    paste(c("any", "parca", "fasolo", "fiedler", "biogrid", "kinase", "phosphatase", "gold1", "gold2", "gold3"), aucs, sep="\t", collapse="\n")
 }
 
 
