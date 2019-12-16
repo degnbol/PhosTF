@@ -299,8 +299,9 @@ Infer a weight matrix from logFC data.
 - PKPP: fname. vector, each element is -1 or 1 indicating PP or PK. 0s ignored.
 - WT/WP: previous run to continue.
 """
-@main function infer(X, nₜ::Integer, nₚ::Integer, ot=pwd()*"/WT_infer.mat", op=pwd()*"/WP_infer.mat"; epochs::Integer=5000, 
+@main function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; epochs::Integer=5000, 
 	lambda::Real=.1, lambdaW::Real=0., WT_prior=nothing, WP_prior=nothing, PKPP=nothing, WT=nothing, WP=nothing, J=nothing)
+	ot, op = abspath(ot), abspath(op)  # workaround for weird cwd issues
 	X = loaddlm(X, Float64)
 	if J !== nothing
 		J = loaddlm(J, Float64)
