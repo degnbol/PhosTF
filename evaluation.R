@@ -113,7 +113,7 @@ evaluate_cor = function(dataset, cor_names, cor_names_pos, cor_names_neg) {
 
 
 evaluate_P = function(dataset) {
-    cor_names = c("yeastkid", "reaction", "ptmod", "expression", "catalysis", "netphorest", "networkin", "networkin_biogrid", "undirected", "n_datasets")
+    cor_names = c("yeastkid", "reaction", "ptmod", "expression", "catalysis", "netphorest", "networkin", "networkin STRING", "networkin_biogrid", "undirected", "n_datasets")
     cor_names_pos = c("activation")
     cor_names_neg = c("inhibition")
     evaluate_cor(dataset, cor_names, cor_names_pos, cor_names_neg)
@@ -130,28 +130,29 @@ evaluate_T = function(dataset) {
 
 evaluate_auc_P = function(dataset) {
     aucs = c(
-        auc(roc(dataset$n_datasets > 0, abs(dataset$marker))),
-        auc(roc(!is.na(dataset$parca), abs(dataset$marker))),
-        auc(roc(!is.na(dataset$fasolo), abs(dataset$marker))),
-        auc(roc(dataset$fiedler != "", abs(dataset$marker))),
-        auc(roc(dataset$biogrid != "", abs(dataset$marker))),
-        auc(roc(dataset$biogrid == "kinase", +(dataset$marker))),
-        auc(roc(dataset$biogrid == "phosphatase", -(dataset$marker))),
-        auc(roc(dataset$goldstandard1[!is.na(dataset$goldstandard1)], abs(dataset$marker[!is.na(dataset$goldstandard1)]))),
-        auc(roc(dataset$goldstandard2[!is.na(dataset$goldstandard2)], abs(dataset$marker[!is.na(dataset$goldstandard2)]))),
-        auc(roc(dataset$goldstandard3[!is.na(dataset$goldstandard3)], abs(dataset$marker[!is.na(dataset$goldstandard3)])))
+        auc(roc(dataset$n_datasets > 0, abs(dataset$marker), direction="<")),
+        auc(roc(!is.na(dataset$parca), abs(dataset$marker), direction="<")),
+        auc(roc(!is.na(dataset$fasolo), abs(dataset$marker), direction="<")),
+        auc(roc(dataset$fiedler != "", abs(dataset$marker), direction="<")),
+        auc(roc(dataset$biogrid != "", abs(dataset$marker), direction="<")),
+        auc(roc(dataset$biogrid == "kinase", +(dataset$marker), direction="<")),
+        auc(roc(dataset$biogrid == "phosphatase", -(dataset$marker), direction="<")),
+        auc(roc(dataset$goldstandard1[!is.na(dataset$goldstandard1)], abs(dataset$marker[!is.na(dataset$goldstandard1)]), direction="<")),
+        auc(roc(dataset$goldstandard2[!is.na(dataset$goldstandard2)], abs(dataset$marker[!is.na(dataset$goldstandard2)]), direction="<")),
+        auc(roc(dataset$goldstandard3[!is.na(dataset$goldstandard3)], abs(dataset$marker[!is.na(dataset$goldstandard3)]), direction="<")),
+        auc(roc(dataset$goldstandard4[!is.na(dataset$goldstandard4)], abs(dataset$marker[!is.na(dataset$goldstandard4)]), direction="<"))
     )
-    paste(c("any", "parca", "fasolo", "fiedler", "biogrid", "kinase", "phosphatase", "gold1", "gold2", "gold3"), aucs, sep="\t", collapse="\n")
+    paste(c("any", "parca", "fasolo", "fiedler", "biogrid", "kinase", "phosphatase", "gold1", "gold2", "gold3", "gold4"), aucs, sep="\t", collapse="\n")
 }
 
 
 evaluate_auc_T = function(dataset) {
     aucs = c(
-        auc(roc(dataset$`yeastract expression` != "", abs(dataset$marker))),
-        auc(roc(dataset$`yeastract expression` == "activator", +(dataset$marker))),
-        auc(roc(dataset$`yeastract expression` == "inhibitor", -(dataset$marker))),
-        auc(roc(!is.na(dataset$`yeastract binding`), abs(dataset$marker))),
-        auc(roc(!is.na(dataset$balaji), abs(dataset$marker)))
+        auc(roc(dataset$`yeastract expression` != "", abs(dataset$marker), direction="<")),
+        auc(roc(dataset$`yeastract expression` == "activator", +(dataset$marker), direction="<")),
+        auc(roc(dataset$`yeastract expression` == "inhibitor", -(dataset$marker), direction="<")),
+        auc(roc(!is.na(dataset$`yeastract binding`), abs(dataset$marker), direction="<")),
+        auc(roc(!is.na(dataset$balaji), abs(dataset$marker), direction="<"))
     )
     paste(c("yeastract expression", "yeastract activator", "yeastract inhibitor", "yeastract binding", "balaji"), aucs, sep="\t", collapse="\n")
 }
