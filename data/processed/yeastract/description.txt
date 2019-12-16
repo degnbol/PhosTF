@@ -28,4 +28,4 @@ r activator=inhibitor
 comm -12 <(cat activator_expression_ORF.tsv) <(cat inhibitor_expression_ORF.tsv) > unsigned_expression_ORF.tsv
 comm -23 <(cat activator_expression_ORF.tsv) <(cat inhibitor_expression_ORF.tsv) > only_activator_expression_ORF.tsv
 comm -13 <(cat activator_expression_ORF.tsv) <(cat inhibitor_expression_ORF.tsv) > only_inhibitor_expression_ORF.tsv
-cat <(sed $'s/$/\tactivator/' only_activator_expression_ORF.tsv) <(sed $'s/$/\tinhibitor/' only_inhibitor_expression_ORF.tsv) <(sed $'s/$/\t/' unsigned_expression_ORF.tsv) > expression_ORF.tsv
+cat <(sed $'s/$/\tactivator/' only_activator_expression_ORF.tsv) <(sed $'s/$/\tinhibitor/' only_inhibitor_expression_ORF.tsv) <(sed $'s/$/\tambiguous/' unsigned_expression_ORF.tsv) > expression_ORF.tsv
