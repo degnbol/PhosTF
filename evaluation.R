@@ -113,7 +113,7 @@ evaluate_cor = function(dataset, cor_names, cor_names_pos, cor_names_neg) {
 
 
 evaluate_P = function(dataset) {
-    cor_names = c("yeastkid", "reaction", "ptmod", "expression", "catalysis", "netphorest", "networkin", "networkin STRING", "networkin_biogrid", "undirected", "n_datasets")
+    cor_names = c("yeastkid", "reaction", "ptmod", "expression", "catalysis", "netphorest", "networkin", "networkin STRING", "networkin_biogrid", "undirected", "EMAP", "n_datasets")
     cor_names_pos = c("activation")
     cor_names_neg = c("inhibition")
     evaluate_cor(dataset, cor_names, cor_names_pos, cor_names_neg)
@@ -160,7 +160,7 @@ evaluate_auc_T = function(dataset) {
 aucs_P = evaluate_auc_P(P_eval)
 aucs_T = evaluate_auc_T(T_eval)
 aucs_T_masked = evaluate_auc_T(T_eval_masked)
-cat("KP aucs", aucs_P, "TF aucs", aucs_T, "TF maskeed aucs", aucs_T_masked, sep="\n")
+cat("KP aucs", aucs_P, "TF aucs", aucs_T, "TF masked aucs", aucs_T_masked, sep="\n")
 cat("KP", evaluate_P(P_eval), sep="\n")
 cat("TF", evaluate_T(T_eval), sep="\n")
 cat("TF masked", evaluate_T(T_eval_masked), sep="\n")
