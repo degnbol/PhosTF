@@ -243,6 +243,7 @@ df5 = data.frame(logFC=perturbation[!J], label="others")
 plotdf = rbind(df1, df2, df3, df4, df5)
 plotdf$label = factor(plotdf$label, levels=c("KO", "OE", "corrected KO", "corrected OE", "others"))
 
+
 ggplot(plotdf, aes(logFC, y=..scaled.., fill=label)) + 
     geom_density(alpha=0.7) +
     scale_x_continuous(name="log fold-change", breaks=c(-10,-5,-1,0,1), labels=c("-10","-5","-1","0","1"), limits=c(-12,4)) +

@@ -1,0 +1,6 @@
+testdata
+data/raw
+.RData
+data/processed/*/*.tsv
+data/processed/*/*.ssv
+data/processed/*/*.xlsx

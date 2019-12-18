@@ -1,0 +1,4 @@
+python NetworKIN.py -b /Users/jinhokim/Packages/blast-2.2.17/bin/blastall -n /Users/jinhokim/Works/binary_human_public_20140130/netphorest -v -t 10 9606 sample.fas > NK_out_sample.tx
+python NetworKIN.py -b /Users/jinhokim/Packages/blast-2.2.17/bin/blastall -n /Users/jinhokim/Works/binary_human_public_20140130/netphorest -v -t 10 9606 sample.fas sample.res > NK_out_sample.txt
+python NetworKIN.py -b /Users/jinhokim/Packages/blast-2.2.17/bin/blastall -n /Users/jinhokim/Works/binary_human_public_20140130/netphorest -v -t 10 9606 data_ProteomeDiscoverer_sample/fasta_tst.txt data_ProteomeDiscoverer_sample/peptides_tst.txt > NK_out_PD_sample.txt
+python NetworKIN.py -b /Users/jinhokim/Packages/blast-2.2.17/bin/blastall -n /Users/jinhokim/Works/binary_human_public_20140130/netphorest -v -t 10 9606 /Users/jinhokim/Works/Data/Proteome/Ensembl/68/Homo_sapiens.GRCh37.68.pep.all.fa.fa sample_MQ.res > NK_output_MQ.txt
