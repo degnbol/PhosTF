@@ -1,4 +1,10 @@
-WP.mat taken from ../../goldstandard
-All unsigned edges made to kinases in WP.mat.
-WP_cor.mat has 3 dephosphorylation edges removed since they were the only P edges onto 2 nodes.
-The edges were in column 174, 176 onto row for target YBL103C, YML007W.
+# replace + values with 1 and - with -1, effectively setting unknown edges (originally 1 in the {0,1,+,-} format) to kinase edges (1 in the {-1,0,1} format)
+sed 's/ \+/ 1/g' ../../goldstandard/WP/WP.mat | sed 's/ -/ -1/g' > WP.ssv
+cp ../../goldstandard/WT/WT.mat WT.ssv
+
+# WP_cor.ssv has 3 dephosphorylation edges removed since they were the only P edges onto 2 nodes.
+# The edges were in column 174, 176 onto row for target YBL103C, YML007W.
+sed '/YBL103C/s/ -1/ 0/g' WP.ssv | sed '/YML007W/s/ -1/ 0/g' > WP_cor.ssv
+
+sed 1d WP_cor.ssv | cut -d' ' -f2- > WP_cor.mat
+r WP_cor=WT
