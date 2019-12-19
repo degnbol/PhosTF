@@ -1,5 +1,7 @@
 cat ../../processed/workman_2006/TF_edges.tsv | cut -f1,2 | sed 1d | sort | uniq > workman.tsv
 sed 1d ../../processed/balaji_2006/TF_edges.tsv | sort | uniq > balaji.tsv
+sed 1d ../../processed/balaji_2008/TF_edges.tsv | sort | uniq > balaji_2008.tsv
+# turns out balaji 2008 only adds 4 edges in the end so not important
 cat ../../processed/yeastract/TF_edges.tsv | sort | uniq > yeastract.tsv
 grep '<0.0001' ../../processed/horak_2002/TF_edges.tsv | cut -f1,2 > horak.tsv
 cat ../../processed/harbison_2004/TF_edges.tsv | awk '$3 < 0.001' | cut -f1,2 > harbison.tsv
