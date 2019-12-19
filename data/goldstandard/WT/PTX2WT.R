@@ -15,7 +15,7 @@ col_names = T_
 
 i = match(T_edges$Target, row_names)
 j = match(T_edges$TF, col_names)
-x = T_edges$Relationship
+x = T_edges$Mode
 # make sure levels are in expected order
 levels(x)
 

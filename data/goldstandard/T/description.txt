@@ -1,17 +1,9 @@
-cat ../../processed/workman_2006/TF_edges.tsv | cut -d$'\t' -f1,2 > workman.tsv
-sed '1d' workman.tsv | sort | uniq > workman_sort.tsv
-sed '1d' balaji.tsv | sort | uniq > balaji_sort.tsv
-cat yeastract.tsv | cut -d$'\t' -f1,2 | sort | uniq > yeastract_sort.tsv
-
-cat yeastract_sort.tsv balaji_sort.tsv | comm -13 - workman_sort.tsv > only_workman.tsv
-cat yeastract_sort.tsv workman_sort.tsv  | comm -13 - balaji_sort.tsv > only_balaji.tsv
-cat balaji_sort.tsv  workman_sort.tsv  | comm -13 - yeastract_sort.tsv > only_yeastract.tsv
-
-comm -12 workman_sort.tsv yeastract_sort.tsv | wc -l
-comm -12 workman_sort.tsv balaji_sort.tsv | wc -l
-comm -12 yeastract_sort.tsv balaji_sort.tsv | wc -l
-wc -l balaji_sort.tsv workman_sort.tsv yeastract_sort.tsv only_workman.tsv only_balaji.tsv only_yeastract.tsv
-
-# deciding to use all edges since the majority are only found in a single file.
-echo $'TF\tTarget\tRelationship' | cat - <(sed $'s/$/\t-/' only_workman.tsv) <(sed $'s/$/\t-/' only_balaji.tsv) yeastract.tsv > edges.tsv
-cat edges.tsv| cut -d$'\t' -f1 | sed '1d' | sort | uniq > T.txt
+cat ../../processed/workman_2006/TF_edges.tsv | cut -f1,2 | sed 1d | sort | uniq > workman.tsv
+sed 1d ../../processed/balaji_2006/TF_edges.tsv | sort | uniq > balaji.tsv
+cat ../../processed/yeastract/TF_edges.tsv | sort | uniq > yeastract.tsv
+grep '<0.0001' ../../processed/horak_2002/TF_edges.tsv | cut -f1,2 > horak.tsv
+cat ../../processed/harbison_2004/TF_edges.tsv | awk '$3 < 0.001' | cut -f1,2 > harbison.tsv
+../../processed/STRING/scores.tsv | cut -f-3,7 | awk '$3!="" || $4!="" && $3 != $4' > STRING.tsv
+# turns out STRING only has very little overlap where it can add info about activation or repression
+Rscript process_T.R
+sed 1d edges.tsv | cut -f1 | sort | uniq > T.txt

@@ -28,9 +28,11 @@ P_netphorest = read.table("../processed/NetPhorest/scores.tsv", sep="\t", header
 P_networkin = read.table("../processed/NetworKIN/scores.tsv", sep="\t", header=T, quote="")[,c(1,2,3,5)] # there is a PCC=.9999 for netphorest so we don't need it
 P_networkin_biogrid = read.table("../processed/NetworKIN/scores_biogrid.tsv", sep="\t", header=T, quote="")[,1:3]
 T_balaji = read.table("../processed/balaji_2006/TF_edges.tsv", sep="\t", header=T, quote="")
-T_workman = read.table("../processed/workman_2006/TF_edges_nodup.tsv", sep="\t", header=T, quote="")
+T_workman = read.table("../processed/workman_2006/TF_edges_nodup.tsv", sep="\t", header=T, quote="")[,c(1,2,4)]
 T_yeastract_binding = read.table("../processed/yeastract/binding_ORF.tsv", sep="\t", col.names=c("TF", "Target"), quote="")
 T_yeastract_expression = read.table("../processed/yeastract/expression_ORF.tsv", sep="\t", col.names=c("TF", "Target", "Mode"), quote="")
+T_harbison = read.table("../processed/harbison_2004/TF_edges.tsv", header=T, sep="\t", quote="")
+T_horak = read.table("../processed/horak_2002/TF_edges.tsv", header=T, sep="\t", quote="", check.names=F)[,1:3]
 # rename columns to indicate data source or add columns indicating such
 colnames(STRING_undirected) = c("Source", "Target", "undirected")
 colnames(P_biogrid) = c("Source", "Target", "biogrid")
@@ -43,9 +45,11 @@ colnames(P_netphorest) = c("Source", "Target", "netphorest")
 colnames(P_networkin) = c("Source", "Target", "networkin", "networkin STRING")
 colnames(P_networkin_biogrid) = c("Source", "Target", "networkin_biogrid")
 T_balaji$balaji = 1; colnames(T_balaji) = c("Source", "Target", "balaji")
-colnames(T_workman) = c("Source", "Target", "workman SLL", "workman pval")
+colnames(T_workman) = c("Source", "Target", "workman")
 T_yeastract_binding$"yeastract binding" = 1; colnames(T_yeastract_binding) = c("Source", "Target", "yeastract binding")
 colnames(T_yeastract_expression) = c("Source", "Target", "yeastract expression")
+colnames(T_harbison) = c("Source", "Target", "harbison")
+colnames(T_horak) = c("Source", "Target", "horak")
 
 KP_fname = "../perturbation/KP.txt"
 TF_fname = "../perturbation/TF.txt"
@@ -75,6 +79,9 @@ T_eval = merge(T_eval, T_balaji, all.x=T)
 T_eval = merge(T_eval, T_workman, all.x=T)
 T_eval = merge(T_eval, T_yeastract_binding, all.x=T)
 T_eval = merge(T_eval, T_yeastract_expression, all.x=T)
+T_eval = merge(T_eval, T_yeastract_expression, all.x=T)
+T_eval = merge(T_eval, T_harbison, all.x=T)
+T_eval = merge(T_eval, T_horak, all.x=T)
 
 P_eval = merge(P_eval, STRING, all.x=T)
 T_eval = merge(T_eval, STRING, all.x=T)
