@@ -296,11 +296,12 @@ end
 """
 Infer a weight matrix from logFC data.
 - WT_prior/WP_prior: optionally limit Wₜ/Wₚ if they are partially known.
+- lambdaWT: whether the WT edges are regularized. Should only be used if highly trusted WT_priors are provided.
 - PKPP: fname. vector, each element is -1 or 1 indicating PP or PK. 0s ignored.
 - WT/WP: previous run to continue.
 """
 @main function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; epochs::Integer=5000, 
-	lambda::Real=.1, lambdaW::Real=0., WT_prior=nothing, WP_prior=nothing, PKPP=nothing, WT=nothing, WP=nothing, J=nothing)
+	lambda::Real=.1, lambdaW::Real=0., lambdaWT::Bool=true, WT_prior=nothing, WP_prior=nothing, PKPP=nothing, WT=nothing, WP=nothing, J=nothing)
 	ot, op = abspath(ot), abspath(op)  # workaround for weird cwd issues
 	X = loaddlm(X, Float64)
 	if J !== nothing
@@ -321,7 +322,7 @@ Infer a weight matrix from logFC data.
 
 	W = (WT === nothing || WP === nothing) ? nothing : Model._W(loaddlm(WT), loaddlm(WP))
 
-	W = Inference.infer(X, nₜ, nₚ; epochs=epochs, λ=lambda, λW=lambdaW, M=M, S=S, Iₚₖ=Iₚₖ, Iₚₚ=Iₚₚ, W=W, J=J)
+	W = Inference.infer(X, nₜ, nₚ; epochs=epochs, λ=lambda, λW=lambdaW, λWT=lambdaWT, M=M, S=S, Iₚₖ=Iₚₖ, Iₚₚ=Iₚₚ, W=W, J=J)
 	Wₜ, Wₚ = Model.WₜWₚ(W, nₜ, nₚ)
 	savedlm(ot, Wₜ)
 	savedlm(op, Wₚ)
