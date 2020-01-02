@@ -3,6 +3,7 @@
 # packages
 library(reshape2)
 library(Matrix)
+library(eulerr)
 suppressPackageStartupMessages(library(pROC))
 
 # functions
@@ -14,6 +15,11 @@ melt_matrix = function(x) {
     colnames(out) = c("rownames", "colnames", "value")
     out
 }
+unwhich = function(which, dim=max(which)) {
+    y = array(logical(length(which)), dim=dim)
+    y[which] = TRUE
+    y
+}
 
 
 example = function() {
@@ -21,8 +27,8 @@ example = function() {
     setwd("/Users/christian/GoogleDrev/PKTFX")
     
     # read
-    WP_fname = "data/inference/05/WP_infer_1.mat"
-    WT_fname = "data/inference/05/WT_infer_1.mat"
+    WP_fname = "data/inference/14/WP_infer_2.mat"
+    WT_fname = "data/inference/14/WT_infer_2.mat"
     WT_prior_fname = "data/perturbation/WT_prior.mat"
     P_fname = "data/evaluation/P_eval.tsv"
     T_fname = "data/evaluation/T_eval.tsv"
@@ -121,7 +127,7 @@ evaluate_P = function(dataset) {
 
 
 evaluate_T = function(dataset) {
-    cor_names = c("n_datasets", "reaction", "expression", "catalysis", "workman SLL", "workman pval", "undirected")
+    cor_names = c("n_datasets", "reaction", "expression", "catalysis", "workman", "undirected")
     cor_names_pos = c("activation")
     cor_names_neg = c()
     evaluate_cor(dataset, cor_names, cor_names_pos, cor_names_neg)
@@ -165,9 +171,42 @@ cat("KP", evaluate_P(P_eval), sep="\n")
 cat("TF", evaluate_T(T_eval), sep="\n")
 cat("TF masked", evaluate_T(T_eval_masked), sep="\n")
 
-
 # plot(roc(P_eval$goldstandard[!is.na(P_eval$goldstandard)], abs(P_eval$marker[!is.na(P_eval$goldstandard)])))
 
+make_euler = function(N, select=c("potential", "known", "inferred")) {
+    venndata = data.frame(
+        potential = T,
+        biogrid = P_eval$biogrid != "",
+        fasolo = !is.na(P_eval$fasolo),
+        parca = !is.na(P_eval$parca),
+        fiedler = P_eval$fiedler != "",
+        yeastkid = !is.na(P_eval$yeastkid) & P_eval$yeastkid > 4.52,
+        ptmod = !is.na(P_eval$ptmod) & P_eval$ptmod > 250,
+        # netphorest = unwhich(order(P_eval$netphorest, decreasing=T)[1:N], dim=nrow(P_eval))
+        # networkin = unwhich(order(P_eval$networkin, decreasing=T)[1:N], dim=nrow(P_eval)),
+        # random = sample(c(rep(T,N),rep(F,nrow(P_eval)-N))),
+        inferred = unwhich(order(abs(P_eval$marker), decreasing=T)[1:N], dim=nrow(P_eval))
+    )
+    venndata$litterature = venndata$biogrid | venndata$fasolo | venndata$parca | venndata$fiedler
+    venndata$curated = venndata$yeastkid | venndata$ptmod
+    venndata$known = venndata$litterature | venndata$curated
+    
+    euler(venndata[,select], shape="ellipse")
+}
+
+intersect_3000 = sum(make_euler(3000)$original.values[paste("potential", "known", "inferred", sep="&")])
+missed_3000 = sum(make_euler(3000)$original.values[paste("potential", "known", sep="&")])
+intersect_5000 = sum(make_euler(5000)$original.values[paste("potential", "known", "inferred", sep="&")])
+missed_5000 = sum(make_euler(5000)$original.values[paste("potential", "known", sep="&")])
+cat(paste0("euler intersect ", c(3000, 5000), ":\t", c(intersect_3000, intersect_5000), collapse="\n"))
+
+# 153 KPs
+# plot(make_euler(1000), labels=T, quantities=F)
+# plot(make_euler(2000), labels=T, quantities=F)
+plot(make_euler(5000), labels=T, quantities=T)
+# plot(make_euler(10000), labels=T, quantities=F)
+# plot(make_euler(20000), labels=T, quantities=F)
+# plot(make_euler(50000), labels=T, quantities=F)
 
 
 

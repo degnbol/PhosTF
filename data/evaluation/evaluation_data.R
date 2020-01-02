@@ -161,6 +161,12 @@ P_eval$goldstandard4[positives4 & !negatives4] = 1
 P_eval$goldstandard4[negatives4 & !positives4] = 0
 
 
+sum(!is.na(P_eval$biogrid))
+sum(!is.na(P_eval$fasolo))
+sum(!is.na(P_eval$parca))
+sum(!is.na(P_eval$fiedler))
+
+
 write.table(P_eval, file="P_eval.tsv", sep="\t", quote=F, row.names=F, na="")
 write.table(T_eval, file="T_eval.tsv", sep="\t", quote=F, row.names=F, na="")
 
