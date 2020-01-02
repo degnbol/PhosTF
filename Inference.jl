@@ -55,7 +55,7 @@ get_V(Iₚₖ::Matrix, Iₚₚ::Matrix, W::Matrix) = sign.(sum(W*(Iₚₖ-Iₚ�
 - W: from previous training.
 - J: matrix with 1 for KO and 0 for passive observed node. Shape like X.
 """
-function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=10000, λ::Real=.1, λW=0., opt=ADAMW(), 
+function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=10000, λ::Real=.1, λW=0., λWT=true, opt=ADAMW(), 
 	M=nothing, S=nothing, Iₚₖ=nothing, Iₚₚ=nothing, W=nothing, J=nothing)
 	n, K = size(X)
 	if M === nothing M = ones(n, n) end # no prior knowledge
