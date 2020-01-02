@@ -1,1 +1,4 @@
-exp column of .PhenoData was found to be in the same order as the header of the measurement file, so the ORF column was used for replacing the header.
+# exp column of .PhenoData was found to be in the same order as the header of the measurement file, so the ORF column was used for replacing the header.
+# micro array naming error with naming things ending in 01 and the dash is removed. Corrected:
+sed -E 's/(Y[A-Z]{2}[0-9]{3}[A-Z])([A-Z])01/\1-\2/' TF_KO.tsv > temp && mv temp TF_KO.tsv
+r KO=OE

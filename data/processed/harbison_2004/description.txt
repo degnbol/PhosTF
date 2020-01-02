@@ -12,3 +12,4 @@ r YPD=conds
 sed 's/A1 (MATA1)/MATA1/' YPD_ORF.head | cat - <(sed 1d YPD.tsv) > temp && mv temp YPD.tsv
 sed 1d conds.tsv | cat conds_ORF.head - > temp && mv temp conds.tsv
 rm *.head 
+# NOTE that there are 3 kinases that has been analysed here as if they were TFs, e.g. KSS1.
