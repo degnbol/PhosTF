@@ -6,13 +6,24 @@ setwd("/Users/christian/GoogleDrev/PKTFX/data/processed/STRING")
 directed_melt = read.table("directed.tsv", sep="\t", header=T, quote="")
 edges = unique(directed_melt[,c("Source","Target")])
 directed = edges
-modes = list()
+types = list()
 for (lvl in levels(directed_melt$Mode)) {
-    modes[[lvl]] = directed_melt[directed_melt$Mode == lvl,]
-    modes[[lvl]] = modes[[lvl]][,!(colnames(modes[[lvl]]) %in% c("Mode", "Action"))]
-    modes[[lvl]] = aggregate(Score ~ Source + Target, data=modes[[lvl]], mean)
-    colnames(modes[[lvl]])[colnames(modes[[lvl]]) == "Score"] = lvl
-    directed = merge(directed, modes[[lvl]], all=T)
+    types[[lvl]] = directed_melt[directed_melt$Mode == lvl,]
+    types[[lvl]] = types[[lvl]][,!(colnames(types[[lvl]]) %in% c("Mode", "Action"))]
+    types[[lvl]] = aggregate(Score ~ Source + Target, data=types[[lvl]], mean)
+    colnames(types[[lvl]])[colnames(types[[lvl]]) == "Score"] = lvl
+    directed = merge(directed, types[[lvl]], all=T)
 }
 
 write.table(directed, "scores.tsv", sep="\t", quote=F, row.names=F, na="")
+
+mode_scores = directed[,c("Source", "Target", "activation", "inhibition")]
+mode_scores = mode_scores[!(is.na(mode_scores$activation) & is.na(mode_scores$inhibition)),]
+mode_scores$Mode = NA
+mode_scores$Mode[mode_scores$activation > mode_scores$inhibition | is.na(mode_scores$inhibition)] = "activator"
+mode_scores$Mode[mode_scores$activation < mode_scores$inhibition | is.na(mode_scores$activation)] = "inhibitor"
+mode_scores = mode_scores[,c(1,2,5)]
+mode_scores = na.omit(mode_scores)
+
+write.table(mode_scores, "modes.tsv", sep="\t", quote=F, row.names=F)
+
