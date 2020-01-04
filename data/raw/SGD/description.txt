@@ -1,0 +1,1 @@
+Reference genome downloaded from https://downloads.yeastgenome.org/sequence/S288C_reference/orf_protein/

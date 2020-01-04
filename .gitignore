@@ -1,5 +1,9 @@
 testdata
-data/raw
+data/raw/*/*.tsv
+data/raw/*/*.ssv
+data/raw/*/*.xlsx
+data/raw/*/*.gz
+data/raw/*/*.tab
 *.RData
 data/processed/*/*.tsv
 data/processed/*/*.ssv

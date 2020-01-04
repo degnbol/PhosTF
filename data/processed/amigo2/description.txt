@@ -1,0 +1,4 @@
+cat ../../raw/amigo2/activators.tsv | cut -f7,11 | cut -d'|' -f1 | sort | uniq > activators.tsv
+r activators=repressors
+cat ../../raw/amigo2/positive_regulators.tsv | cut -f3,7,11 | cut -d'|' -f1 | awk '{print $2,$3,$1}' | sed 's/  / /' | tr ' ' '\t' | cut -f-2 | sort | uniq > positive_regulators.tsv
+r positive=negative
