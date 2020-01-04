@@ -1,0 +1,2 @@
+# collect all measured nodes and categorize them as PK, PP, activator TF, repressor TF, or alternatively as non-regulator gene.
+# Purpose is to allow any node that is regulator to have regulatory effects, even if it is never perturbated.
