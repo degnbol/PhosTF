@@ -1,4 +1,4 @@
-setwd("/Users/christian/GoogleDrev/PKTFX/data/processed/biogrid")
+setwd("~/cwd/data/processed/biogrid")
 # read
 targets = read.table("BIOGRID-PTM-3.5.178.ptmtab.tsv", sep="\t", header=T, quote="")
 sources = read.table("BIOGRID-PTM-RELATIONSHIPS-3.5.178.ptmrel.tsv", sep="\t", header=T, quote="")

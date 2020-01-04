@@ -8,7 +8,7 @@ unwhich = function(which, dim=max(which)) {
     y
 }
 
-setwd("/Users/christian/GoogleDrev/PKTFX/data/nodes")
+setwd("~/cwd/data/nodes")
 
 TFs = read.table("TF.txt", col.names="TF", stringsAsFactors=F)
 activators = read.table("../processed/amigo2/activators.tsv", col.names=c("Evidence", "TF"), stringsAsFactors=F)

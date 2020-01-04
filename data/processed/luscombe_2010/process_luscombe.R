@@ -1,4 +1,4 @@
-setwd("/Users/christian/GoogleDrev/PKTFX/data/processed/luscombe_2010")
+setwd("~/cwd/data/processed/luscombe_2010")
 
 # IMPORTANT that R does not check names since it will rename - to .
 TFKO = t(read.table("TF_KO_transpose.tsv", row.names=1, header=T, check.names=F, stringsAsFactors=F))

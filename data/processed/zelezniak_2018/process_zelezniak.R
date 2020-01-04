@@ -1,7 +1,7 @@
 
 library(reshape2)
 
-setwd("/Users/christian/GoogleDrev/PKTFX/data/processed/zelezniak_2018")
+setwd("~/cwd/data/processed/zelezniak_2018")
 
 dataset = read.table("proteins_dataset.data_prep.tsv", header=T, sep="\t")
 WT = aggregate(value ~ KO_ORF + ORF, data=dataset[dataset$KO_ORF == "WT",], mean)

@@ -24,7 +24,7 @@ unwhich = function(which, dim=max(which)) {
 
 example = function() {
     
-    setwd("/Users/christian/GoogleDrev/PKTFX")
+    setwd("~/cwd")
     
     # read
     WP_fname = "data/inference/14/WP_infer_2.mat"

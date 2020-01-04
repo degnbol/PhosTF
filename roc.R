@@ -83,7 +83,7 @@ main = function(true_fnames, marker_fnames, tf_true_fnames, tf_marker_fnames, ou
 
 example = function() {
     # filenames
-    setwd("/Users/christian/GoogleDrev/PKTFX/data/dream/archive/LB01_100")
+    setwd("~/cwd/data/dream/archive/LB01_100")
     true_fname = "WP.mat"
     tf_true_fname = "WT.mat"
     marker_fname = "WP_infer.mat"

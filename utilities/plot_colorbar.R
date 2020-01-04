@@ -2,7 +2,7 @@
 library(ggplot2)
 library(ggpubr) # so we can take a colorbar from a plot and only plot that
 
-setwd("/Users/christian/GoogleDrev/PKTFX/utilities")
+setwd("~/cwd/utilities")
 
 # load cmap
 rgbs = read.table("colormap_D7.txt")

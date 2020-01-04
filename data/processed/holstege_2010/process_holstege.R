@@ -1,4 +1,4 @@
-setwd("/Users/christian/GoogleDrev/PKTFX/data/processed/holstege_2010")
+setwd("~/cwd/data/processed/holstege_2010")
 # read
 PKKO = read.table("PK_KO_Mpval.tsv", header=T, sep="\t", quote="", stringsAsFactors=F)
 # only logFC values and ORF

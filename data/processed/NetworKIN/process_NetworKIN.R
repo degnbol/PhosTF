@@ -1,7 +1,7 @@
 
 library(data.table)
 
-setwd("/Users/christian/GoogleDrev/PKTFX/data/processed/NetworKIN")
+setwd("~/cwd/data/processed/NetworKIN")
 
 biogridPTM = fread("networkin_biogrid.tsv.gz", sep="\t", quote="", header=T, select=c(1,5:8), col.names=c("Target", "KP", "NetworKIN", "NetPhorest", "STRING"))
 PTM = fread("networkin.tsv.gz", sep="\t", quote="", header=T, select=c(1,4:7), col.names=c("Target", "KP", "NetworKIN", "NetPhorest", "STRING"))

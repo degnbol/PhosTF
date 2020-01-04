@@ -1,5 +1,5 @@
 
-setwd("/Users/christian/GoogleDrev/PKTFX/data/processed/NetPhorest")
+setwd("~/cwd/data/processed/NetPhorest")
 
 posteriors = read.table("netphorest_yeast_col189.tsv", sep="\t", header=T, quote="")
 posteriors_agg = aggregate(Posterior ~ ., data=posteriors, max)

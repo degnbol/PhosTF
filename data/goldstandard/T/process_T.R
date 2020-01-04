@@ -1,5 +1,5 @@
 
-setwd("/Users/christian/GoogleDrev/PKTFX/data/goldstandard/T")
+setwd("~/cwd/data/goldstandard/T")
 
 balaji = read.table("balaji.tsv", sep="\t", col.names=c("TF", "Target"))
 balaji_2008 = read.table("balaji_2008.tsv", sep="\t", col.names=c("TF", "Target"))

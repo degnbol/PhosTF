@@ -1,6 +1,6 @@
 
 options(stringsAsFactors=FALSE)
-setwd("/Users/christian/GoogleDrev/PKTFX/data/nodes")
+setwd("~/cwd/data/nodes")
 
 # read TF edge datasets
 nodes = read.table("../processed/balaji_2006/TF_edges.tsv", sep="\t", quote="", check.names=F, header=T)

@@ -2,7 +2,7 @@
 # functions
 flatten = function(x) as.vector(as.matrix(x))
 
-setwd("/Users/christian/GoogleDrev/PKTFX/data/TF_edges")
+setwd("~/cwd/data/TF_edges")
 
 # read
 TFs = read.table("../nodes/TF_mode.tsv", sep="\t", header=T)

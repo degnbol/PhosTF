@@ -1,4 +1,4 @@
-setwd("/Users/christian/GoogleDrev/PKTFX/data/processed/fiedler_2009")
+setwd("~/cwd/data/processed/fiedler_2009")
 
 edges = read.table("P_edges.tsv", header=T, sep="\t", quote="", check.names=F)
 EMAP = read.table("EMAP_edges.tsv", header=T, sep="\t", quote="", check.names=F)

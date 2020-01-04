@@ -1,5 +1,5 @@
 
-setwd("/Users/christian/GoogleDrev/PKTFX/data/processed/horak_2002")
+setwd("~/cwd/data/processed/horak_2002")
 
 raw = read.table("raw_ORF.tsv", sep="\t", header=T, quote="")
 raw$Target = gsub("-([0-9])[A-Z]$", "-\\1", gsub("-[0-9]$", "", raw$Target))

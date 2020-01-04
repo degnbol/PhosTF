@@ -3,7 +3,7 @@
 flatten = function(x) as.vector(as.matrix(x))
 
 
-setwd("/Users/christian/GoogleDrev/PKTFX/data/goldstandard/P")
+setwd("~/cwd/data/goldstandard/P")
 
 PK = flatten(read.table("PK.txt", quote="", stringsAsFactors=F))
 PP = flatten(read.table("PP.txt", quote="", stringsAsFactors=F))

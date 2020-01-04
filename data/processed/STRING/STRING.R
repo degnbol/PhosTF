@@ -1,7 +1,7 @@
 
 library(reshape2)
 
-setwd("/Users/christian/GoogleDrev/PKTFX/data/processed/STRING")
+setwd("~/cwd/data/processed/STRING")
 
 directed_melt = read.table("directed.tsv", sep="\t", header=T, quote="")
 edges = unique(directed_melt[,c("Source","Target")])

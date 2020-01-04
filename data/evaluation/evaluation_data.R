@@ -13,7 +13,7 @@ melt_matrix = function(x) {
     out
 }
 
-setwd("/Users/christian/GoogleDrev/PKTFX/data/evaluation")
+setwd("~/cwd/data/evaluation")
 
 # read
 STRING = read.table("../processed/STRING/scores.tsv", sep="\t", header=T, quote="")

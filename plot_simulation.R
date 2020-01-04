@@ -81,10 +81,10 @@ readfunc = function(fnames) {
 }
 
 # settings ####
-# setwd("/Users/christian/GoogleDrev/PKTFX/testdata/data_cas"); nt = 3; np = 3; nx = 1
-# setwd("/Users/christian/GoogleDrev/PKTFX/testdata/pres18c"); nt = 3; np = 3; nx = 0
-# setwd("/Users/christian/GoogleDrev/PKTFX/testdata/simi"); nt = 2; np = 3; nx = 1
-setwd("/Users/christian/GoogleDrev/PKTFX/testdata/simi_neg"); nt = 2; np = 3; nx = 1
+# setwd("~/cwd/testdata/data_cas"); nt = 3; np = 3; nx = 1
+# setwd("~/cwd/testdata/pres18c"); nt = 3; np = 3; nx = 0
+# setwd("~/cwd/testdata/simi"); nt = 2; np = 3; nx = 1
+setwd("~/cwd/testdata/simi_neg"); nt = 2; np = 3; nx = 1
 n = nt+np+nx
 wt_fnames = list(
     r = "sim_r.mat",

@@ -1,5 +1,5 @@
 
-setwd("/Users/christian/GoogleDrev/PKTFX/data/processed/SGD")
+setwd("~/cwd/data/processed/SGD")
 
 ORF_gene_aliases = read.table("ORF_gene_aliases.tsv", sep="\t", check.names=F, quote="", col.names=c("ORF", "Gene", "Aliases"), stringsAsFactors=F)
 

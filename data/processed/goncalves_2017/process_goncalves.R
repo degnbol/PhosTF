@@ -1,5 +1,5 @@
 
-setwd("/Users/christian/GoogleDrev/PKTFX/data/processed/goncalves_2017")
+setwd("~/cwd/data/processed/goncalves_2017")
 
 
 KOKP = read.table("KP_KO_KP.tsv", row.names=1, sep="\t", header=T, quote="")

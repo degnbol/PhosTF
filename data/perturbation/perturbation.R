@@ -123,7 +123,7 @@ NA2avg = function(x, avg_table) {
 }
 
 
-setwd("/Users/christian/GoogleDrev/PKTFX/data/perturbation")
+setwd("~/cwd/data/perturbation")
 
 ## read
 holstege_PK_KO = read.table("../processed/holstege_2010/PK_KO.tsv", header=T, row.names=1, sep='\t', check.names=F)

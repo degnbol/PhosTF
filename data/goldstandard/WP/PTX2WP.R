@@ -3,7 +3,7 @@ library(Matrix)
 # functions
 flatten = function(x) as.vector(as.matrix(x))
 
-setwd("/Users/christian/GoogleDrev/PKTFX/data/goldstandard/WP")
+setwd("~/cwd/data/goldstandard/WP")
 
 P_edges = read.table("../P/detectable/edges.tsv", sep="\t", quote="", header=T)
 T_ = flatten(read.table("../T/T.txt", quote=""))

@@ -10,7 +10,7 @@ column_row_values = function(x) {
     values
 }
 
-setwd("/Users/christian/GoogleDrev/PKTFX/data/processed/chua_2006")
+setwd("~/cwd/data/processed/chua_2006")
 # check names off so duplicate names are not changed
 TFOE = read.table("TF_OE.tsv", header=T, row.names=1, check.names=F)
 TFKO = read.table("TF_KO.tsv", header=T, row.names=1, check.names=F)

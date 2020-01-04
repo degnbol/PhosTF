@@ -3,7 +3,7 @@ library(data.table)
 
 flatten = function(x) as.vector(as.matrix(x))
 
-setwd("/Users/christian/GoogleDrev/PKTFX/data/processed/holstege_2014")
+setwd("~/cwd/data/processed/holstege_2014")
 
 M_table = fread("M.tsv", sep="\t", header=T, quote="")
 

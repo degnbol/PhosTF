@@ -1,7 +1,7 @@
 
 library(reshape2)
 
-setwd("/Users/christian/GoogleDrev/PKTFX/data/processed/harbison_2004")
+setwd("~/cwd/data/processed/harbison_2004")
 
 YPD = as.matrix(read.table("YPD.tsv", header=T, row.names=1, sep="\t", check.names=F))
 YPD_lee_2002 = as.matrix(read.table("../lee_2002/YPD.tsv", header=T, row.names=1, sep="\t", check.names=F))
