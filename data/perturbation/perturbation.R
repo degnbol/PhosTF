@@ -216,9 +216,11 @@ perturbation_inner_updated[KO_inner_indices] = perturbation_inner[KO_inner_indic
 # increase OE with 1
 perturbation_updated[OE_indices] = perturbation[OE_indices] + 1
 perturbation_inner_updated[OE_inner_indices] = perturbation_inner[OE_inner_indices] + 1
-# write
-write.table(perturbation_updated, file="logFC.ssv", sep=" ", quote=F)
-write.table(perturbation_inner_updated, "logFC_inner.ssv", sep=" ", quote=F)
+# write. has to be tab and not space delim since there are spaces in 
+# write.table(perturbation_updated, file="logFC.ssv", sep=" ", quote=F, col.names=gsub(" ", "_", colnames(perturbation_updated)))
+# write.table(perturbation_inner_updated, "logFC_inner.ssv", sep=" ", quote=F, col.names=gsub(" ", "_", colnames(perturbation_inner_updated)))
+write.table(perturbation_updated, file="logFC.tsv", sep="\t", quote=F)
+write.table(perturbation_inner_updated, "logFC_inner.tsv", sep="\t", quote=F)
 
 
 # make a mask for WT edges
