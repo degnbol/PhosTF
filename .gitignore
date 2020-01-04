@@ -1,6 +1,7 @@
 testdata
 data/raw/*/*.tsv
 data/raw/*/*.ssv
+data/raw/*/*.xls
 data/raw/*/*.xlsx
 data/raw/*/*.gz
 data/raw/*/*.tab
