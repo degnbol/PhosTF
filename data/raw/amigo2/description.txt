@@ -4,3 +4,4 @@ Filtered by GO class (direct): DNA-binding transcription activator activity, RNA
 and the equivalent DNA-binding transcription repressor activity, RNA polymerase II-specific
 The positive regulators were from the GO class (direct): positive regulation of transcription by RNA polymerase II
 and equivalently negative regulators from negative regulation of transcription by RNA polymerase II
+positive_elongation.tsv: GO class (direct) = positive regulation of transcription elongation from RNA polymerase II promoter
