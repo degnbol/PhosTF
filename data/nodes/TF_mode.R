@@ -15,6 +15,9 @@ activators = read.table("../processed/amigo2/activators.tsv", col.names=c("Evide
 repressors = read.table("../processed/amigo2/repressors.tsv", col.names=c("Evidence", "TF"), stringsAsFactors=F)
 positive_reg = read.table("../processed/amigo2/positive_regulators.tsv", col.names=c("Evidence", "TF"), stringsAsFactors=F)
 negative_reg = read.table("../processed/amigo2/negative_regulators.tsv", col.names=c("Evidence", "TF"), stringsAsFactors=F)
+positive_elong = read.table("../processed/amigo2/positive_elongation.tsv", col.names=c("Evidence", "TF"), stringsAsFactors=F)
+negative_elong = read.table("../processed/amigo2/negative_elongation.tsv", col.names=c("Evidence", "TF"), stringsAsFactors=F)
+
 
 evidences = unique(c(activators$Evidence, repressors$Evidence, positive_reg$Evidence, negative_reg$Evidence))
 # ordered from wrost to best. We don't use ISS, ISA and IBA since they are computational evidence
@@ -36,10 +39,10 @@ get_modes = function(TFs, activator_table, repressor_table) {
     modes
 }
 
-TFs$Mode = get_modes(TFs$TF, positive_reg, negative_reg)
-TFs$Mode2 = get_modes(TFs$TF, activators, repressors)
-TFs$Mode2[TFs$Mode2 == ""] = TFs$Mode[TFs$Mode2 == ""]
-TFs$Mode = TFs$Mode2; TFs = TFs[,c("TF", "Mode")]
+TFs$Mode = get_modes(TFs$TF, activators, repressors)
+TFs$Mode[TFs$Mode==""] = get_modes(TFs$TF, positive_reg, negative_reg)[TFs$Mode==""]
+TFs$Mode[TFs$Mode==""] = get_modes(TFs$TF, positive_elong, negative_elong)[TFs$Mode==""]
+
 
 sum(TFs$Mode == "activator")
 sum(TFs$Mode == "repressor")
