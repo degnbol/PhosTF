@@ -55,7 +55,8 @@ end
 	end
 end
 @main function correct(Wₜ_fname::String=default_Wₜ, Wₚ_fname::String=default_Wₚ; ot="WT_cor.mat", op="WP_cor.mat", save::Bool=false)
-	Wₜ, Wₚ = loaddlm(Wₜ_fname), loaddlm(Wₚ_fname)
+	Wₜ, Wₚ = loadmat(Wₜ_fname), loadmat(Wₚ_fname)
+
 	if Weight.correct!(Wₜ, Wₚ)
 		@info("Corrections made.")
 		savedlm(ot, Wₜ)

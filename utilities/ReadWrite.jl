@@ -9,7 +9,7 @@ using Flux: TrackedArray, Tracker.data
 
 
 export load, save
-export loaddlm, savedlm
+export loaddlm, loadmat, savedlm
 
 default_identifier = "data"
 
@@ -42,6 +42,11 @@ function loaddlm(fname::String, T::Type)
 	elseif ext == ".csv" readdlm(fname, ',', T)
 	elseif ext == ".tsv" readdlm(fname, '\t', T)
 	else error("File format not recognized.") end
+end
+"Load dlm where we try to parse as int, and if that fails as float (which is does automatically)."
+function loadmat(fname::String)
+	try return loaddlm(fname, Int64)
+	catch; return loaddlm(fname) end
 end
 
 """
