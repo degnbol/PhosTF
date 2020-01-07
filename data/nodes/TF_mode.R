@@ -1,5 +1,5 @@
 
-# assign mode to TF from Genetic Ontology terms
+# assign mode to TF from Genetic Ontology terms (AmiGO2)
 
 # functions
 unwhich = function(which, dim=max(which)) {
@@ -8,15 +8,13 @@ unwhich = function(which, dim=max(which)) {
     y
 }
 
-setwd("~/cwd/data/nodes")
-
-TFs = read.table("TF.txt", col.names="TF", stringsAsFactors=F)
-activators = read.table("../processed/amigo2/activators.tsv", col.names=c("Evidence", "TF"), stringsAsFactors=F)
-repressors = read.table("../processed/amigo2/repressors.tsv", col.names=c("Evidence", "TF"), stringsAsFactors=F)
-positive_reg = read.table("../processed/amigo2/positive_regulators.tsv", col.names=c("Evidence", "TF"), stringsAsFactors=F)
-negative_reg = read.table("../processed/amigo2/negative_regulators.tsv", col.names=c("Evidence", "TF"), stringsAsFactors=F)
-positive_elong = read.table("../processed/amigo2/positive_elongation.tsv", col.names=c("Evidence", "TF"), stringsAsFactors=F)
-negative_elong = read.table("../processed/amigo2/negative_elongation.tsv", col.names=c("Evidence", "TF"), stringsAsFactors=F)
+# read GO terms
+activators = read.table("~/cwd/data/processed/amigo2/activators.tsv", col.names=c("Evidence", "TF"), stringsAsFactors=F)
+repressors = read.table("~/cwd/data/processed/amigo2/repressors.tsv", col.names=c("Evidence", "TF"), stringsAsFactors=F)
+positive_reg = read.table("~/cwd/data/processed/amigo2/positive_regulators.tsv", col.names=c("Evidence", "TF"), stringsAsFactors=F)
+negative_reg = read.table("~/cwd/data/processed/amigo2/negative_regulators.tsv", col.names=c("Evidence", "TF"), stringsAsFactors=F)
+positive_elong = read.table("~/cwd/data/processed/amigo2/positive_elongation.tsv", col.names=c("Evidence", "TF"), stringsAsFactors=F)
+negative_elong = read.table("~/cwd/data/processed/amigo2/negative_elongation.tsv", col.names=c("Evidence", "TF"), stringsAsFactors=F)
 
 
 evidences = unique(c(activators$Evidence, repressors$Evidence, positive_reg$Evidence, negative_reg$Evidence))
@@ -39,15 +37,25 @@ get_modes = function(TFs, activator_table, repressor_table) {
     modes
 }
 
-TFs$Mode = get_modes(TFs$TF, activators, repressors)
-TFs$Mode[TFs$Mode==""] = get_modes(TFs$TF, positive_reg, negative_reg)[TFs$Mode==""]
-TFs$Mode[TFs$Mode==""] = get_modes(TFs$TF, positive_elong, negative_elong)[TFs$Mode==""]
+assign_modes = function(TFs) {
 
+    TFs$Mode = get_modes(TFs$TF, activators, repressors)
+    TFs$Mode[TFs$Mode==""] = get_modes(TFs$TF, positive_reg, negative_reg)[TFs$Mode==""]
+    TFs$Mode[TFs$Mode==""] = get_modes(TFs$TF, positive_elong, negative_elong)[TFs$Mode==""]
+    
+    # print counts info
+    cat(paste(sum(TFs$Mode == "activator"), sum(TFs$Mode == "repressor"), sum(TFs$Mode == "")), "\n")
+    
+    TFs
+}
 
-sum(TFs$Mode == "activator")
-sum(TFs$Mode == "repressor")
-sum(TFs$Mode == "")
+main = function(infile, outfile) {
+    TFs = read.table(infile, col.names="TF", stringsAsFactors=F)
+    TFs = assign_modes(TFs)
+    write.table(TFs, outfile, sep="\t", quote=F, row.names=F)
+}
 
-write.table(TFs, "TF_mode.tsv", sep="\t", quote=F, row.names=F)
-
+setwd("~/cwd/data/nodes")
+main("TF.txt", "TF_mode.tsv")
+main("TF_putative.txt", "TF_putative_mode.tsv")
 
