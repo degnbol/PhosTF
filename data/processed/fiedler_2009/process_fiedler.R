@@ -14,5 +14,5 @@ write.table(edges, file="P_edges_EMAP.tsv", row.names=F, quote=F, sep="\t", na="
 # also take average of KO values since there are not enough values to call it replicates.
 KO_table = read.table("ctk1_cak1_KO.tsv", sep="\t", header=T, quote="")
 avg_table = aggregate(. ~ ORF + Gene, data=KO_table, mean)
-write.table(avg_table, file="avg_KO.tsv", sep="\t", quote=F, row.names=F)
+write.table(avg_table[,2:3], file="avg_KO.tsv", sep="\t", quote=F, row.names=F)
 
