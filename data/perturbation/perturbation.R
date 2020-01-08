@@ -1,262 +1,233 @@
 
 ## packages
-library(Matrix)
+library(data.table)
+library(dplyr)
 library(reshape2)
+library(Matrix)
 library(ggplot2)
 
 ## functions
 
+flatten = function(x) as.vector(as.matrix(x))
+
+rootname = function(names) {gsub("_.*", "", gsub(" .*", "", names))}
+
+colname_fix = function(x) {
+    # duplicate colnames have had .1, .2, etc. appended 
+    colnames(x) = gsub("\\.[0-9]+", "", colnames(x))
+    colnames(x) = gsub(" [0-9]+", "", colnames(x))
+    x
+}
+# dts is a list of data.tables
+merge_outer = function(dts) {
+    out = dts[[1]]
+    for (i in 2:length(dts)) {
+        # make sure col names are unique before a merge
+        colnames(out) = make.unique(colnames(out), sep=" ")
+        colnames(dts[[i]]) = make.unique(colnames(dts[[i]]), sep=" ")
+        out = merge(out, dts[[i]], by="ORF", all=T, suffixes=c("", paste0(" ", i)))
+    }
+    colname_fix(out)
+}
+
+
 # make logical matrix with 1 indicating that a row name is in a column name.
 # column names are split with _ so we assume column names with multiple names in them are written that way
-column_row_map = function(x) {
-    i = c(); j = c()
-    for (column in 1:ncol(x)) {
-        column_names = strsplit(colnames(x)[column], "_")[[1]]
-        new_i = match(column_names, rownames(x))
-        new_i = new_i[!is.na(new_i)] # NA means there was no match
-        i = c(i, new_i)
-        j = c(j, rep(column, length(new_i)))
-    }
-    sparseMatrix(i, j, x=1, dims=dim(x), dimnames=dimnames(x), use.last.ij=T)
-}
 # also split with space so only the first word is used
-column_row_map_space = function(x) {
-    i = c(); j = c()
+column_row_map = function(x, column_names) {
+    # row_names assumed to be in column 1 SO IT IS SKIPPED here
+    row_names = x[,1][[1]]
+    x = x[,2:ncol(x)]
+    is = c(); js = c()
     for (column in 1:ncol(x)) {
-        column_names = strsplit(gsub(" .*", "", colnames(x)[column]), "_")[[1]]
-        new_i = match(column_names, rownames(x))
-        i = c(i, new_i)
-        j = c(j, rep(column, length(new_i)))
+        i = match(column_names[[column]], row_names)
+        i = i[!is.na(i)] # NA means there was no match
+        is = c(is, i)
+        js = c(js, rep(column, length(i)))
     }
-    sparseMatrix(i, j, x=1, dims=dim(x), dimnames=dimnames(x), use.last.ij=T)
+    as.matrix(sparseMatrix(is, js, x=1, dims=dim(x), dimnames=list(row_names, colnames(x)), use.last.ij=T))
 }
+column_row_map_space = function(x) {column_row_map(x, strsplit(gsub(" .*", "", colnames(x)[2:ncol(x)]), "_"))}
+column_row_map_nospace = function(x) {column_row_map(x, strsplit(colnames(x)[2:ncol(x)], "_"))}
 
-# get values where column name == row name
-# splitting column name by _
-column_row_values = function(x) {
-    values = c()
-    for (j in 1:ncol(x)) {
-        column_names = strsplit(colnames(x)[j], "_")[[1]]
-        for (i in match(column_names, rownames(x))) {
-            values = c(values, x[i,j])
-        }
-    }
-    values
-}
-
-# make a logical matrix with the given row names and column names where 1 indicates a match from the given row_matches and column_matches
-match_columnrow = function(row_names, column_names, row_matches, column_matches) {
-    i = c(); j = c()
-    for (row_match in row_matches) {
-        i = c(i, match(row_match, row_names))
-    }
-    for (column_match in column_matches) {
-        j = c(j, match(column_match, column_names))
-    }
-    # if there's not a perfect overlap between the sets then NAs are made
-    notfound = is.na(i) | is.na(j)
-    i = i[!notfound]
-    j = j[!notfound]
-    sparseMatrix(i, j, x=1, dims=c(length(row_names), length(column_names)), dimnames=list(row_names, column_names), use.last.ij=T)
-}
-
-# sort rows and columns in a table given a collection of elements that are matched against which are in the correct order
-sort_table = function(x, sort_order) {
-    # sort rows according to a collection of names that are in the intended order
-    x = x[order(match(rownames(x), sort_order)),]
-    x = x[,order(match(colnames(x), sort_order))]
-    # colnames made unique again
-    colnames(x) = gsub("\\.[0-9]", "", colnames(x))
+# copy values from one table to another to replaces NAs. Copies from entries with matching row and column names. assumes matrix type.
+NA2avg = function(x, copy_from) {
+    # make sure rownames match, assume they are first column
+    stopifnot(all(rownames(x) == rownames(copy_from)))
+    # copy columns from copy_from into a new table where rownames and colnames matches x
+    copy_x = copy_from[,colnames(x)]
+    x[is.na(x)] = copy_x[is.na(x)]
     x
 }
 
-melt_table = function(x) {
-    out = melt(as.matrix(x))
-    colnames(out) = c("rownames", "colnames", "value")
-    out
-}
 
-melt_tables = function(dfs) {
-    out = melt_table(dfs[[1]])
-    for (i in 2:length(dfs)) {
-        out = rbind(out, melt_table(dfs[[i]]))
-    }
-    out
-}
-
-# dfs is a list of data.frames
-merge_full = function(dfs) {
-    out = dfs[[1]]
-    for (i in 2:length(dfs)) {
-        # by=0 means row names
-        out = merge(out, dfs[[i]], by=0, all=T, suffixes=c("", paste0(" ", i)))
-        # the merge moves the row names to the first column. we move it back
-        row.names(out) = out$Row.names
-        out = out[,2:ncol(out)]
-    }
-    # duplicate colnames have had .1, .2, etc. appended 
-    colnames(out) = gsub("\\.[0-9]", "", colnames(out))
-    colnames(out) = gsub(" [0-9]", "", colnames(out))
-    out
-}
-
-# replace NA in table x with average of the values in other columns with identical column names from the same row
-NA2avg = function(x) {
-    # mean wants matrix
-    out = as.matrix(x)
-    for(i in 1:nrow(x))
-        for(j in 1:ncol(x))
-            if(is.na(out[i,j])) {
-                out[i,j] = mean(x[i, colnames(x) == colnames(x)[j]], na.rm=T)
-            }
-    out
-}
-# same purpose as above but we have another table with averages to copy from
-# assume rownames match
-NA2avg = function(x, avg_table) {
-    stopifnot(all(rownames(x) == rownames(avg_table)))
-    # copy columns from avg_table into a new table where rownames and colnames matches x
-    avg_x = avg_table[,colnames(x)]
-    out = x
-    out[is.na(x)] = avg_x[is.na(x)]
-    out
-}
-
+# main
 
 setwd("~/cwd/data/perturbation")
-
 ## read
-holstege_PK_KO = read.table("../processed/holstege_2010/PK_KO.tsv", header=T, row.names=1, sep='\t', check.names=F)
-luscombe_TF_KO = read.table("../processed/luscombe_2010/TF_KO.tsv", header=T, row.names=1, sep='\t', check.names=F)
-fiedler_PK_KO = read.table("../processed/fiedler_2009/avg_KO.tsv", header=T, row.names=1, check.names=F)
-fiedler_PK_KO = fiedler_PK_KO[,colnames(fiedler_PK_KO) != "Gene"]
-zelezniak_PK_KO = read.table("../processed/zelezniak_2018/PK_KO.tsv", header=T, row.names=1, sep='\t', check.names=F)
-chua_TF_KO = read.table("../processed/chua_2006/TF_KO.tsv", header=T, row.names=1, check.names=F)
-chua_TF_OE = read.table("../processed/chua_2006/TF_OE.tsv", header=T, row.names=1, check.names=F)
-goncalves_KP_KO_TF = read.table("../processed/goncalves_2017/KP_KO_TF.tsv", header=T, row.names=1, sep='\t', check.names=F)
-goncalves_KP_KO_KP = read.table("../processed/goncalves_2017/KP_KO_KP.tsv", header=T, row.names=1, sep='\t', check.names=F)
+KP_names = flatten(read.table("../nodes/KP.txt"))
+TF_names = flatten(read.table("../nodes/TF.txt"))
+V_names = flatten(read.table("../nodes/V.txt"))
+O_names = V_names[!(V_names%in%c(KP_names,TF_names))]
 
-KP_names = c(colnames(holstege_PK_KO), colnames(fiedler_PK_KO), colnames(zelezniak_PK_KO), colnames(goncalves_KP_KO_KP), colnames(goncalves_KP_KO_TF))
-TF_names = c(colnames(luscombe_TF_KO), colnames(chua_TF_KO), colnames(chua_TF_OE))
-KP_names = sort(unique(unlist(strsplit(KP_names, "_"))))
-TF_names = sort(unique(unlist(strsplit(TF_names, "_"))))
-# Luscombe have KOs of 5 KPs so we remove those from TF
-TF_names = TF_names[!(TF_names %in% KP_names)]
-write.table(KP_names, file="KP.txt", row.names=F, col.names=F, quote=F)
-write.table(TF_names, file="TF.txt", row.names=F, col.names=F, quote=F)
+fnames = c("../processed/holstege_2010/PK_KO.tsv",
+           "../processed/holstege_2014/KO.tsv",
+           "../processed/luscombe_2010/TF_KO.tsv",
+           "../processed/luscombe_2010/PK_KO.tsv",
+           "../processed/fiedler_2009/avg_KO.tsv",
+           "../processed/zelezniak_2018/PK_KO.tsv",
+           "../processed/goncalves_2017/KP_KO_TF.tsv",
+           "../processed/goncalves_2017/KP_KO_KP.tsv",
+           "../processed/chua_2006/TF_KO.tsv",
+           "../processed/chua_2006/TF_OE.tsv")
+pert_tables = list()
+for (i in 1:length(fnames)) {pert_tables[[i]] = fread(fnames[i], quote="", header=T, sep='\t')}
+OE_fname = grep("OE", fnames)
+colnames(pert_tables[[OE_fname]])[2:ncol(pert_tables[[OE_fname]])] = paste(colnames(pert_tables[[OE_fname]])[2:ncol(pert_tables[[OE_fname]])], "OE")  # make sure to separate OE from KO
+pert_melt = list()
+for (i in 1:length(pert_tables)) {pert_melt[[i]] = melt(pert_tables[[i]], id.vars="ORF", variable.name="Mutant")}
+pert_melt = bind_rows(pert_melt)
+pert_melt_avg = pert_melt[,list(value=mean(value)),by=list(ORF,Mutant)]
+pert_outer = merge_outer(pert_tables) # merge all data, keeping all datapoints
+pert_inner = as.data.table(acast(pert_melt_avg, ORF ~ Mutant), "ORF") # merge all data, where there is a single averaged value for each unique entry
 
-colnames(chua_TF_OE) = paste(colnames(chua_TF_OE), "OE")  # make sure to separate OE from KO
-data_frames = list(holstege_PK_KO, luscombe_TF_KO, fiedler_PK_KO, zelezniak_PK_KO, chua_TF_KO, chua_TF_OE, goncalves_KP_KO_TF, goncalves_KP_KO_KP)
-
-# all values in long format
-data_frames_melt = melt_tables(data_frames)
-data_frames_melt_avg = aggregate(value ~ rownames + colnames, data=data_frames_melt, mean)
-data_frames_cast = acast(data_frames_melt_avg, rownames ~ colnames)
-
-# merge all perturbation data
-perturbation = merge_full(data_frames)
-
-X_names = sort(unique(rownames(perturbation)))
-X_names = X_names[!((X_names %in% KP_names) | (X_names %in% TF_names))]
-write.table(X_names, file="X.txt", row.names=F, col.names=F, quote=F)
+# only keep mutation of KP, TF and multi KOs. We want to use _ and OE columns which will be fine, they don't match O_names
+pert_outer[,which(colnames(pert_outer) %in% O_names):=NULL]
+pert_inner[,which(colnames(pert_inner) %in% O_names):=NULL]
 
 # check if any perturbation gene is not measured
-colnames(perturbation)[!(gsub(" OE", "", colnames(perturbation)) %in% rownames(perturbation))]
-# they are only multi KO so all is good
+not_measured = colnames(pert_outer)[!(rootname(colnames(pert_outer)) %in% pert_outer$ORF)]
+not_measured = not_measured[not_measured != "ORF"] # remove ORF
+any(not_measured %in% c(KP_names, TF_names, O_names))  # they are useless
+pert_outer[,(not_measured):=NULL]  # remove them
+pert_inner[,(not_measured):=NULL]  # remove them
+all(V_names[!(V_names %in% pert_outer$ORF)] %in% TF_names) # good, it is only TFs, which we will assign some arbitrary KO value to let them have influence
 
-PTX_names = c(KP_names, TF_names, X_names)
-write.table(PTX_names, file="PTX.txt", row.names=F, col.names=F, quote=F)
+## sorting
+# we need to have unique names for sorting
+colnames(pert_outer) = make.unique(colnames(pert_outer), sep=" ")
+# sort columns according to KP,TF
+setcolorder(pert_outer, order(match(rootname(colnames(pert_outer)), V_names), na.last=F))
+setcolorder(pert_inner, order(match(rootname(colnames(pert_inner)), V_names), na.last=F))
+# sort rows according to KP,TF,O. we use indexing instead of sort to insert 3 new NA lines for TFs that are never measured
+setkey(pert_outer,ORF)
+setkey(pert_inner,ORF)
+pert_outer = pert_outer[V_names,]
+pert_inner = pert_inner[V_names,]
 
-# sort rows according to PTX
-perturbation = sort_table(perturbation, PTX_names)
-perturbation_inner = sort_table(data_frames_cast, PTX_names)
+# stop the uniqueness of col names
+pert_outer = colname_fix(pert_outer)
 
 # make idx of what is KOed/OEed
-KO_indices = as.matrix(column_row_map(perturbation))
-KO_inner_indices = as.matrix(column_row_map(perturbation_inner))
-KOOE_indices = as.matrix(column_row_map_space(perturbation))
-KOOE_inner_indices = as.matrix(column_row_map_space(perturbation_inner))
-OE_indices = KOOE_indices & !KO_indices
-OE_inner_indices = KOOE_inner_indices & !KO_inner_indices
+KO_outer = column_row_map_nospace(pert_outer)
+KO_inner = column_row_map_nospace(pert_inner)
+KOOE_outer = column_row_map_space(pert_outer)
+KOOE_inner = column_row_map_space(pert_inner)
+OE_outer = KOOE_outer & !KO_outer
+OE_inner = KOOE_inner & !KO_inner
 # make sure OE is kept separate. should be TRUE
-any(OE_indices != 0)
-any(OE_inner_indices != 0)
-write.table(KOOE_indices, file="KOOE_indices.ssv", sep=" ", quote=F)
-write.table(KOOE_inner_indices, file="KOOE_inner_indices.ssv", sep=" ", quote=F)
+any(OE_outer != 0)
+any(OE_inner != 0)
+write.table(KOOE_outer, file="KOOE_outer.csv", sep=",", quote=F)
+write.table(KOOE_inner, file="KOOE_inner.csv", sep=",", quote=F)
 # we add NaN entries to J, which will result in their values being ignored in the SSE calculation during gradient descent
-J = KOOE_indices
-J_inner = KOOE_inner_indices
-J[is.na(perturbation)] = 1
-J_inner[is.na(perturbation_inner)] = 1
-write.table(J, file="J.ssv", sep=" ", quote=F)
-write.table(J_inner, file="J_inner.ssv", sep=" ", quote=F)
+J_outer = as.data.table(KOOE_outer, "ORF"); setkey(J_outer, "ORF")
+J_inner = as.data.table(KOOE_inner, "ORF"); setkey(J_inner, "ORF")
+J_outer[is.na(pert_outer)] = 1
+J_inner[is.na(pert_inner)] = 1
+write.table(J_outer, file="J_outer.csv", sep=",", quote=F, row.names=F)
+write.table(J_inner, file="J_inner.csv", sep=",", quote=F, row.names=F)
 
 # make them logical
-KO_indices = KO_indices == 1
-KOOE_indices = KOOE_indices == 1
-OE_indices = OE_indices == 1
-KO_inner_indices = KO_inner_indices == 1
-KOOE_inner_indices = KOOE_inner_indices == 1
-OE_inner_indices = OE_inner_indices == 1
+KO_outer   = KO_outer   == 1
+KOOE_outer = KOOE_outer == 1
+OE_outer   = OE_outer   == 1
+KO_inner   = KO_inner   == 1
+KOOE_inner = KOOE_inner == 1
+OE_inner   = OE_inner   == 1
 
-sum(is.na(perturbation))
 # we have to get rid of NaNs. We can try to copy logFC for a node under the same exp conditions
-perturbation = NA2avg(perturbation, perturbation_inner)
+sum(is.na(pert_outer))
+pert_outer = as.matrix(pert_outer, "ORF"); pert_outer_updated = pert_outer
+pert_inner = as.matrix(pert_inner, "ORF"); pert_inner_updated = pert_inner
+pert_outer_updated = NA2avg(pert_outer_updated, pert_inner_updated)
 # the remaining NA values are set to zero.
-sum(is.na(perturbation))
-sum(is.na(perturbation_inner))
+sum(is.na(pert_outer_updated))
+sum(is.na(pert_inner_updated))
 # correct remaining nodes to zero
-perturbation[is.na(perturbation)] = 0
-perturbation_inner[is.na(perturbation_inner)] = 0
-# reducing KOs with 6
-perturbation_updated = perturbation
-perturbation_inner_updated = perturbation_inner
-perturbation_updated[KO_indices] = perturbation[KO_indices] - 6
-perturbation_inner_updated[KO_inner_indices] = perturbation_inner[KO_inner_indices] - 6
-# increase OE with 1
-perturbation_updated[OE_indices] = perturbation[OE_indices] + 1
-perturbation_inner_updated[OE_inner_indices] = perturbation_inner[OE_inner_indices] + 1
-# write. has to be tab and not space delim since there are spaces in 
-# write.table(perturbation_updated, file="logFC.ssv", sep=" ", quote=F, col.names=gsub(" ", "_", colnames(perturbation_updated)))
-# write.table(perturbation_inner_updated, "logFC_inner.ssv", sep=" ", quote=F, col.names=gsub(" ", "_", colnames(perturbation_inner_updated)))
-write.table(perturbation_updated, file="logFC.tsv", sep="\t", quote=F)
-write.table(perturbation_inner_updated, "logFC_inner.tsv", sep="\t", quote=F)
+pert_outer_updated[is.na(pert_outer_updated)] = 0
+pert_inner_updated[is.na(pert_inner_updated)] = 0
+# reducing KOs
+pert_outer_updated[KO_outer] = pert_outer_updated[KO_outer] - 5
+pert_inner_updated[KO_inner] = pert_inner_updated[KO_inner] - 5
+# increase OE
+pert_outer_updated[OE_outer] = pert_outer_updated[OE_outer] + 1
+pert_inner_updated[OE_inner] = pert_inner_updated[OE_inner] + 1
+# write. there's spaces in colnames (OE)
+write.table(pert_outer_updated, "logFC_outer.csv", sep=",", quote=F)
+write.table(pert_inner_updated, "logFC_inner.csv", sep=",", quote=F)
 
 
-# make a mask for WT edges
-T_edges = read.table("../goldstandard/T/edges.tsv", header=T, sep="\t", quote="")
-WT_prior = match_columnrow(PTX_names, TF_names, T_edges$Target, T_edges$TF)
-write.table(as.matrix(WT_prior), file="WT_prior.ssv", sep=" ", quote=F)
-# this many prior edges
-sum(WT_prior)
-# how many per TF?
-edge_per_TF = apply(WT_prior, 2, sum)
-plot(density(edge_per_TF))
-hist(edge_per_TF, breaks=20)
-mean(edge_per_TF)
 
-
+## plotting
 # plot perturbation values
-df1 = data.frame(logFC=perturbation[KO_indices], label="KO")
-df2 = data.frame(logFC=perturbation_updated[KO_indices], label="corrected KO")
-df3 = data.frame(logFC=perturbation[OE_indices], label="OE")
-df4 = data.frame(logFC=perturbation_updated[OE_indices], label="corrected OE")
-df5 = data.frame(logFC=perturbation[!J], label="others")
+df1 = data.frame(logFC=pert_outer[!as.matrix(J_outer, "ORF")], label="unmutated")
+df2 = data.frame(logFC=na.omit(pert_outer[KO_outer]), label="KO")
+df3 = data.frame(logFC=na.omit(pert_outer[OE_outer]), label="OE")
+df4 = data.frame(logFC=pert_outer_updated[KO_outer], label="corrected KO")
+df5 = data.frame(logFC=pert_outer_updated[OE_outer], label="corrected OE")
 plotdf = rbind(df1, df2, df3, df4, df5)
-plotdf$label = factor(plotdf$label, levels=c("KO", "OE", "corrected KO", "corrected OE", "others"))
+labels = c("unmutated", "KO", "OE", "corrected KO", "corrected OE")
+plotdf$label = factor(plotdf$label, levels=labels)
 
 
-ggplot(plotdf, aes(logFC, y=..scaled.., fill=label)) + 
-    geom_density(alpha=0.7) +
-    scale_x_continuous(name="log fold-change", breaks=c(-10,-5,-1,0,1), labels=c("-10","-5","-1","0","1"), limits=c(-12,4)) +
-    ylab("scaled density") +
-    scale_fill_manual(values=c("pink", "cyan", "red", "blue", "black")) +
+plt = ggplot(plotdf, aes(logFC, fill=label)) + 
+    geom_histogram(alpha=0.5, position="identity", binwidth=0.3)
+
+stepdf = ggplot_build(plt)$data[[1]][,c("xmin", "y", "group")]
+stepdf$label = factor(stepdf$group, labels=labels)
+# make visual corrections
+for (i in 1:length(labels)) {
+    limits = c(min(stepdf$xmin[stepdf$group==i])-.1, max(stepdf$xmin[stepdf$group==i])+.1)
+    stepdf = rbind(stepdf, data.frame(xmin=limits, y=c(0,0), group=c(i,i), label=labels[i]))
+}
+
+color_palette = c("black", "pink", "cyan", "red", "blue")
+
+plt + geom_step(data=stepdf, aes(x=xmin, y=y, color=label)) +
     theme_linedraw() +
+    scale_color_manual(values=color_palette) +
+    scale_fill_manual(values=color_palette) +
+    scale_x_continuous(name="log fold-change", breaks=c(-10,-5,-1,0,1,5), labels=c("-10","-5","-1","0","1","5")) +
     theme(legend.title=element_blank(), panel.grid.major=element_line(colour="lightgray"), panel.grid.minor=element_blank()) +
-    ggtitle("Perturbation corrections")
+    scale_y_log10(limits=c(1,1.2e7), expand=c(0,0)) +
+    ggtitle("Perturbation corrections") +
+    ylab("measurements")
+    
 
-ggsave("perturbation_corrections.pdf", width=7, height=1.7, units="in")
+
+ggsave("perturbation_corrections.pdf", width=7, height=2, units="in")
 
 
+mydensityplot = function() {
+    ggplot(plotdf, aes(logFC, y=..scaled.., fill=label)) + 
+        geom_density(alpha=0.7) +
+        scale_x_continuous(name="log fold-change", breaks=c(-10,-5,-1,0,1), labels=c("-10","-5","-1","0","1"), limits=c(-12,4)) +
+        ylab("scaled density") +
+        scale_fill_manual(values=c("pink", "cyan", "red", "blue", "black")) +
+        theme_linedraw() +
+        theme(legend.title=element_blank(), panel.grid.major=element_line(colour="lightgray"), panel.grid.minor=element_blank()) +
+        ggtitle("Perturbation corrections")
+}
 
+myborderlesshistplot = function() {
+    ggplot(plotdf, aes(logFC, fill=label)) + 
+        geom_histogram(alpha=0.6, position="identity", bins=80) +
+        scale_y_log10(expand = c(0,0)) +
+        scale_x_continuous(name="log fold-change", breaks=c(-10,-5,-1,0,1,5), labels=c("-10","-5","-1","0","1")) +
+        scale_fill_manual(values=c("black", "pink", "cyan", "red", "blue")) +
+        theme_linedraw() +
+        theme(legend.title=element_blank(), panel.grid.major=element_line(colour="lightgray"), panel.grid.minor=element_blank()) +
+        ggtitle("Perturbation corrections")
+}
 
