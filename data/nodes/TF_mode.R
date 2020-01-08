@@ -1,61 +1,83 @@
 
-# assign mode to TF from Genetic Ontology terms (AmiGO2)
+# purpose of this is to assign mode to the TFs that did not have GO terms that could do it.
+# these modes are therefore estimates, but we need to assign something, so that their outgoing edges can be signed
+# mode inferred from datasets with mode annotation for edges (yeastract) combined with the belief in the edge (based on edge p-val)
 
-# functions
-unwhich = function(which, dim=max(which)) {
-    y = array(logical(length(which)), dim=dim)
-    y[which] = TRUE
-    y
-}
+setwd("/Users/christian/cwd/data/nodes")
 
-# read GO terms
-activators = read.table("~/cwd/data/processed/amigo2/activators.tsv", col.names=c("Evidence", "TF"), stringsAsFactors=F)
-repressors = read.table("~/cwd/data/processed/amigo2/repressors.tsv", col.names=c("Evidence", "TF"), stringsAsFactors=F)
-positive_reg = read.table("~/cwd/data/processed/amigo2/positive_regulators.tsv", col.names=c("Evidence", "TF"), stringsAsFactors=F)
-negative_reg = read.table("~/cwd/data/processed/amigo2/negative_regulators.tsv", col.names=c("Evidence", "TF"), stringsAsFactors=F)
-positive_elong = read.table("~/cwd/data/processed/amigo2/positive_elongation.tsv", col.names=c("Evidence", "TF"), stringsAsFactors=F)
-negative_elong = read.table("~/cwd/data/processed/amigo2/negative_elongation.tsv", col.names=c("Evidence", "TF"), stringsAsFactors=F)
+TFs = read.table("../nodes/TF.tsv", sep="\t", header=T, stringsAsFactors=F)
+V = as.vector(as.matrix(read.table("../nodes/V.txt")))
+edges = read.table("../TF_edges/edges.tsv", sep="\t", header=T, quote="", stringsAsFactors=F)
+# fall back on perturbation data to find expression mode
+perturbation = as.matrix(read.table("../perturbation/logFC_inner.tsv", sep="\t", row.names=1, header=T, quote="", stringsAsFactors=F))
 
-
-evidences = unique(c(activators$Evidence, repressors$Evidence, positive_reg$Evidence, negative_reg$Evidence))
-# ordered from wrost to best. We don't use ISS, ISA and IBA since they are computational evidence
-# http://wiki.geneontology.org/index.php/Guide_to_GO_Evidence_Codes
-evidences = c("IEA", "IC", "HMP", "IMP", "IGI", "IDA", "IPI")
-
-# first insert positive and negative regulators so that activators and repressors will replace positive and negative regulators in case of disagreement
-
-get_modes = function(TFs, activator_table, repressor_table) {
-    modes = rep("", length(TFs))
-    # start at worst, replace with better evidence types
-    for (evidence in evidences) {
-        activators_found = unwhich(match(activator_table$TF[activator_table$Evidence == evidence], TFs), dim=length(TFs))
-        repressors_found = unwhich(match(repressor_table$TF[activator_table$Evidence == evidence], TFs), dim=length(TFs))
-        # if a TF is classified as activator and repressor with the same evidence we cannot use it to make a decision
-        modes[activators_found & !repressors_found] = "activator"
-        modes[repressors_found & !activators_found] = "repressor"
+# assign each TF as either activator or repressor sign by using the mode of regulation most supported in the data
+dominant_sign = function(edges) {
+    # pval=0 gives Inf so
+    edges$Pval[edges$Pval == 0] = min(edges$Pval[edges$Pval != 0])
+    signs = rep(NA, nrow(edges))
+    for (TF in unique(edges$TF)) {
+        activation = edges$Mode[edges$TF == TF] == "activator"
+        inhibition = edges$Mode[edges$TF == TF] == "inhibitor"
+        chisq_activation = -2*sum(log(edges$Pval[activation]))
+        chisq_inhibition = -2*sum(log(edges$Pval[inhibition]))
+        pval_activation = pchisq(chisq_activation, df=2*sum(activation), lower.tail=F, log.p=T)
+        pval_inhibition = pchisq(chisq_inhibition, df=2*sum(inhibition), lower.tail=F, log.p=T)
+        
+        if (pval_activation < pval_inhibition) {signs[edges$TF == TF] = "+"}
+        if (pval_activation > pval_inhibition) {signs[edges$TF == TF] = "-"}
     }
-    modes
+    signs
 }
 
-assign_modes = function(TFs) {
+edges$sign = dominant_sign(edges)
 
-    TFs$Mode = get_modes(TFs$TF, activators, repressors)
-    TFs$Mode[TFs$Mode==""] = get_modes(TFs$TF, positive_reg, negative_reg)[TFs$Mode==""]
-    TFs$Mode[TFs$Mode==""] = get_modes(TFs$TF, positive_elong, negative_elong)[TFs$Mode==""]
-    
-    # print counts info
-    cat(paste(sum(TFs$Mode == "activator"), sum(TFs$Mode == "repressor"), sum(TFs$Mode == "")), "\n")
-    
-    TFs
-}
+sum(edges$sign == "+", na.rm=T)
+sum(edges$sign == "-", na.rm=T)
 
-main = function(infile, outfile) {
-    TFs = read.table(infile, col.names="TF", stringsAsFactors=F)
-    TFs = assign_modes(TFs)
-    write.table(TFs, outfile, sep="\t", quote=F, row.names=F)
-}
 
-setwd("~/cwd/data/nodes")
-main("TF.txt", "TF_mode.tsv")
-main("TF_putative.txt", "TF_putative_mode.tsv")
+agree = (edges$sign == "+" & edges$Mode == "activator") | (edges$sign == "-" & edges$Mode == "inhibitor")
+sum(agree)
+sum(!agree & edges$Mode != "")
+# maybe this is attributed to cofactors and other regulators that flip the sign of regulation
 
+# most have been given a sign now which is great
+sum(is.na(edges$sign)) / sum(!is.na(edges$sign))
+
+
+# provide sign from perturbation data where a TF is KOed
+for(i in 1:nrow(edges)) {if (is.na(edges$sign[i])) {
+    logFC = perturbation[rownames(perturbation)==edges$Target[i], colnames(perturbation)==edges$TF[i]]
+    if (length(logFC) == 1) {
+        if (logFC > 0) {edges$Mode[i] = "inhibitor"}
+        if (logFC < 0) {edges$Mode[i] = "activator"}
+    }
+    else if (length(logFC) > 1) {cat("warning\n")}
+}}
+
+edges$sign[is.na(edges$sign)] = dominant_sign(edges)[is.na(edges$sign)]
+unresolved = unique(edges$TF[is.na(edges$sign)])
+length(unresolved) # 19 TFs that are unsigned (15, 4 are known from GO terms)
+
+TF_signs = edges$sign[match(TFs$TF, edges$TF)]
+
+# get the sign of expression correlation between an unresolved TF and its targets
+for (TF in unresolved) {if (TF %in% rownames(perturbation)) {
+    targets = edges$Target[edges$TF == TF]
+    targets = targets[targets %in% rownames(perturbation)]
+    corr = as.vector(cor(rep(perturbation[TF,], length(targets)), matrix(perturbation[targets,], byrow=T)))
+    if (corr < 0) {TF_signs[TFs$TF == TF] = "-"}
+    if (corr > 0) {TF_signs[TFs$TF == TF] = "+"}
+}}
+
+
+TFs$Mode[TF_signs == "+" & !is.na(TF_signs) & TFs$Mode == ""] = "activator"
+TFs$Mode[TF_signs == "-" & !is.na(TF_signs) & TFs$Mode == ""] = "repressor"
+
+
+# manually looking up the only two remaining TFs: MATA1 and YER108C
+# SGD says MATA1 represses genes, and YER108C is a point mutated copy of YER109C (FLO8) which is an activator
+TFs$Mode[TFs$TF == "MATA1"] = "repressor"
+TFs$Mode[TFs$TF == "YER108C"] = "activator"
+
+write.table(TFs, "TF_mode.tsv", sep="\t", quote=F, row.names=F)
