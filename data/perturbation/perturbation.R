@@ -65,9 +65,9 @@ NA2avg = function(x, copy_from) {
 
 setwd("~/cwd/data/perturbation")
 ## read
-KP_names = flatten(read.table("../nodes/KP.txt"))
-TF_names = flatten(read.table("../nodes/TF.txt"))
-V_names = flatten(read.table("../nodes/V.txt"))
+KP_names = flatten(read.table("../network/KP.txt"))
+TF_names = flatten(read.table("../network/TF.txt"))
+V_names = flatten(read.table("../network/V.txt"))
 O_names = V_names[!(V_names%in%c(KP_names,TF_names))]
 
 fnames = c("../processed/holstege_2010/PK_KO.tsv",
@@ -158,8 +158,8 @@ sum(is.na(pert_inner_updated))
 pert_outer_updated[is.na(pert_outer_updated)] = 0
 pert_inner_updated[is.na(pert_inner_updated)] = 0
 # reducing KOs
-pert_outer_updated[KO_outer] = pert_outer_updated[KO_outer] - 5
-pert_inner_updated[KO_inner] = pert_inner_updated[KO_inner] - 5
+pert_outer_updated[KO_outer] = pert_outer_updated[KO_outer] - 4
+pert_inner_updated[KO_inner] = pert_inner_updated[KO_inner] - 4
 # increase OE
 pert_outer_updated[OE_outer] = pert_outer_updated[OE_outer] + 1
 pert_inner_updated[OE_inner] = pert_inner_updated[OE_inner] + 1
@@ -171,15 +171,15 @@ write.table(pert_inner_updated, "logFC_inner.csv", sep=",", quote=F)
 
 ## plotting
 # plot perturbation values
+labels = c("unmutated", "KO", "OE", "corrected KO", "corrected OE")
+color_palette = c("black", "pink", "cyan", "red", "blue")
 df1 = data.frame(logFC=pert_outer[!as.matrix(J_outer, "ORF")], label="unmutated")
 df2 = data.frame(logFC=na.omit(pert_outer[KO_outer]), label="KO")
 df3 = data.frame(logFC=na.omit(pert_outer[OE_outer]), label="OE")
 df4 = data.frame(logFC=pert_outer_updated[KO_outer], label="corrected KO")
 df5 = data.frame(logFC=pert_outer_updated[OE_outer], label="corrected OE")
 plotdf = rbind(df1, df2, df3, df4, df5)
-labels = c("unmutated", "KO", "OE", "corrected KO", "corrected OE")
 plotdf$label = factor(plotdf$label, levels=labels)
-
 
 plt = ggplot(plotdf, aes(logFC, fill=label)) + 
     geom_histogram(alpha=0.5, position="identity", binwidth=0.3)
@@ -192,8 +192,6 @@ for (i in 1:length(labels)) {
     stepdf = rbind(stepdf, data.frame(xmin=limits, y=c(0,0), group=c(i,i), label=labels[i]))
 }
 
-color_palette = c("black", "pink", "cyan", "red", "blue")
-
 plt + geom_step(data=stepdf, aes(x=xmin, y=y, color=label)) +
     theme_linedraw() +
     scale_color_manual(values=color_palette) +
@@ -203,8 +201,6 @@ plt + geom_step(data=stepdf, aes(x=xmin, y=y, color=label)) +
     scale_y_log10(limits=c(1,1.2e7), expand=c(0,0)) +
     ggtitle("Perturbation corrections") +
     ylab("measurements")
-    
-
 
 ggsave("perturbation_corrections.pdf", width=7, height=2, units="in")
 
