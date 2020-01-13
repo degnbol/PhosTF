@@ -11,7 +11,7 @@ using ..ArrayUtils: eye
 import ..FluxUtils
 
 export offdiag, random_W
-export sse, sse2, sse_B, sse_T
+export sse, sse_B, sse_T, linex
 export l1
 export _B, _T
 
