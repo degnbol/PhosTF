@@ -1,3 +1,4 @@
+# pvals for TF gene binding
 sed 1d ../../raw/lee_2002/106_pvalbygene_ypd_v9.0.txt | tr -d '\r' | head -n6290 | sed -E '/^[[:space:]]+$/d' | cut -d$'\t' -f1,4- > YPD.tsv
 head -n1 YPD.tsv > YPD.head
 ../../../utilities/gene2ORF.R YPD.head YPD_ORF.head ../../name_conversion/gene2ORF.tsv
