@@ -1,3 +1,0 @@
-# Collect all TF edges with binding evidence with provided scores, mainly p-values.
-# Purpose is to create a prior for KP edge inference, TF edges should not be trained on at all.
-# Either use them all given the same edge value or use an edge value defined e.g. as number of standard deviations calculated from the pvals and normalized maybe to the largest deviation.
