@@ -100,26 +100,30 @@ Note that self-loops are removed.
 """
 X2T(X) = X.*offdiag(X) ./ repeat(diag(X)', size(X,1), 1)
 
-
+"Error. Difference between prediction and truth."
+E(cs::Constants, W::AbstractMatrix, X::Matrix) = _B(cs,W,X) .- X
 """
 - cs: struct containing the constants Mₜ, Mₚ, and U
 - W: Trainable parameters. Square matrix.
 - X: Matrix holding column vectors of measured (simulated) logFC values. No need to be square but has to have the same shape as J.
 """
-function sse(cs::Constants, W::AbstractMatrix, X::Matrix)
-	E = X .- _B(cs,W,X)
-	sum((cs.U .* E) .^ 2)
-end
+sse(cs::Constants, W::AbstractMatrix, X::Matrix) = sum((cs.U .* E(cs,W,X)) .^ 2)
 "- ks: If we are using batches, then indicate which batches are used"
-function sse(cs::Constants, W::AbstractMatrix, X::Matrix, ks)
-	E = X .- _B(cs,W,X)
-	sum((cs.U[:,ks] .* E) .^ 2)
-end
-"Alternative SSE where both TF and PK/PP edges onto a KO are removed instead of only TF. Reduces edges among PK/PP."
+sse(cs::Constants, W::AbstractMatrix, X::Matrix, ks) = sum((cs.U[:,ks] .* E(cs,W,X)) .^ 2)
+"Alternative SSE where both TF and KP edges onto a KO are removed instead of only TF. Reduces edges among KP."
 function sse_alt(cs::Constants, W::AbstractMatrix, X::Matrix)
 	i = I(size(W,1))
 	E = cs.U .* X .- hcat([(W.*cs.Mₜ .* uₖ) * ((i - W.*cs.Mₚ .* uₖ) \ x) for (uₖ, x) in zip(eachcol(cs.U), eachcol(X))]...)
 	sum(E.^2)
+end
+
+"""
+Alternative to SSE, that punishes undershooting more than overshooting. 
+That is, if a true logFC value is 1, then 2 is punished less than 0 as opposed to what is the case for SSE.
+"""
+function linex(cs::Constants, W::AbstractMatrix, X::Matrix)
+	αE = -sign.(X) .* E(cs,W,X)
+	sum(exp.(αE) .- αE .- 1.)
 end
 
 """
