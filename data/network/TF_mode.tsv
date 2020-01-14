@@ -7,7 +7,7 @@ YBL008W	repressor
 YBL021C	activator
 YBL054W	activator
 YBL103C	activator
-YBR033W	repressor
+YBR033W	activator
 YBR049C	activator
 YBR083W	activator
 YBR112C	repressor
@@ -21,11 +21,11 @@ YCL055W	activator
 YCL066W	repressor
 YCL067C	repressor
 YCR018C	activator
-YCR040W	activator
+YCR040W	repressor
 YCR065W	activator
 YCR084C	repressor
-YCR096C	repressor
-YCR097W	activator
+YCR096C	activator
+YCR097W	repressor
 YCR106W	repressor
 YDL020C	activator
 YDL048C	activator
@@ -148,7 +148,7 @@ YLR098C	repressor
 YLR131C	activator
 YLR176C	repressor
 YLR182W	activator
-YLR183C	activator
+YLR183C	repressor
 YLR223C	activator
 YLR228C	activator
 YLR256W	activator
@@ -161,7 +161,7 @@ YML027W	repressor
 YML051W	repressor
 YML076C	activator
 YML081W	repressor
-YML099C	repressor
+YML099C	activator
 YML113W	repressor
 YMR016C	repressor
 YMR019W	repressor
@@ -187,7 +187,7 @@ YNL216W	activator
 YNL257C	activator
 YNL309W	activator
 YNL312W	repressor
-YNL314W	repressor
+YNL314W	activator
 YNR054C	repressor
 YNR063W	activator
 YOL028C	repressor
@@ -219,7 +219,7 @@ YPL089C	activator
 YPL128C	activator
 YPL133C	activator
 YPL139C	activator
-YPL177C	activator
+YPL177C	repressor
 YPL202C	activator
 YPL230W	repressor
 YPL248C	activator
@@ -227,6 +227,6 @@ YPR008W	activator
 YPR009W	activator
 YPR022C	activator
 YPR065W	repressor
-YPR104C	repressor
+YPR104C	activator
 YPR196W	activator
 YPR199C	activator

@@ -1,3 +1,4 @@
+#!/usr/bin/env Rscript
 setwd("~/cwd/data/processed/biogrid")
 # read
 targets = read.table("BIOGRID-PTM-3.5.178.ptmtab.tsv", sep="\t", header=T, quote="")

@@ -1,4 +1,4 @@
-
+#!/usr/bin/env Rscript
 # define sets of KP, TF and O as well as filter TF edges by TF->V
 
 options(stringsAsFactors=FALSE)

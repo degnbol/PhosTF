@@ -1,6 +1,7 @@
 
 library(data.table)
 library(ggplot2)
+library(harmonicmeanp)
 
 # functions
 
@@ -35,27 +36,24 @@ all_edges = rbind(harbison_YPD, harbison_conds, horak, workman)
 # pval=0 doesn't make sense, change it to the smallest nonzero one
 all_edges$Pval[all_edges$Pval==0] = min(all_edges$Pval[all_edges$Pval!=0])
 # min(all_edges$Pval) == 1.11e-16
-
-# add edges from reviews with p-val thresholds
-balaji = unique(rbind(balaji_2006, balaji_2008))
-# remove edges from balaji that are already found in original experiment
-balaji = balaji[!(paste(balaji$TF, balaji$Target) %in% paste(all_edges$TF, all_edges$Target)),]
-balaji$Pval = 0.001
-all_edges = rbind(all_edges, balaji)
-# remove edges yeastract that are already found
-yeastract_binding = yeastract_binding[!(paste(yeastract_binding$TF, yeastract_binding$Target) %in% paste(all_edges$TF, all_edges$Target)),]
-yeastract_binding$Pval = 0.04999 # I couldn't find a pval threshold so I will use the worst significance level they could have chosen
-all_edges = rbind(all_edges, yeastract_binding)
-
-# apply fisher's method to combine pvals for each edge
+# apply fisher's method to combine pvals assumed independent for each edge
 all_edges = data.table(all_edges)[,list(Pval=fisher.method(Pval)),by=list(TF,Target)]
+
+balaji = unique(rbind(balaji_2006, balaji_2008))
+balaji$Pval = 0.001
+# I couldn't find a pval threshold so I will use the worst significance level that will still be included in the end
+yeastract_binding$Pval = 0.04999
+
+all_edges = rbind(all_edges, balaji, yeastract_binding)
+# use data that is not independent to set a minimum p-value for the data
+all_edges = all_edges[,list(Pval=min(Pval)),by=list(TF,Target)]
 
 # add regulation mode supported in the data
 all_edges = merge(all_edges, expression_evidence, all.x=T)
 
-plot(density(all_edges$Pval))
+hist(all_edges$Pval, breaks=100)
 # remove all edges not supported in the data, we use 0.05 since it is the threshold that allows for the most edges.
-# we get ~80000 potential edges, which is still plenty
+# we get ~100000 potential edges, which is still plenty
 sum(all_edges$Pval <= .05)
 edges = all_edges[all_edges$Pval <= .05,]
 

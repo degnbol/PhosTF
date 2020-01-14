@@ -2,6 +2,8 @@
 library(Matrix)
 library(ggplot2)
 
+options(stringsAsFactors=FALSE)
+
 # functions
 flatten = function(x) as.vector(as.matrix(x))
 

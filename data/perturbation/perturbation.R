@@ -1,4 +1,4 @@
-
+#!/usr/bin/env Rscript
 ## packages
 library(data.table)
 library(dplyr)
@@ -98,10 +98,11 @@ pert_inner[,which(colnames(pert_inner) %in% O_names):=NULL]
 # check if any perturbation gene is not measured
 not_measured = colnames(pert_outer)[!(rootname(colnames(pert_outer)) %in% pert_outer$ORF)]
 not_measured = not_measured[not_measured != "ORF"] # remove ORF
-any(not_measured %in% c(KP_names, TF_names, O_names))  # they are useless
+!any(not_measured %in% c(KP_names, TF_names, O_names))  # they are not in these sets so they are all useless. should be TRUE
 pert_outer[,(not_measured):=NULL]  # remove them
 pert_inner[,(not_measured):=NULL]  # remove them
-all(V_names[!(V_names %in% pert_outer$ORF)] %in% TF_names) # good, it is only TFs, which we will assign some arbitrary KO value to let them have influence
+# should be TRUE, it is only TFs, which we will assign some arbitrary KO value to let them have influence
+all(V_names[!(V_names %in% pert_outer$ORF)] %in% TF_names)
 
 ## sorting
 # we need to have unique names for sorting
