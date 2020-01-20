@@ -9,8 +9,8 @@ awk -F'\t' '{for(i=4;i<4456;i+=3){printf "\t%s", $i;} print "" }' $raw | sed '2d
 head -n1 M.col | tr '\t' '\n' | sed 's/-.*//' > header
 # first convert using conversion builtin to rownames since we have previously tested that they are the same conversion results except for lug1 that is incorrectly referring to YCR087C-A instead of YLR352W in this data.
 # I know to use YCR087C-A since the KO value is -3 instead of ~0 and since there would otherwise be two KOs of YLR352W, since it is present in the raw data.
-../../../utilities/gene2ORF.R header header_ORF gene2ORF.tsv
-../../../utilities/gene2ORF.R header_ORF header_ORF2 ../../name_conversion/gene2ORF.tsv
+../../../src/gene2ORF.R header header_ORF gene2ORF.tsv
+../../../src/gene2ORF.R header_ORF header_ORF2 ../../name_conversion/gene2ORF.tsv
 mv header_ORF2 header_ORF
 # find lowercase entries, they have not been converted to anything
 grep '[a-z]' header_ORF
