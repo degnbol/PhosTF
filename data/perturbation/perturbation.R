@@ -136,8 +136,11 @@ J_outer = as.data.table(KOOE_outer, "ORF"); setkey(J_outer, "ORF")
 J_inner = as.data.table(KOOE_inner, "ORF"); setkey(J_inner, "ORF")
 J_outer[is.na(pert_outer)] = 1
 J_inner[is.na(pert_inner)] = 1
-write.table(J_outer, file="J_outer.csv", sep=",", quote=F, row.names=F)
-write.table(J_inner, file="J_inner.csv", sep=",", quote=F, row.names=F)
+# write.table(J_outer, file="J_outer.csv", sep=",", quote=F, row.names=F)
+# write.table(J_inner, file="J_inner.csv", sep=",", quote=F, row.names=F)
+write.table(J_outer[,!"ORF"], file="J_outer.mat", sep=" ", quote=F, row.names=F, col.names=F)
+write.table(J_inner[,!"ORF"], file="J_inner.mat", sep=" ", quote=F, row.names=F, col.names=F)
+
 
 # make them logical
 KO_outer   = KO_outer   == 1
@@ -165,20 +168,23 @@ pert_inner_updated[KO_inner] = pert_inner_updated[KO_inner] - 4
 pert_outer_updated[OE_outer] = pert_outer_updated[OE_outer] + 1
 pert_inner_updated[OE_inner] = pert_inner_updated[OE_inner] + 1
 # write. there's spaces in colnames (OE)
-write.table(pert_outer_updated, "logFC_outer.csv", sep=",", quote=F)
-write.table(pert_inner_updated, "logFC_inner.csv", sep=",", quote=F)
+# write.table(pert_outer_updated, "logFC_outer.csv", sep=",", quote=F)
+# write.table(pert_inner_updated, "logFC_inner.csv", sep=",", quote=F)
+write.table(pert_outer_updated, "logFC_outer.mat", sep=" ", quote=F, row.names=F, col.names=F)
+write.table(pert_inner_updated, "logFC_inner.mat", sep=" ", quote=F, row.names=F, col.names=F)
 
 
 
 ## plotting
 # plot perturbation values
-labels = c("unmutated", "KO", "OE", "corrected KO", "corrected OE")
+labels = c("affected", "KO", "OE", "corrected KO", "corrected OE")
 color_palette = c("black", "pink", "cyan", "red", "blue")
-df1 = data.frame(logFC=pert_outer[!as.matrix(J_outer, "ORF")], label="unmutated")
+df1 = data.frame(logFC=pert_outer[!as.matrix(J_outer, "ORF")], label="affected")
 df2 = data.frame(logFC=na.omit(pert_outer[KO_outer]), label="KO")
 df3 = data.frame(logFC=na.omit(pert_outer[OE_outer]), label="OE")
 df4 = data.frame(logFC=pert_outer_updated[KO_outer], label="corrected KO")
 df5 = data.frame(logFC=pert_outer_updated[OE_outer], label="corrected OE")
+nrow(df1); nrow(df2); nrow(df3); nrow(df4); nrow(df5)
 plotdf = rbind(df1, df2, df3, df4, df5)
 plotdf$label = factor(plotdf$label, levels=labels)
 

@@ -1,94 +1,91 @@
 #!/usr/bin/env julia
-if !isdefined(Main, :ArrayUtils) include("utilities/ArrayUtils.jl") end
+include("src/utilities/ReadWrite.jl")
+include("src/utilities/CLI.jl")
+include("src/utilities/General.jl")
+include("src/Inference.jl")
+if !isdefined(Main, :ArrayUtils) include("src/utilities/ArrayUtils.jl") end
 
-"Flux machine learning for gradient descent of errors defined by model loss functions."
-module Inference
+
+using Fire
 using LinearAlgebra
-using Random
-using Statistics: mean
-using Flux, Flux.Tracker
-using Flux.Tracker: grad, update!
-using ..ArrayUtils: eye, shuffle_columns
-include("Model.jl"); using .Model
-using Formatting
-using Dates
+using ..ReadWrite, ..ArrayUtils, ..General
+using ..Model
+using ..Inference, ..CLI
+
 
 """
-Get random indexes taken from ∈ [1,K] in portions.
-return: a generator where each iteration will provide a list of size "batch_size" with indexes ∈ [1,K].
-An index will not appear twice. If "K" is not divisible by "batch_size" there will be randomly left out indexes that will not be returned.
+Get priors from files with the indicators 0=no edge, 1=possible edge, "+"=positive edge, "-"=negative edge.
+Can be fed nothing values, and produces nothing values when a matrix would otherwise provide no additional information.
+return: priors, priors_sign
 """
-function batches(K, batch_size)
-	ks = shuffle(1:K)
-	n_batches = trunc(Int, K/batch_size)
-	(ks[1+batch_size*(i-1):batch_size*i] for i ∈ 1:n_batches)
+function _priors(WT_prior::Union{Matrix,Nothing}, WP_prior::Union{Matrix,Nothing}, n::Integer, nₜ::Integer, nₚ::Integer)
+	if WT_prior === nothing && WP_prior === nothing return nothing, nothing end
+	M, S = Model.priors(WT_prior === nothing ? n : WT_prior, WP_prior === nothing ? nₚ : WP_prior)
+	if all(Model._Wₜ(M,nₜ,nₚ) .== 1) && all(Model._Wₚ(M,nₜ,nₚ) .== 1) M = nothing end
+	if all(S == 0) S = nothing end
+	M, S
 end
 
-
-function train!(W, V, X::AbstractMatrix, L, cb, epochs, opt)
-	data = ((X,),)
-	params = (V === nothing) ? [W] : [W, V]
-	for epoch ∈ 1:epochs
-		Flux.train!(L, params, data, opt)
-		cb(epoch)
-	end
-end
-
-
-"W is the param weight matrix, W′ is the masked version where untrainable entries are set to zero."
-L1(X, W′, cs, λ::Real) = sse(cs, W′, X) + λ*l1(W)
-LB(W, cs, λ::Real) = λ*l1(_B(cs, abs.(W)))
-LB(W, cs, λ::Real, ::Nothing) = LB(W, cs, λ)
-LB(W, cs, λ::Real, λW::Real) = LB(W, cs, λ) + λW*l1(W)
-loss(X, W, W′, cs, λ::Real, λW) = sse(cs, W′, X) + LB(W, cs, λ, λW)
-loss_linex(X, W, W′, cs, λ::Real, λW) = linex(cs, W′, X) + LB(W, cs, λ, λW)
-
-
-get_V(::Nothing, ::Nothing, ::Any) = nothing
-get_V(Iₚₖ::Matrix, Iₚₚ::Matrix, ::Nothing) = FluxUtils.random_weight(size(Iₚₖ,1),1) .|> abs |> param
-get_V(Iₚₖ::Matrix, Iₚₚ::Matrix, W::Matrix) = sign.(sum(W*(Iₚₖ-Iₚₚ); dims=2)) |> param
-
-
 """
-- X: logFC values with measured nodes along axis=1, and different experiment or replicate along axis=2
-- throttle: seconds between prints
-- opt: ADAMW or maybe NADAM
-- Iₚₖ, Iₚₚ: kinase and phosphatase indicator diagonal matrices
-- W: from previous training.
-- J: matrix with 1 for KO and 0 for passive observed node. Shape like X.
+Infer a weight matrix from logFC data.
+- WT_prior/WP_prior: optionally limit Wₜ/Wₚ if they are partially known.
+- lambda: regularization constant for B*
+- lambdaW: regularization constant for abs(W)
+- lambdaWT: whether the WT edges are regularized. Should only be used if highly trusted WT_priors are provided.
+- PKPP: fname. vector, each element is -1 or 1 indicating PP or PK. 0s ignored.
+- WT/WP: previous run to continue.
+- WT_reg: NOT square, weights for each element in WT for regularization cost. NaN means the weight should not be allowed, so will function as masking as well.
 """
-function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=10000, λ::Real=.1, λW=0., λWT=true, opt=ADAMW(), 
-	M=nothing, S=nothing, Iₚₖ=nothing, Iₚₚ=nothing, W=nothing, J=nothing, linex=false)
-	n, K = size(X)
-	if M === nothing M = ones(n, n) end # no prior knowledge
-	M[diagind(M)] .= 0  # enforce no self loops
-	cs = Model.Constants(n, nₜ, nₚ, J === nothing ? K : J)
-	V = get_V(Iₚₖ, Iₚₚ, W)
-	W !== nothing || (W = random_W(n))
-	W = param(W)
-	Iₚ = V === nothing ? Model.Iₚ(n, nₜ, nₚ) : Iₚₖ + Iₚₚ
-	Iₜ = Model.Iₜ(n, nₜ, nₚ)
-	Iₓ = I(n) - (Iₜ+Iₚ)
+@main function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; epochs::Integer=5000, 
+	lambda::Real=.1, lambdaW::Real=0., lambdaWT::Bool=true, WT_prior=nothing, WP_prior=nothing, PKPP=nothing, WT=nothing, WP=nothing, J=nothing,
+	linex::Bool=false, trainWT::Bool=true, WT_reg=nothing)
+	# empty strings is the same as providing nothing.
+	WT == "" && (WT = nothing)
+	WP == "" && (WP = nothing)
+	WT_prior == "" && (WT_prior = nothing)
+	WP_prior == "" && (WP_prior = nothing)
+	WT_reg == "" && (WT_reg = nothing)
+	ot, op = abspath_(ot), abspath_(op)  # weird PWD issues require abs path
 
-	if λW == 0 λW = nothing end
-	L(X) = (linex ? loss_linex : loss)(X, W, Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ), cs, λ, λW)
-
-
-	function cb(epoch)
-		l = L(X)
-		w′ = Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ)
-		e = Model.sse(cs, w′, X)
-		lt = l1(w′*Iₜ)
-		lp = l1(w′*Iₚ)
-		printfmt(5, l, e, lt, lp)
-		println("\t$epoch\t$(Dates.now())")
+	# load files
+	X = loaddlm(abspath_(X), Float64)
+	n = size(X,1)
+	if J !== nothing
+		J = loaddlm(abspath_(J), Float64)
+		@assert size(J) == size(X)
 	end
+	WT_reg === nothing || (WT_reg = loaddlm(abspath_(WT_reg)))
+	WT_prior === nothing || (WT_prior = loaddlm(abspath_(WT_prior)))
+	WP_prior === nothing || (WP_prior = loaddlm(abspath_(WP_prior)))
+	W = (WT === nothing || WP === nothing) ? nothing : Model._W(loaddlm(abspath_(WT)), loaddlm(abspath_(WP)))
+
+	# use NaNs from WT_reg for masking
+	if WT_reg !== nothing
+		nans = isnan.(WT_reg)
+		if any(nans)
+			if (WT_prior === nothing) WT_prior = .!nans
+			# if we have a mask given explicitly then all values that were NaN should be removed by the mask
+			else @assert all(WT_prior[nans] .== 0) end
+			# set them to 1 (default weight) to avoid any NaN related problems.
+			WT_reg[nans] = 1
+		end
+	end
+	M, S = _priors(WT_prior, WP_prior, n, nₜ, nₚ)
 	
-	println("loss\tsse\tLt\tLp\tepoch\ttime")
-	train!(W, V, X, L, Flux.throttle(cb, 5), epochs, opt)
-	Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ)
+	if PKPP !== nothing
+		PKPP = vec(loaddlm(abspath_(PKPP)))
+		padding = zeros(n-length(PKPP))
+		Iₚₖ = diagm([PKPP .== +1; padding])
+		Iₚₚ = diagm([PKPP .== -1; padding])
+	else
+		Iₚₖ, Iₚₚ = nothing, nothing
+	end
+
+	W_reg = WT_reg === nothing ? nothing : [ones(n,nₚ) WT_reg]
+
+	W = Inference.infer(X, nₜ, nₚ; epochs=epochs, λ=lambda, λW=lambdaW, λWT=lambdaWT, M=M, S=S, Iₚₖ=Iₚₖ, Iₚₚ=Iₚₚ, W=W, J=J, linex=linex, trainWT=trainWT, W_reg=W_reg)
+	Wₜ, Wₚ = Model.WₜWₚ(W, nₜ, nₚ)
+	savedlm(ot, Wₜ)
+	savedlm(op, Wₚ)
 end
 
-
-
-end;
