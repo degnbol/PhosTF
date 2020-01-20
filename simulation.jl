@@ -1,26 +1,21 @@
 #!/usr/bin/env julia
-include("simulation/GeneRegulation.jl")
-include("simulation/ODEs.jl")
-include("utilities/ReadWrite.jl")
-include("utilities/CLI.jl")
-include("Cytoscape.jl")
-include("Plotting.jl")
-include("ModelIteration.jl")
-if !isdefined(Main, :Model) include("Model.jl") end # loaded by GeneRegulation
-include("Weight.jl")
-include("Inference.jl")
-if !isdefined(Main, :ArrayUtils) include("utilities/ArrayUtils.jl") end
+include("src/simulation/GeneRegulation.jl")
+include("src/simulation/ODEs.jl")
+include("src/utilities/ReadWrite.jl")
+include("src/utilities/CLI.jl")
+include("src/utilities/General.jl")
+include("src/Cytoscape.jl")
+include("src/Plotting.jl")
+# if !isdefined(Main, :Model) include("Model.jl") end # loaded by GeneRegulation
+if !isdefined(Main, :ArrayUtils) include("src/utilities/ArrayUtils.jl") end
 
 
-"Main caller for calling all project functions through command-line or julia REPL."
-module PKTFX
 using Fire
-using Distributions: Uniform
 using LinearAlgebra
 using Plots
-using ..ReadWrite, ..ArrayUtils
-using ..Cytoscape, ..Plotting, ..ODEs, ..ModelIteration, ..Model, ..Weight
-using ..GeneRegulation, ..Inference, ..CLI
+using ..ReadWrite, ..ArrayUtils, ..General
+using ..Cytoscape, ..Plotting, ..ODEs, ..Model
+using ..GeneRegulation, ..CLI
 
 # defaults
 default_Wₜ, default_Wₚ = "WT.mat", "WP.mat"
@@ -29,51 +24,6 @@ default_net = "net.bson"
 
 loadnet(i) = load(i, Network)
 
-"""
-Create random W from a adjacency matrix containing B.
-"""
-@main function W(B::String, nₚₖ::Integer, nₚₚ::Integer; WT_fname::String=default_Wₜ, WP_fname::String=default_Wₚ)
-	Wₜ, Wₚ = Weight.random_W(loaddlm(B), nₚₖ, nₚₚ)
-	savedlm(WT_fname, Wₜ)
-	savedlm(WP_fname, Wₚ)
-end
-
-"""
-- np: mandatory arg to set nₚ
-- save: should we save files if no corrections are made?
-"""
-@main function correct(io=nothing, o=nothing; np=nothing, save::Bool=false)
-	if np === nothing @error("supply --np"); return end
-	i, o = inout(io, o)
-	W = loaddlm(io)
-	if Weight.correct!(W, np)
-		@info("Corrections made.")
-		savedlm(o, W)
-	else
-		@info("NO corrections made.")
-		if save savedlm(o, W) end
-	end
-end
-@main function correct(Wₜ_fname::String=default_Wₜ, Wₚ_fname::String=default_Wₚ; ot="WT_cor.mat", op="WP_cor.mat", save::Bool=false)
-	Wₜ, Wₚ = loadmat(Wₜ_fname), loadmat(Wₚ_fname)
-
-	if Weight.correct!(Wₜ, Wₚ)
-		@info("Corrections made.")
-		savedlm(ot, Wₜ)
-		savedlm(op, Wₚ)
-	else
-		@info("NO corrections made.")
-		if save
-			savedlm(ot, Wₜ)
-			savedlm(op, Wₚ)
-		end
-	end
-end
-
-@main function iteratemodel(Wₜ="WT.mat", Wₚ="WP.mat"; o=stdout)
-	X = ModelIteration.converge(loaddlm(Wₜ), loaddlm(Wₚ))
-	savedlm(o, X)
-end
 
 "Load file(s) as a single 2D array regardless if they match in length along axis 1."
 hcatpad_load(fnames::Vector) = hcatpad(loaddlm(fname, Float64) for fname ∈ fnames)
@@ -272,104 +222,10 @@ Get the log fold-change values comparing mutant transcription levels to wildtype
 @main function logFC(wt, mut, muts...; o=stdout)
 	wildtype = loaddlm(wt)
 	mutants = [loaddlm(mutant) for mutant in [mut; muts...]]
-	measurements = @domainerror ODEs.logFC(wildtype, mutants)
+	measurements = @domainerror(ODEs.logFC(wildtype, mutants))
 	if measurements != nothing
 		@info("logFC values simulated")
 		savedlm(o, measurements)
 	end
 end
 
-"""
-Get priors from files with the indicators 0=no edge, 1=possible edge, "+"=positive edge, "-"=negative edge.
-Can be fed nothing values, and produces nothing values when a matrix would otherwise provide no additional information.
-return: priors, priors_sign
-"""
-function _priors(WT_prior, WP_prior, n::Integer, nₜ::Integer, nₚ::Integer)
-	if WT_prior === nothing && WP_prior === nothing return nothing, nothing end
-	M, S = Model.priors(
-	WT_prior === nothing ? n  : loaddlm(WT_prior),
-	WP_prior === nothing ? nₚ : loaddlm(WP_prior))
-	if all(Model._Wₜ(M,nₜ,nₚ) .== 1) && all(Model._Wₚ(M,nₜ,nₚ) .== 1) M = nothing end
-	if all(S == 0) S = nothing end
-	M, S
-end
-
-"""
-Infer a weight matrix from logFC data.
-- WT_prior/WP_prior: optionally limit Wₜ/Wₚ if they are partially known.
-- lambdaWT: whether the WT edges are regularized. Should only be used if highly trusted WT_priors are provided.
-- PKPP: fname. vector, each element is -1 or 1 indicating PP or PK. 0s ignored.
-- WT/WP: previous run to continue.
-"""
-@main function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; epochs::Integer=5000, 
-	lambda::Real=.1, lambdaW::Real=0., lambdaWT::Bool=true, WT_prior=nothing, WP_prior=nothing, PKPP=nothing, WT=nothing, WP=nothing, J=nothing,
-	linex::Bool=false)
-	ot, op = abspath(ot), abspath(op)  # workaround for weird cwd issues
-	X = loaddlm(X, Float64)
-	if J !== nothing
-		J = loaddlm(J, Float64)
-		@assert size(J) == size(X)
-	end
-	n = size(X,1)
-	M, S = _priors(WT_prior, WP_prior, n, nₜ, nₚ)
-	
-	if PKPP !== nothing
-		PKPP = vec(loaddlm(PKPP))
-		padding = zeros(n-length(PKPP))
-		Iₚₖ = diagm([PKPP .== +1; padding])
-		Iₚₚ = diagm([PKPP .== -1; padding])
-	else
-		Iₚₖ, Iₚₚ = nothing, nothing
-	end
-
-	W = (WT === nothing || WP === nothing) ? nothing : Model._W(loaddlm(WT), loaddlm(WP))
-
-	W = Inference.infer(X, nₜ, nₚ; epochs=epochs, λ=lambda, λW=lambdaW, λWT=lambdaWT, M=M, S=S, Iₚₖ=Iₚₖ, Iₚₚ=Iₚₚ, W=W, J=J, linex=linex)
-	Wₜ, Wₚ = Model.WₜWₚ(W, nₜ, nₚ)
-	savedlm(ot, Wₜ)
-	savedlm(op, Wₚ)
-end
-
-"""
-Remove edges less than a given threshold.
-- thres: optional threshold
-"""
-@main function thres(io=nothing, o=nothing; thres=0.001)
-	i, o = inout(io, o)
-	mat = loaddlm(i, Float64)
-	Weight.threshold!(mat, thres)
-	savedlm(o, mat)
-end
-
-"""
-Get the total effects T from single KO experiments.
-"""
-@main function T(io=nothing, o=nothing)
-	i, o = inout(io, o)
-	X = loaddlm(i)
-	savedlm(o, Model.X2T(X))
-end
-
-"""
-Swap order of PK and TF in matrix (swap between PK-TF-X and TF-PK-X).
-- n1: number of nodes in first group, which will be moved to become the second.
-- n2: number of nodes in the second group, which will be move to become the first.
-"""
-@main function swapPT(io=nothing, o=nothing; n1=nothing, n2=nothing)
-	i, o = inout(io, o)
-	if n1 === nothing || n2 === nothing @error("Provide --n1 and --n2.") end
-	mat = loaddlm(i, Float64)
-	mat = reorder(mat, [n1+1:n1+n2;1:n1;n1+n2+1:maximum(size(mat))])
-	savedlm(o, mat)
-end
-
-"""
-input: WP.mat
-output: a vector indicating PK with -1, and PP with 1. 
-"""
-@main function PKPP(io=nothing, o=nothing)
-	i, o = inout(io, o)
-	savedlm(o, Weight.PKPP(loaddlm(i)))
-end
-
-end;
