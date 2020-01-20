@@ -5,6 +5,6 @@ mkdir $folder
 echo "#!/usr/bin/env bash
 export JULIA_NUM_THREADS=12
 export OPENBLAS_NUM_THREADS=12
-../../../PKTFX.jl infer \"$X\" 272 153 --J \"$J\" --epochs $epochs --lambda $lambda --lambdaW $lambdaW --lambdaWT $lambdaWT --WT_prior \"$WT_mask\" --WP_prior \"$WP_mask\" --WT_reg \"$WT_reg\" --WT \"$WT\" --WP \"$WP\" --trainWT $trainWT --linex $linex | tee infer_1.log" > $folder/commands.sh
+../../../inference.jl \"$X\" 272 153 --J \"$J\" --epochs $epochs --lambda $lambda --lambdaW $lambdaW --lambdaWT $lambdaWT --WT-prior \"$WT_mask\" --WP-prior \"$WP_mask\" --WT-reg \"$WT_reg\" --WT \"$WT\" --WP \"$WP\" --trainWT $trainWT --linex $linex | tee infer_1.log" > $folder/commands.sh
 chmod 755 $folder/commands.sh
 done
