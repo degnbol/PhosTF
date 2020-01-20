@@ -1,6 +1,7 @@
 #!/usr/bin/env julia
 include("src/utilities/ReadWrite.jl")
 include("src/utilities/CLI.jl")
+include("src/utilities/ArgParseUtils.jl")
 include("src/utilities/General.jl")
 include("src/Inference.jl")
 include("src/Model.jl")
@@ -12,11 +13,11 @@ using LinearAlgebra
 using .ReadWrite, .ArrayUtils, .General
 using .Model
 using .Inference, .CLI
+using .ArgParseUtils
 
-
-function parse_commandline()
-	argument_parser = ArgParseSettings(description="Infer a weight matrix from logFC data.", autofix_names=true)
-	@add_arg_table argument_parser begin
+function argument_parser()
+	s = ArgParseSettings(description="Infer a weight matrix from logFC data.", autofix_names=true)
+	@add_arg_table s begin
 		"X"
 			help = "Filname for LogFC values in a matrix. No column or row names. Space delimiters are recommended."
 			required = true
@@ -30,10 +31,10 @@ function parse_commandline()
 			range_tester = x -> x > 0
 			help = "Number of KPs."
 			required = true
-		"--ot"
+		"ot"
 			default = "WT_infer.mat"
 			help = "Outfile for inferred Wₜ adjacency matrix."
-		"--op"
+		"op"
 			default = "WT_infer.mat"
 			help = "Outfile for inferred Wₜ adjacency matrix."
 		"--J", "-J"
@@ -79,8 +80,7 @@ function parse_commandline()
 		"--PKPP"
 			help = "Filename of vector. Each element is -1 or 1 indicating PP or PK, respectively. 0s ignored."
 	end
-
-	parse_args(argument_parser; as_symbols=true)
+	s
 end
 
 function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; J=nothing, epochs::Integer=5000, 
@@ -152,13 +152,4 @@ function _priors(WT_prior::Union{Matrix,Nothing}, WP_prior::Union{Matrix,Nothing
 end
 
 
-
-function main()
-	parsed_args = parse_commandline()
-	println("Parsed args:")
-    for (arg,val) in parsed_args
-		println("  $arg  =>  $val")
-    end
-end
-
-main()
+ArgParseUtils.main(argument_parser(), infer)
