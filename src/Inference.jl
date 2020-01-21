@@ -1,5 +1,5 @@
 #!/usr/bin/env julia
-if !isdefined(Main, :ArrayUtils) include("utilities/ArrayUtils.jl") end
+isdefined(Main, :ArrayUtils) || include("utilities/ArrayUtils.jl")
 
 "Flux machine learning for gradient descent of errors defined by model loss functions."
 module Inference
