@@ -12,7 +12,10 @@ KP2TF = read.table("KP2TF_genesign.tsv", sep="\t", header=T)
 # which for TF_sign \in {-1,1} is the same as KP_sign = - KO_sign * TF_sign
 TFs$Mode[TFs$Mode == "activator"] = +1
 TFs$Mode[TFs$Mode == "repressor"] = -1
+TFs$Mode = as.numeric(TFs$Mode)
 
 KP2TF$sign = - TFs$Mode[match(KP2TF$TF, TFs$TF)] * KP2TF$sign
+KP2TF = KP2TF[,c("KP", "TF", "p", "sign")] # reorder columns
+stopifnot(all(unique(KP2TF$KP) == KPs))
 
-write.table(KP_edges, "KP2TF_p.tsv", sep="\t", quote=F, row.names=F)
+write.table(KP2TF, "KP2TF_p.tsv", sep="\t", quote=F, row.names=F)
