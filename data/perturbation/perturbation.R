@@ -87,8 +87,9 @@ colnames(pert_tables[[OE_fname]])[2:ncol(pert_tables[[OE_fname]])] = paste(colna
 pert_melt = list()
 for (i in 1:length(pert_tables)) {pert_melt[[i]] = melt(pert_tables[[i]], id.vars="ORF", variable.name="Mutant")}
 pert_melt = bind_rows(pert_melt)
-pert_melt_avg = pert_melt[,list(value=mean(value)),by=list(ORF,Mutant)]
+pert_melt_avg = pert_melt[,list(value=mean(value,na.rm=TRUE)),by=list(ORF,Mutant)]
 pert_outer = merge_outer(pert_tables) # merge all data, keeping all datapoints
+stopifnot(sum(!is.na(pert_outer[,!"ORF"])) == sum(!is.na(pert_melt$value))) # are all values kept
 pert_inner = as.data.table(acast(pert_melt_avg, ORF ~ Mutant), "ORF") # merge all data, where there is a single averaged value for each unique entry
 
 # only keep mutation of KP, TF and multi KOs. We want to use _ and OE columns which will be fine, they don't match O_names
@@ -98,11 +99,11 @@ pert_inner[,which(colnames(pert_inner) %in% O_names):=NULL]
 # check if any perturbation gene is not measured
 not_measured = colnames(pert_outer)[!(rootname(colnames(pert_outer)) %in% pert_outer$ORF)]
 not_measured = not_measured[not_measured != "ORF"] # remove ORF
-!any(not_measured %in% c(KP_names, TF_names, O_names))  # they are not in these sets so they are all useless. should be TRUE
+stopifnot(!any(not_measured %in% c(KP_names, TF_names, O_names)))  # they are not in these sets so they are all useless. should be TRUE
 pert_outer[,(not_measured):=NULL]  # remove them
 pert_inner[,(not_measured):=NULL]  # remove them
 # should be TRUE, it is only TFs, which we will assign some arbitrary KO value to let them have influence
-all(V_names[!(V_names %in% pert_outer$ORF)] %in% TF_names)
+stopifnot(all(V_names[!(V_names %in% pert_outer$ORF)] %in% TF_names))
 
 ## sorting
 # we need to have unique names for sorting
@@ -113,8 +114,8 @@ setcolorder(pert_inner, order(match(rootname(colnames(pert_inner)), V_names), na
 # sort rows according to KP,TF,O. we use indexing instead of sort to insert 3 new NA lines for TFs that are never measured
 setkey(pert_outer,ORF)
 setkey(pert_inner,ORF)
-pert_outer = pert_outer[V_names,]
-pert_inner = pert_inner[V_names,]
+pert_outer = pert_outer[V_names,]; stopifnot(all(pert_outer$ORF == V_names))
+pert_inner = pert_inner[V_names,]; stopifnot(all(pert_inner$ORF == V_names))
 
 # stop the uniqueness of col names
 pert_outer = colname_fix(pert_outer)
@@ -127,17 +128,17 @@ KOOE_inner = column_row_map_space(pert_inner)
 OE_outer = KOOE_outer & !KO_outer
 OE_inner = KOOE_inner & !KO_inner
 # make sure OE is kept separate. should be TRUE
-any(OE_outer != 0)
-any(OE_inner != 0)
+stopifnot(any(OE_outer != 0))
+stopifnot(any(OE_inner != 0))
 write.table(KOOE_outer, file="KOOE_outer.csv", sep=",", quote=F)
 write.table(KOOE_inner, file="KOOE_inner.csv", sep=",", quote=F)
 # we add NaN entries to J, which will result in their values being ignored in the SSE calculation during gradient descent
 J_outer = as.data.table(KOOE_outer, "ORF"); setkey(J_outer, "ORF")
 J_inner = as.data.table(KOOE_inner, "ORF"); setkey(J_inner, "ORF")
-J_outer[is.na(pert_outer)] = 1
-J_inner[is.na(pert_inner)] = 1
-# write.table(J_outer, file="J_outer.csv", sep=",", quote=F, row.names=F)
-# write.table(J_inner, file="J_inner.csv", sep=",", quote=F, row.names=F)
+J_outer[is.na(pert_outer)] = 1 # this notation was checked to work
+J_inner[is.na(pert_inner)] = 1 # this notation was checked to work
+write.table(J_outer, file="J_outer.csv", sep=",", quote=F, row.names=F)
+write.table(J_inner, file="J_inner.csv", sep=",", quote=F, row.names=F)
 write.table(J_outer[,!"ORF"], file="J_outer.mat", sep=" ", quote=F, row.names=F, col.names=F)
 write.table(J_inner[,!"ORF"], file="J_inner.mat", sep=" ", quote=F, row.names=F, col.names=F)
 
@@ -168,8 +169,8 @@ pert_inner_updated[KO_inner] = pert_inner_updated[KO_inner] - 4
 pert_outer_updated[OE_outer] = pert_outer_updated[OE_outer] + 1
 pert_inner_updated[OE_inner] = pert_inner_updated[OE_inner] + 1
 # write. there's spaces in colnames (OE)
-# write.table(pert_outer_updated, "logFC_outer.csv", sep=",", quote=F)
-# write.table(pert_inner_updated, "logFC_inner.csv", sep=",", quote=F)
+write.table(pert_outer_updated, "logFC_outer.csv", sep=",", quote=F)
+write.table(pert_inner_updated, "logFC_inner.csv", sep=",", quote=F)
 write.table(pert_outer_updated, "logFC_outer.mat", sep=" ", quote=F, row.names=F, col.names=F)
 write.table(pert_inner_updated, "logFC_inner.mat", sep=" ", quote=F, row.names=F, col.names=F)
 
