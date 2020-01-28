@@ -14,7 +14,7 @@ colnames(KP_pert_J)[2:3] = c("KP", "j")
 stopifnot(all(KP_pert_J$ORF == KP_pert$ORF))
 stopifnot(all(KP_pert_J$KP == KP_pert$KP))
 KP_pert = KP_pert[(KP_pert_J$j == 0),]
-
+stopifnot(!any(is.na(KP_pert$M)))  # NaNs should be removed with U=1-J mask
 
 KP2TF = read.table("KP2TF_p.tsv", sep="\t", quote="", header=T)
 KP2TF_sig = KP2TF[KP2TF$p < 1e-2,]

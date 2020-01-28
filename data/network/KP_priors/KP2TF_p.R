@@ -5,6 +5,7 @@ library(data.table)
 setwd("~/cwd/data/network/KP_priors")
 load("wilcoxon.RData")
 
+# made in parts, takes half an hour:
 KP2TF = read.table("KP2TF_genesign.tsv", sep="\t", header=T)
 
 # the sign is currently for the PK KO effect 
