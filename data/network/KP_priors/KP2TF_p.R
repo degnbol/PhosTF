@@ -19,4 +19,6 @@ KP2TF$sign = - TFs$Mode[match(KP2TF$TF, TFs$TF)] * KP2TF$sign
 KP2TF = KP2TF[,c("KP", "TF", "p", "sign")] # reorder columns
 stopifnot(all(unique(KP2TF$KP) == KPs))
 
+KP2TF$weight = qbeta(KP2TF$p, 1, 20, lower.tail=F) * KP2TF$sign
+
 write.table(KP2TF, "KP2TF_p.tsv", sep="\t", quote=F, row.names=F)
