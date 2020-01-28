@@ -100,3 +100,16 @@ write.table(adjacency_pval, "WT_p.csv", sep=",", quote=F, na="NaN")
 write.table(adjacency_pval, "WT_p.mat", sep=" ", quote=F, col.names=F, row.names=F, na="NaN")
 write.table(adjacency_sign, "WT_mask.csv", sep=",", quote=F)
 write.table(adjacency_sign, "WT_mask.mat", sep=" ", quote=F, col.names=F, row.names=F)
+
+
+noise_sd = 1/sqrt(sum(dim(adjacency)^2))
+noise = matrix(rnorm(prod(dim(adjacency)), sd=noise_sd), nrow=nrow(adjacency), ncol=ncol(adjacency))
+adjacency[adjacency == 0] = noise[adjacency == 0]
+
+write.table(adjacency, "WT_noise.csv", sep=",", quote=F)
+write.table(adjacency, "WT_noise.mat", sep=" ", quote=F, col.names=F, row.names=F)
+
+
+
+
+
