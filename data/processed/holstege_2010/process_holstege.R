@@ -1,7 +1,9 @@
+
 setwd("~/cwd/data/processed/holstege_2010")
 # read
 PKKO = read.table("PK_KO_Mpval.tsv", header=T, sep="\t", quote="", stringsAsFactors=F)
 # only logFC values and ORF
+stopifnot(all(grep("\\.M", colnames(PKKO)) == seq(3,ncol(PKKO),2)))  # make sure M values are actually in every other row
 PKKOM = PKKO[,seq(1,ncol(PKKO),2)]
 # what are the KOed genes?
 KO_genes = toupper(gsub("\\.M", "", names(PKKOM)))[2:ncol(PKKOM)]
