@@ -11,7 +11,7 @@ using ..ArrayUtils: eye
 import ..FluxUtils
 
 export offdiag, random_W
-export sse, sse_B, sse_T, linex
+export sse, sse_B, sse_T, linex, quadquad
 export l1
 export _B, B_star, _T
 
@@ -117,16 +117,16 @@ X2T(X) = X.*offdiag(X) ./ repeat(diag(X)', size(X,1), 1)
 Error. Difference between prediction and truth.
 - W: either Matrix with Wt and Wp, or vector with Wt and Wp matrices, or tracked versions.
 """
-E(W, cs::NamedTuple, X::Matrix) = _B(W,cs,X) .- X
+E(W, cs::NamedTuple, X::Matrix) = cs.U .* (_B(W,cs,X) .- X)
 
 """
 - cs: struct containing the constants Mₜ, Mₚ, and U
-- W: Trainable parameters. Square matrix.
+- W: either Matrix with Wt and Wp, or vector with Wt and Wp matrices, or tracked versions.
 - X: Matrix holding column vectors of measured (simulated) logFC values. No need to be square but has to have the same shape as J.
 """
-sse(W, cs::NamedTuple, X::Matrix) = sum((cs.U .* E(W,cs,X)) .^ 2)
+sse(W, cs::NamedTuple, X::Matrix) = sum(E(W,cs,X) .^ 2)
 "- ks: If we are using batches, then indicate which batches are used"
-sse(W, cs::NamedTuple, X::Matrix, ks) = sum((cs.U[:,ks] .* E(W,cs,X)) .^ 2)
+sse(W, cs::NamedTuple, X::Matrix, ks) = sum((cs.U[:,ks] .* (_B(W,cs,X) .- X)) .^ 2)
 "Alternative SSE where both TF and KP edges onto a KO are removed instead of only TF. Reduces edges among KP."
 function sse_alt(W::AbstractMatrix, cs::NamedTuple, X::Matrix)
 	i = I(size(W,1))
@@ -137,12 +137,25 @@ end
 """
 Alternative to SSE, that punishes undershooting more than overshooting. 
 That is, if a true logFC value is 1, then 2 is punished less than 0 as opposed to what is the case for SSE.
+- W: either Matrix with Wt and Wp, or vector with Wt and Wp matrices, or tracked versions.
 """
 function linex(W, cs::NamedTuple, X::Matrix)
 	signs = sign.(X)
+	# set zero signs to -1 or 1
 	signs[signs .== 0] .= rand([-1,1], sum(signs .== 0))
 	αE = -signs .* E(W,cs,X)
 	sum(exp.(αE) .- αE .- 1.)
+end
+
+"""
+Alternative to SSE, that punishes undershooting more than overshooting. 
+That is, if a true logFC value is 1, then 2 is punished less than 0 as opposed to what is the case for SSE.
+- W: either Matrix with Wt and Wp, or vector with Wt and Wp matrices, or tracked versions.
+"""
+function quadquad(W, cs::NamedTuple, X::Matrix)
+	α = abs.(X) ./ (abs.(X) .+ .5)
+	X̂ = _B(W,cs,X)
+	sum(cs.U .* ((1. .- α .* (X̂.*X.>X.*X)) .* (X.-X̂).^2))
 end
 
 """

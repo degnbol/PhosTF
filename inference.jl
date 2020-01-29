@@ -70,10 +70,10 @@ function argument_parser()
 			arg_type = Bool
 			default = true
 			help = "Whether the WT edges are trained at all. If set to false, --WT/-T has to be provided with fully trusted edges."
-		"--linex"
+		"--quadquad"
 			arg_type = Bool
 			default = false
-			help = "Use linex cost function instead of SSE (sum of squared error) to punish undershooting effects more than overshooting them."
+			help = "Use quadquad cost function instead of SSE (sum of squared error) to punish undershooting effects more than overshooting them."
 		"--WT-reg"
 			help = "Filename of matrix with regularization weights for Wₜ. NOT square. 
 			NaN means the weight should not be allowed, so this will function as masking as well."
@@ -85,7 +85,7 @@ end
 
 function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; J=nothing, epochs::Integer=5000, 
 	WT=nothing, WP=nothing, WT_prior=nothing, WP_prior=nothing,
-	lambda::Real=.1, lambdaW::Real=0., lambdaWT::Bool=true, trainWT::Bool=true, linex::Bool=false, WT_reg=nothing,
+	lambda::Real=.1, lambdaW::Real=0., lambdaWT::Bool=true, trainWT::Bool=true, quadquad::Bool=false, WT_reg=nothing,
 	PKPP=nothing)
 	# empty strings is the same as providing nothing.
 	WT == "" && (WT = nothing)
@@ -132,7 +132,7 @@ function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.
 	nₒ = n-(nₚ+nₜ)
 	W_reg = WT_reg === nothing ? nothing : [ones(n,nₚ) WT_reg ones(n,nₒ)]
 
-	W = Inference.infer(X, nₜ, nₚ; epochs=epochs, λ=lambda, λW=lambdaW, λWT=lambdaWT, M=M, S=S, Iₚₖ=Iₚₖ, Iₚₚ=Iₚₚ, W=W, J=J, linex=linex, trainWT=trainWT, W_reg=W_reg)
+	W = Inference.infer(X, nₜ, nₚ; epochs=epochs, λ=lambda, λW=lambdaW, λWT=lambdaWT, M=M, S=S, Iₚₖ=Iₚₖ, Iₚₚ=Iₚₚ, W=W, J=J, quadquad=quadquad, trainWT=trainWT, W_reg=W_reg)
 	Wₜ, Wₚ = Model.WₜWₚ(W, nₜ, nₚ)
 	savedlm(ot, Wₜ)
 	savedlm(op, Wₚ)

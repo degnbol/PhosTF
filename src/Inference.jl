@@ -53,7 +53,7 @@ get_V(Iₚₖ::Matrix, Iₚₚ::Matrix, W::Matrix) = sign.(sum(W*(Iₚₖ-Iₚ�
 - J: matrix with 1 for KO and 0 for passive observed node. Shape like X.
 """
 function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=10000, λ::Real=.1, λW=0., λWT::Bool=true, opt=ADAMW(), 
-	M=nothing, S=nothing, Iₚₖ=nothing, Iₚₚ=nothing, W=nothing, J=nothing, linex::Bool=false, trainWT::Bool=true, W_reg=nothing)
+	M=nothing, S=nothing, Iₚₖ=nothing, Iₚₚ=nothing, W=nothing, J=nothing, quadquad::Bool=false, trainWT::Bool=true, W_reg=nothing)
 	n, K = size(X)
 	M !== nothing || (M = ones(n, n)) # no prior knowledge
 	M[diagind(M)] .= 0  # enforce no self loops
@@ -66,7 +66,7 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 	Iₓ = I(n) - (Iₜ+Iₚ)
 	λW != 0 || (λW = nothing)
 	
-	error_cost = linex ? Model.linex : Model.sse
+	error_cost = quadquad ? Model.quadquad : Model.sse
 	B_cost = λWT ? LB : LB_WP
 	L(X) = error_cost(Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ), cs, X) + B_cost(W, cs, λ, W_reg) + L1(W, λW)
 
