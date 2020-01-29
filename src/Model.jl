@@ -139,7 +139,9 @@ Alternative to SSE, that punishes undershooting more than overshooting.
 That is, if a true logFC value is 1, then 2 is punished less than 0 as opposed to what is the case for SSE.
 """
 function linex(W, cs::NamedTuple, X::Matrix)
-	αE = -sign.(X) .* E(W,cs,X)
+	signs = sign.(X)
+	signs[signs .== 0] .= rand([-1,1], sum(signs .== 0))
+	αE = -signs .* E(W,cs,X)
 	sum(exp.(αE) .- αE .- 1.)
 end
 
