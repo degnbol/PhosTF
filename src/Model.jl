@@ -69,16 +69,17 @@ function _W(Wₜ, Wₚ)
 	[[Wₚ; zeros(nₓ,nₚ)] Wₜ zeros(nₓ+nₜ+nₚ,nₓ)]
 end
 
-_Wₜ(W, nₜ::Integer, nₚ::Integer) = W[:,nₚ+1:nₚ+nₜ]
-_Wₚ(W, nₜ::Integer, nₚ::Integer) = W[1:nₜ+nₚ,1:nₚ]
+_Wₜ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = W[:,nₚ+1:nₚ+nₜ]
+_Wₚ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = W[1:nₜ+nₚ,1:nₚ]
 """
 wₚᵢⱼ := vᵢ⋅(|wₚₖᵢⱼ| - |wₚₚᵢⱼ|)
 As vector notation:
 Wₚ := V (Wₚₖ' - Wₚₚ')
 We use rowwise multiplication with .* here instead of diagonal matrix multiplication so make sure V is a 2D column vector.
 """
-_Wₚ(W, V, Iₚₖ::Matrix, Iₚₚ::Matrix) = V .* (abs.(W)*(Iₚₖ-Iₚₚ))
-WₜWₚ(W, nₜ::Integer, nₚ::Integer) = _Wₜ(W,nₜ,nₚ), _Wₚ(W,nₜ,nₚ)
+_Wₚ(W::AbstractMatrix, V, Iₚₖ::Matrix, Iₚₚ::Matrix) = V .* (abs.(W)*(Iₚₖ-Iₚₚ))
+WₜWₚ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = _Wₜ(W,nₜ,nₚ), _Wₚ(W,nₜ,nₚ)
+WₜWₚ(W::AbstractVector, ::Integer, ::Integer) = W[1], W[2]
 _Wₜ(W::AbstractMatrix, Iₜ) = W * Iₜ
 _Wₚ(W::AbstractMatrix, Iₚ) = W * Iₚ
 _Wₜ(W::AbstractVector, ::Any) = W[1]
