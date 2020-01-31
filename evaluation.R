@@ -23,73 +23,64 @@ unwhich = function(which, dim=max(which)) {
 
 
 example = function() {
-    
-    setwd("~/cwd")
-    
+    setwd("~/cwd/data/inference/01")
     # read
-    WP_fname = "data/inference/14/WP_infer_2.mat"
-    WT_fname = "data/inference/14/WT_infer_2.mat"
-    WT_prior_fname = "data/perturbation/WT_prior.mat"
-    P_fname = "data/evaluation/P_eval.tsv"
-    T_fname = "data/evaluation/T_eval.tsv"
-    KP_fname = "data/perturbation/KP.txt"
-    TF_fname = "data/perturbation/TF.txt"
-    PTX_fname = "data/perturbation/PTX.txt"
-    
+    WP_fname = "WP_infer.mat"
+    WT_fname = "WT_infer.mat"
+    # end
 }
 
-# assuming when run as a script that we are in a folder such as data/inference/??/
 # read
 args = commandArgs(trailingOnly=T)
 WP_fname = args[1]
 WT_fname = args[2]
-P_fname = "../../evaluation/P_eval.tsv"
-T_fname = "../../evaluation/T_eval.tsv"
-WT_prior_fname = "../../perturbation/WT_prior.mat"
-KP_fname = "../../perturbation/KP.txt"
-TF_fname = "../../perturbation/TF.txt"
-PTX_fname = "../../perturbation/PTX.txt"
 # end
+P_fname = "~/cwd/data/evaluation/P_eval.tsv"
+T_fname = "~/cwd/data/evaluation/T_eval.tsv"
+WT_mask_fname = "~/cwd/data/network/WT_mask.csv"
+KP_fname = "~/cwd/data/network/KP.txt"
+TF_fname = "~/cwd/data/network/TF.txt"
+V_fname = "~/cwd/data/network/V.txt"
 
 
 P_eval = read.table(P_fname, header=T, sep="\t", quote="", check.names=F)
 T_eval = read.table(T_fname, header=T, sep="\t", quote="", check.names=F)
 WP = read.matrix(WP_fname)
 WT = read.matrix(WT_fname)
-WT_prior = read.matrix(WT_prior_fname)
+WT_mask = read.matrix(WT_mask_fname)
 KP = read.vector(KP_fname)
 TF = read.vector(TF_fname)
-PTX = read.vector(PTX_fname)
+V = read.vector(V_fname)
 PT = c(KP,TF)
 colnames(WP) = KP
 colnames(WT) = TF
-colnames(WT_prior) = TF
+stopifnot(all(colnames(WT_mask) == TF))
 rownames(WP) = c(KP, TF)
-rownames(WT) = PTX
-rownames(WT_prior) = PTX
+rownames(WT) = V
+stopifnot(all(rownames(WT_mask) == V))
 # swap rownames and colnames columns so the order will be source then target
-P_edges = melt_matrix(WP)[,c(2,1,3)]
-T_edges = melt_matrix(WT)[,c(2,1,3)]
-T_prior_edges = melt_matrix(WT_prior)[,c(2,1,3)]
-colnames(P_edges) = c("P",  "Target", "marker")
-colnames(T_edges) = c("TF", "Target", "marker")
-colnames(T_prior_edges) = c("TF", "Target", "mask")
+KP_edges = melt_matrix(WP)[,c(2,1,3)]
+TF_edges = melt_matrix(WT)[,c(2,1,3)]
+TF_mask_edges = melt_matrix(WT_mask)[,c(2,1,3)]
+colnames(KP_edges) = c("P",  "Target", "marker")
+colnames(TF_edges) = c("TF", "Target", "marker")
+colnames(TF_mask_edges) = c("TF", "Target", "mask")
 # sanity check
-all(P_edges$P == P_eval$Source)
-all(P_edges$Target == P_eval$Target)
-all(T_edges$TF == T_eval$Source)
-all(T_edges$Target == T_eval$Target)
+all(KP_edges$P == P_eval$Source)
+all(KP_edges$Target == P_eval$Target)
+all(TF_edges$TF == T_eval$Source)
+all(TF_edges$Target == T_eval$Target)
 all(T_prior_edges$TF == T_eval$Source)
 all(T_prior_edges$Target == T_eval$Target)
 
 # mask with prior
-T_edges_masked = T_edges[T_prior_edges$mask == 1,]
+TF_edges_masked = TF_edges[T_prior_edges$mask == 1,]
 T_eval_masked = T_eval[T_prior_edges$mask == 1,]
 
 # hold all data in eval sets
-P_eval$marker = P_edges$marker
-T_eval$marker = T_edges$marker
-T_eval_masked$marker = T_edges_masked$marker
+P_eval$marker = KP_edges$marker
+T_eval$marker = TF_edges$marker
+T_eval_masked$marker = TF_edges_masked$marker
 
 # remove diagonals
 P_eval = P_eval[as.character(P_eval$Source) != as.character(P_eval$Target),]
@@ -119,7 +110,8 @@ evaluate_cor = function(dataset, cor_names, cor_names_pos, cor_names_neg) {
 
 
 evaluate_P = function(dataset) {
-    cor_names = c("yeastkid", "reaction", "ptmod", "expression", "catalysis", "netphorest", "networkin", "networkin STRING", "networkin_biogrid", "undirected", "EMAP", "n_datasets")
+    cor_names = c("yeastkid", "reaction", "ptmod", "expression", "catalysis", "netphorest", "networkin", "networkin STRING", 
+                  "networkin_biogrid", "undirected", "EMAP", "n_datasets")
     cor_names_pos = c("activation")
     cor_names_neg = c("inhibition")
     evaluate_cor(dataset, cor_names, cor_names_pos, cor_names_neg)
