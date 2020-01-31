@@ -10,7 +10,7 @@ flatten = function(x) as.vector(as.matrix(x))
 setwd("~/cwd/data/network")
 
 # read
-edges = read.table("TF_edges.tsv", sep="\t", header=T, quote="")
+edges = read.table("TF_priors/TF_edges.tsv", sep="\t", header=T, quote="")
 TFs = read.table("TF_mode.tsv", sep="\t", header=T, quote="")
 Vs  = flatten(read.table("V.txt", quote=""))
 simulated = flatten(read.table("../yeast_simulation/simulations/01/WT_est.mat", sep=" "))
@@ -27,7 +27,7 @@ summary(edges$weight)
 summary(abs(simulated))
 sd(edges$weight)
 # hist(edges$weight, breaks=200)
-c(sum(edges$weight >= .5), sum(edges$weight >= .75), sum(edges$weight >= 1.))
+c(sum(edges$weight >= .1), sum(edges$weight >= .5), sum(edges$weight >= .75), sum(edges$weight >= .9))
 mean(edges$weight[edges$weight > .75])
 
 ## add sign
@@ -59,8 +59,6 @@ for (i in 1:length(labels)) {
     limits = c(min(stepdf$xmin[stepdf$group==i])-bw, max(stepdf$xmin[stepdf$group==i])+bw)
     stepdf = rbind(stepdf, data.frame(xmin=limits, y=c(0,0), group=c(i,i), label=labels[i]))
 }
-# one more manual correction
-stepdf = rbind(stepdf, data.frame(xmin=0.125, y=1, group=2, label=labels[2]))
 
 pbreaks=c(-1e-60,-1e-12,-1e-6,-1e-3,-.05,.05,1e-3,1e-6,1e-12,1e-60)
 px = sign(pbreaks) * qbeta(abs(pbreaks), alpha_, beta_, lower.tail=F)
@@ -72,7 +70,7 @@ plt + geom_step(data=stepdf, aes(x=xmin, y=y, color=label)) +
     theme(legend.title=element_blank(), panel.grid.major=element_line(colour="lightgray"), panel.grid.minor=element_blank()) +
     ggtitle("TF edge weight construction") +
     ylab("edge count") +
-    scale_y_log10(expand=c(0,0), limits=c(1,20000)) +
+    scale_y_log10(expand=c(0,0), limits=c(1,80000)) +
     scale_x_continuous(sec.axis=dup_axis(name="p-value", breaks=px, labels=abs(pbreaks)))
 
 
