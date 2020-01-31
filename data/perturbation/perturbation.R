@@ -178,13 +178,15 @@ write.table(pert_inner_updated, "logFC_inner.mat", sep=" ", quote=F, row.names=F
 
 ## plotting
 # plot perturbation values
-labels = c("affected", "KO", "OE", "corrected KO", "corrected OE")
-color_palette = c("black", "pink", "cyan", "red", "blue")
-df1 = data.frame(logFC=pert_outer[!as.matrix(J_outer, "ORF")], label="affected")
+labels = c("others", "KO", "OE", "enhanced KO", "enhanced OE")
+# limits are used to put "others" last in the legend list without putting it in front when drawing wich would be default
+legend_labels = c(labels[2:5], labels[1])
+color_palette = c("pink", "cyan", "red", "blue", "black")
+df1 = data.frame(logFC=pert_outer[!as.matrix(J_outer, "ORF")], label="others")
 df2 = data.frame(logFC=na.omit(pert_outer[KO_outer]), label="KO")
 df3 = data.frame(logFC=na.omit(pert_outer[OE_outer]), label="OE")
-df4 = data.frame(logFC=pert_outer_updated[KO_outer], label="corrected KO")
-df5 = data.frame(logFC=pert_outer_updated[OE_outer], label="corrected OE")
+df4 = data.frame(logFC=pert_outer_updated[KO_outer], label="enhanced KO")
+df5 = data.frame(logFC=pert_outer_updated[OE_outer], label="enhanced OE")
 nrow(df1); nrow(df2); nrow(df3); nrow(df4); nrow(df5)
 plotdf = rbind(df1, df2, df3, df4, df5)
 plotdf$label = factor(plotdf$label, levels=labels)
@@ -202,36 +204,13 @@ for (i in 1:length(labels)) {
 
 plt + geom_step(data=stepdf, aes(x=xmin, y=y, color=label)) +
     theme_linedraw() +
-    scale_color_manual(values=color_palette) +
-    scale_fill_manual(values=color_palette) +
+    scale_color_manual(values=color_palette, limits=legend_labels) +
+    scale_fill_manual(values=color_palette, limits=legend_labels) +
     scale_x_continuous(name="log fold-change", breaks=c(-10,-5,-1,0,1,5), labels=c("-10","-5","-1","0","1","5")) +
     theme(legend.title=element_blank(), panel.grid.major=element_line(colour="lightgray"), panel.grid.minor=element_blank()) +
     scale_y_log10(limits=c(1,1.2e7), expand=c(0,0)) +
-    ggtitle("Perturbation corrections") +
+    ggtitle("Enhanced perturbations") +
     ylab("measurements")
 
-ggsave("perturbation_corrections.pdf", width=7, height=2, units="in")
-
-
-mydensityplot = function() {
-    ggplot(plotdf, aes(logFC, y=..scaled.., fill=label)) + 
-        geom_density(alpha=0.7) +
-        scale_x_continuous(name="log fold-change", breaks=c(-10,-5,-1,0,1), labels=c("-10","-5","-1","0","1"), limits=c(-12,4)) +
-        ylab("scaled density") +
-        scale_fill_manual(values=c("pink", "cyan", "red", "blue", "black")) +
-        theme_linedraw() +
-        theme(legend.title=element_blank(), panel.grid.major=element_line(colour="lightgray"), panel.grid.minor=element_blank()) +
-        ggtitle("Perturbation corrections")
-}
-
-myborderlesshistplot = function() {
-    ggplot(plotdf, aes(logFC, fill=label)) + 
-        geom_histogram(alpha=0.6, position="identity", bins=80) +
-        scale_y_log10(expand = c(0,0)) +
-        scale_x_continuous(name="log fold-change", breaks=c(-10,-5,-1,0,1,5), labels=c("-10","-5","-1","0","1")) +
-        scale_fill_manual(values=c("black", "pink", "cyan", "red", "blue")) +
-        theme_linedraw() +
-        theme(legend.title=element_blank(), panel.grid.major=element_line(colour="lightgray"), panel.grid.minor=element_blank()) +
-        ggtitle("Perturbation corrections")
-}
+ggsave("enhanced_perturbations.pdf", width=7, height=2, units="in")
 
