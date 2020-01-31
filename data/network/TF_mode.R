@@ -11,7 +11,7 @@ setwd("~/cwd/data/network")
 
 TFs = read.table("TF.tsv", sep="\t", header=T, stringsAsFactors=F)
 V = flatten(read.table("V.txt"))
-edges = read.table("TF_edges.tsv", sep="\t", header=T, quote="", stringsAsFactors=F)
+edges = read.table("TF_priors/TF_edges.tsv", sep="\t", header=T, quote="", stringsAsFactors=F)
 # fall back on perturbation data to find expression mode
 perturbation = as.matrix(read.table("../perturbation/logFC_inner.csv", sep=",", row.names=1, header=T, quote="", check.names=F, stringsAsFactors=F))
 
