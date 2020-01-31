@@ -5,7 +5,7 @@ options(stringsAsFactors=FALSE)
 setwd("~/cwd/data/network")
 
 # read TF edge datasets
-TF_edges = read.table("TF_edges_putative.tsv", sep="\t", header=T, quote="", stringsAsFactors=F)
+TF_edges = read.table("TF_priors/TF_edges_putative.tsv", sep="\t", header=T, quote="", stringsAsFactors=F)
 
 # read KP edge datasets
 KP_edges = read.table("../processed/biogrid/P_edges.tsv", sep="\t", quote="", check.names=F, header=T)[,1:2]
