@@ -1,2 +1,0 @@
-we test multiple loss functions (LB, LT, L1) with multiple lambda (1, .1) on many random nets, generated with either 100% of edges made to cascades if possible or only 50%.
-folder naming convention: <loss function><10*lambda>_<cascade percentage>
