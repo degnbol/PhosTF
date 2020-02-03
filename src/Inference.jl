@@ -55,9 +55,9 @@ get_V(Iₚₖ::Matrix, Iₚₚ::Matrix, W::Matrix) = sign.(sum(W*(Iₚₖ-Iₚ�
 function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=10000, λ::Real=.1, λW=0., λWT::Bool=true, opt=ADAMW(), 
 	M=nothing, S=nothing, Iₚₖ=nothing, Iₚₚ=nothing, W=nothing, J=nothing, quadquad::Bool=false, trainWT::Bool=true, W_reg=nothing)
 	n, K = size(X)
-	M !== nothing || (M = ones(n, n)) # no prior knowledge
-	M[diagind(M)] .= 0  # enforce no self loops
 	cs = Model.constants(n, nₜ, nₚ, J === nothing ? K : J)
+	M !== nothing || (M = ones(n, n)) # no prior knowledge
+	M .*= cs.Mₜ .+ cs.Mₚ # enforce masks
 	V = get_V(Iₚₖ, Iₚₚ, W)
 	W !== nothing || (W = random_W(n))
 	W = trainWT ? param(W) : [W.*cs.Mₜ, param(W.*cs.Mₚ)]

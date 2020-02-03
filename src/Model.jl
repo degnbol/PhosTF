@@ -96,10 +96,10 @@ _B(W::AbstractMatrix, cs::NamedTuple) = (W.*cs.Mₜ) * inv(I(size(W,1)) - W.*cs.
 - W[2]: Wₚ, square
 I has to have a known size to not produce an error that might be fixed in later release.
 """
-_B(W::AbstractVector, cs::NamedTuple) = W[1] * inv(I(size(W[2],1)) - W[2].*cs.Mₚ)
+_B(W::AbstractVector, cs::NamedTuple) = (W[1].*cs.Mₜ) * inv(I(size(W[2],1)) - W[2].*cs.Mₚ)
 "To avoid finding inverse matrix, we can instead solve if given the x in B^-1 * x"
 _B(W::AbstractMatrix, cs::NamedTuple, x) = (W.*cs.Mₜ) * ((I(size(W,1)) - W.*cs.Mₚ) \ x)
-_B(W::AbstractVector, cs::NamedTuple, x) = W[1] * ((I(size(W[2],1)) - W[2]) \ x)
+_B(W::AbstractVector, cs::NamedTuple, x) = (W[1].*cs.Mₜ) * ((I(size(W[2],1)) - W[2].*cs.Mₚ) \ x)
 B_star(W::AbstractMatrix, cs::NamedTuple) = _B(abs.(W), cs)
 B_star(W::AbstractVector, cs::NamedTuple) = _B([abs.(W[1]), abs.(W[2])], cs)
 
