@@ -190,6 +190,21 @@ function priors(Wₜ_prior::AbstractMatrix, Wₚ_prior::AbstractMatrix)
 end
 priors(Wₜ_prior::AbstractMatrix, nₚ::Integer) = priors(Wₜ_prior, ones(size(Wₜ_prior,2)+nₚ, nₚ))
 priors(n::Integer, Wₚ_prior::AbstractMatrix) = priors(ones(n, size(Wₚ_prior,1)-size(Wₚ_prior,2)), Wₚ_prior)
+"""
+Get priors from files with the indicators 0=no edge, 1=possible edge, "+"=positive edge, "-"=negative edge.
+Can be fed nothing values, and produces nothing values when a matrix would otherwise provide no additional information.
+- WT_prior/WP_prior: should be either matrix with 0,1,+,- or bitmatrix.
+return: priors, priors_sign
+"""
+function priors(WT_prior::Union{AbstractMatrix,Nothing}, WP_prior::Union{AbstractMatrix,Nothing}, n::Integer, nₜ::Integer, nₚ::Integer)
+	if WT_prior === nothing && WP_prior === nothing return nothing, nothing end
+	M, S = Model.priors(WT_prior === nothing ? n : WT_prior, WP_prior === nothing ? nₚ : WP_prior)
+	if all(Model._Wₜ(M,nₜ,nₚ) .== 1) && all(Model._Wₚ(M,nₜ,nₚ) .== 1) M = nothing end
+	if all(S == 0) S = nothing end
+	M, S
+end
+
+
 
 apply_priors(W, M, S) = apply_priors(apply_priors(W, M), nothing, S)
 apply_priors(W::AbstractMatrix, ::Nothing, S) = W .* (S .== 0) .+ abs.(W) .* S
