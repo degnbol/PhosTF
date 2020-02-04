@@ -4,6 +4,7 @@
 library(reshape2)
 library(Matrix)
 library(eulerr)
+library(lmPerm)
 suppressPackageStartupMessages(library(pROC))
 
 # functions
@@ -21,20 +22,15 @@ unwhich = function(which, dim=max(which)) {
     y
 }
 
-
-example = function() {
-    setwd("~/cwd/data/inference/01")
-    # read
+example = TRUE
+if (example) {
+    setwd("~/cwd/data/inference/02")
     WP_fname = "WP_infer.mat"
-    WT_fname = "WT_infer.mat"
-    # end
+} else {
+    args = commandArgs(trailingOnly=T)
+    WP_fname = args[1]
 }
 
-# read
-args = commandArgs(trailingOnly=T)
-WP_fname = args[1]
-WT_fname = args[2]
-# end
 P_fname = "~/cwd/data/evaluation/P_eval.tsv"
 T_fname = "~/cwd/data/evaluation/T_eval.tsv"
 WT_mask_fname = "~/cwd/data/network/WT_mask.csv"
@@ -47,7 +43,7 @@ P_eval = read.table(P_fname, header=T, sep="\t", quote="", check.names=F)
 T_eval = read.table(T_fname, header=T, sep="\t", quote="", check.names=F)
 WP = read.matrix(WP_fname)
 WT = read.matrix(WT_fname)
-WT_mask = read.matrix(WT_mask_fname)
+WT_mask = as.matrix(read.table(WT_mask_fname, sep=",", check.names=F))
 KP = read.vector(KP_fname)
 TF = read.vector(TF_fname)
 V = read.vector(V_fname)
@@ -66,44 +62,33 @@ colnames(KP_edges) = c("P",  "Target", "marker")
 colnames(TF_edges) = c("TF", "Target", "marker")
 colnames(TF_mask_edges) = c("TF", "Target", "mask")
 # sanity check
-all(KP_edges$P == P_eval$Source)
+all(as.character(KP_edges$P) == as.character(P_eval$Source))
 all(KP_edges$Target == P_eval$Target)
-all(TF_edges$TF == T_eval$Source)
-all(TF_edges$Target == T_eval$Target)
-all(T_prior_edges$TF == T_eval$Source)
-all(T_prior_edges$Target == T_eval$Target)
-
-# mask with prior
-TF_edges_masked = TF_edges[T_prior_edges$mask == 1,]
-T_eval_masked = T_eval[T_prior_edges$mask == 1,]
 
 # hold all data in eval sets
 P_eval$marker = KP_edges$marker
-T_eval$marker = TF_edges$marker
-T_eval_masked$marker = TF_edges_masked$marker
 
 # remove diagonals
 P_eval = P_eval[as.character(P_eval$Source) != as.character(P_eval$Target),]
-T_eval = T_eval[as.character(T_eval$Source) != as.character(T_eval$Target),]
-T_eval_masked = T_eval_masked[as.character(T_eval_masked$Source) != as.character(T_eval_masked$Target),]
 
 
 evaluate_cor = function(dataset, cor_names, cor_names_pos, cor_names_neg) {
     out = c()
     for (name in cor_names) {
         valid = !is.na(dataset[name])
-        PCC = cor(dataset[valid,name], abs(dataset[valid, "marker"]))
-        out = c(out, sprintf(paste(name, "cor:\t%.4f"), PCC))
+        PCC = cor.test(dataset[valid,name], abs(dataset[valid, "marker"]))[c("estimate", "p.value")]
+        PCC = summary(lm(dataset[valid,name] ~ abs(dataset[valid, "marker"])))$coefficients[2,3]
+        out = c(out, sprintf(paste0(name, "%.4f", sep="\t"), PCC))
     }
     for (name in cor_names_pos) {
         valid = !is.na(dataset[name])
-        PCC = cor(dataset[valid,name], +(dataset[valid, "marker"]))
-        out = c(out, sprintf(paste(name, "cor:\t%.4f"), PCC))
+        PCC = lm(dataset[valid,name], +(dataset[valid, "marker"]))$coefficients[2,3]
+        out = c(out, sprintf(paste0(name, "%.4f", sep="\t"), PCC))
     }
     for (name in cor_names_neg) {
         valid = !is.na(dataset[name])
-        PCC = cor(dataset[valid,name], -(dataset[valid, "marker"]))
-        out = c(out, sprintf(paste(name, "cor:\t%.4f"), PCC))
+        PCC = lm(dataset[valid,name], -(dataset[valid, "marker"]))$coefficients[2,3]
+        out = c(out, sprintf(paste0(name, "%.4f", sep="\t"), PCC))
     }
     paste(out, collapse="\n")
 }
@@ -114,14 +99,6 @@ evaluate_P = function(dataset) {
                   "networkin_biogrid", "undirected", "EMAP", "n_datasets")
     cor_names_pos = c("activation")
     cor_names_neg = c("inhibition")
-    evaluate_cor(dataset, cor_names, cor_names_pos, cor_names_neg)
-}
-
-
-evaluate_T = function(dataset) {
-    cor_names = c("n_datasets", "reaction", "expression", "catalysis", "workman", "undirected")
-    cor_names_pos = c("activation")
-    cor_names_neg = c()
     evaluate_cor(dataset, cor_names, cor_names_pos, cor_names_neg)
 }
 
@@ -143,27 +120,9 @@ evaluate_auc_P = function(dataset) {
     paste(c("any", "parca", "fasolo", "fiedler", "biogrid", "kinase", "phosphatase", "gold1", "gold2", "gold3", "gold4"), aucs, sep="\t", collapse="\n")
 }
 
-
-evaluate_auc_T = function(dataset) {
-    aucs = c(
-        auc(roc(dataset$`yeastract expression` != "", abs(dataset$marker), direction="<")),
-        auc(roc(dataset$`yeastract expression` == "activator", +(dataset$marker), direction="<")),
-        auc(roc(dataset$`yeastract expression` == "inhibitor", -(dataset$marker), direction="<")),
-        auc(roc(!is.na(dataset$`yeastract binding`), abs(dataset$marker), direction="<")),
-        auc(roc(!is.na(dataset$balaji), abs(dataset$marker), direction="<"))
-    )
-    paste(c("yeastract expression", "yeastract activator", "yeastract inhibitor", "yeastract binding", "balaji"), aucs, sep="\t", collapse="\n")
-}
-
 aucs_P = evaluate_auc_P(P_eval)
-aucs_T = evaluate_auc_T(T_eval)
-aucs_T_masked = evaluate_auc_T(T_eval_masked)
-cat("KP aucs", aucs_P, "TF aucs", aucs_T, "TF masked aucs", aucs_T_masked, sep="\n")
-cat("KP", evaluate_P(P_eval), sep="\n")
-cat("TF", evaluate_T(T_eval), sep="\n")
-cat("TF masked", evaluate_T(T_eval_masked), sep="\n")
-
-# plot(roc(P_eval$goldstandard[!is.na(P_eval$goldstandard)], abs(P_eval$marker[!is.na(P_eval$goldstandard)])))
+cat("KP aucs", aucs_P, sep="\n")
+cat("KP cor", evaluate_P(P_eval), sep="\n")
 
 make_euler = function(N, select=c("potential", "known", "inferred")) {
     venndata = data.frame(
@@ -192,13 +151,9 @@ intersect_5000 = sum(make_euler(5000)$original.values[paste("potential", "known"
 missed_5000 = sum(make_euler(5000)$original.values[paste("potential", "known", sep="&")])
 cat(paste0("euler intersect ", c(3000, 5000), ":\t", c(intersect_3000, intersect_5000), collapse="\n"))
 
-# 153 KPs
-# plot(make_euler(1000), labels=T, quantities=F)
-# plot(make_euler(2000), labels=T, quantities=F)
 plot(make_euler(5000), labels=T, quantities=T)
-# plot(make_euler(10000), labels=T, quantities=F)
-# plot(make_euler(20000), labels=T, quantities=F)
-# plot(make_euler(50000), labels=T, quantities=F)
+
+
 
 
 
