@@ -79,11 +79,25 @@ We use rowwise multiplication with .* here instead of diagonal matrix multiplica
 """
 _Wₚ(W::AbstractMatrix, V, Iₚₖ::Matrix, Iₚₚ::Matrix) = V .* (abs.(W)*(Iₚₖ-Iₚₚ))
 WₜWₚ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = _Wₜ(W,nₜ,nₚ), _Wₚ(W,nₜ,nₚ)
-WₜWₚ(W::AbstractVector, ::Integer, ::Integer) = W[1], W[2]
+WₜWₚ(W::AbstractVector, ::Integer, ::Integer) = _Wₜ(W[1],nₜ,nₚ), _Wₚ(W[2],nₜ,nₚ)
 _Wₜ(W::AbstractMatrix, Iₜ) = W * Iₜ
 _Wₚ(W::AbstractMatrix, Iₚ) = W * Iₚ
-_Wₜ(W::AbstractVector, ::Any) = W[1]
-_Wₚ(W::AbstractVector, ::Any) = W[2]
+_Wₜ(W::AbstractVector, Iₜ) = W[1] * Iₜ
+_Wₚ(W::AbstractVector, Iₚ) = W[2] * Iₚ
+"Assert that untrainable areas are in fact zero."
+function isW(W::AbstractMatrix, nₜ::Integer, nₚ::Integer)
+	all(W[nₜ+nₚ+1:end,1:nₚ] .== 0) && 
+	all(W[:,nₜ+nₚ+1:end] .== 0) && 
+	all(diag(W) .== 0)
+end
+function isW(W::AbstractVector, nₜ::Integer, nₚ::Integer)
+	all(W[1][:,1:nₚ] .== 0) && 
+	all(W[1][:,nₜ+nₚ+1:end] .== 0) && 
+	all(W[2][nₜ+nₚ+1:end,1:nₚ] .== 0) && 
+	all(W[2][:,nₚ+1:end] .== 0) && 
+	all(diag(W[1]) .== 0) &&
+	all(diag(W[2]) .== 0)
+end
 
 
 Iₚ(n::Integer, nₜ::Integer, nₚ::Integer) = diagm([[1 for _ in 1:nₚ]; [0 for _ in nₚ+1:n]])

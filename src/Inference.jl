@@ -51,9 +51,10 @@ get_V(Iₚₖ::Matrix, Iₚₚ::Matrix, W::Matrix) = sign.(sum(W*(Iₚₖ-Iₚ�
 - Iₚₖ, Iₚₚ: kinase and phosphatase indicator diagonal matrices
 - W: from previous training.
 - J: matrix with 1 for KO and 0 for passive observed node. Shape like X.
+- save_every: e.g. 10 to save every tenth epoch. Use zero to not save intermediates. Intermediates are saved to W{T,P}.mat.tmp in PWD.
 """
 function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=10000, λ::Real=.1, λW=0., λWT::Bool=true, opt=ADAMW(), 
-	M=nothing, S=nothing, Iₚₖ=nothing, Iₚₚ=nothing, W=nothing, J=nothing, quadquad::Bool=false, trainWT::Bool=true, W_reg=nothing)
+	M=nothing, S=nothing, Iₚₖ=nothing, Iₚₚ=nothing, W=nothing, J=nothing, quadquad::Bool=false, trainWT::Bool=true, W_reg=nothing, save_every::Integer=10)
 	n, K = size(X)
 	cs = Model.constants(n, nₜ, nₚ, J === nothing ? K : J)
 	M !== nothing || (M = ones(n, n)) # no prior knowledge
@@ -85,6 +86,14 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 		end
 		println("\t$epoch\t$(Dates.now())")
 		epoch += 1
+
+		if save_every > 0 && epoch % save_every == 0
+			Model.isW(W) || @error("W has nonzeros in entries that should be zero")
+			W′ = Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ)
+			Wₜ, Wₚ = Model.WₜWₚ(W′, nₜ, nₚ)
+			savedlm("WT.mat.tmp", Wₜ)
+			savedlm("WP.mat.tmp", Wₚ)
+		end
 	end
 	# throttle callbacks if we are doing a small example
 	n > 100 || (cb = Flux.throttle(cb, 5))
