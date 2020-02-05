@@ -79,7 +79,7 @@ We use rowwise multiplication with .* here instead of diagonal matrix multiplica
 """
 _Wₚ(W::AbstractMatrix, V, Iₚₖ::Matrix, Iₚₚ::Matrix) = V .* (abs.(W)*(Iₚₖ-Iₚₚ))
 WₜWₚ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = _Wₜ(W,nₜ,nₚ), _Wₚ(W,nₜ,nₚ)
-WₜWₚ(W::AbstractVector, ::Integer, ::Integer) = _Wₜ(W[1],nₜ,nₚ), _Wₚ(W[2],nₜ,nₚ)
+WₜWₚ(W::AbstractVector, nₜ::Integer, nₚ::Integer) = _Wₜ(W[1],nₜ,nₚ), _Wₚ(W[2],nₜ,nₚ)
 _Wₜ(W::AbstractMatrix, Iₜ) = W * Iₜ
 _Wₚ(W::AbstractMatrix, Iₚ) = W * Iₚ
 _Wₜ(W::AbstractVector, Iₜ) = W[1] * Iₜ

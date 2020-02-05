@@ -32,38 +32,25 @@ if (example) {
 }
 
 P_fname = "~/cwd/data/evaluation/P_eval.tsv"
-T_fname = "~/cwd/data/evaluation/T_eval.tsv"
-WT_mask_fname = "~/cwd/data/network/WT_mask.csv"
 KP_fname = "~/cwd/data/network/KP.txt"
 TF_fname = "~/cwd/data/network/TF.txt"
 V_fname = "~/cwd/data/network/V.txt"
 
 
 P_eval = read.table(P_fname, header=T, sep="\t", quote="", check.names=F)
-T_eval = read.table(T_fname, header=T, sep="\t", quote="", check.names=F)
 WP = read.matrix(WP_fname)
-WT = read.matrix(WT_fname)
-WT_mask = as.matrix(read.table(WT_mask_fname, sep=",", check.names=F))
 KP = read.vector(KP_fname)
 TF = read.vector(TF_fname)
 V = read.vector(V_fname)
 PT = c(KP,TF)
 colnames(WP) = KP
-colnames(WT) = TF
-stopifnot(all(colnames(WT_mask) == TF))
 rownames(WP) = c(KP, TF)
-rownames(WT) = V
-stopifnot(all(rownames(WT_mask) == V))
 # swap rownames and colnames columns so the order will be source then target
 KP_edges = melt_matrix(WP)[,c(2,1,3)]
-TF_edges = melt_matrix(WT)[,c(2,1,3)]
-TF_mask_edges = melt_matrix(WT_mask)[,c(2,1,3)]
 colnames(KP_edges) = c("P",  "Target", "marker")
-colnames(TF_edges) = c("TF", "Target", "marker")
-colnames(TF_mask_edges) = c("TF", "Target", "mask")
 # sanity check
-all(as.character(KP_edges$P) == as.character(P_eval$Source))
-all(KP_edges$Target == P_eval$Target)
+stopifnot(all(as.character(KP_edges$P) == as.character(P_eval$Source)))
+stopifnot(all(KP_edges$Target == P_eval$Target))
 
 # hold all data in eval sets
 P_eval$marker = KP_edges$marker
@@ -71,36 +58,26 @@ P_eval$marker = KP_edges$marker
 # remove diagonals
 P_eval = P_eval[as.character(P_eval$Source) != as.character(P_eval$Target),]
 
-
 evaluate_cor = function(dataset, cor_names, cor_names_pos, cor_names_neg) {
-    out = c()
-    for (name in cor_names) {
+    out = data.frame()
+    for (name in c(cor_names, cor_names_pos, cor_names_neg)) {
         valid = !is.na(dataset[name])
-        PCC = cor.test(dataset[valid,name], abs(dataset[valid, "marker"]))[c("estimate", "p.value")]
-        PCC = summary(lm(dataset[valid,name] ~ abs(dataset[valid, "marker"])))$coefficients[2,3]
-        out = c(out, sprintf(paste0(name, "%.4f", sep="\t"), PCC))
+        if (name%in%cor_names)   marker = abs(dataset[valid, "marker"])
+        if (name%in%cor_names_pos) marker = +(dataset[valid, "marker"])
+        if (name%in%cor_names_neg) marker = -(dataset[valid, "marker"])
+        PCC = cor.test(dataset[valid,name], marker)[c("estimate", "p.value")]
+        PCC_perm = summary(lmp(dataset[valid,name] ~ marker))$coefficients[2,c(1,3)]
+        out = rbind(out, data.frame(test=paste(name, "cor"), value=PCC[[1]][[1]], p=PCC[[2]], value.perm=PCC_perm[[1]], p.perm=PCC_perm[[2]]))
     }
-    for (name in cor_names_pos) {
-        valid = !is.na(dataset[name])
-        PCC = lm(dataset[valid,name], +(dataset[valid, "marker"]))$coefficients[2,3]
-        out = c(out, sprintf(paste0(name, "%.4f", sep="\t"), PCC))
-    }
-    for (name in cor_names_neg) {
-        valid = !is.na(dataset[name])
-        PCC = lm(dataset[valid,name], -(dataset[valid, "marker"]))$coefficients[2,3]
-        out = c(out, sprintf(paste0(name, "%.4f", sep="\t"), PCC))
-    }
-    paste(out, collapse="\n")
+    out
 }
 
 
-evaluate_P = function(dataset) {
-    cor_names = c("yeastkid", "reaction", "ptmod", "expression", "catalysis", "netphorest", "networkin", "networkin STRING", 
-                  "networkin_biogrid", "undirected", "EMAP", "n_datasets")
-    cor_names_pos = c("activation")
-    cor_names_neg = c("inhibition")
-    evaluate_cor(dataset, cor_names, cor_names_pos, cor_names_neg)
-}
+cor_names = c("yeastkid", "reaction", "ptmod", "expression", "catalysis", "netphorest", "networkin", "networkin STRING", 
+              "networkin_biogrid", "undirected", "EMAP", "n_datasets")
+cor_names_pos = c("activation")
+cor_names_neg = c("inhibition")
+cortable = evaluate_cor(P_eval, cor_names, cor_names_pos, cor_names_neg)
 
 
 evaluate_auc_P = function(dataset) {
