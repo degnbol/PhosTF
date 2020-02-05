@@ -27,6 +27,7 @@ P_yeastkid = read.table("../processed/yeastkid/P_edges.tsv", sep="\t", header=T,
 P_netphorest = read.table("../processed/NetPhorest/scores.tsv", sep="\t", header=T, quote="")
 P_networkin = read.table("../processed/NetworKIN/scores.tsv", sep="\t", header=T, quote="")[,c(1,2,3,5)] # there is a PCC=.9999 for netphorest so we don't need it
 P_networkin_biogrid = read.table("../processed/NetworKIN/scores_biogrid.tsv", sep="\t", header=T, quote="")[,1:3]
+P_ptacek = read.table("../processed/ptacek_2005/KP_edges.tsv", sep="\t", header=T, quote="", check.names=F)
 # T_balaji = read.table("../processed/balaji_2006/TF_edges.tsv", sep="\t", header=T, quote="")
 # T_workman = read.table("../processed/workman_2006/TF_edges.tsv", sep="\t", header=T, quote="")[,c(1,2,4)]
 # T_yeastract_binding = read.table("../processed/yeastract/binding_ORF.tsv", sep="\t", col.names=c("TF", "Target"), quote="")
@@ -39,12 +40,13 @@ colnames(STRING_undirected) = c("Source", "Target", "undirected")
 colnames(P_biogrid) = c("Source", "Target", "biogrid")
 P_fasolo$fasolo = 1; colnames(P_fasolo) = c("Source", "Target", "fasolo")
 colnames(P_fiedler) = c("Source", "Target", "fiedler", "EMAP")
-P_parca$parca = 1; colnames(P_parca) = c("Source", "Target", "parca")
+colnames(P_parca) = c("Source", "Target"); P_parca$parca = 1
 # colnames(P_workman) = c("Source", "Target", "workman SLL", "workman pval")
 colnames(P_yeastkid) = c("Source", "Target", "yeastkid")
 colnames(P_netphorest) = c("Source", "Target", "netphorest")
 colnames(P_networkin) = c("Source", "Target", "networkin", "networkin STRING")
 colnames(P_networkin_biogrid) = c("Source", "Target", "networkin_biogrid")
+colnames(P_ptacek) = c("Source", "Target"); P_ptacek$ptacek = 1
 # colnames(T_balaji) = c("Source", "Target", "balaji")
 # colnames(T_workman) = c("Source", "Target", "workman")
 # T_yeastract_binding$"yeastract binding" = 1; colnames(T_yeastract_binding) = c("Source", "Target", "yeastract binding")
@@ -79,6 +81,7 @@ P_eval = merge(P_eval, P_networkin, all.x=T)
 P_eval = merge(P_eval, P_networkin_biogrid, all.x=T)
 P_eval = merge(P_eval, STRING, all.x=T)
 P_eval = merge(P_eval, STRING_undirected, all.x=T)
+P_eval = merge(P_eval, P_ptacek, all.x=T)
 
 # T_eval = merge(T_eval, T_balaji, all.x=T)
 # T_eval = merge(T_eval, T_workman, all.x=T)
@@ -99,6 +102,7 @@ sum(!is.na(P_eval$biogrid))
 sum(!is.na(P_eval$fasolo))
 sum(!is.na(P_eval$parca))
 sum(!is.na(P_eval$fiedler))
+sum(!is.na(P_eval$ptacek))
 sum(P_eval$n_datasets > 0)
 # sum(T_eval$n_datasets > 0)
 # number of edges with directed info
@@ -122,7 +126,7 @@ ptmod_pos = P_eval$ptmod > mean(P_eval$ptmod, na.rm=T)
 ptmod_neg = P_eval$ptmod < mean(P_eval$ptmod, na.rm=T)
 yeastkid_pos = P_eval$yeastkid > 4.52
 yeastkid_neg = P_eval$yeastkid < 0.00
-positives1 = yeastkid_pos | (P_eval$undirected > 950) | ptmod_pos | P_eval$fasolo | P_eval$parca | !is.na(P_eval$fiedler) | !is.na(P_eval$biogrid)
+positives1 = yeastkid_pos | (P_eval$undirected > 950) | ptmod_pos | P_eval$fasolo | P_eval$parca | !is.na(P_eval$fiedler) | !is.na(P_eval$biogrid) | !is.na(P_eval$ptacek)
 negatives1 = yeastkid_neg | (P_eval$undirected < 155) | ptmod_neg
 positives2 = yeastkid_pos | ptmod_pos | P_eval$fasolo | P_eval$parca | !is.na(P_eval$fiedler) | !is.na(P_eval$biogrid)
 negatives2 = yeastkid_neg | ptmod_neg
