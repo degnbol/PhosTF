@@ -15,13 +15,18 @@ for (sheet_name in sheet_names) {
     edges = rbind(edges, sheet)
 }
 
-edges = edges[,2:1]
+edges$KP2 = ""
+for (paired in c("CDC28", "PHO85")) {
+    regex = paste0("^",paired)
+    idx = grepl(regex, edges$KP)
+    edges$KP2[idx] = gsub(regex, "", edges$KP[idx])
+    edges$KP[idx] = paired
+}
+edges$KP2[edges$KP2 == "alone"] = ""
 
-edges$KP = gsub("^CDC28", "CDC28 ", edges$KP)
-edges$KP = gsub("^PHO85", "PHO85 ", edges$KP)
-edges$KP = gsub(" alone", "", edges$KP)
+edges = edges[,c("KP", "KP2", "Target")]
 
-write.table(edges, "~/cwd/data/processed/ptacek_2005/edges.tsv", sep="\t", quote=F, row.names=F)
+write.table(edges, "~/cwd/data/processed/ptacek_2005/edges_pop.tsv", sep="\t", quote=F, row.names=F)
 
 
 
