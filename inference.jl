@@ -105,7 +105,9 @@ function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.
 	WT_reg === nothing || (WT_reg = loaddlm(abspath_(WT_reg)))
 	WT_prior === nothing || (WT_prior = loaddlm(abspath_(WT_prior)))
 	WP_prior === nothing || (WP_prior = loaddlm(abspath_(WP_prior)))
-	W = (WT === nothing || WP === nothing) ? nothing : Model._W(loaddlm(abspath_(WT)), loaddlm(abspath_(WP)))
+	WT === nothing || (WT = loaddlm(abspath_(WT)))
+	WP === nothing || (WP = loaddlm(abspath_(WP)))
+	W = (WT === nothing || WP === nothing) ? nothing : Model._W(WT, WP)
 
 	# use NaNs from WT_reg for masking
 	if WT_reg !== nothing
@@ -134,9 +136,10 @@ function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.
 
 	W = Inference.infer(X, nₜ, nₚ; epochs=epochs, λ=lambda, λW=lambdaW, λWT=lambdaWT,
 	M=M, S=S, Iₚₖ=Iₚₖ, Iₚₚ=Iₚₚ, W=W, J=J, quadquad=quadquad, trainWT=trainWT, W_reg=W_reg)
-	Model.isW(W, nₜ, nₚ) || @error("W has nonzeros in entries that should be zero")
+	Model.isW(W, nₜ, nₚ) || @error("W has nonzeros in entries that should be zero.")
 	Wₜ, Wₚ = Model.WₜWₚ(W, nₜ, nₚ)
-	savedlm(ot, Wₜ)
+	trainWT && savedlm(ot, Wₜ)
+	trainWT || all(WT .== Wₜ) || @error("There has been changes made to Wₜ even though it was not intented to be trained on.")
 	savedlm(op, Wₚ)
 end
 

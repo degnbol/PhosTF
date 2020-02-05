@@ -93,7 +93,7 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 			Model.isW(W, nₜ, nₚ) || @error("W has nonzeros in entries that should be zero")
 			W′ = Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ)
 			Wₜ, Wₚ = Model.WₜWₚ(W′, nₜ, nₚ)
-			savedlm("WT.tmp.mat", Wₜ)
+			trainWT && savedlm("WT.tmp.mat", Wₜ)
 			savedlm("WP.tmp.mat", Wₚ)
 		end
 	end
