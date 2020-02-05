@@ -59,15 +59,15 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 	M=nothing, S=nothing, Iₚₖ=nothing, Iₚₚ=nothing, W=nothing, J=nothing, quadquad::Bool=false, trainWT::Bool=true, W_reg=nothing, save_every::Integer=1)
 	n, K = size(X)
 	cs = Model.constants(n, nₜ, nₚ, J === nothing ? K : J)
-	M !== nothing || (M = ones(n, n)) # no prior knowledge
+	M === nothing && (M = ones(n,n)) # no prior knowledge
 	M .*= cs.Mₜ .+ cs.Mₚ # enforce masks
 	V = get_V(Iₚₖ, Iₚₚ, W)
-	W !== nothing || (W = random_W(n))
+	W === nothing && (W = random_W(n))
 	W = trainWT ? param(W) : [W.*cs.Mₜ, param(W.*cs.Mₚ)]
 	Iₚ = V === nothing ? Model.Iₚ(n, nₜ, nₚ) : Iₚₖ + Iₚₚ
 	Iₜ = Model.Iₜ(n, nₜ, nₚ)
 	Iₓ = I(n) - (Iₜ+Iₚ)
-	λW != 0 || (λW = nothing)
+	λW == 0 && (λW = nothing)
 	
 	error_cost = quadquad ? Model.quadquad : Model.sse
 	B_cost = λWT ? LB : LB_WP

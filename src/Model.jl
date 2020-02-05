@@ -69,8 +69,6 @@ function _W(Wₜ, Wₚ)
 	[[Wₚ; zeros(nₓ,nₚ)] Wₜ zeros(nₓ+nₜ+nₚ,nₓ)]
 end
 
-_Wₜ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = W[:,nₚ+1:nₚ+nₜ]
-_Wₚ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = W[1:nₜ+nₚ,1:nₚ]
 """
 wₚᵢⱼ := vᵢ⋅(|wₚₖᵢⱼ| - |wₚₚᵢⱼ|)
 As vector notation:
@@ -78,14 +76,19 @@ Wₚ := V (Wₚₖ' - Wₚₚ')
 We use rowwise multiplication with .* here instead of diagonal matrix multiplication so make sure V is a 2D column vector.
 """
 _Wₚ(W::AbstractMatrix, V, Iₚₖ::Matrix, Iₚₚ::Matrix) = V .* (abs.(W)*(Iₚₖ-Iₚₚ))
-WₜWₚ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = _Wₜ(W,nₜ,nₚ), _Wₚ(W,nₜ,nₚ)
-WₜWₚ(W::AbstractVector, nₜ::Integer, nₚ::Integer) = _Wₜ(W[1],nₜ,nₚ), _Wₚ(W[2],nₜ,nₚ)
+_Wₜ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = W[:,nₚ+1:nₚ+nₜ]
+_Wₚ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = W[1:nₜ+nₚ,1:nₚ]
 _Wₜ(W::AbstractMatrix, Iₜ) = W * Iₜ
 _Wₚ(W::AbstractMatrix, Iₚ) = W * Iₚ
 _Wₜ(W::AbstractVector, Iₜ) = W[1] * Iₜ
 _Wₚ(W::AbstractVector, Iₚ) = W[2] * Iₚ
+WₜWₚ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = _Wₜ(W,nₜ,nₚ), _Wₚ(W,nₜ,nₚ)
+WₜWₚ(W::AbstractVector, nₜ::Integer, nₚ::Integer) = _Wₜ(W[1],nₜ,nₚ), _Wₚ(W[2],nₜ,nₚ)
 "Assert that untrainable areas are in fact zero."
 function isW(W::AbstractMatrix, nₜ::Integer, nₚ::Integer)
+	println(sum(W[nₜ+nₚ+1:end,1:nₚ] .!= 0))
+	println(sum(W[:,nₜ+nₚ+1:end] .!= 0))
+	println(sum(diag(W) .!= 0))
 	all(W[nₜ+nₚ+1:end,1:nₚ] .== 0) && 
 	all(W[:,nₜ+nₚ+1:end] .== 0) && 
 	all(diag(W) .== 0)
