@@ -71,7 +71,10 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 	
 	error_cost = quadquad ? Model.quadquad : Model.sse
 	B_cost = λWT ? LB : LB_WP
-	L(X) = error_cost(Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ), cs, X) + B_cost(W, cs, λ, W_reg) + L1(W, λW)
+	function L(X)
+		W′ = Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ)
+		error_cost(W′, cs, X) + B_cost(W′, cs, λ, W_reg) + L1(W, λW)
+	end
 
 	epoch = 0
 	function cb()
@@ -83,15 +86,15 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 		try trainWT ? printfmt(5, l,e,l1(Model._Wₜ(W′,Iₜ)),lp) : printfmt(5, l,e,lp)
 		catch exception
 			if isa(exception, InexactError) # if the values are crazy big we get issues with showing floats
-				trainWT ? print("$(l)\t$(e)\t$(l1(Model._Wₜ(W′,Iₜ)))\t$(lp)") : print("$(l)\t$(e)\t$(lp)")
+				trainWT ? print("$l\t$e\t$(l1(Model._Wₜ(W′,Iₜ)))\t$lp") : print("$l\t$e\t$lp")
 			else rethrow() end
 		end
 		println("\t$epoch\t$(Dates.now())")
 		epoch += 1
 
 		if save_every > 0 && epoch % save_every == 0
-			Model.isW(W, nₜ, nₚ) || @error("W has nonzeros in entries that should be zero")
 			W′ = Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ)
+			Model.isW(W′, nₜ, nₚ) || @error("W has nonzeros in entries that should be zero")
 			Wₜ, Wₚ = Model.WₜWₚ(W′, nₜ, nₚ)
 			trainWT && savedlm("WT.tmp.mat", Wₜ)
 			savedlm("WP.tmp.mat", Wₚ)

@@ -78,17 +78,14 @@ We use rowwise multiplication with .* here instead of diagonal matrix multiplica
 _Wₚ(W::AbstractMatrix, V, Iₚₖ::Matrix, Iₚₚ::Matrix) = V .* (abs.(W)*(Iₚₖ-Iₚₚ))
 _Wₜ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = W[:,nₚ+1:nₚ+nₜ]
 _Wₚ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = W[1:nₜ+nₚ,1:nₚ]
-_Wₜ(W::AbstractMatrix, Iₜ) = W * Iₜ
-_Wₚ(W::AbstractMatrix, Iₚ) = W * Iₚ
-_Wₜ(W::AbstractVector, Iₜ) = W[1] * Iₜ
-_Wₚ(W::AbstractVector, Iₚ) = W[2] * Iₚ
+_Wₜ(W::AbstractMatrix, Iₜ) = W*Iₜ
+_Wₚ(W::AbstractMatrix, Iₚ) = W*Iₚ
+_Wₜ(W::AbstractVector, Iₜ) = W[1]*Iₜ
+_Wₚ(W::AbstractVector, Iₚ) = W[2]*Iₚ
 WₜWₚ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = _Wₜ(W,nₜ,nₚ), _Wₚ(W,nₜ,nₚ)
 WₜWₚ(W::AbstractVector, nₜ::Integer, nₚ::Integer) = _Wₜ(W[1],nₜ,nₚ), _Wₚ(W[2],nₜ,nₚ)
 "Assert that untrainable areas are in fact zero."
 function isW(W::AbstractMatrix, nₜ::Integer, nₚ::Integer)
-	println(sum(W[nₜ+nₚ+1:end,1:nₚ] .!= 0))
-	println(sum(W[:,nₜ+nₚ+1:end] .!= 0))
-	println(sum(diag(W) .!= 0))
 	all(W[nₜ+nₚ+1:end,1:nₚ] .== 0) && 
 	all(W[:,nₜ+nₚ+1:end] .== 0) && 
 	all(diag(W) .== 0)
@@ -224,10 +221,10 @@ end
 
 
 apply_priors(W, M, S) = apply_priors(apply_priors(W, M), nothing, S)
-apply_priors(W::AbstractMatrix, ::Nothing, S) = W .* (S .== 0) .+ abs.(W) .* S
+apply_priors(W::AbstractMatrix, ::Nothing, S) = W .* (S.==0) .+ abs.(W) .* S
 apply_priors(W::AbstractVector, ::Nothing, S) = [apply_priors(W[1], nothing, S), apply_priors(W[2], nothing, S)]
-apply_priors(W::AbstractMatrix, M) = W .* M
-apply_priors(W::AbstractVector, M) = [W[1] .* M, W[2] .* M]
+apply_priors(W::AbstractMatrix, M) = W.*M
+apply_priors(W::AbstractVector, M) = [W[1].*M, W[2].*M]
 apply_priors(W, M, ::Nothing) = apply_priors(W, M)
 apply_priors(W, ::Nothing, ::Nothing) = W
 "If we know which nodes are ∈ PK and ∈ PP, then use that information."
