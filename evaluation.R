@@ -4,8 +4,8 @@
 library(reshape2)
 library(Matrix)
 library(eulerr)
-library(lmPerm)
-suppressPackageStartupMessages(library(pROC))
+# suppressPackageStartupMessages(library(pROC))
+library(verification)
 
 # functions
 flatten = function(x) as.vector(as.matrix(x))
@@ -66,12 +66,10 @@ evaluate_cor = function(dataset, cor_names, cor_names_pos, cor_names_neg) {
         if (name%in%cor_names_pos) marker = +(dataset[valid, "marker"])
         if (name%in%cor_names_neg) marker = -(dataset[valid, "marker"])
         PCC = cor.test(dataset[valid,name], marker)[c("estimate", "p.value")]
-        PCC_perm = summary(lmp(dataset[valid,name] ~ marker))$coefficients[2,c(1,3)]
-        out = rbind(out, data.frame(test=paste(name, "cor"), value=PCC[[1]][[1]], p=PCC[[2]], value.perm=PCC_perm[[1]], p.perm=PCC_perm[[2]]))
+        out = rbind(out, data.frame(test=paste(name, "cor"), value=PCC[[1]][[1]], p=PCC[[2]]))
     }
     out
 }
-
 
 cor_names = c("yeastkid", "reaction", "ptmod", "expression", "catalysis", "netphorest", "networkin", "networkin STRING", 
               "networkin_biogrid", "undirected", "EMAP", "n_datasets")
@@ -79,54 +77,57 @@ cor_names_pos = c("activation")
 cor_names_neg = c("inhibition")
 cortable = evaluate_cor(P_eval, cor_names, cor_names_pos, cor_names_neg)
 
+aucs = rbind(
+    data.frame(roc.area(P_eval$n_datasets > 0, abs(P_eval$marker))[c("A","p.value")]),
+    data.frame(roc.area(!is.na(P_eval$parca), abs(P_eval$marker))[c("A","p.value")]),
+    data.frame(roc.area(!is.na(P_eval$fasolo), abs(P_eval$marker))[c("A","p.value")]),
+    data.frame(roc.area(P_eval$fiedler != "", abs(P_eval$marker))[c("A","p.value")]),
+    data.frame(roc.area(P_eval$biogrid != "", abs(P_eval$marker))[c("A","p.value")]),
+    data.frame(roc.area(P_eval$biogrid == "kinase", +(P_eval$marker))[c("A","p.value")]),
+    data.frame(roc.area(P_eval$biogrid == "phosphatase", -(P_eval$marker))[c("A","p.value")]),
+    data.frame(roc.area(P_eval$goldstandard1[!is.na(P_eval$goldstandard1)], abs(P_eval$marker[!is.na(P_eval$goldstandard1)]))[c("A","p.value")]),
+    data.frame(roc.area(P_eval$goldstandard2[!is.na(P_eval$goldstandard2)], abs(P_eval$marker[!is.na(P_eval$goldstandard2)]))[c("A","p.value")]),
+    data.frame(roc.area(P_eval$goldstandard3[!is.na(P_eval$goldstandard3)], abs(P_eval$marker[!is.na(P_eval$goldstandard3)]))[c("A","p.value")]),
+    data.frame(roc.area(P_eval$goldstandard4[!is.na(P_eval$goldstandard4)], abs(P_eval$marker[!is.na(P_eval$goldstandard4)]))[c("A","p.value")])
+)
+titles = c("any", "parca", "fasolo", "fiedler", "biogrid", "kinase", "phosphatase", "gold1", "gold2", "gold3", "gold4")
+aucs_P = cbind(test=paste(titles, "auc"), aucs)
+colnames(aucs_P)[2:3] = c("value", "p")
 
-evaluate_auc_P = function(dataset) {
-    aucs = c(
-        auc(roc(dataset$n_datasets > 0, abs(dataset$marker), direction="<")),
-        auc(roc(!is.na(dataset$parca), abs(dataset$marker), direction="<")),
-        auc(roc(!is.na(dataset$fasolo), abs(dataset$marker), direction="<")),
-        auc(roc(dataset$fiedler != "", abs(dataset$marker), direction="<")),
-        auc(roc(dataset$biogrid != "", abs(dataset$marker), direction="<")),
-        auc(roc(dataset$biogrid == "kinase", +(dataset$marker), direction="<")),
-        auc(roc(dataset$biogrid == "phosphatase", -(dataset$marker), direction="<")),
-        auc(roc(dataset$goldstandard1[!is.na(dataset$goldstandard1)], abs(dataset$marker[!is.na(dataset$goldstandard1)]), direction="<")),
-        auc(roc(dataset$goldstandard2[!is.na(dataset$goldstandard2)], abs(dataset$marker[!is.na(dataset$goldstandard2)]), direction="<")),
-        auc(roc(dataset$goldstandard3[!is.na(dataset$goldstandard3)], abs(dataset$marker[!is.na(dataset$goldstandard3)]), direction="<")),
-        auc(roc(dataset$goldstandard4[!is.na(dataset$goldstandard4)], abs(dataset$marker[!is.na(dataset$goldstandard4)]), direction="<"))
-    )
-    paste(c("any", "parca", "fasolo", "fiedler", "biogrid", "kinase", "phosphatase", "gold1", "gold2", "gold3", "gold4"), aucs, sep="\t", collapse="\n")
-}
+View(rbind(cortable, aucs_P))
 
-aucs_P = evaluate_auc_P(P_eval)
-cat("KP aucs", aucs_P, sep="\n")
-cat("KP cor", evaluate_P(P_eval), sep="\n")
+# only analysing positives
+
+venndata = data.frame(
+    potential = TRUE,
+    biogrid = P_eval$biogrid != "",
+    fasolo = !is.na(P_eval$fasolo),
+    parca = !is.na(P_eval$parca),
+    fiedler = P_eval$fiedler != "",
+    yeastkid = !is.na(P_eval$yeastkid) & P_eval$yeastkid > 4.52,
+    ptmod = !is.na(P_eval$ptmod) & P_eval$ptmod > 250,
+)
+venndata$litterature = venndata$biogrid | venndata$fasolo | venndata$parca | venndata$fiedler
+venndata$curated = venndata$yeastkid | venndata$ptmod
+venndata$known = venndata$litterature | venndata$curated
+
 
 make_euler = function(N, select=c("potential", "known", "inferred")) {
-    venndata = data.frame(
-        potential = T,
-        biogrid = P_eval$biogrid != "",
-        fasolo = !is.na(P_eval$fasolo),
-        parca = !is.na(P_eval$parca),
-        fiedler = P_eval$fiedler != "",
-        yeastkid = !is.na(P_eval$yeastkid) & P_eval$yeastkid > 4.52,
-        ptmod = !is.na(P_eval$ptmod) & P_eval$ptmod > 250,
-        # netphorest = unwhich(order(P_eval$netphorest, decreasing=T)[1:N], dim=nrow(P_eval))
-        # networkin = unwhich(order(P_eval$networkin, decreasing=T)[1:N], dim=nrow(P_eval)),
-        # random = sample(c(rep(T,N),rep(F,nrow(P_eval)-N))),
-        inferred = unwhich(order(abs(P_eval$marker), decreasing=T)[1:N], dim=nrow(P_eval))
-    )
-    venndata$litterature = venndata$biogrid | venndata$fasolo | venndata$parca | venndata$fiedler
-    venndata$curated = venndata$yeastkid | venndata$ptmod
-    venndata$known = venndata$litterature | venndata$curated
+    
     
     euler(venndata[,select], shape="ellipse")
 }
+
+inferred = unwhich(order(abs(P_eval$marker), decreasing=T)[1:N], dim=nrow(P_eval))
 
 intersect_3000 = sum(make_euler(3000)$original.values[paste("potential", "known", "inferred", sep="&")])
 missed_3000 = sum(make_euler(3000)$original.values[paste("potential", "known", sep="&")])
 intersect_5000 = sum(make_euler(5000)$original.values[paste("potential", "known", "inferred", sep="&")])
 missed_5000 = sum(make_euler(5000)$original.values[paste("potential", "known", sep="&")])
 cat(paste0("euler intersect ", c(3000, 5000), ":\t", c(intersect_3000, intersect_5000), collapse="\n"))
+
+
+### Plotting
 
 plot(make_euler(5000), labels=T, quantities=T)
 
