@@ -23,12 +23,13 @@ unwhich = function(which, dim=max(which)) {
 
 example = FALSE
 if (example) {
-    setwd("~/cwd/data/inference/02")
-    WP_fname = "WP_infer.mat"
+    WP_fname = "~/cwd/data/inference/02/WP_infer.mat"
 } else {
-    args = commandArgs(trailingOnly=T)
-    WP_fname = args[1]
+    WP_fname = commandArgs(trailingOnly=T)[1]
 }
+
+setwd(dirname(WP_fname))
+WP_fname = basename(WP_fname)
 
 P_fname = "~/cwd/data/evaluation/P_eval.tsv"
 KP_fname = "~/cwd/data/network/KP.txt"
