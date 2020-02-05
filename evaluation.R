@@ -4,8 +4,7 @@
 library(reshape2)
 library(Matrix)
 library(eulerr)
-# suppressPackageStartupMessages(library(pROC))
-library(verification)
+library(verification) # roc auc with p-value
 
 # functions
 flatten = function(x) as.vector(as.matrix(x))
@@ -22,7 +21,7 @@ unwhich = function(which, dim=max(which)) {
     y
 }
 
-example = TRUE
+example = FALSE
 if (example) {
     setwd("~/cwd/data/inference/02")
     WP_fname = "WP_infer.mat"
@@ -94,9 +93,8 @@ titles = c("any", "parca", "fasolo", "fiedler", "biogrid", "kinase", "phosphatas
 aucs_P = cbind(test=paste(titles, "auc"), aucs)
 colnames(aucs_P)[2:3] = c("value", "p")
 
-View(rbind(cortable, aucs_P))
 
-# only analysing positives
+# only analysing positives, since we cannot actually rule out negatives
 
 venndata = data.frame(
     potential = TRUE,
@@ -105,32 +103,49 @@ venndata = data.frame(
     parca = !is.na(P_eval$parca),
     fiedler = P_eval$fiedler != "",
     yeastkid = !is.na(P_eval$yeastkid) & P_eval$yeastkid > 4.52,
-    ptmod = !is.na(P_eval$ptmod) & P_eval$ptmod > 250,
+    ptmod = !is.na(P_eval$ptmod) & P_eval$ptmod > 250
 )
 venndata$litterature = venndata$biogrid | venndata$fasolo | venndata$parca | venndata$fiedler
 venndata$curated = venndata$yeastkid | venndata$ptmod
 venndata$known = venndata$litterature | venndata$curated
 
+# index indicating which edge is inferred most strongly to most weakly
+marker_order = order(abs(P_eval$marker), decreasing=T)
 
-make_euler = function(N, select=c("potential", "known", "inferred")) {
-    
-    
-    euler(venndata[,select], shape="ellipse")
+p.selection = function(k, selection) {
+    intersect = sum(venndata[marker_order[1:k],selection])
+    m = sum(venndata[,selection])
+    n = nrow(venndata) - m
+    list(value=intersect, p=phyper(intersect, m, n, k, lower.tail=FALSE))
 }
 
-inferred = unwhich(order(abs(P_eval$marker), decreasing=T)[1:N], dim=nrow(P_eval))
+p.selection.q = function(selection) {
+    out = data.frame()
+    quantiles = c(0.01, 0.025, 0.05, 0.075, 0.1, 0.2)
+    for (k in quantiles*nrow(venndata)) {
+        out = rbind(out, p.selection(k, selection))
+    }
+    data.frame(test=paste(selection, quantiles), out)
+}
 
-intersect_3000 = sum(make_euler(3000)$original.values[paste("potential", "known", "inferred", sep="&")])
-missed_3000 = sum(make_euler(3000)$original.values[paste("potential", "known", sep="&")])
-intersect_5000 = sum(make_euler(5000)$original.values[paste("potential", "known", "inferred", sep="&")])
-missed_5000 = sum(make_euler(5000)$original.values[paste("potential", "known", sep="&")])
-cat(paste0("euler intersect ", c(3000, 5000), ":\t", c(intersect_3000, intersect_5000), collapse="\n"))
+positive.intersections = rbind(p.selection.q("known"), p.selection.q("litterature"))
+best = positive.intersections[which.min(positive.intersections$p),]
+score = -log10(best$p)
 
+eval.table = rbind(cortable, aucs_P, positive.intersections)
+eval.table = eval.table[order(eval.table$p),]  # sort by p-value
+
+write.table(eval.table, "evaluation.tsv", sep="\t", quote=F, row.names=F)
+write.table(score, "score.txt", quote=F, row.names=F, col.names=F)
 
 ### Plotting
-
-plot(make_euler(5000), labels=T, quantities=T)
-
+selection = gsub(" .*", "", best$test)
+k = as.numeric(gsub(".* ", "", best$test)) * nrow(venndata)
+inferred = unwhich(marker_order[1:k], dim=nrow(P_eval))
+eulerdata = euler(data.frame(venndata[,c("potential", selection)], inferred=inferred), shape="ellipse")
+pdf("euler.pdf")
+plot(eulerdata, labels=T, quantities=T)
+dev.off()
 
 
 
