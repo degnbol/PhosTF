@@ -1,5 +1,6 @@
 #!/usr/bin/env julia
 isdefined(Main, :ArrayUtils) || include("utilities/ArrayUtils.jl")
+isdefined(Main, :ReadWrite) || include("src/utilities/ReadWrite.jl")
 
 "Flux machine learning for gradient descent of errors defined by model loss functions."
 module Inference
@@ -9,6 +10,7 @@ using Statistics: mean
 using Flux, Flux.Tracker
 using Flux.Tracker: grad, update!
 using ..ArrayUtils: eye, shuffle_columns
+using ..ReadWrite
 include("Model.jl"); using .Model
 using Formatting
 using Dates
