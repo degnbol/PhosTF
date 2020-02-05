@@ -1,10 +1,10 @@
 #!/usr/bin/env Rscript
 
 # packages
-library(reshape2)
-library(Matrix)
-library(eulerr)
-library(verification) # roc auc with p-value
+suppressPackageStartupMessages(library(reshape2))
+suppressPackageStartupMessages(library(Matrix))
+suppressPackageStartupMessages(library(eulerr))
+suppressPackageStartupMessages(library(verification)) # roc auc with p-value
 
 # functions
 flatten = function(x) as.vector(as.matrix(x))
