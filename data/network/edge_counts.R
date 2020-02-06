@@ -2,6 +2,8 @@
 # purpose is to make column EDGES in table for edge data, 
 # indicating how many unique edges are described in the data based on having source node among KP or TF and target node among V
 
+options(stringsAsFactors=F)
+
 # functions
 
 flatten = function(x) as.vector(as.matrix(x))
@@ -22,6 +24,7 @@ yeastkid = read.table("../processed/yeastkid/P_edges.tsv", sep="\t", header=T, q
 colnames(fiedler) = colnames(fiedler_EMAP) = colnames(yeastkid) = c("P", "Target")
 netphorest = read.table("../processed/NetPhorest/scores.tsv", sep="\t", header=T, quote="", check.names=F)[,1:2]
 networkin = read.table("../processed/NetworKIN/scores.tsv", sep="\t", header=T, quote="", check.names=F)[,1:2]
+ptacek = read.table("../processed/ptacek_2005/KP_edges.tsv", sep="\t", header=T, quote="", check.names=F)
 balaji = read.table("../processed/balaji_2006/TF_edges.tsv", sep="\t", header=T, quote="", check.names=F)[,1:2]
 workman = read.table("../processed/workman_2006/TF_edges.tsv", sep="\t", header=T, quote="", check.names=F)[,1:2]
 harbison_YPD = read.table("../processed/harbison_2004/TF_edges_YPD.tsv", sep="\t", header=T, quote="", check.names=F)[,1:2]
@@ -50,6 +53,7 @@ fiedler_EMAP = unique(fiedler_EMAP[fiedler_EMAP$P!=fiedler_EMAP$Target,])
 yeastkid = unique(yeastkid[yeastkid$P!=yeastkid$Target,])
 netphorest = unique(netphorest[netphorest$KP!=netphorest$Target,])
 networkin = unique(networkin[networkin$KP!=networkin$Target,])
+ptacek = unique(ptacek[ptacek$KP!=ptacek$Target,])
 balaji = unique(balaji[balaji$TF!=balaji$Target,])
 workman = unique(workman[workman$TF!=workman$Target,])
 harbison = unique(rbind(harbison_YPD,harbison_conds))
@@ -70,6 +74,7 @@ sum((fiedler_EMAP$P %in% KPs) & (fiedler_EMAP$Target %in% KPTFs))
 sum((yeastkid$P %in% KPs) & (yeastkid$Target %in% KPTFs))
 sum((netphorest$KP %in% KPs) & (netphorest$Target %in% KPTFs))
 sum((networkin$KP %in% KPs) & (networkin$Target %in% KPTFs))
+sum((ptacek$KP %in% KPs) & (ptacek$Target %in% KPTFs))
 sum((balaji$TF %in% TFs) & (balaji$Target %in% Vs))
 sum((workman$TF %in% TFs) & (workman$Target %in% Vs))
 sum((harbison$TF %in% TFs) & (harbison$Target %in% Vs))
