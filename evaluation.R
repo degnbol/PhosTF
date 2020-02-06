@@ -53,7 +53,7 @@ for (WP_fname in WP_fnames) {
     WP = read.matrix(WP_fname)
     if (all(dim(WP) == nV)) {
         # is square, use the relevant part
-        WP = WP[nP+nT,nP]
+        WP = WP[1:(nP+nT),1:nP]
     }
     colnames(WP) = KP
     rownames(WP) = c(KP, TF)
