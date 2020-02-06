@@ -51,6 +51,10 @@ for (WP_fname in WP_fnames) {
     setwd(dirname(WP_fname))
     WP_fname = basename(WP_fname)
     WP = read.matrix(WP_fname)
+    if (all(dim(WP) == nV)) {
+        # is square, use the relevant part
+        WP = WP[nP+nT,nP]
+    }
     colnames(WP) = KP
     rownames(WP) = c(KP, TF)
     P_eval = read.table(P_fname, header=T, sep="\t", quote="", check.names=F)
