@@ -51,9 +51,10 @@ return:
 - Mₚ: Masking matrix for KP. Square.
 - U: Matrix holding column vectors of non-KO indexes for each experiment. No need to be square but has to have same shape as X.
 """
-constants(n::Integer, nₜ::Integer, nₚ::Integer, J::AbstractMatrix) = (Mₜ=default_Mₜ(n, nₜ, nₚ), Mₚ=default_Mₚ(n, nₜ, nₚ), U=_U(J))
+constants(n::Integer, nₜ::Integer, nₚ::Integer, J::AbstractMatrix) = (Mₜ=default_Mₜ(n,nₜ,nₚ), Mₚ=default_Mₚ(n,nₜ,nₚ), U=_U(J))
 "- K: number of experiments (k in 1:K)"
-constants(n::Integer, nₜ::Integer, nₚ::Integer, K::Integer=nₜ+nₚ) = constants(n, nₜ, nₚ, eye(n,K))
+constants(n::Integer, nₜ::Integer, nₚ::Integer, K::Integer=nₜ+nₚ) = constants(n,nₜ,nₚ, eye(n,K))
+constants(Wₜ::AbstractMatrix, Wₚ::AbstractMatrix) = constants(nnₜnₚ(Wₜ,Wₚ)...)
 
 
 nnₜnₚ(Wₜ::AbstractMatrix, Wₚ::AbstractMatrix) = size(Wₜ,1), size(Wₜ,2), size(Wₚ,2)
