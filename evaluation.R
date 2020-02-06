@@ -4,6 +4,7 @@
 suppressPackageStartupMessages(library(reshape2))
 suppressPackageStartupMessages(library(Matrix))
 suppressPackageStartupMessages(library(eulerr))
+suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(verification)) # roc auc with p-value
 
 # functions
@@ -20,37 +21,39 @@ unwhich = function(which, dim=max(which)) {
     y[which] = TRUE
     y
 }
-
-
-
-example = T
-if (example) {
-    WP_fnames = "~/cwd/data/inference/02/WP_infer.mat"
-} else {
-    WP_fnames = commandArgs(trailingOnly=T)
+# combine pvals using fishers method https://en.wikipedia.org/wiki/Fisher%27s_method 
+# chisq = -2 sum(ln(p-values)); pval = 1-pchisq(chisq, df=2length(p-values))
+fisher.method.log = function(pvals) {
+    df = 2*length(pvals)
+    pchisq(-2*sum(log(pvals),na.rm=TRUE),df,lower.tail=FALSE,log.p=TRUE)
 }
 
 
+WP_fnames = commandArgs(trailingOnly=T)
+# WP_fnames = "~/cwd/data/inference/02/WP_infer.mat"
+P_fname = "~/cwd/data/evaluation/P_eval.tsv"
+KP_fname = "~/cwd/data/network/KP.txt"
+TF_fname = "~/cwd/data/network/TF.txt"
+V_fname = "~/cwd/data/network/V.txt"
+KP = read.vector(KP_fname)
+TF = read.vector(TF_fname)
+V = read.vector(V_fname)
+PT = c(KP,TF)
+nP = length(KP)
+nV = length(V)
+nT = length(TF)
+nO = nV-length(PT)
+
+rundir = getwd()
+
 for (WP_fname in WP_fnames) {
-    
+    cat(WP_fname, "\n")
     setwd(dirname(WP_fname))
     WP_fname = basename(WP_fname)
-    
-    
-    P_fname = "~/cwd/data/evaluation/P_eval.tsv"
-    KP_fname = "~/cwd/data/network/KP.txt"
-    TF_fname = "~/cwd/data/network/TF.txt"
-    V_fname = "~/cwd/data/network/V.txt"
-    
-    
-    P_eval = read.table(P_fname, header=T, sep="\t", quote="", check.names=F)
     WP = read.matrix(WP_fname)
-    KP = read.vector(KP_fname)
-    TF = read.vector(TF_fname)
-    V = read.vector(V_fname)
-    PT = c(KP,TF)
     colnames(WP) = KP
     rownames(WP) = c(KP, TF)
+    P_eval = read.table(P_fname, header=T, sep="\t", quote="", check.names=F)
     # swap rownames and colnames columns so the order will be source then target
     KP_edges = melt_matrix(WP)[,c(2,1,3)]
     colnames(KP_edges) = c("P",  "Target", "marker")
@@ -128,34 +131,59 @@ for (WP_fname in WP_fnames) {
         list(value=intersect, p=phyper(intersect, m, n, k, lower.tail=FALSE))
     }
     
-    p.selection.q = function(selection) {
+    quantiles = seq(0.01, 0.333, 0.0025)
+    quantiles_plot = c(0.01, 0.025, 0.05, 0.075, 0.1, 0.2, 0.25, 0.333)
+    
+    p.selection.q = function(selection, quantiles) {
         out = data.frame()
-        quantiles = c(0.01, 0.025, 0.05, 0.075, 0.1, 0.2)
         for (k in quantiles*nrow(venndata)) {
             out = rbind(out, p.selection(k, selection))
         }
-        data.frame(test=paste(selection, quantiles), out)
+        data.frame(test=paste(selection, quantiles), selection=selection, quantile=quantiles, out)
     }
     
-    positive.intersections = rbind(p.selection.q("known"), p.selection.q("litterature"), p.selection.q("invitro"))
+    known.p = p.selection.q("known", quantiles)
+    litterature.p = p.selection.q("litterature", quantiles)
+    invitro.p = p.selection.q("invitro", quantiles)
+    positive.intersections = rbind(known.p, litterature.p, invitro.p)
     best = positive.intersections[which.min(positive.intersections$p),]
     score = -log10(best$p)
     
-    eval.table = rbind(cortable, aucs_P, positive.intersections)
+    eval.table = rbind(cortable, aucs_P, positive.intersections[positive.intersections$quantile%in%quantiles_plot, c("test", "value", "p")])
     eval.table = eval.table[order(eval.table$p),]  # sort by p-value
     
     write.table(eval.table, "evaluation.tsv", sep="\t", quote=F, row.names=F)
     write.table(score, "score.txt", quote=F, row.names=F, col.names=F)
     
     ### Plotting
-    selection = gsub(" .*", "", best$test)
-    k = as.numeric(gsub(".* ", "", best$test)) * nrow(venndata)
+    selection = as.character(best$selection)
+    k = best$quantile * nrow(venndata)
     inferred = unwhich(marker_order[1:k], dim=nrow(P_eval))
     eulerdata = euler(data.frame(venndata[,c("potential", selection)], inferred=inferred), shape="ellipse")
     pdf("euler.pdf")
     print(plot(eulerdata, labels=T, quantities=T))
     dev.off()
     
+    fisher.ps = c(fisher.method.log(known.p$p), fisher.method.log(litterature.p$p), fisher.method.log(invitro.p$p))
+    pltdf = list(known.p, litterature.p, invitro.p)[[which.min(fisher.ps)]]
+    
+    second_axis = dup_axis(name="mean KP substrates", breaks=quantiles_plot, labels=round(quantiles_plot*nrow(venndata)/length(KP),1))
+    
+    plt = ggplot(data=pltdf, aes(x=quantile, y=-log10(p))) +
+        geom_line() +
+        scale_y_continuous(breaks=seq(0,18,3)) +
+        scale_x_continuous(breaks=quantiles_plot, labels=gsub("0\\.","\\.",quantiles_plot), sec.axis=second_axis) +
+        theme_linedraw() +
+        geom_hline(yintercept=-log10(0.05), linetype="dashed") + 
+        annotate("text", x=.31, y=2.01, label="p=0.05", size=3) +
+        ylab(expression("-"*log[10]*" p")) +
+        theme(panel.grid.major = element_line(colour = "gray"), 
+              panel.grid.minor = element_line(colour = "lightgray"))
+    
+    ggsave("hyperp.pdf", plot=plt, width=7, height=3)
+    
+    
+    setwd(rundir)  # go back to so relative dirs for other files still work
 }
 
 
