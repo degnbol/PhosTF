@@ -120,36 +120,64 @@ for (WP_fname in WP_fnames) {
         ptmod = !is.na(P_eval$ptmod) & P_eval$ptmod > 250,
         ptacek = !is.na(P_eval$ptacek)
     )
-    venndata$litterature = venndata$biogrid | venndata$fasolo | venndata$parca | venndata$fiedler
+    venndata$literature = venndata$biogrid | venndata$fasolo | venndata$parca | venndata$fiedler
     venndata$curated = venndata$yeastkid | venndata$ptmod
-    venndata$known = venndata$litterature | venndata$curated
+    venndata$known = venndata$literature | venndata$curated
     venndata$invitro = venndata$known | venndata$ptacek
     
     # index indicating which edge is inferred most strongly to most weakly
-    marker_order = order(abs(P_eval$marker), decreasing=T)
+    marker_order = function(k, index) {
+        if(missing(index)) marker = P_eval$marker
+        else marker = P_eval$marker[index]
+        order(abs(marker), decreasing=T)[1:k]
+    }
     
-    p.selection = function(k, selection) {
-        intersect = sum(venndata[marker_order[1:k],selection])
-        m = sum(venndata[,selection])
-        n = nrow(venndata) - m
-        list(value=intersect, p=phyper(intersect, m, n, k, lower.tail=FALSE))
+    # logical version of marker_order
+    top_marked = function(k, index) {
+        if(!missing(index)) dim=sum(index)
+        else dim=nrow(P_eval)
+        unwhich(marker_order(k, index), dim=dim)
+    }
+    
+    p.selection = function(k, col_select, row_idx) {
+        drawn = top_marked(k, row_idx)
+        if(missing(row_idx)) row_idx = rep(TRUE, nrow(venndata))
+        evaldata = venndata[row_idx, col_select]
+        q = sum(evaldata[drawn])  # number of correct inferences
+        m = sum(evaldata) # number of true edges
+        n = length(evaldata) - m  # number of potential edges (not in true edge set)
+        list(value=q, p=phyper(q, m, n, sum(drawn), lower.tail=FALSE))
     }
     
     quantiles = seq(0.01, 0.333, 0.0025)
     quantiles_plot = c(0.01, 0.025, 0.05, 0.075, 0.1, 0.2, 0.25, 0.333)
     
-    p.selection.q = function(selection, quantiles) {
+    p.selection.q = function(quantiles, col_select, row_idx) {
         out = data.frame()
-        for (k in quantiles*nrow(venndata)) {
-            out = rbind(out, p.selection(k, selection))
+        if (missing(row_idx)) n = nrow(venndata)
+        else n = sum(row_idx)
+        for (k in quantiles*n) {
+            out = rbind(out, p.selection(k, col_select, row_idx))
         }
-        data.frame(test=paste(selection, quantiles), selection=selection, quantile=quantiles, out)
+        data.frame(test=paste(col_select, quantiles), selection=col_select, quantile=quantiles, out)
     }
     
-    known.p = p.selection.q("known", quantiles)
-    litterature.p = p.selection.q("litterature", quantiles)
-    invitro.p = p.selection.q("invitro", quantiles)
-    positive.intersections = rbind(known.p, litterature.p, invitro.p)
+    KP2KP.idx = P_eval$Target%in%KP
+    KP2TF.idx = P_eval$Target%in%TF
+    stopifnot(all(KP2KP.idx|KP2TF.idx))
+    
+    known_KP.p = p.selection.q(quantiles, "known", KP2KP.idx)
+    literature_KP.p = p.selection.q(quantiles, "literature", KP2KP.idx)
+    invitro_KP.p = p.selection.q(quantiles, "invitro", KP2KP.idx)
+    known_TF.p = p.selection.q(quantiles, "known", KP2TF.idx)
+    literature_TF.p = p.selection.q(quantiles, "literature", KP2TF.idx)
+    invitro_TF.p = p.selection.q(quantiles, "invitro", KP2TF.idx)
+    known_KP.p$target = literature_KP.p$target = invitro_KP.p$target = "KP"
+    known_TF.p$target = literature_TF.p$target = invitro_TF.p$target = "TF"
+    known.p = rbind(known_KP.p, known_TF.p)
+    literature.p = rbind(literature_KP.p, literature_TF.p)
+    invitro.p = rbind(invitro_KP.p, invitro_TF.p)
+    positive.intersections = rbind(known.p, literature.p, invitro.p)
     best = positive.intersections[which.min(positive.intersections$p),]
     score = -log10(best$p)
     
@@ -161,30 +189,40 @@ for (WP_fname in WP_fnames) {
     
     ### Plotting
     selection = as.character(best$selection)
-    k = best$quantile * nrow(venndata)
-    inferred = unwhich(marker_order[1:k], dim=nrow(P_eval))
-    eulerdata = euler(data.frame(venndata[,c("potential", selection)], inferred=inferred), shape="ellipse")
-    pdf("euler.pdf")
-    print(plot(eulerdata, labels=T, quantities=T))
+    inferred.KP = top_marked(best$quantile * sum(KP2KP.idx), KP2KP.idx)
+    inferred.TF = top_marked(best$quantile * sum(KP2TF.idx), KP2TF.idx)
+    eulerdata.KP = euler(data.frame(venndata[KP2KP.idx,c("potential", selection)], inferred=inferred.KP), shape="ellipse")
+    eulerdata.TF = euler(data.frame(venndata[KP2TF.idx,c("potential", selection)], inferred=inferred.TF), shape="ellipse")
+    
+    eulerr_options(fills=list(fill=c("transparent", "green", "lightgray")), padding=unit(14, units="pt"), labels=list(font=3), quantities=list(font=2))
+    pdf("euler_KP.pdf", width=4, height=4)
+    print(plot(eulerdata.KP, quantities=T, labels=c("potential", "known", "inferred"), adjust_labels=T))
+    dev.off()
+    pdf("euler_TF.pdf", width=4, height=4)
+    print(plot(eulerdata.TF, quantities=T, labels=c("potential", "known", "inferred"), adjust_labels=T))
     dev.off()
     
-    fisher.ps = c(fisher.method.log(known.p$p), fisher.method.log(litterature.p$p), fisher.method.log(invitro.p$p))
-    pltdf = list(known.p, litterature.p, invitro.p)[[which.min(fisher.ps)]]
+    fisher.ps = c(fisher.method.log(c(known_KP.p$p, known_TF.p$p)),
+                  fisher.method.log(c(literature_KP.p$p, literature_TF.p$p)),
+                  fisher.method.log(c(invitro_KP.p$p, invitro_TF.p$p)))
+    plt.p = list(known.p, literature.p, invitro.p)[[which.min(fisher.ps)]]
     
     second_axis = dup_axis(name="substrates/KP", breaks=quantiles_plot, labels=round(quantiles_plot*nrow(venndata)/length(KP),1))
 
-    plt = ggplot(data=pltdf, aes(x=quantile, y=-log10(p))) +
+    plt = ggplot(data=plt.p, aes(x=quantile, y=-log10(p), color=target)) +
         geom_line() +
-        scale_y_continuous(breaks=seq(0,18,3)) +
-        scale_x_continuous(breaks=quantiles_plot, labels=gsub("0\\.","\\.",quantiles_plot), sec.axis=second_axis) +
+        scale_y_continuous(breaks=seq(0,24,3), expand=c(0,0), limits=c(0, 24)) +
+        scale_x_continuous(breaks=quantiles_plot, labels=gsub("0\\.","\\.",quantiles_plot), sec.axis=second_axis, expand=c(0,0), limits=c(min(quantiles_plot),max(quantiles_plot))) +
         theme_linedraw() +
         geom_hline(yintercept=-log10(0.05), linetype="dashed") + 
-        annotate("text", x=.31, y=2.01, label="p=0.05", size=3) +
+        annotate("text", x=.31, y=2.5, label="p=0.05", size=3) +
         ylab(expression("-"*log[10]*" p")) +
         theme(panel.grid.major = element_line(colour = "gray"), 
-              panel.grid.minor = element_line(colour = "lightgray"))
+              panel.grid.minor = element_line(colour = "lightgray"),
+              plot.margin=margin(t=0,b=0,l=0,r=12,unit="pt")) +
+        scale_color_manual(values=c("#bd61b6", "#75b42f"))
     
-    ggsave("hyperp.pdf", plot=plt, width=7, height=3)
+    ggsave("hyperp.pdf", plot=plt, width=6.5, height=2.5)
     
     
     setwd(rundir)  # go back to so relative dirs for other files still work
