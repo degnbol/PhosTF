@@ -171,8 +171,8 @@ for (WP_fname in WP_fnames) {
     fisher.ps = c(fisher.method.log(known.p$p), fisher.method.log(litterature.p$p), fisher.method.log(invitro.p$p))
     pltdf = list(known.p, litterature.p, invitro.p)[[which.min(fisher.ps)]]
     
-    second_axis = dup_axis(name="mean KP substrates", breaks=quantiles_plot, labels=round(quantiles_plot*nrow(venndata)/length(KP),1))
-    
+    second_axis = dup_axis(name="substrates/KP", breaks=quantiles_plot, labels=round(quantiles_plot*nrow(venndata)/length(KP),1))
+
     plt = ggplot(data=pltdf, aes(x=quantile, y=-log10(p))) +
         geom_line() +
         scale_y_continuous(breaks=seq(0,18,3)) +
