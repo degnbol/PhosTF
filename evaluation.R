@@ -211,7 +211,7 @@ for (WP_fname in WP_fnames) {
 
     plt = ggplot(data=plt.p, aes(x=quantile, y=-log10(p), color=target)) +
         geom_line() +
-        scale_y_continuous(breaks=seq(0,24,3), expand=c(0,0), limits=c(0, 24)) +
+        scale_y_continuous(breaks=seq(0,27,3), expand=c(0,0), limits=c(0, 27)) +
         scale_x_continuous(breaks=quantiles_plot, labels=gsub("0\\.","\\.",quantiles_plot), sec.axis=second_axis, expand=c(0,0), limits=c(min(quantiles_plot),max(quantiles_plot))) +
         theme_linedraw() +
         geom_hline(yintercept=-log10(0.05), linetype="dashed") + 
