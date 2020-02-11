@@ -6,6 +6,7 @@ setwd("~/cwd/data/network")
 
 # read TF edge datasets
 TF_edges = read.table("TF_priors/TF_edges_putative.tsv", sep="\t", header=T, quote="", stringsAsFactors=F)
+TF_edges_FDR = read.table("TF_priors/TF_edges_putative_FDR.tsv", sep="\t", header=T, quote="", stringsAsFactors=F)
 
 # read KP edge datasets
 KP_edges = read.table("../processed/biogrid/P_edges.tsv", sep="\t", quote="", check.names=F, header=T)[,1:2]
@@ -49,10 +50,15 @@ measured = sort(unique(measured))
 write.table(TF, file="TF_putative.txt", quote=F, row.names=F, col.names=F)
 # filter TF edges. It is necessary to do (TF_edges$TF %in% TF) since KSS1 has been removed from TF by removal of KPs
 TF_edges = TF_edges[(TF_edges$TF %in% TF) & (TF_edges$Target %in% c(KP,TF,measured)),]
+TF_edges_FDR = TF_edges_FDR[(TF_edges_FDR$TF %in% TF) & (TF_edges_FDR$Target %in% c(KP,TF,measured)),]
 TF_edges = TF_edges[TF_edges$TF != TF_edges$Target,] # no self-loops
-all(TF %in% TF_edges$TF)  # if not true we should reduce set of TFs
+TF_edges_FDR = TF_edges_FDR[TF_edges_FDR$TF != TF_edges_FDR$Target,] # no self-loops
+stopifnot(all(TF %in% TF_edges$TF))  # if not true we should reduce set of TFs
+TF[!TF%in%TF_edges_FDR$TF] # not all TFs are actually in use in the smaller FDR set of edges. Ignore for now but effictively some TFs are in V here.
 hist(TF_edges$Pval)
-write.table(TF_edges, file="TF_edges.tsv", sep="\t", row.names=F, quote=F, na="")
+hist(TF_edges_FDR$Pval)
+write.table(TF_edges, file="TF_priors/TF_edges.tsv", sep="\t", row.names=F, quote=F, na="")
+write.table(TF_edges_FDR, file="TF_priors/TF_edges_FDR.tsv", sep="\t", row.names=F, quote=F, na="")
 
 # has to have TF edges onto, otherwise no way to regulate them
 O = measured[!(measured %in% c(KP,TF)) & (measured %in% TF_edges$Target)]
