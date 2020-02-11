@@ -6,6 +6,7 @@ suppressPackageStartupMessages(library(Matrix))
 suppressPackageStartupMessages(library(eulerr))
 suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(verification)) # roc auc with p-value
+library(latex2exp)
 
 # functions
 flatten = function(x) as.vector(as.matrix(x))
@@ -27,6 +28,9 @@ fisher.method.log = function(pvals) {
     df = 2*length(pvals)
     pchisq(-2*sum(log(pvals),na.rm=TRUE),df,lower.tail=FALSE,log.p=TRUE)
 }
+
+# convert tex code to expression object (use \\ for \ and combine expressions with list() instead of c())
+tex = function(x) unname(TeX(paste0("$",x)))
 
 
 WP_fnames = commandArgs(trailingOnly=T)
@@ -172,44 +176,49 @@ for (WP_fname in WP_fnames) {
     known_TF.p = p.selection.q(quantiles, "known", KP2TF.idx)
     literature_TF.p = p.selection.q(quantiles, "literature", KP2TF.idx)
     invitro_TF.p = p.selection.q(quantiles, "invitro", KP2TF.idx)
-    known_KP.p$target = literature_KP.p$target = invitro_KP.p$target = "KP"
-    known_TF.p$target = literature_TF.p$target = invitro_TF.p$target = "TF"
+    known_KP.p$substrate = literature_KP.p$substrate = invitro_KP.p$substrate = "KP"
+    known_TF.p$substrate = literature_TF.p$substrate = invitro_TF.p$substrate = "TF"
     known.p = rbind(known_KP.p, known_TF.p)
     literature.p = rbind(literature_KP.p, literature_TF.p)
     invitro.p = rbind(invitro_KP.p, invitro_TF.p)
     positive.intersections = rbind(known.p, literature.p, invitro.p)
-    best = positive.intersections[which.min(positive.intersections$p),]
-    score = -log10(best$p)
-    
     eval.table = rbind(cortable, aucs_P, positive.intersections[positive.intersections$quantile%in%quantiles_plot, c("test", "value", "p")])
     eval.table = eval.table[order(eval.table$p),]  # sort by p-value
     
+    fisher.ps = list(known=fisher.method.log(c(known_KP.p$p, known_TF.p$p)),
+                     literature=fisher.method.log(c(literature_KP.p$p, literature_TF.p$p)),
+                     invitro=fisher.method.log(c(invitro_KP.p$p, invitro_TF.p$p)))
+    # best selection 
+    best.selection = names(which.min(fisher.ps))
+    plt.p = list(known=known.p, literature=literature.p, invitro=invitro.p)[[best.selection]]
+    # best quantile
+    both.p = aggregate(p ~ quantile, data=plt.p, fisher.method.log)
+    best.quantile = both.p[order(both.p$p),][1,"quantile"]
+    
     write.table(eval.table, "evaluation.tsv", sep="\t", quote=F, row.names=F)
-    write.table(score, "score.txt", quote=F, row.names=F, col.names=F)
+    write.table(-fisher.ps[[best.selection]], "score.txt", quote=F, row.names=F, col.names=F)
     
     ### Plotting
-    selection = as.character(best$selection)
-    inferred.KP = top_marked(best$quantile * sum(KP2KP.idx), KP2KP.idx)
-    inferred.TF = top_marked(best$quantile * sum(KP2TF.idx), KP2TF.idx)
+    KP_color = "#bd61b6"
+    TF_color = "#75b42f"
+    
+    selection = as.character(best.selection)
+    inferred.KP = top_marked(best.quantile * sum(KP2KP.idx), KP2KP.idx)
+    inferred.TF = top_marked(best.quantile * sum(KP2TF.idx), KP2TF.idx)
     eulerdata.KP = euler(data.frame(venndata[KP2KP.idx,c("potential", selection)], inferred=inferred.KP), shape="ellipse")
     eulerdata.TF = euler(data.frame(venndata[KP2TF.idx,c("potential", selection)], inferred=inferred.TF), shape="ellipse")
     
-    eulerr_options(fills=list(fill=c("transparent", "green", "lightgray")), padding=unit(14, units="pt"), labels=list(font=3), quantities=list(font=2))
+    eulerr_options(padding=unit(14, units="pt"), labels=list(font=3), quantities=list(font=2))
     pdf("euler_KP.pdf", width=4, height=4)
-    print(plot(eulerdata.KP, quantities=T, labels=c("potential", "known", "inferred"), adjust_labels=T))
+    print(plot(eulerdata.KP, quantities=T, labels=c("potential", "known", "inferred"), adjust_labels=T, fills=list(fill=c("transparent", KP_color, "lightgray"))))
     dev.off()
     pdf("euler_TF.pdf", width=4, height=4)
-    print(plot(eulerdata.TF, quantities=T, labels=c("potential", "known", "inferred"), adjust_labels=T))
+    print(plot(eulerdata.TF, quantities=T, labels=c("potential", "known", "inferred"), adjust_labels=T, fills=list(fill=c("transparent", TF_color, "lightgray"))))
     dev.off()
-    
-    fisher.ps = c(fisher.method.log(c(known_KP.p$p, known_TF.p$p)),
-                  fisher.method.log(c(literature_KP.p$p, literature_TF.p$p)),
-                  fisher.method.log(c(invitro_KP.p$p, invitro_TF.p$p)))
-    plt.p = list(known.p, literature.p, invitro.p)[[which.min(fisher.ps)]]
-    
-    second_axis = dup_axis(name="substrates/KP", breaks=quantiles_plot, labels=round(quantiles_plot*nrow(venndata)/length(KP),1))
 
-    plt = ggplot(data=plt.p, aes(x=quantile, y=-log10(p), color=target)) +
+    second_axis = dup_axis(name="substrates/KP", breaks=quantiles_plot, labels=round(quantiles_plot*nrow(venndata)/length(KP),1))
+    
+    plt = ggplot(data=plt.p, aes(x=quantile, y=-log10(p), color=substrate)) +
         geom_line() +
         scale_y_continuous(breaks=seq(0,27,3), expand=c(0,0), limits=c(0, 27)) +
         scale_x_continuous(breaks=quantiles_plot, labels=gsub("0\\.","\\.",quantiles_plot), sec.axis=second_axis, expand=c(0,0), limits=c(min(quantiles_plot),max(quantiles_plot))) +
@@ -217,15 +226,14 @@ for (WP_fname in WP_fnames) {
         geom_hline(yintercept=-log10(0.05), linetype="dashed") + 
         annotate("text", x=.31, y=2.5, label="p=0.05", size=3) +
         ylab(expression("-"*log[10]*" p")) +
-        theme(panel.grid.major = element_line(colour = "gray"), 
-              panel.grid.minor = element_line(colour = "lightgray"),
-              plot.margin=margin(t=0,b=0,l=0,r=12,unit="pt")) +
-        scale_color_manual(values=c("#bd61b6", "#75b42f"))
+        theme(panel.grid.major=element_line(colour="gray"), 
+              panel.grid.minor=element_line(colour="lightgray"),
+              plot.margin=margin(t=0,b=0,l=0,r=0,unit="pt"),
+              legend.title=element_blank()) +
+        scale_color_manual(values=c(KP_color, TF_color), labels=list(tex("KP\\rightarrow KP"),tex("KP\\rightarrow TF")))
     
     ggsave("hyperp.pdf", plot=plt, width=6.5, height=2.5)
     
-    
     setwd(rundir)  # go back to so relative dirs for other files still work
 }
-
 
