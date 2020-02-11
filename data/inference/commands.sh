@@ -3,7 +3,7 @@ nTF=$(cat ../network/TF.txt | wc -l | xargs)
 nKP=$(cat ../network/KP.txt | wc -l | xargs)
 cat hyperparams.tsv | tr -d '\r' > temp && mv temp hyperparams.tsv
 sed 1d hyperparams.tsv | tr '\t' ',' | while IFS=',' read `head -n1 hyperparams.tsv`; do
-mkdir $folder
+mkdir -p $folder
 echo "#!/usr/bin/env zsh
 export JULIA_NUM_THREADS=6
 export OPENBLAS_NUM_THREADS=6
