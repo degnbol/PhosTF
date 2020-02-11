@@ -123,7 +123,7 @@ write.table(adjacencies[[4]], "WT_noise.csv", sep=",", quote=F)
 write.table(adjacencies[[4]], "WT_noise.mat", sep=" ", quote=F, col.names=F, row.names=F)
 
 adjacencies = get_adjacencies(edges_FDR)
-write.table(adjacencies[[4]], "WT_noise_FDR.mat", sep=" ", quote=F, col.names=F, row.names=F)
+write.table(adjacencies[[1]], "WT_FDR.mat", sep=" ", quote=F, col.names=F, row.names=F)
 
 
 
