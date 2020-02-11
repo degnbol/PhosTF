@@ -1,10 +1,10 @@
 #!/usr/bin/env Rscript
 ## packages
-library(data.table)
-library(dplyr)
-library(reshape2)
-library(Matrix)
-library(ggplot2)
+suppressPackageStartupMessages(library(data.table))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(reshape2))
+suppressPackageStartupMessages(library(Matrix))
+suppressPackageStartupMessages(library(ggplot2))
 
 ## functions
 
@@ -153,8 +153,12 @@ OE_inner   = OE_inner   == 1
 
 # we have to get rid of NaNs. We can try to copy logFC for a node under the same exp conditions
 sum(is.na(pert_outer))
-pert_outer = as.matrix(pert_outer, "ORF"); pert_outer_updated = pert_outer
-pert_inner = as.matrix(pert_inner, "ORF"); pert_inner_updated = pert_inner
+pert_outer = as.matrix(pert_outer, "ORF")
+pert_inner = as.matrix(pert_inner, "ORF")
+# make the enhanched version
+pert_outer_updated = pert_outer
+pert_inner_updated = pert_inner
+# first just fill in for NAs
 pert_outer_updated = NA2avg(pert_outer_updated, pert_inner_updated)
 # the remaining NA values are set to zero.
 sum(is.na(pert_outer_updated))
@@ -162,6 +166,10 @@ sum(is.na(pert_inner_updated))
 # correct remaining nodes to zero
 pert_outer_updated[is.na(pert_outer_updated)] = 0
 pert_inner_updated[is.na(pert_inner_updated)] = 0
+# save unenhanced versions
+write.table(pert_outer_updated, "logFC_outer_raw.mat", sep=" ", quote=F, row.names=F, col.names=F)
+write.table(pert_inner_updated, "logFC_inner_raw.mat", sep=" ", quote=F, row.names=F, col.names=F)
+# enhancing.
 # reducing KOs
 pert_outer_updated[KO_outer] = pert_outer_updated[KO_outer] - 4
 pert_inner_updated[KO_inner] = pert_inner_updated[KO_inner] - 4
