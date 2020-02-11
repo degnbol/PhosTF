@@ -4,3 +4,4 @@
 ./TF_mode.R
 ./TF_priors/TF_edge_weights.R
 ./edge_counts.R
+./WT.R

@@ -64,10 +64,9 @@ library(fdrtool)
 sum(all_edges$Pval <= .05)
 sum(p.adjust(all_edges$Pval, "BH") <= .05)
 fdr = fdrtool(all_edges$Pval, statistic="pvalue", plot=FALSE)
-sum(fdr$qval < .2)
-TF_edges = all_edges[all_edges$Pval <= .05,]
-# TF_edges = all_edges[fdr$qval <= .2,]  # uncomment and use this if you want to control FDR rate<0.2 rather than raw p<0.05
-write.table(TF_edges, "TF_edges_putative.tsv", sep="\t", row.names=F, quote=F, na="")
+sum(fdr$qval < .2) / 231
+write.table(all_edges[fdr$qval <= .2,], "TF_edges_putative_FDR.tsv", sep="\t", row.names=F, quote=F, na="")
+write.table(all_edges[all_edges$Pval <= .05,], "TF_edges_putative.tsv", sep="\t", row.names=F, quote=F, na="")
 
 
 
