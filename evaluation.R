@@ -262,7 +262,8 @@ for (WP_fname in WP_fnames) {
             annotate("text", x=c(1,2)-fgdg+bw/fgscl, vjust=0, hjust=-hn, y=0, label="known", fontface="italic", color=c(KP_color, TF_color)) +
             annotate("text", x=c(1,2,1,2)-fgdg, vjust=0.5, y=euler.plt.fg$value*fgscl, hjust=c(1+hn,1+hn,-hn,-hn), label=abs(euler.plt.fg$value), fontface="bold", color=rep(c(KP_color, TF_color),2)) +
             coord_flip() + theme_void() + 
-            theme(legend.position="none", axis.text.y=element_text()) +
+            theme(legend.position="none", axis.text.y=element_text(),
+                  plot.margin=margin(t=0,b=0,l=0,r=0,unit="pt")) +
             scale_x_discrete(labels=parse(text=c(tex("KP\\rightarrow KP"),tex("KP\\rightarrow TF"))))
         
     }
