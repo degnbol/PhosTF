@@ -205,34 +205,91 @@ for (WP_fname in WP_fnames) {
     selection = as.character(best.selection)
     inferred.KP = top_marked(best.quantile * sum(KP2KP.idx), KP2KP.idx)
     inferred.TF = top_marked(best.quantile * sum(KP2TF.idx), KP2TF.idx)
-    eulerdata.KP = euler(data.frame(venndata[KP2KP.idx,c("potential", selection)], inferred=inferred.KP), shape="ellipse")
-    eulerdata.TF = euler(data.frame(venndata[KP2TF.idx,c("potential", selection)], inferred=inferred.TF), shape="ellipse")
+    eulerdata.KP = data.frame(venndata[KP2KP.idx,c("potential", selection)], inferred=inferred.KP)
+    eulerdata.TF = data.frame(venndata[KP2TF.idx,c("potential", selection)], inferred=inferred.TF)
     
-    eulerr_options(padding=unit(14, units="pt"), labels=list(font=3), quantities=list(font=2))
-    pdf("euler_KP.pdf", width=4, height=4)
-    print(plot(eulerdata.KP, quantities=T, labels=c("potential", "known", "inferred"), adjust_labels=T, fills=list(fill=c("transparent", KP_color, "lightgray"))))
-    dev.off()
-    pdf("euler_TF.pdf", width=4, height=4)
-    print(plot(eulerdata.TF, quantities=T, labels=c("potential", "known", "inferred"), adjust_labels=T, fills=list(fill=c("transparent", TF_color, "lightgray"))))
-    dev.off()
+    plot_eulers = function() {
+        eulerr_options(padding=unit(14, units="pt"), labels=list(font=3), quantities=list(font=2))
+        pdf("euler_KP.pdf", width=4, height=4)
+        print(plot(euler(eulerdata.KP, shape="ellipse"), quantities=T, labels=c("potential", "known", "inferred"), adjust_labels=T, fills=list(fill=c("transparent", KP_color, "lightgray"))))
+        dev.off()
+        pdf("euler_TF.pdf", width=4, height=4)
+        print(plot(euler(eulerdata.TF, shape="ellipse"), quantities=T, labels=c("potential", "known", "inferred"), adjust_labels=T, fills=list(fill=c("transparent", TF_color, "lightgray"))))
+        dev.off()
+    }
+    
+    plot_square_euler = function() {
+        
+        euler.plt.bg = rbind(data.frame(substrate="KP", inferred =-sum(eulerdata.KP$inferred), potential = sum(!eulerdata.KP$inferred)),
+                             data.frame(substrate="TF", inferred =-sum(eulerdata.TF$inferred), potential = sum(!eulerdata.TF$inferred)))
+        euler.plt.fg = rbind(data.frame(substrate="KP", TP       =-sum( eulerdata.KP$inferred & eulerdata.KP[selection]),
+                                                        FN       = sum(!eulerdata.KP$inferred & eulerdata.KP[selection])),
+                             data.frame(substrate="TF", TP       =-sum( eulerdata.TF$inferred & eulerdata.TF[selection]),
+                                                        FN       = sum(!eulerdata.TF$inferred & eulerdata.TF[selection])))
+        euler.plt.bg = melt(euler.plt.bg, id.vars="substrate")
+        euler.plt.fg = melt(euler.plt.fg, id.vars="substrate")
+        euler.plt.bg$count = abs(euler.plt.bg$value)
+        # include the inferred in the actual count of potentials
+        euler.plt.bg$count[euler.plt.bg$variable == "potential" & euler.plt.bg$substrate == "KP"] = sum(euler.plt.bg$count[euler.plt.bg$substrate == "KP"])
+        euler.plt.bg$count[euler.plt.bg$variable == "potential" & euler.plt.bg$substrate == "TF"] = sum(euler.plt.bg$count[euler.plt.bg$substrate == "TF"])
+        
+        bw = .8
+        hn = .05  # horizontal nudge
+        fgscl = 6  # how wide foreground is compared to background
+        # ggplot(mapping=aes(x=substrate, y=value)) + 
+        #     geom_bar(data=euler.plt.bg, mapping=aes(fill=variable), stat="identity", position="identity", width=bw, fill="transparent", color="black", size=2) +
+        #     geom_bar(data=euler.plt.bg, mapping=aes(fill=variable), stat="identity", position="identity", width=bw) +
+        #     geom_bar(data=euler.plt.fg, mapping=aes(fill=substrate, y=value*fgscl), stat="identity", position="identity", width=bw/fgscl, alpha=.5) +
+        #     scale_fill_manual(values=list(KP=KP_color, TF=TF_color, inferred="lightgray", potential="white")) +
+        #     annotate("text", x=c(1,2,1,2)+bw/2-.01, vjust=1,   y=euler.plt.bg$value, hjust=c(-hn,-hn,1+hn,1+hn), label=euler.plt.bg$variable, fontface="italic", alpha=c(.65,.65,1,1)) +
+        #     annotate("text", x=c(1,2,1,2)+bw/2-.01, vjust=2.2, y=euler.plt.bg$value, hjust=c(-hn,-hn,1+hn,1+hn), label=euler.plt.bg$count, fontface="bold", alpha=c(.65,.65,1,1)) +
+        #     annotate("text", x=c(1,2)+bw/4, vjust=1, hjust=0-hn, y=0, label="known", fontface="italic", color=c(KP_color, TF_color)) +
+        #     annotate("text", x=c(1,2,1,2), vjust=0.5, y=euler.plt.fg$value*fgscl, hjust=c(1+hn,1+hn,-hn,-hn), label=abs(euler.plt.fg$value), fontface="bold", color=rep(c(KP_color, TF_color),2)) +
+        #     coord_flip() + theme_void() + 
+        #     theme(legend.position="none", axis.text.y=element_text()) +
+        #     scale_x_discrete(labels=parse(text=c(tex("KP\\rightarrow KP"),tex("KP\\rightarrow TF"))))
+        
+        # version where we nudge fgs down 1/4
+        fgdg = bw/4
+        
+        ggplot(mapping=aes(x=substrate, y=value)) + 
+            geom_bar(data=euler.plt.bg, mapping=aes(fill=variable), stat="identity", position="identity", width=bw, fill="transparent", color="black", size=2) +
+            geom_bar(data=euler.plt.bg, mapping=aes(fill=variable), stat="identity", position="identity", width=bw) +
+            geom_bar(data=euler.plt.fg, mapping=aes(fill=substrate, y=value*fgscl), stat="identity", position=position_nudge(x=-fgdg), width=bw/fgscl, alpha=.5) +
+            scale_fill_manual(values=list(KP=KP_color, TF=TF_color, inferred="lightgray", potential="white")) +
+            annotate("text", x=c(1,2,1,2)+bw/2-.01, vjust=1,   y=euler.plt.bg$value, hjust=c(-hn,-hn,1+hn,1+hn), label=euler.plt.bg$variable, fontface="italic", alpha=c(.65,.65,1,1)) +
+            annotate("text", x=c(1,2,1,2)+bw/2-.01, vjust=2.2, y=euler.plt.bg$value, hjust=c(-hn,-hn,1+hn,1+hn), label=euler.plt.bg$count, fontface="bold", alpha=c(.65,.65,1,1)) +
+            annotate("text", x=c(1,2)-fgdg+bw/fgscl, vjust=0, hjust=-hn, y=0, label="known", fontface="italic", color=c(KP_color, TF_color)) +
+            annotate("text", x=c(1,2,1,2)-fgdg, vjust=0.5, y=euler.plt.fg$value*fgscl, hjust=c(1+hn,1+hn,-hn,-hn), label=abs(euler.plt.fg$value), fontface="bold", color=rep(c(KP_color, TF_color),2)) +
+            coord_flip() + theme_void() + 
+            theme(legend.position="none", axis.text.y=element_text()) +
+            scale_x_discrete(labels=parse(text=c(tex("KP\\rightarrow KP"),tex("KP\\rightarrow TF"))))
+        
+    }
+    
+    
+    plot_logp = function() {
 
-    second_axis = dup_axis(name="substrates/KP", breaks=quantiles_plot, labels=round(quantiles_plot*nrow(venndata)/length(KP),1))
+        second_axis = dup_axis(name="substrates/KP", breaks=quantiles_plot, labels=round(quantiles_plot*nrow(venndata)/length(KP),1))
+        
+        ggplot(data=plt.p, aes(x=quantile, y=-log10(p), color=substrate)) +
+            geom_line() +
+            scale_y_continuous(breaks=seq(0,27,3), expand=c(0,0), limits=c(0, 27)) +
+            scale_x_continuous(breaks=quantiles_plot, labels=gsub("0\\.","\\.",quantiles_plot), sec.axis=second_axis, expand=c(0,0), limits=c(min(quantiles_plot),max(quantiles_plot))) +
+            theme_linedraw() +
+            geom_hline(yintercept=-log10(0.05), linetype="dashed") + 
+            annotate("text", x=.31, y=2.5, label="p=0.05", size=3) +
+            ylab(expression("-"*log[10]*" p")) +
+            theme(panel.grid.major=element_line(colour="gray"), 
+                  panel.grid.minor=element_line(colour="lightgray"),
+                  plot.margin=margin(t=0,b=0,l=0,r=0,unit="pt"),
+                  legend.title=element_blank()) +
+            scale_color_manual(values=c(KP_color, TF_color), labels=list(tex("KP\\rightarrow KP"),tex("KP\\rightarrow TF")))
+    }
     
-    plt = ggplot(data=plt.p, aes(x=quantile, y=-log10(p), color=substrate)) +
-        geom_line() +
-        scale_y_continuous(breaks=seq(0,27,3), expand=c(0,0), limits=c(0, 27)) +
-        scale_x_continuous(breaks=quantiles_plot, labels=gsub("0\\.","\\.",quantiles_plot), sec.axis=second_axis, expand=c(0,0), limits=c(min(quantiles_plot),max(quantiles_plot))) +
-        theme_linedraw() +
-        geom_hline(yintercept=-log10(0.05), linetype="dashed") + 
-        annotate("text", x=.31, y=2.5, label="p=0.05", size=3) +
-        ylab(expression("-"*log[10]*" p")) +
-        theme(panel.grid.major=element_line(colour="gray"), 
-              panel.grid.minor=element_line(colour="lightgray"),
-              plot.margin=margin(t=0,b=0,l=0,r=0,unit="pt"),
-              legend.title=element_blank()) +
-        scale_color_manual(values=c(KP_color, TF_color), labels=list(tex("KP\\rightarrow KP"),tex("KP\\rightarrow TF")))
     
-    ggsave("hyperp.pdf", plot=plt, width=6.5, height=2.5)
+    ggsave("square_euler.pdf", plot=plot_square_euler(), width=6.5, height=1.5)
+    ggsave("hyperp.pdf", plot=plot_logp(), width=6.5, height=2.5)
     
     setwd(rundir)  # go back to so relative dirs for other files still work
 }
