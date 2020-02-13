@@ -77,6 +77,7 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 	W = trainWT ? param(W) : [W.*cs.Mₜ, param(W.*cs.Mₚ)]
 	# if we have Iₚₖ and Iₚₚ given but they do not add up to nₚ it means that ∃ KP ∉ PK ∪ PP
 	Iₚ = V !== nothing && sum(Iₚₖ + Iₚₚ) == nₚ ? Iₚₖ + Iₚₚ : Model.Iₚ(n, nₜ, nₚ)
+	Iₜ = Model.Iₜ(n, nₜ, nₚ)
 	λW == 0 && (λW = nothing)
 	
 	error_cost = quadquad ? Model.quadquad : Model.sse
