@@ -73,7 +73,7 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 	B_cost = λWT ? LB : LB_WP
 	function L(X)
 		W′ = Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ)
-		error_cost(W′, cs, X) + B_cost(W′, cs, λ, W_reg) + L1(W, λW)
+		error_cost(W′, cs, X) + B_cost(W′, cs, λ, W_reg) + L1(W′, λW)
 	end
 
 	epoch = 0
