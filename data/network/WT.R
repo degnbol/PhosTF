@@ -56,10 +56,15 @@ weight_plot = function(dataset, alpha_, beta_) {
     labels = c("simulated", "constructed")
     plotdf$label = factor(plotdf$label, levels=labels)
     color_palette = c("gray50", "green4", "red")
-    
     bw = .05
-    plt = ggplot(plotdf, aes(weight, fill=label)) +
-        geom_histogram(alpha=0.5, position="identity", binwidth=bw)
+    
+    Beta_curve = data.frame(weight=seq(-1,1,bw/2), dens=dbeta(abs(seq(-1,1,bw/2)), alpha_, beta_))
+    
+    plt = ggplot(plotdf, aes(weight)) +
+        geom_histogram(mapping=aes(fill=label), alpha=0.5, position="identity", binwidth=bw) #+
+        #geom_line(data=Beta_curve, mapping=aes(y=2500*dens+1), linetype=2)
+    
+    
     stepdf = ggplot_build(plt)$data[[1]][,c("xmin", "y", "group")]
     stepdf$label = factor(stepdf$group, labels=labels)
     # make visual corrections
@@ -80,6 +85,7 @@ weight_plot = function(dataset, alpha_, beta_) {
         ylab("edge count") +
         scale_y_log10(expand=c(0,0), limits=c(1,80000)) +
         scale_x_continuous(sec.axis=dup_axis(name="p-value", breaks=px, labels=abs(pbreaks)), limits=c(-1-bw,1+bw), expand=c(0,0))
+        
 }
 
 # weight_plot(edges$weight)
