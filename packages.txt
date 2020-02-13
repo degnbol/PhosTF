@@ -1,3 +1,4 @@
+ArgParse
 BSON
 Base
 Colors
@@ -10,10 +11,12 @@ Distributions
 Fire
 Flux
 Formatting
+HypothesisTests
 JLD
 JSON3
 LinearAlgebra
 Logging
+NamedTupleTools
 Plots
 Random
 SparseArrays
