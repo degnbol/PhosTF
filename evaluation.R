@@ -289,7 +289,7 @@ for (WP_fname in WP_fnames) {
     }
     
     
-    ggsave("square_euler.pdf", plot=plot_square_euler(), width=6.5, height=1.5)
+    ggsave("square_euler.pdf", plot=plot_square_euler(), width=6.5, height=1.25)
     ggsave("hyperp.pdf", plot=plot_logp(), width=6.5, height=2.5)
     
     setwd(rundir)  # go back to so relative dirs for other files still work
