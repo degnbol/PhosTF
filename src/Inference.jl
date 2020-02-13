@@ -60,7 +60,7 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 	n, K = size(X)
 	cs = Model.constants(n, nₜ, nₚ, J === nothing ? K : J)
 	M === nothing && (M = ones(n,n)) # no prior knowledge
-	M .*= cs.Mₜ .+ cs.Mₚ # enforce masks
+	M = trainWT ? M .* (cs.Mₜ .+ cs.Mₚ) : [M.*cs.Mₜ, M.*cs.Mₚ] # enforce masks
 	V = get_V(Iₚₖ, Iₚₚ, W)
 	W === nothing && (W = random_W(n))
 	W = trainWT ? param(W) : [W.*cs.Mₜ, param(W.*cs.Mₚ)]

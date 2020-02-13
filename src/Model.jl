@@ -224,8 +224,9 @@ end
 apply_priors(W, M, S) = apply_priors(apply_priors(W, M), nothing, S)
 apply_priors(W::AbstractMatrix, ::Nothing, S) = W .* (S.==0) .+ abs.(W) .* S
 apply_priors(W::AbstractVector, ::Nothing, S) = [apply_priors(W[1], nothing, S), apply_priors(W[2], nothing, S)]
-apply_priors(W::AbstractMatrix, M) = W.*M
-apply_priors(W::AbstractVector, M) = [W[1].*M, W[2].*M]
+apply_priors(W::AbstractMatrix, M::AbstractMatrix) = W.*M
+apply_priors(W::AbstractVector, M::AbstractMatrix) = [W[1].*M,    W[2].*M]
+apply_priors(W::AbstractVector, M::AbstractVector) = [W[1].*M[1], W[2].*M[2]]
 apply_priors(W, M, ::Nothing) = apply_priors(W, M)
 apply_priors(W, ::Nothing, ::Nothing) = W
 "If we know which nodes are ∈ PK and ∈ PP, then use that information."
