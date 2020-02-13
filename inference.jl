@@ -78,7 +78,8 @@ function argument_parser()
 			help = "Filename of matrix with regularization weights for Wₜ. NOT square. 
 			NaN means the weight should not be allowed, so this will function as masking as well."
 		"--PKPP"
-			help = "Filename of vector. Each element is -1 or 1 indicating PP or PK, respectively. 0s ignored."
+			help = "Filename of vector. Each element is -1 or 1 indicating PP or PK, respectively. 
+			0s are ignored. Length of vector can either be n or nₚ+nₜ."
 	end
 	s
 end
@@ -124,9 +125,9 @@ function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.
 	
 	if PKPP !== nothing
 		PKPP = vec(loaddlm(abspath_(PKPP)))
-		padding = zeros(n-length(PKPP))
-		Iₚₖ = diagm([PKPP .== +1; padding])
-		Iₚₚ = diagm([PKPP .== -1; padding])
+		PKPP = [PKPP; zeros(n-length(PKPP))]
+		Iₚₖ = diagm(PKPP .== +1)
+		Iₚₚ = diagm(PKPP .== -1)
 	else
 		Iₚₖ, Iₚₚ = nothing, nothing
 	end
