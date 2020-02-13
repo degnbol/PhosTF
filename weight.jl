@@ -65,7 +65,7 @@ end
 
 
 """
-Swap order of PK and TF in matrix (swap between PK-TF-X and TF-PK-X).
+Swap order of PK and TF in matrix (swap between PK-TF-V and TF-PK-V).
 - n1: number of nodes in first group, which will be moved to become the second.
 - n2: number of nodes in the second group, which will be move to become the first.
 """
@@ -79,7 +79,7 @@ end
 
 """
 input: WP.mat
-output: a vector indicating PK with -1, and PP with 1. 
+output: a vector indicating PK with 1, and PP with -1. 
 """
 @main function PKPP(io=nothing, o=nothing)
 	i, o = inout(io, o)
