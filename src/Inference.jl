@@ -41,9 +41,19 @@ LB_WP(W, cs::NamedTuple, λ::Real) = λ*l1(B_star(W, cs).*cs.Mₚ)
 LB_WP(W, cs::NamedTuple, λ::Real, ::Nothing) = LB_WP(W, cs, λ)
 LB_WP(W, cs::NamedTuple, λ::Real, weights) = λ*l1(B_star(W, cs).*cs.Mₚ.*weights)
 
-get_V(::Nothing, ::Nothing, ::Any) = nothing
-get_V(Iₚₖ::Matrix, Iₚₚ::Matrix, ::Nothing) = FluxUtils.random_weight(size(Iₚₖ,1),1) .|> abs |> param
-get_V(Iₚₖ::Matrix, Iₚₚ::Matrix, W::Matrix) = sign.(sum(W*(Iₚₖ-Iₚₚ); dims=2)) |> param
+"""
+If we are using PK vs PP knowledge, we have vector V with elements vᵢ for each node i. 
+"""
+init_V(::Nothing, ::Nothing, ::Any) = nothing
+"""
+vᵢ>0 if phosphorylation of i == activation of i. This will mean that we should generally have wᵢⱼ>0 for j∈PK and wᵢⱼ<0 for j∈PP.
+The opposite should be observed for a protein i that is activated when dephosphorylated.
+elements in W*(Iₚₖ-Iₚₚ) are positive if activation agrees with phosphorylation. sum(..., dims=2) shows overall effect for each target i.
+- W: a weight matrix of activation/repression effects.
+"""
+init_V(Iₚₖ::Matrix, Iₚₚ::Matrix, W::Matrix) = sign.(sum(W*(Iₚₖ-Iₚₚ); dims=2)) |> param
+"If W is not provided we assume phosphorylation == activation for all target nodes."
+init_V(Iₚₖ::Matrix, Iₚₚ::Matrix, ::Nothing) = FluxUtils.random_weight(size(Iₚₖ,1),1) .|> abs |> param
 
 
 """
@@ -62,12 +72,11 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 	cs = Model.constants(n, nₜ, nₚ, J === nothing ? K : J)
 	M === nothing && (M = ones(n,n)) # no prior knowledge
 	M = trainWT ? M .* (cs.Mₜ .+ cs.Mₚ) : [M.*cs.Mₜ, M.*cs.Mₚ] # enforce masks
-	V = get_V(Iₚₖ, Iₚₚ, W)
+	V = init_V(Iₚₖ, Iₚₚ, W)
 	W === nothing && (W = random_W(n))
 	W = trainWT ? param(W) : [W.*cs.Mₜ, param(W.*cs.Mₚ)]
-	Iₚ = V === nothing ? Model.Iₚ(n, nₜ, nₚ) : Iₚₖ + Iₚₚ
-	Iₜ = Model.Iₜ(n, nₜ, nₚ)
-	Iₓ = I(n) - (Iₜ+Iₚ)
+	# if we have Iₚₖ and Iₚₚ given but they do not add up to nₚ it means that ∃ KP ∉ PK ∪ PP
+	Iₚ = V !== nothing && sum(Iₚₖ + Iₚₚ) == nₚ ? Iₚₖ + Iₚₚ : Model.Iₚ(n, nₜ, nₚ)
 	λW == 0 && (λW = nothing)
 	
 	error_cost = quadquad ? Model.quadquad : Model.sse
@@ -76,7 +85,7 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 		W′ = Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ)
 		error_cost(W′, cs, X) + B_cost(W′, cs, λ, W_reg) + L1(W′, λW)
 	end
-
+	
 	epoch = 0
 	function cb()
 		l = L(X)
@@ -92,7 +101,7 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 		end
 		println("\t$epoch\t$(Dates.now())")
 		epoch += 1
-
+		
 		if save_every > 0 && epoch % save_every == 0
 			W′ = Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ)
 			Model.isW(W′, nₜ, nₚ) || @error("W has nonzeros in entries that should be zero")

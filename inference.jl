@@ -79,7 +79,7 @@ function argument_parser()
 			NaN means the weight should not be allowed, so this will function as masking as well."
 		"--PKPP"
 			help = "Filename of vector. Each element is -1 or 1 indicating PP or PK, respectively. 
-			0s are ignored. Length of vector can either be n or nₚ+nₜ."
+			0s are ignored (unknown or no phosphorylation mode). Length of vector can either be n or nₚ+nₜ."
 	end
 	s
 end

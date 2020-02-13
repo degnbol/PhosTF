@@ -103,7 +103,9 @@ end
 
 Iₚ(n::Integer, nₜ::Integer, nₚ::Integer) = diagm([[1 for _ in 1:nₚ]; [0 for _ in nₚ+1:n]])
 Iₜ(n::Integer, nₜ::Integer, nₚ::Integer) = diagm([[0 for _ in 1:nₚ]; [1 for _ in 1:nₜ]; [0 for _ in nₚ+nₜ+1:n]])
-
+Iₒ(n::Integer, nₜ::Integer, nₚ::Integer) = diagm([[0 for _ in 1:nₚ+nₜ]; [1 for _ in nₚ+nₜ+1:n]])
+"All except nodes ∈ PK ∪ PP"
+I₋ₖₚ(Iₚₖ::AbstractMatrix, Iₚₚ::AbstractMatrix) = I(size(Iₚₖ,1)) - (Iₚₖ+Iₚₚ)
 
 _B(W::AbstractMatrix, cs::NamedTuple) = (W.*cs.Mₜ) * inv(I(size(W,1)) - W.*cs.Mₚ)
 """
@@ -230,7 +232,12 @@ apply_priors(W::AbstractVector, M::AbstractVector) = [W[1].*M[1], W[2].*M[2]]
 apply_priors(W, M, ::Nothing) = apply_priors(W, M)
 apply_priors(W, ::Nothing, ::Nothing) = W
 "If we know which nodes are ∈ PK and ∈ PP, then use that information."
-apply_priors(W::AbstractMatrix, V::AbstractArray, M, S, Iₚₖ::Matrix, Iₚₚ::Matrix) = apply_priors(W*(I(size(W,1))-(Iₚₖ+Iₚₚ)) + _Wₚ(W,V,Iₚₖ,Iₚₚ), M, S)
+apply_priors(W::AbstractMatrix, V::AbstractArray, M, S, Iₚₖ::Matrix, Iₚₚ::Matrix) = apply_priors(W*I₋ₖₚ(Iₚₖ,Iₚₚ) + _Wₚ(W,V,Iₚₖ,Iₚₚ), M, S)
+"""
+W[2]*I₋ₖₚ(Iₚₖ,Iₚₚ) for the nodes ∈ KP where it is not known if they are a kinase or phosphatase 
+(or where we do not wish to simply describe them as only one or the other).
+"""
+apply_priors(W::AbstractVector, V::AbstractArray, M, S, Iₚₖ::Matrix, Iₚₚ::Matrix) = apply_priors([W[1], W[2]*I₋ₖₚ(Iₚₖ,Iₚₚ) + _Wₚ(W[2],V,Iₚₖ,Iₚₚ)], M, S)
 apply_priors(W, ::Nothing, M, S, ::Any, ::Any) = apply_priors(W, M, S)
 
 end;

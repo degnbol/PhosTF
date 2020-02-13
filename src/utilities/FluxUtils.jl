@@ -9,7 +9,7 @@ export zerodiag
 export random_weight
 
 """
-Set Gaussian random values where μ is set by the number of values.
+Set Gaussian random values where σ is set by the number of values.
 """
 random_weight(n::Integer, m::Integer) = randn(n, m) ./ √(n*m)
 
