@@ -133,15 +133,15 @@ stopifnot(any(OE_inner != 0))
 write.table(KOOE_outer, file="KOOE_outer.csv", sep=",", quote=F)
 write.table(KOOE_inner, file="KOOE_inner.csv", sep=",", quote=F)
 # we add NaN entries to J, which will result in their values being ignored in the SSE calculation during gradient descent
-J_outer = as.data.table(KOOE_outer, "ORF"); setkey(J_outer, "ORF")
-J_inner = as.data.table(KOOE_inner, "ORF"); setkey(J_inner, "ORF")
+J_outer = as.data.table(KOOE_outer, "ORF")
+J_inner = as.data.table(KOOE_inner, "ORF")
 J_outer[is.na(pert_outer)] = 1 # this notation was checked to work
 J_inner[is.na(pert_inner)] = 1 # this notation was checked to work
+# VERY IMPORTANT do not setkey on tables, it sorts them so they will stop being in correct KP->TF->O order
 write.table(J_outer, file="J_outer.csv", sep=",", quote=F, row.names=F)
 write.table(J_inner, file="J_inner.csv", sep=",", quote=F, row.names=F)
 write.table(J_outer[,!"ORF"], file="J_outer.mat", sep=" ", quote=F, row.names=F, col.names=F)
 write.table(J_inner[,!"ORF"], file="J_inner.mat", sep=" ", quote=F, row.names=F, col.names=F)
-
 
 # make them logical
 KO_outer   = KO_outer   == 1
