@@ -16,7 +16,7 @@ perturbation = as.matrix(read.table("../../perturbation/logFC_inner.csv", sep=",
 TF_edges = read.table("../TF_edges.tsv", sep="\t", header=T, quote="")[,1:3] # discard incomplete edge mode column
 TF_edges = TF_edges[TF_edges$TF %in% colnames(perturbation),]
 KPs = flatten(read.table("../KP.txt"))
-KPs = KPs[KPs %in% colnames(perturbation)]
+KPs = KPs[KPs %in% colnames(perturbation)]  # we can only do wilcoxon test for KPs that are pertubed
 TFs = read.table("../TF_mode.tsv", sep="\t", header=T, quote="", stringsAsFactors=FALSE)
 TFs = TFs[TFs$TF%in%TF_edges$TF,]
 genes = rownames(perturbation)
