@@ -99,12 +99,12 @@ function isW(W::AbstractVector, nₜ::Integer, nₚ::Integer)
 	println(sum(diag(W[1]) .!= 0))
 	println(sum(diag(W[2]) .!= 0))
 
-	println(mean(abs(W[1][:,1:nₚ][W[1][:,1:nₚ] .!= 0])))
-	println(mean(abs(W[1][:,nₜ+nₚ+1:end][W[1][:,nₜ+nₚ+1:end] .!= 0])))
-	println(mean(abs(W[2][nₜ+nₚ+1:end,1:nₚ][W[2][nₜ+nₚ+1:end,1:nₚ] .!= 0])))
-	println(mean(abs(W[2][:,nₚ+1:end][W[2][:,nₚ+1:end] .!= 0])))
-	println(mean(abs(diag(W[1])[diag(W[1]) .!= 0])))
-	println(mean(abs(diag(W[2])[diag(W[2]) .!= 0])))
+	println(mean(abs.(W[1][:,1:nₚ][W[1][:,1:nₚ] .!= 0])))
+	println(mean(abs.(W[1][:,nₜ+nₚ+1:end][W[1][:,nₜ+nₚ+1:end] .!= 0])))
+	println(mean(abs.(W[2][nₜ+nₚ+1:end,1:nₚ][W[2][nₜ+nₚ+1:end,1:nₚ] .!= 0])))
+	println(mean(abs.(W[2][:,nₚ+1:end][W[2][:,nₚ+1:end] .!= 0])))
+	println(mean(abs.(diag(W[1])[diag(W[1]) .!= 0])))
+	println(mean(abs.(diag(W[2])[diag(W[2]) .!= 0])))
 
 	all(W[1][:,1:nₚ] .== 0) && 
 	all(W[1][:,nₜ+nₚ+1:end] .== 0) && 
@@ -203,7 +203,7 @@ l1(W::AbstractVector) = norm(W[1],1)+norm(W[2],1)
 
 """
 Get a mask for trainable weights and/or restriction to sign of weights.
-- W: matrix with 0(/unrecognized)=no edge, 1=possible edge, "+"=positive edge, "-"=negative edge.
+- W: matrix with 0(/unrecognized)=no edge, 1==possible edge, "+"==positive edge, "-"==negative edge.
 Also works if W is a BitMatrix with true (1) and false (0)
 return: mask for W, mask for sign
 """
