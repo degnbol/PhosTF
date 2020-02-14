@@ -12,3 +12,7 @@ makeblastdb -in ../orfs.aa -dbtype prot
 blastp -num_threads 4 -evalue 1e-10 -outfmt 6 -db orfs.aa -query orfs.aa -out orfs_blast.tab
 cat orfs_blast.tab | sort -k12nr > orfs_blast_sort.tab
 grep -v '^!' ../../raw/SGD/gene_association.sgd | cut -f3,11 | cut -d'|' -f1 | grep -v '\t$' | awk '{print $2 "\t" $1}' | sort | uniq > gene_association_gene2ORF.tsv
+
+
+# collect GO terms (filter out lines where GO term is not indicated)
+grep GO ~/cwd/data/raw/SGD/go_slim_mapping.tab | cut -f1,4,6 > GO.tsv
