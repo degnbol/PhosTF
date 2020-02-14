@@ -36,9 +36,11 @@ tex = function(x) unname(TeX(paste0("$",x)))
 WP_fnames = commandArgs(trailingOnly=T)
 # WP_fnames = "~/cwd/data/inference/02/WP_infer.mat"
 P_fname = "~/cwd/data/evaluation/P_eval.tsv"
+P_eval_noknownsite_fname = "~/cwd/data/evaluation/KP_targets_noknownsite.txt"
 KP_fname = "~/cwd/data/network/KP.txt"
 TF_fname = "~/cwd/data/network/TF.txt"
 V_fname = "~/cwd/data/network/V.txt"
+P_eval_noknownsite = read.vector(P_eval_noknownsite_fname)
 KP = read.vector(KP_fname)
 TF = read.vector(TF_fname)
 V = read.vector(V_fname)
@@ -88,29 +90,33 @@ for (WP_fname in WP_fnames) {
         out
     }
     
-    cor_names = c("yeastkid", "reaction", "ptmod", "expression", "catalysis", "netphorest", "networkin", "networkin STRING", 
-                  "networkin_biogrid", "undirected", "EMAP", "n_datasets")
-    cor_names_pos = c("activation")
-    cor_names_neg = c("inhibition")
-    cortable = evaluate_cor(P_eval, cor_names, cor_names_pos, cor_names_neg)
+    get_cortable = function() {
+        cor_names = c("yeastkid", "reaction", "ptmod", "expression", "catalysis", "netphorest", "networkin", "networkin STRING", 
+                      "networkin_biogrid", "undirected", "EMAP", "n_datasets")
+        cor_names_pos = c("activation")
+        cor_names_neg = c("inhibition")
+        evaluate_cor(P_eval, cor_names, cor_names_pos, cor_names_neg)
+    }
     
-    aucs = rbind(
-        data.frame(roc.area(P_eval$n_datasets > 0, abs(P_eval$marker))[c("A","p.value")]),
-        data.frame(roc.area(!is.na(P_eval$parca), abs(P_eval$marker))[c("A","p.value")]),
-        data.frame(roc.area(!is.na(P_eval$fasolo), abs(P_eval$marker))[c("A","p.value")]),
-        data.frame(roc.area(P_eval$fiedler != "", abs(P_eval$marker))[c("A","p.value")]),
-        data.frame(roc.area(P_eval$biogrid != "", abs(P_eval$marker))[c("A","p.value")]),
-        data.frame(roc.area(P_eval$biogrid == "kinase", +(P_eval$marker))[c("A","p.value")]),
-        data.frame(roc.area(P_eval$biogrid == "phosphatase", -(P_eval$marker))[c("A","p.value")]),
-        data.frame(roc.area(P_eval$goldstandard1[!is.na(P_eval$goldstandard1)], abs(P_eval$marker[!is.na(P_eval$goldstandard1)]))[c("A","p.value")]),
-        data.frame(roc.area(P_eval$goldstandard2[!is.na(P_eval$goldstandard2)], abs(P_eval$marker[!is.na(P_eval$goldstandard2)]))[c("A","p.value")]),
-        data.frame(roc.area(P_eval$goldstandard3[!is.na(P_eval$goldstandard3)], abs(P_eval$marker[!is.na(P_eval$goldstandard3)]))[c("A","p.value")]),
-        data.frame(roc.area(P_eval$goldstandard4[!is.na(P_eval$goldstandard4)], abs(P_eval$marker[!is.na(P_eval$goldstandard4)]))[c("A","p.value")])
-    )
-    titles = c("any", "parca", "fasolo", "fiedler", "biogrid", "kinase", "phosphatase", "gold1", "gold2", "gold3", "gold4")
-    aucs_P = cbind(test=paste(titles, "auc"), aucs)
-    colnames(aucs_P)[2:3] = c("value", "p")
-    
+    get_AUCs = function() {
+        aucs = rbind(
+            data.frame(roc.area(P_eval$n_datasets > 0, abs(P_eval$marker))[c("A","p.value")]),
+            data.frame(roc.area(!is.na(P_eval$parca), abs(P_eval$marker))[c("A","p.value")]),
+            data.frame(roc.area(!is.na(P_eval$fasolo), abs(P_eval$marker))[c("A","p.value")]),
+            data.frame(roc.area(P_eval$fiedler != "", abs(P_eval$marker))[c("A","p.value")]),
+            data.frame(roc.area(P_eval$biogrid != "", abs(P_eval$marker))[c("A","p.value")]),
+            data.frame(roc.area(P_eval$biogrid == "kinase", +(P_eval$marker))[c("A","p.value")]),
+            data.frame(roc.area(P_eval$biogrid == "phosphatase", -(P_eval$marker))[c("A","p.value")]),
+            data.frame(roc.area(P_eval$goldstandard1[!is.na(P_eval$goldstandard1)], abs(P_eval$marker[!is.na(P_eval$goldstandard1)]))[c("A","p.value")]),
+            data.frame(roc.area(P_eval$goldstandard2[!is.na(P_eval$goldstandard2)], abs(P_eval$marker[!is.na(P_eval$goldstandard2)]))[c("A","p.value")]),
+            data.frame(roc.area(P_eval$goldstandard3[!is.na(P_eval$goldstandard3)], abs(P_eval$marker[!is.na(P_eval$goldstandard3)]))[c("A","p.value")]),
+            data.frame(roc.area(P_eval$goldstandard4[!is.na(P_eval$goldstandard4)], abs(P_eval$marker[!is.na(P_eval$goldstandard4)]))[c("A","p.value")])
+        )
+        titles = c("any", "parca", "fasolo", "fiedler", "biogrid", "kinase", "phosphatase", "gold1", "gold2", "gold3", "gold4")
+        aucs_P = cbind(test=paste(titles, "auc"), aucs)
+        colnames(aucs_P)[2:3] = c("value", "p")
+        aucs_P
+    }
     
     # only analysing positives, since we cannot actually rule out negatives
     
@@ -128,6 +134,10 @@ for (WP_fname in WP_fnames) {
     venndata$curated = venndata$yeastkid | venndata$ptmod
     venndata$known = venndata$literature | venndata$curated
     venndata$invitro = venndata$known | venndata$ptacek
+    venndata$with_site = venndata$invitro & !P_eval$Target%in%P_eval_noknownsite
+    
+    # write KP targets that are in the evaluation dataset
+    # write.table(PT[PT%in%P_eval$Target[venndata$invitro]], "~/cwd/data/evaluation/KP_targets.txt", row.names=F, col.names=F, quote=F)
     
     # index indicating which edge is inferred most strongly to most weakly
     marker_order = function(k, index) {
@@ -170,33 +180,28 @@ for (WP_fname in WP_fnames) {
     KP2TF.idx = P_eval$Target%in%TF
     stopifnot(all(KP2KP.idx|KP2TF.idx))
     
-    known_KP.p = p.selection.q(quantiles, "known", KP2KP.idx)
-    literature_KP.p = p.selection.q(quantiles, "literature", KP2KP.idx)
-    invitro_KP.p = p.selection.q(quantiles, "invitro", KP2KP.idx)
-    known_TF.p = p.selection.q(quantiles, "known", KP2TF.idx)
-    literature_TF.p = p.selection.q(quantiles, "literature", KP2TF.idx)
-    invitro_TF.p = p.selection.q(quantiles, "invitro", KP2TF.idx)
-    known_KP.p$substrate = literature_KP.p$substrate = invitro_KP.p$substrate = "KP"
-    known_TF.p$substrate = literature_TF.p$substrate = invitro_TF.p$substrate = "TF"
-    known.p = rbind(known_KP.p, known_TF.p)
-    literature.p = rbind(literature_KP.p, literature_TF.p)
-    invitro.p = rbind(invitro_KP.p, invitro_TF.p)
-    positive.intersections = rbind(known.p, literature.p, invitro.p)
-    eval.table = rbind(cortable, aucs_P, positive.intersections[positive.intersections$quantile%in%quantiles_plot, c("test", "value", "p")])
-    eval.table = eval.table[order(eval.table$p),]  # sort by p-value
+    eval.table = data.frame()
+    selections = c("known","literature","invitro","with_site")
+    for (selection in selections) {
+        selection.table = rbind(data.frame(p.selection.q(quantiles, selection, KP2KP.idx), substrate="KP"),
+                                data.frame(p.selection.q(quantiles, selection, KP2TF.idx), substrate="TF"))
+        eval.table = rbind(eval.table, selection.table)
+    }
     
-    fisher.ps = list(known=fisher.method.log(c(known_KP.p$p, known_TF.p$p)),
-                     literature=fisher.method.log(c(literature_KP.p$p, literature_TF.p$p)),
-                     invitro=fisher.method.log(c(invitro_KP.p$p, invitro_TF.p$p)))
-    # best selection 
-    best.selection = names(which.min(fisher.ps))
-    plt.p = list(known=known.p, literature=literature.p, invitro=invitro.p)[[best.selection]]
+    # only select few quantiles in the eval table
+    eval.table.few = eval.table[eval.table$quantile%in%quantiles_plot,]
+    eval.table.few = eval.table.few[order(eval.table.few$p),]  # sort by p-value
+    write.table(eval.table.few, "evaluation.tsv", sep="\t", quote=F, row.names=F)
+    
+    # best selection
+    fisher.ps = aggregate(p ~ selection, data=eval.table, fisher.method.log)
+    best.selection = fisher.ps$selection[which.min(fisher.ps$p)]
+    plt.p = eval.table[eval.table$selection==best.selection,]
     # best quantile
     both.p = aggregate(p ~ quantile, data=plt.p, fisher.method.log)
-    best.quantile = both.p[order(both.p$p),][1,"quantile"]
+    best.quantile = both.p$quantile[which.min(both.p$p)]
     
-    write.table(eval.table, "evaluation.tsv", sep="\t", quote=F, row.names=F)
-    write.table(-fisher.ps[[best.selection]], "score.txt", quote=F, row.names=F, col.names=F)
+    write.table(-fisher.ps$p[best.selection], "score.txt", quote=F, row.names=F, col.names=F)
     
     ### Plotting
     KP_color = "#bd61b6"
@@ -236,6 +241,7 @@ for (WP_fname in WP_fnames) {
         bw = .8
         hn = .05  # horizontal nudge
         fgscl = 6  # how wide foreground is compared to background
+        
         # ggplot(mapping=aes(x=substrate, y=value)) + 
         #     geom_bar(data=euler.plt.bg, mapping=aes(fill=variable), stat="identity", position="identity", width=bw, fill="transparent", color="black", size=2) +
         #     geom_bar(data=euler.plt.bg, mapping=aes(fill=variable), stat="identity", position="identity", width=bw) +
@@ -275,7 +281,7 @@ for (WP_fname in WP_fnames) {
         
         ggplot(data=plt.p, aes(x=quantile, y=-log10(p), color=substrate)) +
             geom_line() +
-            scale_y_continuous(breaks=seq(0,27,3), expand=c(0,0), limits=c(0, 27)) +
+            scale_y_continuous(breaks=seq(0,30,3), expand=c(0,0), limits=c(0, 30)) +
             scale_x_continuous(breaks=quantiles_plot, labels=gsub("0\\.","\\.",quantiles_plot), sec.axis=second_axis, expand=c(0,0), limits=c(min(quantiles_plot),max(quantiles_plot))) +
             theme_linedraw() +
             geom_hline(yintercept=-log10(0.05), linetype="dashed") + 
