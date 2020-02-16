@@ -13,11 +13,11 @@ mRNA = "mRNA"
 prot = "protein"
 phos = "phos. protein"
 wildtype = "Wildtype"
-mutant = "P1 Knockout"
+mutant = "KP1 Knockout"
 
 P_colors = c("#af70b6", "#654169", "#9f3b5a", "#9400d3")
 T_colors = c("#87ac33", "#50661e", "#2fa540", "#8FBC8F")
-X_colors = c("#79712f", "#DAA520")
+O_colors = c("#79712f", "#DAA520")
 
 # functions ####
 readfunc = function(fnames) {
@@ -32,60 +32,60 @@ readfunc = function(fnames) {
         meas[[i]] = t(meas[[i]])
     }
     
-    P  = cbind(meas[["r"]][,1:np], meas[["p"]][,1:np], meas[["phi"]][,1:np])
+    KP = cbind(meas[["r"]][,1:np], meas[["p"]][,1:np], meas[["phi"]][,1:np])
     TF = cbind(meas[["r"]][,np+1:nt], meas[["p"]][,np+1:nt], meas[["phi"]][,np+1:nt])
-    if(nx > 0) X = meas[["r"]][,np+nt+1:nx]
+    if(no > 0) O = meas[["r"]][,np+nt+1:no]
     
-    P  = data.frame(P)
+    KP = data.frame(KP)
     TF = data.frame(TF)
-    if(nx > 0) X  = data.frame(X)
+    if(no > 0) O  = data.frame(O)
     
-    colnames(P)  = c(paste0("P",1:np," mRNA"), paste0("P",1:np," prot"), paste0("P",1:np," phos"))
-    colnames(TF) = c(paste0("T",1:nt," mRNA"), paste0("T",1:nt," prot"), paste0("T",1:nt," phos"))
-    if(nx > 0) colnames(X) = paste0("X",1:nx," mRNA")
+    colnames(KP) = c(paste0("KP",1:np," mRNA"), paste0("KP",1:np," prot"), paste0("KP",1:np," phos"))
+    colnames(TF) = c(paste0("TF",1:nt," mRNA"), paste0("TF",1:nt," prot"), paste0("TF",1:nt," phos"))
+    if(no > 0) colnames(O) = paste0("O",1:no," mRNA")
     
     # split as mRNA, prot, phos
-    P_ = list(mRNA= P[,1:np], prot= P[,np+1:np], phos= P[,2*np+1:np])
-    T_ = list(mRNA=TF[,1:nt], prot=TF[,nt+1:nt], phos=TF[,2*nt+1:nt])
+    KP_ = list(mRNA=KP[,1:np], prot=KP[,np+1:np], phos=KP[,2*np+1:np])
+    TF_ = list(mRNA=TF[,1:nt], prot=TF[,nt+1:nt], phos=TF[,2*nt+1:nt])
     
     # to remove curves always at zero
     rmz = function(df) {df[colSums(df) > 0]}
     
     # add time and remove curves that are always at zero
     for (i in c("mRNA", "prot", "phos")) {
-        P_[[i]] = rmz(P_[[i]])
-        T_[[i]] = rmz(T_[[i]])
-        P_[[i]]["time"] = meas[["t"]]
-        T_[[i]]["time"] = meas[["t"]]
+        KP_[[i]] = rmz(KP_[[i]])
+        TF_[[i]] = rmz(TF_[[i]])
+        KP_[[i]]["time"] = meas[["t"]]
+        TF_[[i]]["time"] = meas[["t"]]
     }
-    if(nx > 0) {
-        X = rmz(X)
-        X["time"] = meas[["t"]]
+    if(no > 0) {
+        O = rmz(O)
+        O["time"] = meas[["t"]]
     }
     
     # melt
     mlt = function(df) {melt(df, id="time")}
     
     
-    P_mRNA=mlt(P_[["mRNA"]]); P_mRNA["measure"] = mRNA; P_mRNA["type"] = "PK/PP"
-    P_prot=mlt(P_[["prot"]]); P_prot["measure"] = prot; P_prot["type"] = "PK/PP"
-    P_phos=mlt(P_[["phos"]]); P_phos["measure"] = phos; P_phos["type"] = "PK/PP"
-    T_mRNA=mlt(T_[["mRNA"]]); T_mRNA["measure"] = mRNA; T_mRNA["type"] = "TF"
-    T_prot=mlt(T_[["prot"]]); T_prot["measure"] = prot; T_prot["type"] = "TF"
-    T_phos=mlt(T_[["phos"]]); T_phos["measure"] = phos; T_phos["type"] = "TF"
-    if(nx > 0) {
-        X_mRNA=mlt(X); X_mRNA["measure"] = mRNA; X_mRNA["type"] = "X"
-        return(rbind(P_mRNA, P_prot, P_phos, T_mRNA, T_prot, T_phos, X_mRNA))
+    KP_mRNA=mlt(KP_[["mRNA"]]); KP_mRNA["measure"] = mRNA; KP_mRNA["type"] = "KP"
+    KP_prot=mlt(KP_[["prot"]]); KP_prot["measure"] = prot; KP_prot["type"] = "KP"
+    KP_phos=mlt(KP_[["phos"]]); KP_phos["measure"] = phos; KP_phos["type"] = "KP"
+    TF_mRNA=mlt(TF_[["mRNA"]]); TF_mRNA["measure"] = mRNA; TF_mRNA["type"] = "TF"
+    TF_prot=mlt(TF_[["prot"]]); TF_prot["measure"] = prot; TF_prot["type"] = "TF"
+    TF_phos=mlt(TF_[["phos"]]); TF_phos["measure"] = phos; TF_phos["type"] = "TF"
+    if(no > 0) {
+        O_mRNA=mlt(O); O_mRNA["measure"] = mRNA; O_mRNA["type"] = "O"
+        return(rbind(KP_mRNA, KP_prot, KP_phos, TF_mRNA, TF_prot, TF_phos, O_mRNA))
     }
-    else return(rbind(P_mRNA, P_prot, P_phos, T_mRNA, T_prot, T_phos))
+    else return(rbind(KP_mRNA, KP_prot, KP_phos, TF_mRNA, TF_prot, TF_phos))
 }
 
 # settings ####
-# setwd("~/cwd/testdata/data_cas"); nt = 3; np = 3; nx = 1
-# setwd("~/cwd/testdata/pres18c"); nt = 3; np = 3; nx = 0
-# setwd("~/cwd/testdata/simi"); nt = 2; np = 3; nx = 1
-setwd("~/cwd/testdata/simi_neg"); nt = 2; np = 3; nx = 1
-n = nt+np+nx
+# setwd("~/cwd/data/testdata/data_cas"); nt = 3; np = 3; no = 1
+# setwd("~/cwd/data/testdata/pres18c"); nt = 3; np = 3; no = 0
+# setwd("~/cwd/data/testdata/simi"); nt = 2; np = 3; no = 1
+setwd("~/cwd/data/toy/simulation"); nt = 2; np = 3; no = 1
+n = nt+np+no
 wt_fnames = list(
     r = "sim_r.mat",
     p = "sim_p.mat",
@@ -107,8 +107,10 @@ data = rbind(wt, mut)
 # explicit order using factors
 data$experiment = factor(data$experiment, levels=c(wildtype, mutant))
 data$measure = factor(data$measure, levels=c(mRNA, prot, phos))
-data$node = sapply(as.character(data$variable), function(x) strsplit(x, " ")[[1]][1])
-
+data$node = gsub(" .*", "", as.character(data$variable))
+# be they are already sorted correctly so unique will provide them in correct KP->TF->O order
+data$node = factor(data$node, levels=unique(data$node))
+data$type = factor(data$type, levels=unique(data$type))
 
 # plot ####
 
@@ -116,7 +118,8 @@ p = ggplot(data, aes(x=time, y=value, group=variable, color=node)) +
     geom_line(aes(linetype=measure, size=measure)) +
     scale_linetype_manual(values=c("solid", "solid", "dashed")) +
     scale_size_manual(values=c(1.2, .5, .5)) +
-    scale_color_manual(values=c(P_colors[1:np], T_colors[1:nt], X_colors[1:nx])) +
+    scale_color_manual(values=c(P_colors[1:np], T_colors[1:nt], O_colors[1:no])) +
+    scale_x_continuous(expand=c(0,0)) +
     xlab("time [min]") +
     ylab("nondimensionalized concentration") + 
     ggtitle("Steady state simulation") +
@@ -127,12 +130,12 @@ p = ggplot(data, aes(x=time, y=value, group=variable, color=node)) +
 
 
 # without flipping x-axis of mutant
-p + facet_grid(vars(type), vars(experiment), scales="free_x")
+p = p + facet_grid(vars(type), vars(experiment), scales="free_x")
 # or with flipping x-axis of mutant
 # x_scales = list(Wildtype=scale_x_continuous(), Mutant=scale_x_reverse())
-# p + facet_grid_sc(vars(type), vars(experiment), scales=list(x=x_scales))
+# p = p + facet_grid_sc(vars(type), vars(experiment), scales=list(x=x_scales))
 
-
+ggsave("~/cwd/data/toy/simulation/simulation_KP1.pdf", p, width=7, height=5)
 
 
 #####
