@@ -30,7 +30,6 @@ PTs = c(KPs, TFs)
 nKP = length(KPs)
 nTF = length(TFs)
 nPT = nKP+nTF
-shared_GO = fread("~/cwd/data/go/shared_GO.tsv", sep="\t")
 
 
 # WP_fname = "~/cwd/data/inference/01/WP_infer.mat"  # test
@@ -49,6 +48,7 @@ for(WP_fname in WP_fnames) {
     infers = rbind(melt_(WP[KPs,])[order(-w)[1:n_top_KP],], melt_(WP[TFs,])[order(-w)[1:n_top_TF],])
     infers[,w:=NULL][,infer:=T]
     
+    shared_GO = fread("~/cwd/data/go/shared_GO.tsv", sep="\t")
     shared_GO[infers,on=c("ORF","KP"),infer:=infer]
     shared_GO$infer[is.na(shared_GO$infer)] = F
     
