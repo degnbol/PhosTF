@@ -21,7 +21,7 @@ KPs = read.vector("~/cwd/data/network/KP.txt")
 TFs = read.vector("~/cwd/data/network/TF.txt")
 Vs = read.vector("~/cwd/data/network/V.txt")
 PTs = c(KPs, TFs)
-shared_GO = fread("shared_GO.tsv", sep="\t")
+shared_GO = fread("~/cwd/data/go/shared_GO.tsv", sep="\t")
 
 
 # WP_fnames = "~/cwd/data/inference/01/WP_infer.mat"  # test
