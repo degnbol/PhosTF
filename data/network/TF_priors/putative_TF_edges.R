@@ -2,6 +2,7 @@
 library(data.table)
 library(ggplot2)
 library(harmonicmeanp)
+library(fdrtool)
 
 # putative edge refers to an edge with significant p-value (<=0.05), where it is putative if the source of the edge is actually a TF.
 # this is settled in the ../nodes.R script which should be run next.
@@ -54,18 +55,18 @@ all_edges = all_edges[,list(Pval=min(Pval)),by=list(TF,Target)]
 
 # add regulation mode supported in the data
 all_edges = merge(all_edges, expression_evidence, all.x=T)
+fdr = fdrtool(all_edges$Pval, statistic="pvalue", plot=FALSE)
+all_edges$qval = fdr$qval
 
 hist(all_edges$Pval, breaks=100)
-
-library(fdrtool)
-
 # remove all edges not supported in the data, we use 0.05 since it is the threshold that allows for the most edges.
 # we get ~100000 potential edges, which is still plenty
-sum(all_edges$Pval <= .05)
-sum(p.adjust(all_edges$Pval, "BH") <= .05)
-fdr = fdrtool(all_edges$Pval, statistic="pvalue", plot=FALSE)
+sum(all_edges$Pval <= .05) / 231
+sum(p.adjust(all_edges$Pval, "BH") <= .05) / 231
 sum(fdr$qval < .2) / 231
-write.table(all_edges[fdr$qval <= .2,], "TF_edges_putative_FDR.tsv", sep="\t", row.names=F, quote=F, na="")
+sum(fdr$qval < .1) / 231
+stopifnot(min(all_edges$qval[all_edges$Pval > .05]) > 0.2)  # FDR is more limiting that p<0.05
+
 write.table(all_edges[all_edges$Pval <= .05,], "TF_edges_putative.tsv", sep="\t", row.names=F, quote=F, na="")
 
 
