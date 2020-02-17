@@ -123,8 +123,13 @@ write.table(adjacencies[[3]], "WT_mask.mat", sep=" ", quote=F, col.names=F, row.
 write.table(adjacencies[[4]], "WT_noise.csv", sep=",", quote=F)
 write.table(adjacencies[[4]], "WT_noise.mat", sep=" ", quote=F, col.names=F, row.names=F)
 
-adjacencies = get_adjacencies(edges_FDR10, "weight25")
-write.table(adjacencies[[1]], "WT_FDR10.mat", sep=" ", quote=F, col.names=F, row.names=F)
+adjacencies_FDR10 = get_adjacencies(edges_FDR10, "weight25")
+write.table(adjacencies_FDR10[[1]], "WT_FDR10.mat", sep=" ", quote=F, col.names=F, row.names=F)
+write.table(sign(adjacencies_FDR10[[1]]), "WT_FDR10_sign.mat", sep=" ", quote=F, col.names=F, row.names=F)
+
+adjacencies_FDR20 = get_adjacencies(edges_FDR20, "weight25")
+write.table(adjacencies_FDR20[[1]], "WT_FDR20.mat", sep=" ", quote=F, col.names=F, row.names=F)
+write.table(sign(adjacencies_FDR20[[1]]), "WT_FDR20_sign.mat", sep=" ", quote=F, col.names=F, row.names=F)
 
 
 
