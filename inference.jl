@@ -139,9 +139,16 @@ function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.
 	M=M, S=S, Iₚₖ=Iₚₖ, Iₚₚ=Iₚₚ, W=W, J=J, quadquad=quadquad, trainWT=trainWT, W_reg=W_reg)
 	Model.isW(W, nₜ, nₚ) || @error("W has nonzeros in entries that should be zero.")
 	Wₜ, Wₚ = Model.WₜWₚ(W, nₜ, nₚ)
-	trainWT && savedlm(ot, Wₜ)
-	trainWT || all(WT .== Wₜ) || @error("There has been changes made to Wₜ even though it was not intented to be trained on.")
+	
+	if !trainWT && any(WT .!= Wₜ)
+		n_changes = sum(WT .!= Wₜ)
+		diff = sum(abs.(WT - Wₜ))
+		@error("There has been $n_changes changes made to Wₜ even though it was not intented to be trained on (difference=$diff).")
+		savedlm(ot, Wₜ)
+	end
+
 	savedlm(op, Wₚ)
+	trainWT && savedlm(ot, Wₜ)
 end
 
 

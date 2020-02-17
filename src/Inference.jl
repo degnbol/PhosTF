@@ -63,6 +63,7 @@ init_V(Iₚₖ::Matrix, Iₚₚ::Matrix, ::Nothing) = FluxUtils.random_weight(si
 - Iₚₖ, Iₚₚ: kinase and phosphatase indicator diagonal matrices
 - W: from previous training.
 - J: matrix with 1 for KO and 0 for passive observed node. Shape like X.
+- λWT: should Wₜ be regularized on?
 - trainWT: should Wₜ be trained or only Wₚ? if both are trained it is done together using W, otherwise we use W=[Wₜ,param(Wₚ)]
 - save_every: e.g. 10 to save every tenth epoch. Use zero to not save intermediates. Intermediates are saved to W{T,P}.mat.tmp in PWD.
 """
