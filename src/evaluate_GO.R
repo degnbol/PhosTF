@@ -12,6 +12,12 @@ melt_ = function(x) melt(x, id.vars="ORF", variable.name="KP", value.name="w")
 wilcox_p = function(dataset) {
     wilcox.test(dataset[infer==TRUE,shared], dataset$shared, alternative="g")$p.value
 }
+# combine pvals using fishers method https://en.wikipedia.org/wiki/Fisher%27s_method 
+# chisq = -2 sum(ln(p-values)); pval = 1-pchisq(chisq, df=2length(p-values))
+fisher.method.log = function(pvals) {
+    df = 2*length(pvals)
+    pchisq(-2*sum(log(pvals),na.rm=TRUE),df,lower.tail=FALSE,log.p=TRUE)
+}
 
 # constants
 KP_color = "#bd61b6"
@@ -21,13 +27,18 @@ KPs = read.vector("~/cwd/data/network/KP.txt")
 TFs = read.vector("~/cwd/data/network/TF.txt")
 Vs = read.vector("~/cwd/data/network/V.txt")
 PTs = c(KPs, TFs)
+nKP = length(KPs)
+nTF = length(TFs)
+nPT = nKP+nTF
 shared_GO = fread("~/cwd/data/go/shared_GO.tsv", sep="\t")
 
 
-# WP_fnames = "~/cwd/data/inference/01/WP_infer.mat"  # test
+# WP_fname = "~/cwd/data/inference/01/WP_infer.mat"  # test
 WP_fnames = commandArgs(trailingOnly=TRUE)
-n_top_KP = length(KPs) * 100
-n_top_TF = length(TFs) * 100
+quantile = .15
+n_top_KP = nKP * (nKP-1) * quantile
+n_top_TF = nKP * nTF * quantile
+# cat(n_top_KP, " ", n_top_TF, "\n")
 
 init_dir = getwd()
 for(WP_fname in WP_fnames) {
@@ -45,7 +56,7 @@ for(WP_fname in WP_fnames) {
     p.values = data.frame(Substrate=c("KP","TF"),
         p=c(wilcox_p(shared_GO[Aspect=="P" & Substrate == "KP",]),
             wilcox_p(shared_GO[Aspect=="P" & Substrate == "TF",])))
-    fwrite(list(p.values$p), "shared_GO_p.tsv", sep="\t")
+    fwrite(list(-fisher.method.log(p.values$p)), "GO_score.txt")
     
     # mean shared GO terms for different interesting groupings
     shared_GO_dens = shared_GO[,.N,by=c("infer", "Aspect", "Substrate", "shared")]
@@ -57,13 +68,13 @@ for(WP_fname in WP_fnames) {
         geom_col(mapping=aes(x=shared, y=density, fill=infer), position="dodge", width=.8) +
         theme_linedraw() +
         scale_fill_manual(values=c("darkgray", "black"), breaks=list(TRUE,FALSE), labels=c("inferred", "potential")) +
-        scale_x_continuous(breaks=c(0,1,2,5,10), limits=c(-.5,14.5), expand=c(0,0)) +
+        scale_x_continuous(breaks=c(0,1,2,5,10), limits=c(-.5,14.5), expand=c(0,0), minor_breaks=c(3,4,6,7,8,9)) +
         facet_grid(vars(Substrate)) + 
         xlab("shared GO pathways") + 
         theme(legend.title=element_blank(), 
               panel.grid.major=element_line(colour="gray"), 
               panel.grid.minor=element_line(colour="lightgray")) +
-        geom_text(data=p.values, mapping=aes(label=sprintf("p=%.3g",p)), x=12.5, y=.7)
+        geom_text(data=p.values, mapping=aes(label=sprintf("p=%.3g",p)), x=11.5, y=.7)
     
     ggsave("shared_GO.pdf", plot=plt, width=6, height=3)
     
