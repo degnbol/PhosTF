@@ -94,6 +94,7 @@ function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.
 	WT_prior == "" && (WT_prior = nothing)
 	WP_prior == "" && (WP_prior = nothing)
 	WT_reg == "" && (WT_reg = nothing)
+	PKPP == "" && (PKPP = nothing)
 	ot, op = abspath_(ot), abspath_(op)  # weird PWD issues require abs path
 
 	# load files
