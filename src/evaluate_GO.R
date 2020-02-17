@@ -44,9 +44,7 @@ init_dir = getwd()
 for(WP_fname in WP_fnames) {
     cat(WP_fname, "\n")
     setwd(dirname(WP_fname))
-    WP_fname = basename(WP_fname)
-    
-    WP = fread(WP_fname, sep=" ", col.names=KPs)
+    WP = fread(basename(WP_fname), sep=" ", col.names=KPs)
     WP = data.table(ORF=PTs, abs(WP), key="ORF")
     infers = rbind(melt_(WP[KPs,])[order(-w)[1:n_top_KP],], melt_(WP[TFs,])[order(-w)[1:n_top_TF],])
     infers[,w:=NULL][,infer:=T]

@@ -33,8 +33,8 @@ fisher.method.log = function(pvals) {
 tex = function(x) unname(TeX(paste0("$",x)))
 
 
+# WP_fname = "~/cwd/data/inference/02/WP_infer.mat"
 WP_fnames = commandArgs(trailingOnly=T)
-# WP_fnames = "~/cwd/data/inference/02/WP_infer.mat"
 P_fname = "~/cwd/data/evaluation/P_eval.tsv"
 P_eval_noknownsite_fname = "~/cwd/data/evaluation/KP_targets_noknownsite.txt"
 KP_fname = "~/cwd/data/network/KP.txt"
