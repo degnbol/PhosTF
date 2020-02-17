@@ -42,6 +42,7 @@ n_top_TF = nKP * nTF * quantile
 
 init_dir = getwd()
 for(WP_fname in WP_fnames) {
+    cat(WP_fname, "\n")
     setwd(dirname(WP_fname))
     WP_fname = basename(WP_fname)
     
