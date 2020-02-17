@@ -106,9 +106,10 @@ function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.
 	WT_reg === nothing || (WT_reg = loaddlm(abspath_(WT_reg)))
 	WT_prior === nothing || (WT_prior = loaddlm(abspath_(WT_prior)))
 	WP_prior === nothing || (WP_prior = loaddlm(abspath_(WP_prior)))
-	WT === nothing || (WT = loaddlm(abspath_(WT)))
-	WP === nothing || (WP = loaddlm(abspath_(WP)))
-	W = (WT === nothing || WP === nothing) ? nothing : Model._W(WT, WP)
+	W = Model.random_W(n)
+	WT = WT === nothing ? Model._Wₜ(W,nₜ,nₚ) : loaddlm(abspath_(WT))
+	WP = WP === nothing ? Model._Wₚ(W,nₜ,nₚ) : loaddlm(abspath_(WP))
+	W = Model._W(WT, WP)
 
 	# use NaNs from WT_reg for masking
 	if WT_reg !== nothing

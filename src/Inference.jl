@@ -69,15 +69,15 @@ init_V(Iₚₖ::Matrix, Iₚₚ::Matrix, ::Nothing) = FluxUtils.random_weight(si
 """
 function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=10000, λ::Real=.1, λW=0., λWT::Bool=true, opt=ADAMW(), 
 	M=nothing, S=nothing, Iₚₖ=nothing, Iₚₚ=nothing, W=nothing, J=nothing, quadquad::Bool=false, trainWT::Bool=true, W_reg=nothing, save_every::Integer=1)
+	@assert W !== nothing
 	n, K = size(X)
 	cs = Model.constants(n, nₜ, nₚ, J === nothing ? K : J)
 	M === nothing && (M = ones(n,n)) # no prior knowledge
 	M = trainWT ? M .* (cs.Mₜ .+ cs.Mₚ) : [M.*cs.Mₜ, M.*cs.Mₚ] # enforce masks
 	V = init_V(Iₚₖ, Iₚₚ, W)
-	W === nothing && (W = random_W(n))
 	W = trainWT ? param(W) : [W.*cs.Mₜ, param(W.*cs.Mₚ)]
 	# if we have Iₚₖ and Iₚₚ given but they do not add up to nₚ it means that ∃ KP ∉ PK ∪ PP
-	Iₚ = V !== nothing && sum(Iₚₖ + Iₚₚ) == nₚ ? Iₚₖ + Iₚₚ : Model.Iₚ(n, nₜ, nₚ)
+	Iₚ = V !== nothing && sum(Iₚₖ + Iₚₚ) == nₚ ? Iₚₖ+Iₚₚ : Model.Iₚ(n, nₜ, nₚ)
 	Iₜ = Model.Iₜ(n, nₜ, nₚ)
 	λW == 0 && (λW = nothing)
 	
