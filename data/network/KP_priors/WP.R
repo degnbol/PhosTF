@@ -21,6 +21,7 @@ KP2KP = KP2KP[,colnames(KP2KP)!="p_adj"]
 KP_edges = rbind(KP2TF, KP2KP)
 
 KP2TF$q = fdrtool(KP2TF$p, statistic="pvalue", plot=FALSE)$qval
+KP2TF$normlogp = log10(KP2TF$p) / min(log10(KP2TF$p)) * KP2TF$sign
 KP2TF_FDR10 = KP2TF[KP2TF$q < .1,]
 KP2TF_FDR20 = KP2TF[KP2TF$q < .2,]
 
@@ -33,6 +34,8 @@ adjacency_KP2TF_FDR10 = as.matrix(sparseMatrix(i=match(KP2TF_FDR10$Target, KPTFs
                                                dims=list(length(KPTFs), length(KPs)), dimnames=list(KPTFs, KPs)))
 adjacency_KP2TF_FDR20 = as.matrix(sparseMatrix(i=match(KP2TF_FDR20$Target, KPTFs), j=match(KP2TF_FDR20$KP, KPs), x=KP2TF_FDR20$sign, 
                                                dims=list(length(KPTFs), length(KPs)), dimnames=list(KPTFs, KPs)))
+adjacency_KP2TF_log = as.matrix(sparseMatrix(i=match(KP2TF$Target, KPTFs), j=match(KP2TF$KP, KPs), x=KP2TF$normlogp, 
+                                         dims=list(length(KPTFs), length(KPs)), dimnames=list(KPTFs, KPs)))
 
 
 adjacency[is.na(adjacency)] = 0
@@ -61,7 +64,8 @@ write.table(adjacency_KP2TF_FDR10, "WP_FDR10_sign.mat", sep=" ", quote=F, col.na
 write.table(adjacency_KP2TF_FDR20, "WP_FDR20_sign.mat", sep=" ", quote=F, col.names=F, row.names=F)
 write.table(get_adjacency_noise(adjacency_KP2TF_FDR10), "WP_noise_FDR10_sign.mat", sep=" ", quote=F, col.names=F, row.names=F)
 write.table(get_adjacency_noise(adjacency_KP2TF_FDR20), "WP_noise_FDR20_sign.mat", sep=" ", quote=F, col.names=F, row.names=F)
-
+write.table(adjacency_KP2TF_log, "WP_KP2TF_log.mat", sep=" ", quote=F, col.names=F, row.names=F)
+write.table(get_adjacency_noise(adjacency_KP2TF_log), "WP_noise_KP2TF_log.mat", sep=" ", quote=F, col.names=F, row.names=F)
 
 
 # analysis
