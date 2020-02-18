@@ -1,4 +1,7 @@
 
+library(Matrix)
+library(fdrtool)
+
 options(stringsAsFactors=F)
 
 # functions
@@ -17,30 +20,48 @@ colnames(KP2TF)[colnames(KP2TF)=="TF"] = "Target"
 KP2KP = KP2KP[,colnames(KP2KP)!="p_adj"]
 KP_edges = rbind(KP2TF, KP2KP)
 
+KP2TF$q = fdrtool(KP2TF$p, statistic="pvalue", plot=FALSE)$qval
+KP2TF_FDR10 = KP2TF[KP2TF$q < .1,]
+KP2TF_FDR20 = KP2TF[KP2TF$q < .2,]
+
 # adjacency matrix
 adjacency = as.matrix(sparseMatrix(i=match(KP_edges$Target, KPTFs), j=match(KP_edges$KP, KPs), x=KP_edges$weight, 
                                    dims=list(length(KPTFs), length(KPs)), dimnames=list(KPTFs, KPs)))
 adjacency_KP2TF = as.matrix(sparseMatrix(i=match(KP2TF$Target, KPTFs), j=match(KP2TF$KP, KPs), x=KP2TF$weight, 
                                    dims=list(length(KPTFs), length(KPs)), dimnames=list(KPTFs, KPs)))
-write.table(adjacency, "WP.csv", sep=",", quote=F)
-write.table(adjacency, "WP.mat", sep=" ", quote=F, col.names=F, row.names=F)
-write.table(adjacency_KP2TF, "WP_KP2TF.csv", sep=",", quote=F)
-write.table(adjacency_KP2TF, "WP_KP2TF.mat", sep=" ", quote=F, col.names=F, row.names=F)
+adjacency_KP2TF_FDR10 = as.matrix(sparseMatrix(i=match(KP2TF_FDR10$Target, KPTFs), j=match(KP2TF_FDR10$KP, KPs), x=KP2TF_FDR10$sign, 
+                                               dims=list(length(KPTFs), length(KPs)), dimnames=list(KPTFs, KPs)))
+adjacency_KP2TF_FDR20 = as.matrix(sparseMatrix(i=match(KP2TF_FDR20$Target, KPTFs), j=match(KP2TF_FDR20$KP, KPs), x=KP2TF_FDR20$sign, 
+                                               dims=list(length(KPTFs), length(KPs)), dimnames=list(KPTFs, KPs)))
+
+
+adjacency[is.na(adjacency)] = 0
 
 get_adjacency_noise = function(adjacency) {
     adjacency_noise = adjacency
-    lacking = is.na(adjacency_noise) | (adjacency_noise==0)
-    noise_sd = 1/sqrt(sum(dim(adjacency)^2))
+    noise_sd = 1/sqrt(prod(dim(adjacency)))
+    lacking = adjacency_noise==0
     adjacency_noise[lacking] = matrix(rnorm(prod(dim(adjacency)), sd=noise_sd), nrow=nrow(adjacency), ncol=ncol(adjacency))[lacking]
     adjacency_noise
 }
 
-adjacency_noise = get_adjacency_noise(adjacency)
-adjacency_noise_KP2TF = get_adjacency_noise(adjacency_KP2TF)
-write.table(adjacency_noise, "WP_noise.csv", sep=",", quote=F)
-write.table(adjacency_noise, "WP_noise.mat", sep=" ", quote=F, col.names=F, row.names=F)
-write.table(adjacency_noise_KP2TF, "WP_noise_KP2TF.csv", sep=",", quote=F)
-write.table(adjacency_noise_KP2TF, "WP_noise_KP2TF.mat", sep=" ", quote=F, col.names=F, row.names=F)
+
+
+write.table(adjacency, "WP.csv", sep=",", quote=F)
+write.table(adjacency, "WP.mat", sep=" ", quote=F, col.names=F, row.names=F)
+write.table(adjacency_KP2TF, "WP_KP2TF.csv", sep=",", quote=F)
+write.table(adjacency_KP2TF, "WP_KP2TF.mat", sep=" ", quote=F, col.names=F, row.names=F)
+write.table(get_adjacency_noise(adjacency), "WP_noise.mat", sep=" ", quote=F, col.names=F, row.names=F)
+write.table(get_adjacency_noise(adjacency_KP2TF), "WP_noise_KP2TF.mat", sep=" ", quote=F, col.names=F, row.names=F)
+write.table(sign(adjacency), "WP_sign.mat", sep=" ", quote=F, col.names=F, row.names=F)
+write.table(sign(adjacency_KP2TF), "WP_KP2TF_sign.mat", sep=" ", quote=F, col.names=F, row.names=F)
+write.table(get_adjacency_noise(sign(adjacency)), "WP_noise_sign.mat", sep=" ", quote=F, col.names=F, row.names=F)
+write.table(get_adjacency_noise(sign(adjacency_KP2TF)), "WP_noise_KP2TF_sign.mat", sep=" ", quote=F, col.names=F, row.names=F)
+write.table(adjacency_KP2TF_FDR10, "WP_FDR10_sign.mat", sep=" ", quote=F, col.names=F, row.names=F)
+write.table(adjacency_KP2TF_FDR20, "WP_FDR20_sign.mat", sep=" ", quote=F, col.names=F, row.names=F)
+write.table(get_adjacency_noise(adjacency_KP2TF_FDR10), "WP_noise_FDR10_sign.mat", sep=" ", quote=F, col.names=F, row.names=F)
+write.table(get_adjacency_noise(adjacency_KP2TF_FDR20), "WP_noise_FDR20_sign.mat", sep=" ", quote=F, col.names=F, row.names=F)
+
 
 
 # analysis
