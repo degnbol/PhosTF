@@ -1,3 +1,8 @@
-grep -hv '^TF' KP2TF_parts/*.tsv | cat <(head -n1 KP2TF_parts/YAL009W.tsv) - > KP2TF_genesign.tsv
-# cleanup folder a bit, we can always make this files again with the split_KPs.sh script
-rm KP_??.txt
+./KP2TF_wilcoxon_setup.R
+./split_parts.sh
+# do in parallel:
+./wilcoxon_part.sh KP_01.txt
+./wilcoxon_part.sh ...
+./after_parts.sh
+./KP2TF.sh
+./WP.sh
