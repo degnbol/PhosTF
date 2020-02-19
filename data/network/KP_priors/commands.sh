@@ -4,5 +4,5 @@
 ./wilcoxon_part.sh KP_01.txt
 ./wilcoxon_part.sh ...
 ./after_parts.sh
-./KP2TF.sh
+./KP2TF.R
 ./WP.sh
