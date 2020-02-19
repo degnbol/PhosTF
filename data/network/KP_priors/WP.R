@@ -1,4 +1,5 @@
 
+library(data.table)
 library(Matrix)
 library(fdrtool)
 
@@ -17,7 +18,7 @@ KPTFs = c(KPs, TFs)
 KP2KP = fread("KP2KP.tsv", sep="\t", quote="", header=T)
 KP2TF = fread("KP2TF.tsv", sep="\t", quote="", header=T)
 colnames(KP2TF)[colnames(KP2TF)=="TF"] = "substrate"
-KP2TF[, q:=fdrtool(p, statistic="pvalue", plot=FALSE)$qval]
+
 
 KP2TF_FDR10 = KP2TF[KP2TF$q < .1,]
 KP2TF_FDR20 = KP2TF[KP2TF$q < .2,]
