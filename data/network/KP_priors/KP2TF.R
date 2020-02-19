@@ -16,9 +16,7 @@ TFs$Mode[TFs$Mode == "repressor"] = -1
 TFs$Mode = as.numeric(TFs$Mode)
 
 KP2TF$sign = - TFs$Mode[match(KP2TF$TF, TFs$TF)] * sign(KP2TF$estimate)
-KP2TF = KP2TF[,c("KP", "TF", "p", "sign")] # reorder columns
 stopifnot(all(unique(KP2TF$KP) == KPs))
-
 KP2TF$weight = - TFs$Mode[match(KP2TF$TF, TFs$TF)] * KP2TF$estimate
-
+KP2TF = KP2TF[,c("KP", "TF", "p", "sign", "weight")] # reorder columns
 write.table(KP2TF, "KP2TF.tsv", sep="\t", quote=F, row.names=F)
