@@ -76,7 +76,7 @@ As vector notation:
 Wₚ := V (Wₚₖ' - Wₚₚ')
 We use rowwise multiplication with .* here instead of diagonal matrix multiplication so make sure V is a 2D column vector.
 """
-_Wₚ(W::AbstractMatrix, V, Iₚₖ::Matrix, Iₚₚ::Matrix) = V .* (abs.(W)*(Iₚₖ-Iₚₚ))
+_Wₚ(W::AbstractMatrix, V, Iₚₖ::AbstractMatrix, Iₚₚ::AbstractMatrix) = V .* (abs.(W)*(Iₚₖ-Iₚₚ))
 _Wₜ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = W[:,nₚ+1:nₚ+nₜ]
 _Wₚ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = W[1:nₜ+nₚ,1:nₚ]
 _Wₜ(W::AbstractMatrix, Iₜ) = W*Iₜ
