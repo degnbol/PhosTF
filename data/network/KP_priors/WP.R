@@ -25,9 +25,12 @@ KP2TF$normlogp = log10(KP2TF$p) / min(log10(KP2TF$p)) * KP2TF$sign
 KP2TF_FDR10 = KP2TF[KP2TF$q < .1,]
 KP2TF_FDR20 = KP2TF[KP2TF$q < .2,]
 
-KP2TF$gauss = qhalfnorm(KP2TF$p, lower.tail=FALSE)*KP2TF$sign
-KP2TF$gauss01 = qhalfnorm(KP2TF$p, theta=sd2theta(.1), lower.tail=FALSE)*KP2TF$sign
-
+KP2TF$gauss = qhalfnorm(KP2TF$p, lower.tail=FALSE)
+KP2TF$gauss01 = qhalfnorm(KP2TF$p, theta=sd2theta(.1), lower.tail=FALSE)
+KP2TF$gauss[KP2TF$gauss == Inf] = max(KP2TF$gauss[KP2TF$gauss != Inf])
+KP2TF$gauss01[KP2TF$gauss01 == Inf] = max(KP2TF$gauss01[KP2TF$gauss01 != Inf])
+KP2TF$gauss = KP2TF$gauss*KP2TF$sign
+KP2TF$gauss01 = KP2TF$gauss01*KP2TF$sign
 
 # adjacency matrix
 adjacency = as.matrix(sparseMatrix(i=match(KP_edges$Target, KPTFs), j=match(KP_edges$KP, KPs), x=KP_edges$weight, 
