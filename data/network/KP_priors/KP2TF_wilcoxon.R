@@ -6,7 +6,6 @@ suppressPackageStartupMessages(library(data.table))
 suppressPackageStartupMessages(library(tidyverse))
 
 kps = commandArgs(trailingOnly=TRUE)
-cat(length(kps),"\n")
 
 for(kp in kps) {
     cat(kp, "\n")
