@@ -14,8 +14,8 @@ setwd("~/cwd/data/network/KP_priors")
 KPs = flatten(read.table("../KP.txt"))
 TFs = flatten(read.table("../TF.txt"))
 KPTFs = c(KPs, TFs)
-KP2TF = read.table("KP2TF_p.tsv", sep="\t", quote="", header=T)
-KP2KP = read.table("KP2KP_p.tsv", sep="\t", quote="", header=T)
+KP2TF = read.table("KP2TF.tsv", sep="\t", quote="", header=T)
+KP2KP = read.table("archive/KP2KP_p.tsv", sep="\t", quote="", header=T)
 colnames(KP2TF)[colnames(KP2TF)=="TF"] = "Target"
 KP2KP = KP2KP[,colnames(KP2KP)!="p_adj"]
 KP_edges = rbind(KP2TF, KP2KP)
