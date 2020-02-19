@@ -51,9 +51,9 @@ The opposite should be observed for a protein i that is activated when dephospho
 elements in W*(Iₚₖ-Iₚₚ) are positive if activation agrees with phosphorylation. sum(..., dims=2) shows overall effect for each target i.
 - W: a weight matrix of activation/repression effects.
 """
-init_V(Iₚₖ::Matrix, Iₚₚ::Matrix, W::Matrix) = sign.(sum(W*(Iₚₖ-Iₚₚ); dims=2)) |> param
+init_V(Iₚₖ::AbstractMatrix, Iₚₚ::AbstractMatrix, W::Matrix) = sign.(sum(W*(Iₚₖ-Iₚₚ); dims=2)) |> param
 "If W is not provided we assume phosphorylation == activation for all target nodes."
-init_V(Iₚₖ::Matrix, Iₚₚ::Matrix, ::Nothing) = FluxUtils.random_weight(size(Iₚₖ,1),1) .|> abs |> param
+init_V(Iₚₖ::AbstractMatrix, Iₚₚ::AbstractMatrix, ::Nothing) = FluxUtils.random_weight(size(Iₚₖ,1),1) .|> abs |> param
 
 
 """
