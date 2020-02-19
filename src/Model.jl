@@ -237,7 +237,7 @@ apply_priors(W::AbstractMatrix, V::AbstractArray, M, S, Iₚₖ::Matrix, Iₚₚ
 W[2]*I₋ₖₚ(Iₚₖ,Iₚₚ) for the nodes ∈ KP where it is not known if they are a kinase or phosphatase 
 (or where we do not wish to simply describe them as only one or the other).
 """
-apply_priors(W::AbstractVector, V::AbstractArray, M, S, Iₚₖ::Matrix, Iₚₚ::Matrix) = apply_priors([W[1], W[2]*I₋ₖₚ(Iₚₖ,Iₚₚ) + _Wₚ(W[2],V,Iₚₖ,Iₚₚ)], M, S)
+apply_priors(W::AbstractVector, V::AbstractArray, M, S, Iₚₖ::AbstractMatrix, Iₚₚ::AbstractMatrix) = apply_priors([W[1], W[2]*I₋ₖₚ(Iₚₖ,Iₚₚ) + _Wₚ(W[2],V,Iₚₖ,Iₚₚ)], M, S)
 apply_priors(W, ::Nothing, M, S, ::Any, ::Any) = apply_priors(W, M, S)
 
 end;
