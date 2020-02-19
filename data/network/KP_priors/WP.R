@@ -25,6 +25,10 @@ KP2TF$normlogp = log10(KP2TF$p) / min(log10(KP2TF$p)) * KP2TF$sign
 KP2TF_FDR10 = KP2TF[KP2TF$q < .1,]
 KP2TF_FDR20 = KP2TF[KP2TF$q < .2,]
 
+KP2TF$gauss = qhalfnorm(KP2TF$p, lower.tail=FALSE)*KP2TF$sign
+KP2TF$gauss01 = qhalfnorm(KP2TF$p, theta=sd2theta(.1), lower.tail=FALSE)*KP2TF$sign
+
+
 # adjacency matrix
 adjacency = as.matrix(sparseMatrix(i=match(KP_edges$Target, KPTFs), j=match(KP_edges$KP, KPs), x=KP_edges$weight, 
                                    dims=list(length(KPTFs), length(KPs)), dimnames=list(KPTFs, KPs)))
@@ -36,6 +40,10 @@ adjacency_KP2TF_FDR20 = as.matrix(sparseMatrix(i=match(KP2TF_FDR20$Target, KPTFs
                                                dims=list(length(KPTFs), length(KPs)), dimnames=list(KPTFs, KPs)))
 adjacency_KP2TF_log = as.matrix(sparseMatrix(i=match(KP2TF$Target, KPTFs), j=match(KP2TF$KP, KPs), x=KP2TF$normlogp, 
                                          dims=list(length(KPTFs), length(KPs)), dimnames=list(KPTFs, KPs)))
+adjacency_KP2TF_gauss = as.matrix(sparseMatrix(i=match(KP2TF$Target, KPTFs), j=match(KP2TF$KP, KPs), x=KP2TF$gauss, 
+                                             dims=list(length(KPTFs), length(KPs)), dimnames=list(KPTFs, KPs)))
+adjacency_KP2TF_gauss01 = as.matrix(sparseMatrix(i=match(KP2TF$Target, KPTFs), j=match(KP2TF$KP, KPs), x=KP2TF$gauss01, 
+                                               dims=list(length(KPTFs), length(KPs)), dimnames=list(KPTFs, KPs)))
 
 
 adjacency[is.na(adjacency)] = 0
@@ -66,7 +74,8 @@ write.table(get_adjacency_noise(adjacency_KP2TF_FDR10), "WP_noise_FDR10_sign.mat
 write.table(get_adjacency_noise(adjacency_KP2TF_FDR20), "WP_noise_FDR20_sign.mat", sep=" ", quote=F, col.names=F, row.names=F)
 write.table(adjacency_KP2TF_log, "WP_KP2TF_log.mat", sep=" ", quote=F, col.names=F, row.names=F)
 write.table(get_adjacency_noise(adjacency_KP2TF_log), "WP_noise_KP2TF_log.mat", sep=" ", quote=F, col.names=F, row.names=F)
-
+write.table(get_adjacency_noise(adjacency_KP2TF_gauss), "WP_noise_KP2TF_gauss.mat", sep=" ", quote=F, col.names=F, row.names=F)
+write.table(get_adjacency_noise(adjacency_KP2TF_gauss01), "WP_noise_KP2TF_gauss01.mat", sep=" ", quote=F, col.names=F, row.names=F)
 
 # analysis
 
