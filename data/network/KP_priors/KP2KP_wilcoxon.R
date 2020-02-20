@@ -34,14 +34,16 @@ for (kp in KPs) {
 TFs$sign = (TFs$Mode == "activator") - (TFs$Mode == "repressor")
 pathways[TFs[,c("TF","sign")],on="TF",TF_sign:=sign]
 pathways[KP2TF[,c("KP","TF","sign")],on=c("KP","TF"),KP_sign:=sign]
-
-
+pathways[,sign:=TF_sign*KP_sign]
+pathways = pathways[,.(sign=sign(sum(sign))),by=c("KP","gene")][sign!=0,]
+pathways = unique(pathways)
 pathways[,Regulon:=TRUE]
 
 KP_regulons = data.table(expand.grid(KP=KPs, gene=genes))
 KP_regulons = KP_regulons[as.character(KP) != as.character(gene),]
-KP_regulons[pathways, on=c("KP", "gene"), Regulon:=Regulon]
+KP_regulons[pathways, on=c("KP", "gene"), c("Regulon", "sign"):=.(Regulon, sign),]
 KP_regulons$Regulon[is.na(KP_regulons$Regulon)] = FALSE
+KP_regulons$sign[is.na(KP_regulons$sign)] = 1
 colnames(KP_regulons)[colnames(KP_regulons)=="KP"] = "KP_reg"
 
 
@@ -54,6 +56,7 @@ for (kp in kps) {
     DT = KP_regulons # copy
     DT[KP_pert[KP== kp,], on="gene", M:=M]
     DT = na.omit(DT)
+    DT$M = DT$M * DT$sign
     # invert Regulon bool since case should be tested for being greater than control, and case is 0 while control is 1 apparently
     # it's very clear which way to test, the values reveal nothing significant if chosen in the wrong direction.
     DT = DT[, c(wilcox.test(abs(M) ~ !Regulon, alternative="g", conf.int=TRUE)[c("p.value", "estimate")], 
