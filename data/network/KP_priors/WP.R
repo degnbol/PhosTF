@@ -20,9 +20,9 @@ KP2TF = fread("KP2TF.tsv", sep="\t", quote="", header=T)
 colnames(KP2TF)[colnames(KP2TF)=="TF"] = "substrate"
 
 
-KP2TF_FDR10 = KP2TF[KP2TF$q < .1,]
-KP2TF_FDR20 = KP2TF[KP2TF$q < .2,]
-KP2KP_FDR20 = KP2KP[q < .2 & abs(estimate) > .2,]
+KP2TF_FDR10 = KP2TF[q < .1,]
+KP2TF_FDR20 = KP2TF[q < .2,]
+KP2KP_FDR20 = KP2KP[q < .2,]
 
 
 KP2KPTF = rbind(KP2KP_FDR20[,c("KP", "substrate", "sign")],
@@ -69,8 +69,8 @@ add_noise = function(adjacency) {
 }
 
 
-fwrite(adjacency_KP2TF_FDR20_median, "WP_median2_FDR20.mat", sep=" ", row.names=F, col.names=F)
-fwrite(add_noise(adjacency_KP2TF_FDR20_median), "WP_noise_median2_FDR20.mat", sep=" ", row.names=F, col.names=F)
+fwrite(adjacency_KP2TF_FDR20_median, "WP_median_KP2TF_FDR20.mat", sep=" ", row.names=F, col.names=F)
+fwrite(add_noise(adjacency_KP2TF_FDR20_median), "WP_median_KP2TF_FDR20_noise.mat", sep=" ", row.names=F, col.names=F)
 
 
 
