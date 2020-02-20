@@ -5,7 +5,6 @@ options(stringsAsFactors=F)
 
 # packages
 library(data.table)
-library(fdrtool)
 
 setwd("~/cwd/data/network/KP_priors")
 # read
