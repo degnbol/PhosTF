@@ -15,7 +15,7 @@ KP2TF = fread("KP2TF_medianest.tsv", sep="\t", header=T)
 TFs$sign = (TFs$Mode == "activator") - (TFs$Mode == "repressor")
 
 KP2TF[TFs[,c("TF","sign")], on="TF", TF_sign:=sign]
-KP2TF[,median_weight:= - TF_sign * estimate]
+KP2TF[,median_weight:= - TF_sign * sign * estimate]
 KP2TF[,sign:= sign(median_weight)]
 KP2TF[,q:=fdrtool(p.value, statistic="pvalue", plot=FALSE)$qval]
 stopifnot(all(unique(KP2TF$KP) == KPs))
