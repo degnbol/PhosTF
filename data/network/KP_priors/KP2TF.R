@@ -20,7 +20,7 @@ KP2TF$sign = - TFs$Mode[match(KP2TF$TF, TFs$TF)] * sign(KP2TF$estimate)
 stopifnot(all(unique(KP2TF$KP) == KPs))
 KP2TF$q = fdrtool(KP2TF$p, statistic="pvalue", plot=FALSE)$qval
 KP2TF$median_weight = - TFs$Mode[match(KP2TF$TF, TFs$TF)] * KP2TF$estimate
-KP2TF = KP2TF[,c("KP", "TF", "p", "q", "sign", "median_weight")] # reorder and select columns
+KP2TF = KP2TF[,c("KP", "TF", "p.value", "q", "sign", "median_weight")] # reorder and select columns
 write.table(KP2TF, "KP2TF.tsv", sep="\t", quote=F, row.names=F)
 
 
