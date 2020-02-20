@@ -28,11 +28,14 @@ pathways = data.table()
 for (kp in KPs) {
     tfs = KP2TF_sig[KP==kp,TF]
     pathways_ = TF2V_sig[TF%in%KP2TF_sig[KP==kp,TF],]
-    pathways = rbind(pathways, data.table(gene=pathways_$gene, KP=kp))
+    pathways = rbind(pathways, cbind(pathways_, KP=kp))
 }
 
-# ignoring TF we reduce to unique KP->?->gene pathways
-pathways = unique(pathways)
+TFs$sign = (TFs$Mode == "activator") - (TFs$Mode == "repressor")
+pathways[TFs[,c("TF","sign")],on="TF",TF_sign:=sign]
+pathways[KP2TF[,c("KP","TF","sign")],on=c("KP","TF"),KP_sign:=sign]
+
+
 pathways[,Regulon:=TRUE]
 
 KP_regulons = data.table(expand.grid(KP=KPs, gene=genes))
