@@ -1,3 +1,4 @@
+#!/usr/bin/env Rscript
 
 # settings
 options(stringsAsFactors=F)
