@@ -57,6 +57,12 @@ for (kp in kps) {
     DT[KP_pert[KP== kp,], on="gene", M:=M]
     DT = na.omit(DT)
     DT$M = DT$M * DT$sign
+    
+    # only consider KP_regs that have both cases of reg and !reg
+    valid_kp_regs = DT[length(unique(Regulon))==2,KP_reg,by=KP_reg]$KP_reg
+    if(length(valid_kp_regs) < length(KPs))
+        DT = DT[KP_reg%in%valid_kp_regs,]
+    
     # invert Regulon bool since case should be tested for being greater than control, and case is 0 while control is 1 apparently
     # it's very clear which way to test, the values reveal nothing significant if chosen in the wrong direction.
     DT = DT[, c(wilcox.test(abs(M) ~ !Regulon, alternative="g", conf.int=TRUE)[c("p.value", "estimate")], 
