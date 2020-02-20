@@ -71,6 +71,8 @@ add_noise = function(adjacency) {
 
 fwrite(adjacency_KP2TF_FDR20_median, "WP_median_KP2TF_FDR20.mat", sep=" ", row.names=F, col.names=F)
 fwrite(add_noise(adjacency_KP2TF_FDR20_median), "WP_median_KP2TF_FDR20_noise.mat", sep=" ", row.names=F, col.names=F)
+fwrite(sign(adjacency_KP2TF_FDR20_median), "WP_sign_KP2TF_FDR20.mat", sep=" ", row.names=F, col.names=F)
+fwrite(add_noise(sign(adjacency_KP2TF_FDR20_median)), "WP_sign_KP2TF_FDR20_noise.mat", sep=" ", row.names=F, col.names=F)
 
 
 
