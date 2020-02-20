@@ -18,7 +18,7 @@ stopifnot(all(KP_pert_J$KP == KP_pert$KP))
 KP_pert = KP_pert[(KP_pert_J$j == 0),]
 stopifnot(!any(is.na(KP_pert$M)))  # NaNs should be removed with U=1-J mask
 
-KP2TF = fread("KP2TF_p.tsv", sep="\t", header=T)
+KP2TF = fread("KP2TF.tsv", sep="\t", header=T)
 KP2TF_sig = KP2TF[KP2TF$q < .1, c("KP", "TF")]
 TF2V_sig = TF_edges[TF_edges$qval < .1, c("TF", "Target")]
 colnames(TF2V_sig) = c("TF", "gene")  # rename to gene to match KP_pert
