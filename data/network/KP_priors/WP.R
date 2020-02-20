@@ -49,25 +49,29 @@ sparsematrix = function(i, j, x) {
 
 adjacency = sparsematrix(KP2KPTF$substrate, KP2KPTF$KP, KP2KPTF$sign)
 
-adjacency_KP2TF = sparsematrix(KP2TF$Target, KP2TF$KP, KP2TF$weight)
-adjacency_KP2TF_FDR10 = sparsematrix(KP2TF_FDR10$Target, KP2TF_FDR10$KP, KP2TF_FDR10$sign) 
-adjacency_KP2TF_FDR20 = sparsematrix(KP2TF_FDR20$Target, KP2TF_FDR20$KP, KP2TF_FDR20$sign) 
-adjacency_KP2TF_log = sparsematrix(KP2TF$Target, KP2TF$KP, KP2TF$normlogp)
-adjacency_KP2TF_gauss = sparsematrix(KP2TF$Target, KP2TF$KP, KP2TF$gauss)
-adjacency_KP2TF_gauss01 = sparsematrix(KP2TF$Target, KP2TF$KP, KP2TF$gauss01)
+adjacency_KP2TF = sparsematrix(KP2TF$substrate, KP2TF$KP, KP2TF$weight)
+adjacency_KP2TF_FDR10_median = sparsematrix(KP2TF_FDR10$substrate, KP2TF_FDR10$KP, KP2TF_FDR10$median_weight) 
+adjacency_KP2TF_FDR20_median = sparsematrix(KP2TF_FDR20$substrate, KP2TF_FDR20$KP, KP2TF_FDR20$median_weight) 
+adjacency_KP2TF_FDR10_sign = sparsematrix(KP2TF_FDR10$substrate, KP2TF_FDR10$KP, KP2TF_FDR10$sign) 
+adjacency_KP2TF_FDR20_sign = sparsematrix(KP2TF_FDR20$substrate, KP2TF_FDR20$KP, KP2TF_FDR20$sign) 
+adjacency_KP2TF_log = sparsematrix(KP2TF$substrate, KP2TF$KP, KP2TF$normlogp)
+adjacency_KP2TF_gauss = sparsematrix(KP2TF$substrate, KP2TF$KP, KP2TF$gauss)
+adjacency_KP2TF_gauss01 = sparsematrix(KP2TF$substrate, KP2TF$KP, KP2TF$gauss01)
 
 
 add_noise = function(adjacency) {
     adjacency_noise = adjacency
     noise_sd = 1/sqrt(prod(dim(adjacency)))
+    cat(noise_sd, "\n")
     lacking = adjacency_noise==0
     adjacency_noise[lacking] = matrix(rnorm(prod(dim(adjacency)), sd=noise_sd), nrow=nrow(adjacency), ncol=ncol(adjacency))[lacking]
     adjacency_noise
 }
 
 
-fwrite(adjacency, "WP_FDR20.mat", sep=" ", row.names=F, col.names=F)
-fwrite(add_noise(adjacency), "WP_noise_FDR20.mat", sep=" ", row.names=F, col.names=F)
+fwrite(adjacency_KP2TF_FDR20_median, "WP_median_FDR20.mat", sep=" ", row.names=F, col.names=F)
+fwrite(add_noise(adjacency_KP2TF_FDR20_median), "WP_noise_median_FDR20.mat", sep=" ", row.names=F, col.names=F)
+
 
 
 
