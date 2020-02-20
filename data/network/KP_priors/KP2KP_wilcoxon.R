@@ -59,7 +59,8 @@ for (kp in kps) {
     DT$M = DT$M * DT$sign
     
     # only consider KP_regs that have both cases of reg and !reg
-    valid_kp_regs = DT[length(unique(Regulon))==2,KP_reg,by=KP_reg]$KP_reg
+    valid_kp_regs = DT[,.(n=length(unique(Regulon))),by=KP_reg]
+    valid_kp_regs = valid_kp_regs[n==2,KP_reg]
     if(length(valid_kp_regs) < length(KPs))
         DT = DT[KP_reg%in%valid_kp_regs,]
     
