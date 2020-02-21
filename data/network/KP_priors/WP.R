@@ -36,7 +36,7 @@ KP2TF$gauss01 = qhalfnorm(KP2TF$p, theta=sd2theta(.1), lower.tail=FALSE)
 KP2TF$gauss001 = qhalfnorm(KP2TF$p, theta=sd2theta(.01), lower.tail=FALSE)
 KP2TF$gauss[KP2TF$gauss == Inf] = max(KP2TF$gauss[KP2TF$gauss != Inf])
 KP2TF$gauss01[KP2TF$gauss01 == Inf] = max(KP2TF$gauss01[KP2TF$gauss01 != Inf])
-KP2TF$gauss001[KP2TF$gauss01 == Inf] = max(KP2TF$gauss001[KP2TF$gauss01 != Inf])
+KP2TF$gauss001[KP2TF$gauss001 == Inf] = max(KP2TF$gauss001[KP2TF$gauss001 != Inf])
 KP2TF$gauss = KP2TF$gauss*KP2TF$sign
 KP2TF$gauss01 = KP2TF$gauss01*KP2TF$sign
 KP2TF$gauss001 = KP2TF$gauss001*KP2TF$sign
