@@ -86,7 +86,7 @@ fwrite(sign(adjacency_KP2TF_FDR20_median), "WP_sign_KP2TF_FDR20.mat", sep=" ", r
 fwrite(add_noise(sign(adjacency_KP2TF_FDR20_median)), "WP_sign_KP2TF_FDR20_noise.mat", sep=" ", row.names=F, col.names=F)
 fwrite(add_noise(adjacency_KP2TF_gauss, 1), "WP_KP2TF_gauss.mat", sep=" ", row.names=F, col.names=F)
 fwrite(add_noise(adjacency_KP2TF_gauss01, .1), "WP_KP2TF_gauss01.mat", sep=" ", row.names=F, col.names=F)
-fwrite(add_noise(adjacency_KP2TF_gauss001, .1), "WP_KP2TF_gauss001.mat", sep=" ", row.names=F, col.names=F)
+fwrite(add_noise(adjacency_KP2TF_gauss001, .01), "WP_KP2TF_gauss001.mat", sep=" ", row.names=F, col.names=F)
 
 
 
