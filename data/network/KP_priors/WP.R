@@ -25,8 +25,8 @@ KP2TF_FDR20 = KP2TF[q < .2,]
 KP2KP_FDR20 = KP2KP[q < .2,]
 
 
-KP2KPTF = rbind(KP2KP_FDR20[,c("KP", "substrate", "sign")],
-                KP2TF_FDR20[,c("KP", "substrate", "sign")])
+KP2KPTF = rbind(KP2KP_FDR20[,c("KP", "substrate", "sign", "median_weight")],
+                KP2TF_FDR20[,c("KP", "substrate", "sign", "median_weight")])
 
 
 KP2TF[, normlogp:=log10(p)/min(log10(p))*sign]
@@ -47,7 +47,8 @@ sparsematrix = function(i, j, x) {
     as.matrix(sparseMatrix(i=i, j=j, x=x, dims=dims_, dimnames=dimnames_))
 }
 
-adjacency = sparsematrix(KP2KPTF$substrate, KP2KPTF$KP, KP2KPTF$sign)
+adjacency_median = sparsematrix(KP2KPTF$substrate, KP2KPTF$KP, KP2KPTF$median_weight)
+adjacency_sign = sparsematrix(KP2KPTF$substrate, KP2KPTF$KP, KP2KPTF$sign)
 
 adjacency_KP2TF = sparsematrix(KP2TF$substrate, KP2TF$KP, KP2TF$weight)
 adjacency_KP2TF_FDR10_median = sparsematrix(KP2TF_FDR10$substrate, KP2TF_FDR10$KP, KP2TF_FDR10$median_weight) 
@@ -67,6 +68,13 @@ add_noise = function(adjacency) {
     adjacency_noise[lacking] = matrix(rnorm(prod(dim(adjacency)), sd=noise_sd), nrow=nrow(adjacency), ncol=ncol(adjacency))[lacking]
     adjacency_noise
 }
+
+
+
+fwrite(adjacency_median, "WP_median_FDR20.mat", sep=" ", row.names=F, col.names=F)
+fwrite(add_noise(adjacency_median), "WP_median_FDR20_noise.mat", sep=" ", row.names=F, col.names=F)
+fwrite(adjacency_sign, "WP_sign_FDR20.mat", sep=" ", row.names=F, col.names=F)
+fwrite(add_noise(adjacency_sign), "WP_sign_FDR20_noise.mat", sep=" ", row.names=F, col.names=F)
 
 
 fwrite(adjacency_KP2TF_FDR20_median, "WP_median_KP2TF_FDR20.mat", sep=" ", row.names=F, col.names=F)
