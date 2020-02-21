@@ -33,10 +33,13 @@ KP2TF[, normlogp:=log10(p)/min(log10(p))*sign]
 
 KP2TF$gauss = qhalfnorm(KP2TF$p, lower.tail=FALSE)
 KP2TF$gauss01 = qhalfnorm(KP2TF$p, theta=sd2theta(.1), lower.tail=FALSE)
+KP2TF$gauss001 = qhalfnorm(KP2TF$p, theta=sd2theta(.01), lower.tail=FALSE)
 KP2TF$gauss[KP2TF$gauss == Inf] = max(KP2TF$gauss[KP2TF$gauss != Inf])
 KP2TF$gauss01[KP2TF$gauss01 == Inf] = max(KP2TF$gauss01[KP2TF$gauss01 != Inf])
+KP2TF$gauss001[KP2TF$gauss01 == Inf] = max(KP2TF$gauss001[KP2TF$gauss01 != Inf])
 KP2TF$gauss = KP2TF$gauss*KP2TF$sign
 KP2TF$gauss01 = KP2TF$gauss01*KP2TF$sign
+KP2TF$gauss001 = KP2TF$gauss001*KP2TF$sign
 
 # adjacency matrices
 sparsematrix = function(i, j, x) {
@@ -58,12 +61,12 @@ adjacency_KP2TF_FDR20_sign = sparsematrix(KP2TF_FDR20$substrate, KP2TF_FDR20$KP,
 adjacency_KP2TF_log = sparsematrix(KP2TF$substrate, KP2TF$KP, KP2TF$normlogp)
 adjacency_KP2TF_gauss = sparsematrix(KP2TF$substrate, KP2TF$KP, KP2TF$gauss)
 adjacency_KP2TF_gauss01 = sparsematrix(KP2TF$substrate, KP2TF$KP, KP2TF$gauss01)
+adjacency_KP2TF_gauss001 = sparsematrix(KP2TF$substrate, KP2TF$KP, KP2TF$gauss001)
 
 
-add_noise = function(adjacency) {
-    adjacency_noise = adjacency
-    noise_sd = 1/sqrt(prod(dim(adjacency)))
+add_noise = function(adjacency, noise_sd = 1/sqrt(prod(dim(adjacency)))) {
     cat(noise_sd, "\n")
+    adjacency_noise = adjacency
     lacking = adjacency_noise==0
     adjacency_noise[lacking] = matrix(rnorm(prod(dim(adjacency)), sd=noise_sd), nrow=nrow(adjacency), ncol=ncol(adjacency))[lacking]
     adjacency_noise
@@ -81,6 +84,9 @@ fwrite(adjacency_KP2TF_FDR20_median, "WP_median_KP2TF_FDR20.mat", sep=" ", row.n
 fwrite(add_noise(adjacency_KP2TF_FDR20_median), "WP_median_KP2TF_FDR20_noise.mat", sep=" ", row.names=F, col.names=F)
 fwrite(sign(adjacency_KP2TF_FDR20_median), "WP_sign_KP2TF_FDR20.mat", sep=" ", row.names=F, col.names=F)
 fwrite(add_noise(sign(adjacency_KP2TF_FDR20_median)), "WP_sign_KP2TF_FDR20_noise.mat", sep=" ", row.names=F, col.names=F)
+fwrite(add_noise(adjacency_KP2TF_gauss, 1), "WP_KP2TF_gauss.mat", sep=" ", row.names=F, col.names=F)
+fwrite(add_noise(adjacency_KP2TF_gauss01, .1), "WP_KP2TF_gauss01.mat", sep=" ", row.names=F, col.names=F)
+fwrite(add_noise(adjacency_KP2TF_gauss001, .1), "WP_KP2TF_gauss001.mat", sep=" ", row.names=F, col.names=F)
 
 
 
