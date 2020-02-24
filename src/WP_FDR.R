@@ -58,8 +58,8 @@ for (WP_fname in WP_fnames) {
     KP_edges$q = fdrtool(abs(KP_edges$marker), plot=FALSE)$qval
     cat("raw < .1", sum(fdrtool(KP_edges$marker, plot=FALSE)$qval < .05) / 199, "\n")
     cat("abs < .2", sum(KP_edges$q < .2) / 199, "\n")
+    write.table(KP_edges, "KP_edges.tsv", sep="\t", quote=F, row.names=F)
     KP_edges$infer = KP_edges$q < .2
-    
     
     plt = ggplot(KP_edges, aes(marker, fill=infer)) + 
         geom_histogram(binwidth=.005) +
