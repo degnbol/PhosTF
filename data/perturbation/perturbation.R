@@ -210,15 +210,55 @@ for (i in 1:length(labels)) {
     stepdf = rbind(stepdf, data.frame(xmin=limits, y=c(0,0), group=c(i,i), label=labels[i]))
 }
 
-plt + geom_step(data=stepdf, aes(x=xmin, y=y, color=label)) +
+plt = plt + geom_step(data=stepdf, aes(x=xmin, y=y, color=label)) +
     theme_linedraw() +
-    scale_color_manual(values=color_palette, limits=legend_labels) +
-    scale_fill_manual(values=color_palette, limits=legend_labels) +
+    scale_color_manual(name="gene", values=color_palette, limits=legend_labels) +
+    scale_fill_manual(name="gene", values=color_palette, limits=legend_labels) +
     scale_x_continuous(name="log fold-change", breaks=c(-10,-5,-1,0,1,5), labels=c("-10","-5","-1","0","1","5")) +
-    theme(legend.title=element_blank(), panel.grid.major=element_line(colour="lightgray"), panel.grid.minor=element_blank()) +
+    theme(panel.grid.major=element_line(colour="lightgray"), panel.grid.minor=element_blank()) +
     scale_y_log10(limits=c(1,1.2e7), expand=c(0,0)) +
     ggtitle("Enhanced perturbations") +
     ylab("measurements")
 
-ggsave("enhanced_perturbations.pdf", width=7, height=2, units="in")
+ggsave("enhanced_perturbations.pdf", plot=plt, width=7, height=2, units="in")
+
+
+
+### not enhanced
+
+labels = c("others", "KO", "OE")
+# limits are used to put "others" last in the legend list without putting it in front when drawing wich would be default
+legend_labels = c(labels[2:3], labels[1])
+color_palette = c("red", "blue", "black")
+df1 = data.frame(logFC=pert_outer[!as.matrix(J_outer, "ORF")], label="others")
+df2 = data.frame(logFC=na.omit(pert_outer[KO_outer]), label="KO")
+df3 = data.frame(logFC=na.omit(pert_outer[OE_outer]), label="OE")
+nrow(df1); nrow(df2); nrow(df3)
+plotdf = rbind(df1, df2, df3)
+plotdf$label = factor(plotdf$label, levels=labels)
+
+plt = ggplot(plotdf, aes(logFC, fill=label)) + 
+    geom_histogram(alpha=0.5, position="identity", binwidth=0.3)
+
+stepdf = ggplot_build(plt)$data[[1]][,c("xmin", "y", "group")]
+stepdf$label = factor(stepdf$group, labels=labels)
+# make visual corrections
+for (i in 1:length(labels)) {
+    limits = c(min(stepdf$xmin[stepdf$group==i])-.1, max(stepdf$xmin[stepdf$group==i])+.1)
+    stepdf = rbind(stepdf, data.frame(xmin=limits, y=c(0,0), group=c(i,i), label=labels[i]))
+}
+
+plt = plt + geom_step(data=stepdf, aes(x=xmin, y=y, color=label)) +
+    theme_linedraw() +
+    scale_color_manual(name="gene", values=color_palette, limits=legend_labels) +
+    scale_fill_manual(name="gene", values=color_palette, limits=legend_labels) +
+    scale_x_continuous(name="log fold-change", breaks=c(-10,-5,-1,0,1,5), labels=c("-10","-5","-1","0","1","5")) +
+    theme(panel.grid.major=element_line(colour="lightgray"), panel.grid.minor=element_blank()) +
+    scale_y_log10(limits=c(1,1.2e7), expand=c(0,0)) +
+    ggtitle("Perturbation data") +
+    ylab("measurements")
+
+ggsave("perturbations.pdf", plot=plt, width=7, height=2, units="in")
+
+
 
