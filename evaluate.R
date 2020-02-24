@@ -196,10 +196,6 @@ for (WP_fname in WP_fnames) {
     # best selection
     fisher.ps = aggregate(p ~ selection, data=eval.table, fisher.method.log)
     best.selection = fisher.ps$selection[which.min(fisher.ps$p)]
-    plt.p = eval.table[eval.table$selection==best.selection,]
-    # best quantile
-    both.p = aggregate(p ~ quantile, data=plt.p, fisher.method.log)
-    best.quantile = both.p$quantile[which.min(both.p$p)]
     
     write.table(-fisher.ps$p[best.selection], "score.txt", quote=F, row.names=F, col.names=F)
     
@@ -207,23 +203,12 @@ for (WP_fname in WP_fnames) {
     KP_color = "#bd61b6"
     TF_color = "#75b42f"
     
-    selection = as.character(best.selection)
-    inferred.KP = top_marked(best.quantile * sum(KP2KP.idx), KP2KP.idx)
-    inferred.TF = top_marked(best.quantile * sum(KP2TF.idx), KP2TF.idx)
-    eulerdata.KP = data.frame(venndata[KP2KP.idx,c("potential", selection)], inferred=inferred.KP)
-    eulerdata.TF = data.frame(venndata[KP2TF.idx,c("potential", selection)], inferred=inferred.TF)
-    
-    plot_eulers = function() {
-        eulerr_options(padding=unit(14, units="pt"), labels=list(font=3), quantities=list(font=2))
-        pdf("euler_KP.pdf", width=4, height=4)
-        print(plot(euler(eulerdata.KP, shape="ellipse"), quantities=T, labels=c("potential", "known", "inferred"), adjust_labels=T, fills=list(fill=c("transparent", KP_color, "lightgray"))))
-        dev.off()
-        pdf("euler_TF.pdf", width=4, height=4)
-        print(plot(euler(eulerdata.TF, shape="ellipse"), quantities=T, labels=c("potential", "known", "inferred"), adjust_labels=T, fills=list(fill=c("transparent", TF_color, "lightgray"))))
-        dev.off()
-    }
-    
-    plot_square_euler = function() {
+    plot_square_euler = function(selection) {
+        best.quantile = .15
+        inferred.KP = top_marked(best.quantile * sum(KP2KP.idx), KP2KP.idx)
+        inferred.TF = top_marked(best.quantile * sum(KP2TF.idx), KP2TF.idx)
+        eulerdata.KP = data.frame(venndata[KP2KP.idx,c("potential", selection)], inferred=inferred.KP)
+        eulerdata.TF = data.frame(venndata[KP2TF.idx,c("potential", selection)], inferred=inferred.TF)
         
         euler.plt.bg = rbind(data.frame(substrate="KP", inferred =-sum(eulerdata.KP$inferred), potential = sum(!eulerdata.KP$inferred)),
                              data.frame(substrate="TF", inferred =-sum(eulerdata.TF$inferred), potential = sum(!eulerdata.TF$inferred)))
@@ -275,7 +260,7 @@ for (WP_fname in WP_fnames) {
     }
     
     
-    plot_logp = function() {
+    plot_logp = function(plt.p) {
 
         second_axis = dup_axis(name="substrates/KP", breaks=quantiles_plot, labels=round(quantiles_plot*nrow(venndata)/length(KP),1))
         
@@ -294,10 +279,26 @@ for (WP_fname in WP_fnames) {
             scale_color_manual(values=c(KP_color, TF_color), labels=list(tex("KP\\rightarrow KP"),tex("KP\\rightarrow TF")))
     }
     
-    
-    ggsave("square_euler.pdf", plot=plot_square_euler(), width=6.5, height=1.25)
-    ggsave("hyperp.pdf", plot=plot_logp(), width=6.5, height=2.5)
+    for(selection in selections) {
+        plt.p = eval.table[eval.table$selection==selection,]
+        ggsave(paste0("square_euler_",selection,".pdf"), plot=plot_square_euler(selection), width=6.5, height=1.25)
+        ggsave(paste0("hyperp_",selection,".pdf"), plot=plot_logp(plt.p), width=6.5, height=2.5)
+    }
     
     setwd(rundir)  # go back to so relative dirs for other files still work
 }
 
+
+
+## archive
+
+
+plot_eulers = function() {
+    eulerr_options(padding=unit(14, units="pt"), labels=list(font=3), quantities=list(font=2))
+    pdf("euler_KP.pdf", width=4, height=4)
+    print(plot(euler(eulerdata.KP, shape="ellipse"), quantities=T, labels=c("potential", "known", "inferred"), adjust_labels=T, fills=list(fill=c("transparent", KP_color, "lightgray"))))
+    dev.off()
+    pdf("euler_TF.pdf", width=4, height=4)
+    print(plot(euler(eulerdata.TF, shape="ellipse"), quantities=T, labels=c("potential", "known", "inferred"), adjust_labels=T, fills=list(fill=c("transparent", TF_color, "lightgray"))))
+    dev.off()
+}
