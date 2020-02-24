@@ -1,7 +1,8 @@
 #!/usr/bin/env Rscript
 
 library(fdrtool)
-
+library(reshape2)
+library(ggplot2)
 
 ## functions
 
