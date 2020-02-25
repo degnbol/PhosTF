@@ -52,17 +52,23 @@ for (WP_fname in WP_fnames) {
     
     # remove diagonals
     KP_edges = KP_edges[as.character(KP_edges$KP) != as.character(KP_edges$Target),]
- 
     
     
-    KP_edges$q = fdrtool(abs(KP_edges$marker), plot=FALSE)$qval
-    cat("raw < .1", sum(fdrtool(KP_edges$marker, plot=FALSE)$qval < .05) / 199, "\n")
-    cat("abs < .2", sum(KP_edges$q < .2) / 199, "\n")
+    KP2KP.idx = KP_edges$Target%in%KP
+    KP2TF.idx = KP_edges$Target%in%TF
+    stopifnot(all(KP2KP.idx | KP2TF.idx))
+    stopifnot(!any(KP2KP.idx & KP2TF.idx))
+    
+    
+    KP_edges$q = NA
+    KP_edges$q[KP2KP.idx] = fdrtool(KP_edges$marker[KP2KP.idx], plot=FALSE)$qval
+    KP_edges$q[KP2TF.idx] = fdrtool(KP_edges$marker[KP2TF.idx], plot=FALSE)$qval
+    
     write.table(KP_edges, "KP_edges.tsv", sep="\t", quote=F, row.names=F)
-    KP_edges$infer = KP_edges$q < .2
+    KP_edges$infer = KP_edges$q < .05
     
     plt = ggplot(KP_edges, aes(marker, fill=infer)) + 
-        geom_histogram(binwidth=.005) +
+        geom_histogram(binwidth=.001) +
         theme_linedraw() +
         scale_x_continuous(expand=c(0,0)) +
         scale_y_continuous(expand=c(0,0)) +
