@@ -26,8 +26,8 @@ nTF = length(TFs)
 nPT = nKP+nTF
 
 
-KP_edges_fname = "~/cwd/data/inference/74/KP_edges.tsv"
-# KP_edges_fnames = commandArgs(trailingOnly=TRUE)
+# KP_edges_fname = "~/cwd/data/inference/74/KP_edges.tsv"
+KP_edges_fnames = commandArgs(trailingOnly=TRUE)
 
 init_dir = getwd()
 for(KP_edges_fname in KP_edges_fnames) {
@@ -56,7 +56,6 @@ for(KP_edges_fname in KP_edges_fnames) {
         theme_linedraw() +
         scale_fill_manual(name="inferred", values=c("darkgray", "black"), breaks=list(TRUE,FALSE), labels=c("yes", "no")) +
         scale_x_continuous(breaks=c(0,1,2,5,10), limits=c(-.5,14.5), expand=c(0,0), minor_breaks=c(3,4,6,7,8,9)) +
-        scale_y_log10() +
         facet_grid(vars(Substrate)) + 
         xlab("shared GO pathways") + 
         theme(panel.grid.major=element_line(colour="gray"), 
