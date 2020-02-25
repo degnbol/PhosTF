@@ -66,7 +66,7 @@ for (WP_fname in WP_fnames) {
     
     write.table(KP_edges, "KP_edges.tsv", sep="\t", quote=F, row.names=F)
     KP_edges$infer = KP_edges$q < .05
-    cat(sum(KP_edges$infer[KP2KP.idx]), sum(KP_edges$infer[KP2TF.idx]), "\n")
+    cat(sum(KP_edges$infer[KP2KP.idx]), " ", sum(KP_edges$infer[KP2TF.idx]), "\n")
     
     plt = ggplot(KP_edges, aes(marker, fill=infer)) + 
         geom_histogram(binwidth=.001) +
