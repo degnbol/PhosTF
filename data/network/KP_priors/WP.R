@@ -31,15 +31,20 @@ KP2KPTF = rbind(KP2KP_FDR20[,c("KP", "substrate", "sign", "median_weight")],
 
 KP2TF[, normlogp:=log10(p)/min(log10(p))*sign]
 
+noise_sd = 1/sqrt(length(KPs)*length(KPTFs))
+
 KP2TF$gauss = qhalfnorm(KP2TF$p, lower.tail=FALSE)
 KP2TF$gauss01 = qhalfnorm(KP2TF$p, theta=sd2theta(.1), lower.tail=FALSE)
 KP2TF$gauss001 = qhalfnorm(KP2TF$p, theta=sd2theta(.01), lower.tail=FALSE)
+KP2TF$gauss003 = qhalfnorm(KP2TF$p, theta=sd2theta(noise_sd), lower.tail=FALSE)
 KP2TF$gauss[KP2TF$gauss == Inf] = max(KP2TF$gauss[KP2TF$gauss != Inf])
 KP2TF$gauss01[KP2TF$gauss01 == Inf] = max(KP2TF$gauss01[KP2TF$gauss01 != Inf])
 KP2TF$gauss001[KP2TF$gauss001 == Inf] = max(KP2TF$gauss001[KP2TF$gauss001 != Inf])
+KP2TF$gauss003[KP2TF$gauss003 == Inf] = max(KP2TF$gauss003[KP2TF$gauss003 != Inf])
 KP2TF$gauss = KP2TF$gauss*KP2TF$sign
 KP2TF$gauss01 = KP2TF$gauss01*KP2TF$sign
 KP2TF$gauss001 = KP2TF$gauss001*KP2TF$sign
+KP2TF$gauss003 = KP2TF$gauss003*KP2TF$sign
 
 # adjacency matrices
 sparsematrix = function(i, j, x) {
@@ -62,6 +67,7 @@ adjacency_KP2TF_log = sparsematrix(KP2TF$substrate, KP2TF$KP, KP2TF$normlogp)
 adjacency_KP2TF_gauss = sparsematrix(KP2TF$substrate, KP2TF$KP, KP2TF$gauss)
 adjacency_KP2TF_gauss01 = sparsematrix(KP2TF$substrate, KP2TF$KP, KP2TF$gauss01)
 adjacency_KP2TF_gauss001 = sparsematrix(KP2TF$substrate, KP2TF$KP, KP2TF$gauss001)
+adjacency_KP2TF_gauss003 = sparsematrix(KP2TF$substrate, KP2TF$KP, KP2TF$gauss003)
 
 
 add_noise = function(adjacency, noise_sd = 1/sqrt(prod(dim(adjacency)))) {
@@ -87,6 +93,7 @@ fwrite(add_noise(sign(adjacency_KP2TF_FDR20_median)), "WP_sign_KP2TF_FDR20_noise
 fwrite(add_noise(adjacency_KP2TF_gauss, 1), "WP_KP2TF_gauss.mat", sep=" ", row.names=F, col.names=F)
 fwrite(add_noise(adjacency_KP2TF_gauss01, .1), "WP_KP2TF_gauss01.mat", sep=" ", row.names=F, col.names=F)
 fwrite(add_noise(adjacency_KP2TF_gauss001, .01), "WP_KP2TF_gauss001.mat", sep=" ", row.names=F, col.names=F)
+fwrite(add_noise(adjacency_KP2TF_gauss003, noise_sd), "WP_KP2TF_gauss003.mat", sep=" ", row.names=F, col.names=F)
 
 
 
