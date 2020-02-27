@@ -21,7 +21,6 @@ unwhich = function(which, dim=max(which)) {
     y[which] = TRUE
     y
 }
-
 # convert tex code to expression object (use \\ for \ and combine expressions with list() instead of c())
 tex = function(x) unname(TeX(paste0("$",x)))
 
