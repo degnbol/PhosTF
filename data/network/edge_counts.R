@@ -23,7 +23,7 @@ fiedler_EMAP = read.table("../processed/fiedler_2009/EMAP_edges.tsv", sep="\t", 
 yeastkid = read.table("../processed/yeastkid/P_edges.tsv", sep="\t", header=T, quote="", check.names=F)[,c(1,3)]
 colnames(fiedler) = colnames(fiedler_EMAP) = colnames(yeastkid) = c("P", "Target")
 netphorest = read.table("../processed/NetPhorest/scores.tsv", sep="\t", header=T, quote="", check.names=F)[,1:2]
-networkin = read.table("../processed/NetworKIN/scores.tsv", sep="\t", header=T, quote="", check.names=F)[,1:2]
+# networkin = read.table("../processed/NetworKIN/scores.tsv", sep="\t", header=T, quote="", check.names=F)[,1:2]
 ptacek = read.table("../processed/ptacek_2005/KP_edges.tsv", sep="\t", header=T, quote="", check.names=F)
 balaji = read.table("../processed/balaji_2006/TF_edges.tsv", sep="\t", header=T, quote="", check.names=F)[,1:2]
 workman = read.table("../processed/workman_2006/TF_edges.tsv", sep="\t", header=T, quote="", check.names=F)[,1:2]
@@ -52,7 +52,7 @@ fiedler = unique(fiedler[fiedler$P!=fiedler$Target,])
 fiedler_EMAP = unique(fiedler_EMAP[fiedler_EMAP$P!=fiedler_EMAP$Target,])
 yeastkid = unique(yeastkid[yeastkid$P!=yeastkid$Target,])
 netphorest = unique(netphorest[netphorest$KP!=netphorest$Target,])
-networkin = unique(networkin[networkin$KP!=networkin$Target,])
+# networkin = unique(networkin[networkin$KP!=networkin$Target,])
 ptacek = unique(ptacek[ptacek$KP!=ptacek$Target,])
 balaji = unique(balaji[balaji$TF!=balaji$Target,])
 workman = unique(workman[workman$TF!=workman$Target,])
@@ -86,12 +86,12 @@ sum((STRING_directed$Source %in% KPs) & (STRING_directed$Target %in% KPTFs))
 sum((STRING_directed$Source %in% TFs) & (STRING_directed$Target %in% Vs))
 sum((STRING_undirected$protein1 %in% TFs) & (STRING_undirected$protein2 %in% Vs))
 
+colnames(ptacek)[1] = "P"
 colnames(netphorest)[1] = "P"
-colnames(networkin)[1] = "P"
 
 # counts of total described KP edges versus total potential
-KP_edges = unique(rbind(biogrid, fasolo, parca, fiedler, fiedler_EMAP, yeastkid))
-KP_edges_pred = unique(rbind(KP_edges, netphorest, networkin, data.frame(P=STRING_directed$Source, Target=STRING_directed$Target)))
+KP_edges = unique(rbind(biogrid, fasolo, parca, ptacek, fiedler, fiedler_EMAP, yeastkid))
+KP_edges_pred = unique(rbind(KP_edges, netphorest, data.frame(P=STRING_directed$Source, Target=STRING_directed$Target)))
 colnames(STRING_directed)[1] = "TF"
 colnames(STRING_undirected) = c("TF", "Target")
 TF_edges = unique(rbind(balaji, harbison, horak, yeastract_binding, yeastract_expression, yeastract_ambiguous, STRING_directed, STRING_undirected))
