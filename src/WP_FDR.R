@@ -17,8 +17,6 @@ melt_matrix = function(x) {
 
 
 
-
-
 # WP_fname = "~/cwd/data/inference/74/WP_infer_1.mat"
 WP_fnames = commandArgs(trailingOnly=T)
 KP = read.vector("~/cwd/data/network/KP.txt")
@@ -29,8 +27,6 @@ nP = length(KP)
 nV = length(V)
 nT = length(TF)
 nO = nV-length(PT)
-
-
 
 
 rundir = getwd()
