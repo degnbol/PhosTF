@@ -7,3 +7,5 @@ cat sequences.linfa | sed 's/^/>/' | tr '\t' '\n' > sequences.fa
 grep kinase BIOGRID-PTM-RELATIONSHIPS-3.5.178.ptmrel.tsv | cut -f4 | sort | uniq > kinases.txt
 r kinase=phosphatase
 cat <(sed $'s/$/\tkinase/' kinases.txt) <(sed $'s/$/\tphosphatase/' phosphatases.txt) > KP.tsv
+# number of unique sites
+cat BIOGRID-PTM-RELATIONSHIPS-3.5.178.ptmrel.tsv | cut -f1,7 | grep -v $'\t-' | sed 1d | cut -f1 | sort -n | uniq | wc -l
