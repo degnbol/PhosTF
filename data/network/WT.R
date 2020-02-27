@@ -6,6 +6,34 @@ options(stringsAsFactors=FALSE)
 
 # functions
 flatten = function(x) as.vector(as.matrix(x))
+qhalfnorm_ = function(pvals, sd) {
+    vals = qhalfnorm(edges$Pval, theta=sd2theta(sd), lower.tail=F)
+    vals[vals == Inf] = max(vals[vals != Inf])
+    vals
+}
+sparsematrix = function(i, j, x) {
+    i = match(i, Vs)
+    j = match(j, TFs$TF)
+    dims_ = list(length(Vs), nrow(TFs))
+    dimnames_ = list(Vs, TFs$TF)
+    as.matrix(sparseMatrix(i=i, j=j, x=x, dims=dims_, dimnames=dimnames_))
+}
+
+add_noise = function(adjacency, noise_sd = 1/sqrt(prod(dim(adjacency)))) {
+    cat(noise_sd, "\n")
+    adjacency_noise = adjacency
+    lacking = adjacency_noise==0
+    adjacency_noise[lacking] = matrix(rnorm(prod(dim(adjacency)), sd=noise_sd), nrow=nrow(adjacency), ncol=ncol(adjacency))[lacking]
+    adjacency_noise
+}
+
+get_sign_mask = function(adjacency) {
+    out = sign(adjacency)
+    out[out == +1] = "+"
+    out[out == -1] = "-"
+    out
+}
+
 
 setwd("~/cwd/data/network")
 
@@ -15,12 +43,13 @@ TFs = read.table("TF_mode.tsv", sep="\t", header=T, quote="")
 Vs  = flatten(read.table("V.txt", quote=""))
 simulated = flatten(read.table("../yeast_simulation/simulations/01/WT_est.mat", sep=" "))
 simulated = simulated[simulated != 0]
+nTF = nrow(TFs)
+nV = length(Vs)
 
 # find a fit
 plot(seq(0,1,.01), dbeta(seq(0,1,.01), 1, 20), type="l")
 # create unsigned edge weights
-edges$weight = qbeta(edges$Pval, 1, 20, lower.tail=F)
-edges$weight25 = qbeta(edges$Pval, 1, 25, lower.tail=F)
+edges$gauss01 = qhalfnorm_(edges$Pval, 0.1)
 
 summary(edges$weight)
 summary(abs(simulated))
@@ -94,23 +123,11 @@ weight_plot(edges_FDR20$weight25, 25)
 write.table(edges_FDR20, "TF_edge_weights.tsv", sep="\t", quote=F, row.names=F)
 
 get_adjacencies = function(edges, weight) {
-    adjacency = as.matrix(sparseMatrix(i=match(edges$Target, Vs), j=match(edges$TF, TFs$TF), x=edges[,weight], 
-                                       dims=list(length(Vs), nrow(TFs)), dimnames=list(Vs, TFs$TF)))
-    adjacency_pval = as.matrix(sparseMatrix(i=match(edges$Target, Vs), j=match(edges$TF, TFs$TF), x=edges$Pval, 
-                                       dims=list(length(Vs), nrow(TFs)), dimnames=list(Vs, TFs$TF)))
+    adjacency = sparsematrix(edges$Target, edges$TF, edges$weight)
+    adjacency_pval = sparsematrix(edges$Target, edges$TF, edges$Pval)
     stopifnot(!any(edges$Pval==0))  # should be true then we can safely do:
     adjacency_pval[adjacency_pval == 0] = NaN
-    
-    adjacency_sign = sign(adjacency)
-    adjacency_sign[adjacency_sign == +1] = "+"
-    adjacency_sign[adjacency_sign == -1] = "-"
-    
-    noise_sd = 1/sqrt(sum(dim(adjacency)^2))
-    noise = matrix(rnorm(prod(dim(adjacency)), sd=noise_sd), nrow=nrow(adjacency), ncol=ncol(adjacency))
-    adjacency_noise = adjacency
-    adjacency_noise[adjacency_noise == 0] = noise[adjacency_noise == 0]
-    
-    list(adjacency, adjacency_pval, adjacency_sign, adjacency_noise)
+    list(adjacency, adjacency_pval, get_sign_mask(adjacency), add_noise(adjacency))
 }
 
 adjacencies = get_adjacencies(edges, "weight")
@@ -132,6 +149,12 @@ adjacencies_FDR20 = get_adjacencies(edges_FDR20, "weight25")
 write.table(adjacencies_FDR20[[1]], "WT_FDR20.csv", sep=",", quote=F)
 write.table(adjacencies_FDR20[[1]], "WT_FDR20.mat", sep=" ", quote=F, col.names=F, row.names=F)
 write.table(sign(adjacencies_FDR20[[1]]), "WT_FDR20_sign.mat", sep=" ", quote=F, col.names=F, row.names=F)
+
+
+fwrite(sparsematrix(edges$Target, edges$TF, edges$gauss01), "WT_gauss01.mat", sep=" ", row.names=F, col.names=F)
+
+
+
 
 
 
