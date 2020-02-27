@@ -47,22 +47,44 @@ for(KP_edges_fname in KP_edges_fnames) {
     
     shared_GOP = shared_GO[Aspect=="P",!"Aspect"]
     
+    get_contingency = function(substrate, limit) {
+        shared_GOP[Substrate==substrate,.(shared=shared>=limit),by=c("ORF", "KP", "infer")][,.N,by=c("infer", "shared")]
+    }
+    
     get_odds_ratio = function(substrate, limit) {
-        contingency = shared_GOP[Substrate==substrate,.(shared=shared>=limit),by=c("ORF", "KP", "infer")][,.N,by=c("infer", "shared")]
+        contingency = get_contingency(substrate, limit)
         prod(contingency[shared==infer,N]) / prod(contingency[shared!=infer,N])
     }
+    
+    get_logOR_sd = function(substrate, limit) {
+        sqrt(sum(1/get_contingency(substrate, limit)$N))
+    }
+    
     
     odds_ratios = rbind(
         data.table(shared=1:max(shared_GOP[Substrate=="TF",shared]), Substrate="TF"),
         data.table(shared=1:max(shared_GOP[Substrate=="KP",shared]), Substrate="KP"))
     odds_ratios[,OR:=get_odds_ratio(Substrate, shared), by=c("Substrate", "shared")]
+    odds_ratios[,logOR_sd:=get_logOR_sd(Substrate, shared), by=c("Substrate", "shared")]
+    odds_ratios[, CI_low:=exp(log(OR-qnorm(.975, sd=logOR_sd)))]
+    odds_ratios[,CI_high:=exp(log(OR+qnorm(.975, sd=logOR_sd)))]
+    # add copy of final value for visuals
+    odds_ratios_max = rbind(
+        odds_ratios[Substrate=="TF"][max(shared)],
+        odds_ratios[Substrate=="KP"][max(shared)])
+    odds_ratios_max$shared=odds_ratios_max$shared+1
+    odds_ratios = rbind(odds_ratios, odds_ratios_max)
     
     odds_ratios$Substrate = factor(odds_ratios$Substrate, levels=c("TF", "KP"))
     
-    plt = ggplot(odds_ratios, aes(shared, OR, color=Substrate)) +
-        geom_line() +
-        scale_x_continuous(breaks=c(1,2,5,10), minor_breaks=c(3:4,6:9,11:14), expand=c(0,0)) +
-        scale_y_continuous(limits=c(1,max(odds_ratios$OR)), breaks=c(1,2,seq(4,16,4)), expand=c(0,0), trans="log10") +
+    
+    plt = 
+    ggplot(odds_ratios, aes(shared-.5, OR, color=Substrate)) +
+        geom_step(size=1) +
+        geom_step(data=odds_ratios, mapping=aes(y=CI_low), linetype=2) +
+        geom_step(data=odds_ratios, mapping=aes(y=CI_high), linetype=2) +
+        scale_x_continuous(limits=c(0.5,8.5), breaks=c(1,2,5,8), minor_breaks=c(3:4,6:9), expand=c(0,0)) +
+        scale_y_continuous(limits=c(1,max(odds_ratios$OR)+2), breaks=c(1,2,seq(4,16,4)), expand=c(0,0), trans="log10") +
         scale_color_manual(values=c(TF_color, KP_color), labels=parse(text=c(tex("KP\\rightarrow TF"),tex("KP\\rightarrow KP")))) +
         theme_linedraw() +
         xlab(expression("shared GO processes">="")) +
@@ -71,8 +93,6 @@ for(KP_edges_fname in KP_edges_fnames) {
             legend.title=element_blank(),
             panel.grid.major=element_line(colour="gray"), 
             panel.grid.minor=element_line(colour="lightgray"))
-    
-    plt
     
     ggsave("shared_GO_OR.pdf", plot=plt, width=4, height=2)
     
