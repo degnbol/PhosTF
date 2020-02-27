@@ -4,6 +4,7 @@
 
 library(data.table)
 library(ggplot2)
+library(latex2exp)
 
 flatten = function(x) as.vector(as.matrix(x))
 read.vector = function(x) flatten(read.table(x))
@@ -12,6 +13,9 @@ melt_ = function(x) melt(x, id.vars="ORF", variable.name="KP", value.name="w")
 wilcox_p = function(dataset) {
     wilcox.test(dataset[infer==TRUE,shared], dataset[infer==FALSE,shared], alternative="g")$p.value
 }
+# convert tex code to expression object (use \\ for \ and combine expressions with list() instead of c())
+tex = function(x) unname(TeX(paste0("$",x)))
+
 
 # constants
 KP_color = "#bd61b6"
@@ -41,9 +45,40 @@ for(KP_edges_fname in KP_edges_fnames) {
     shared_GO[KP_edges,on=c("ORF","KP"),infer:=infer]
     stopifnot(!any(is.na(shared_GO$infer)))
     
+    shared_GOP = shared_GO[Aspect=="P",!"Aspect"]
+    
+    get_odds_ratio = function(substrate, limit) {
+        contingency = shared_GOP[Substrate==substrate,.(shared=shared>=limit),by=c("ORF", "KP", "infer")][,.N,by=c("infer", "shared")]
+        prod(contingency[shared==infer,N]) / prod(contingency[shared!=infer,N])
+    }
+    
+    odds_ratios = rbind(
+        data.table(shared=1:max(shared_GOP[Substrate=="TF",shared]), Substrate="TF"),
+        data.table(shared=1:max(shared_GOP[Substrate=="KP",shared]), Substrate="KP"))
+    odds_ratios[,OR:=get_odds_ratio(Substrate, shared), by=c("Substrate", "shared")]
+    
+    odds_ratios$Substrate = factor(odds_ratios$Substrate, levels=c("TF", "KP"))
+    
+    plt = ggplot(odds_ratios, aes(shared, OR, color=Substrate)) +
+        geom_line() +
+        scale_x_continuous(breaks=c(1,2,5,10), minor_breaks=c(3:4,6:9,11:14), expand=c(0,0)) +
+        scale_y_continuous(limits=c(1,max(odds_ratios$OR)), breaks=c(1,2,seq(4,16,4)), expand=c(0,0), trans="log10") +
+        scale_color_manual(values=c(TF_color, KP_color), labels=parse(text=c(tex("KP\\rightarrow TF"),tex("KP\\rightarrow KP")))) +
+        theme_linedraw() +
+        xlab(expression("shared GO processes">="")) +
+        ylab("Odds Ratio") +
+        theme(
+            legend.title=element_blank(),
+            panel.grid.major=element_line(colour="gray"), 
+            panel.grid.minor=element_line(colour="lightgray"))
+    
+    plt
+    
+    ggsave("shared_GO_OR.pdf", plot=plt, width=4, height=2)
+    
     p.values = data.frame(Substrate=c("KP","TF"),
-                          p=c(wilcox_p(shared_GO[Aspect=="P" & Substrate == "KP",]),
-                              wilcox_p(shared_GO[Aspect=="P" & Substrate == "TF",])))
+                          p=c(wilcox_p(shared_GOP[Substrate == "KP",]),
+                              wilcox_p(shared_GOP[Substrate == "TF",])))
     
     # mean shared GO terms for different interesting groupings
     shared_GO_dens = shared_GO[,.N,by=c("infer", "Aspect", "Substrate", "shared")]
@@ -61,6 +96,7 @@ for(KP_edges_fname in KP_edges_fnames) {
         theme(panel.grid.major=element_line(colour="gray"), 
               panel.grid.minor=element_line(colour="lightgray")) +
         geom_text(data=p.values, mapping=aes(label=sprintf("p=%.3g",p)), x=11.5, y=.7)
+        
     
     ggsave("shared_GO.pdf", plot=plt, width=6, height=3)
     
