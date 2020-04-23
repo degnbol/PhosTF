@@ -66,8 +66,9 @@ for(KP_edges_fname in KP_edges_fnames) {
         data.table(shared=1:max(shared_GOP[Substrate=="KP",shared]), Substrate="KP"))
     odds_ratios[,OR:=get_odds_ratio(Substrate, shared), by=c("Substrate", "shared")]
     odds_ratios[,logOR_sd:=get_logOR_sd(Substrate, shared), by=c("Substrate", "shared")]
-    odds_ratios[, CI_low:=exp(log(OR-qnorm(.975, sd=logOR_sd)))]
-    odds_ratios[,CI_high:=exp(log(OR+qnorm(.975, sd=logOR_sd)))]
+    odds_ratios[,CI_low :=exp(log(OR)-qnorm(.975, sd=logOR_sd))]
+    odds_ratios[,CI_high:=exp(log(OR)+qnorm(.975, sd=logOR_sd))]
+    odds_ratios[,CI_null:=exp(qnorm(.975, sd=logOR_sd))]
     # add copy of final value for visuals
     odds_ratios_max = rbind(
         odds_ratios[Substrate=="TF"][max(shared)],
@@ -81,8 +82,9 @@ for(KP_edges_fname in KP_edges_fnames) {
     plt = 
     ggplot(odds_ratios, aes(shared-.5, OR, color=Substrate)) +
         geom_step(size=1) +
-        geom_step(data=odds_ratios, mapping=aes(y=CI_low), linetype=2) +
-        geom_step(data=odds_ratios, mapping=aes(y=CI_high), linetype=2) +
+        # geom_step(data=odds_ratios, mapping=aes(y=CI_low), linetype=2) +
+        # geom_step(data=odds_ratios, mapping=aes(y=CI_high), linetype=2) +
+        geom_step(data=odds_ratios, mapping=aes(y=CI_null), linetype=2) +
         scale_x_continuous(limits=c(0.5,8.5), breaks=c(1,2,5,8), minor_breaks=c(3:4,6:9), expand=c(0,0)) +
         scale_y_continuous(limits=c(1,max(odds_ratios$OR)+2), breaks=c(1,2,seq(4,16,4)), expand=c(0,0), trans="log10") +
         scale_color_manual(values=c(TF_color, KP_color), labels=parse(text=c(tex("KP\\rightarrow TF"),tex("KP\\rightarrow KP")))) +
@@ -94,7 +96,7 @@ for(KP_edges_fname in KP_edges_fnames) {
             panel.grid.major=element_line(colour="gray"), 
             panel.grid.minor=element_line(colour="lightgray"))
     
-    ggsave("shared_GO_OR.pdf", plot=plt, width=4, height=2)
+    ggsave("shared_GO_OR.pdf", plot=plt, width=5, height=2)
     
     p.values = data.frame(Substrate=c("KP","TF"),
                           p=c(wilcox_p(shared_GOP[Substrate == "KP",]),
