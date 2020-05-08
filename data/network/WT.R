@@ -1,6 +1,7 @@
 #!/usr/bin/env Rscript
 library(Matrix)
 library(ggplot2)
+library(fdrtool)
 
 options(stringsAsFactors=FALSE)
 
@@ -49,14 +50,18 @@ nV = length(Vs)
 # find a fit
 plot(seq(0,1,.01), dbeta(seq(0,1,.01), 1, 20), type="l")
 # create unsigned edge weights
-edges$gauss01 = qhalfnorm_(edges$Pval, 0.1)
+edges$gauss01 = qhalfnorm_(edges$Pval, 0.10)
+edges$gauss025 = qhalfnorm_(edges$Pval, 0.25)
+edges$weight = qbeta(edges$qval, 1, 20, lower.tail=F)
+edges$weight25 = qbeta(edges$qval, 1, 25, lower.tail=F)
 
-summary(edges$weight)
+
+summary(edges$weight25)
 summary(abs(simulated))
-sd(edges$weight)
-hist(edges$weight, breaks=200)
-c(sum(edges$weight >= .1), sum(edges$weight >= .5), sum(edges$weight >= .75), sum(edges$weight >= .9))
-mean(edges$weight[edges$weight > .75])
+sd(edges$weight25)
+hist(edges$weight25, breaks=200)
+c(sum(edges$weight25 >= .1), sum(edges$weight25 >= .5), sum(edges$weight25 >= .75), sum(edges$weight25 >= .9))
+mean(edges$weight25[edges$weight25 > .75])
 
 ## add sign
 edge_modes = TFs$Mode[match(edges$TF, TFs$TF)]
@@ -65,7 +70,6 @@ edges$Mode[edges$Mode == ""] = edge_modes[edges$Mode == ""]
 edges$Mode[edges$Mode == "inhibitor"] = "repressor"
 # sum(edges$Mode == "activator")
 # sum(edges$Mode == "repressor")
-# edges$weight[edges$Mode == "activator"] = +edges$weight[edges$Mode == "activator"]  # redundant
 edges$weight[edges$Mode == "repressor"] = -edges$weight[edges$Mode == "repressor"]
 edges$weight25[edges$Mode == "repressor"] = -edges$weight25[edges$Mode == "repressor"]
 
@@ -98,7 +102,7 @@ weight_plot = function(dataset, beta_) {
     }
     
     pbreaks=c(-1e-60,-1e-12,-1e-6,-1e-3,-.05,.05,1e-3,1e-6,1e-12,1e-60)
-    px = sign(pbreaks) * qbeta(abs(pbreaks), alpha_, beta_, lower.tail=F)
+    px = sign(pbreaks) * qbeta(abs(pbreaks), 1, beta_, lower.tail=F)
     
     plt + geom_step(data=stepdf, aes(x=xmin, y=y, color=label)) +
         theme_linedraw() +
@@ -112,9 +116,10 @@ weight_plot = function(dataset, beta_) {
         
 }
 
-weight_plot(edges$weight25, 25)
-weight_plot(edges_FDR10$weight25, 25)
-weight_plot(edges_FDR20$weight25, 25)
+
+weight_plot(edges$weight, 20)
+weight_plot(edges_FDR10$weight, 20)
+weight_plot(edges_FDR20$weight, 20)
 # ggsave("edge_weights.pdf", plot=weight_plot(edges_FDR10$weight25, 25), width=7, height=2, units="in")
 
 
