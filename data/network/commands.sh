@@ -1,6 +1,5 @@
 ./TF_priors/putative_TF_edges.R
 ./nodes.R
-./TF_priors/TF_edge_weights.R
 ../perturbation/perturbation.R
 ./TF_mode.R
 ./WT.R
