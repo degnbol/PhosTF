@@ -27,11 +27,11 @@ all_evidences = unique(c(activators$Evidence, repressors$Evidence,
                          positive_elong$Evidence, negative_elong$Evidence,
                          protein_kinase$Evidence, protein_phosphatase$Evidence,
                          protein_phosphorylation$Evidence, protein_dephosphorylation$Evidence))
-# ordered from wrost to best
+# ordered from worst to best
 # http://wiki.geneontology.org/index.php/Guide_to_GO_Evidence_Codes
-evidences = c("IEA", "IC", "HMP", "IMP", "TAS", "HDA", "IGI", "IDA", "IPI")
-computational_evidence = c("IBA", "ISA", "ISS", "ISM") # We don't use IBA, ISA, ISS, and ISM since they are computational evidence
-all(all_evidences[!(all_evidences %in% evidences)] %in% computational_evidence) # assert to be true
+evidences = c("IC", "HMP", "IMP", "TAS", "HDA", "IGI", "IDA", "IPI")
+computational_evidence = c("IEA", "IBA", "ISA", "ISS", "ISM") # We don't use IBA, ISA, ISS, and ISM since they are computational evidence
+stopifnot(all(all_evidences[!(all_evidences %in% evidences)] %in% computational_evidence))
 # remove entries from computational evidence
 filter_computational = function(x) {x[!(x$Evidence %in% computational_evidence),]}
 activators = filter_computational(activators)
