@@ -21,8 +21,9 @@ setwd("~/cwd/data/processed/amigo2")
 # read GO
 
 GO = rbind(
-    read_go("activators.tsv", "TF_activator"),
-    read_go("repressors.tsv", "TF_repressor"),
+    read_go("transcription_factors.tsv", "TF"),
+    read_go("activators.tsv", "TFA"),
+    read_go("repressors.tsv", "TFR"),
     read_go("protein_kinase.tsv", "PK"),
     read_go("protein_phosphatase.tsv", "PP"),
     read_go("protein_phosphorylation.tsv", "PK"),
@@ -34,14 +35,11 @@ GO = rbind(
 experimental_evidence = c("HMP", "IMP", "HDA", "IGI", "IDA", "IPI")
 computational_evidence = c("IEA", "IGC", "RCA", "IBA", "ISO", "ISA", "ISS", "ISM")
 statement_evidence = c("IC", "NAS", "TAS")
-nonexperimental_evidence = c(computational_evidence, statement_evidence)
 
 GO[Evidence%in%experimental_evidence,Experimental:=Evidence]
-# GO[Evidence%in%nonexperimental_evidence,Nonexperimental:=Evidence]
 GO[,Evidence:=NULL]
 for(label in unique(GO$Label)) {
-    GO[Label==label,paste(label,"Experimental",sep="_"):=Experimental]
-    # GO[Label==label,paste(label,"Nonexperimental",sep="_"):=Nonexperimental]
+    GO[Label==label,paste(label,"amigo",sep="_"):=Experimental]
 }
 GO[,Experimental:=NULL]
 # GO[,Nonexperimental:=NULL]
@@ -50,6 +48,8 @@ GO[is.na(GO)] = ""
 
 GO = GO[, lapply(.SD, function(x) paste(x[x!=""], collapse=",")), by=ORF]
 
+
+fwrite(GO, "amigo_evidences.tsv", sep="\t", quote=F)
 
 
 
