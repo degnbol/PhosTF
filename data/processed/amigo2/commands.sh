@@ -9,3 +9,4 @@ cat ../../raw/amigo2/protein_phosphorylation.tsv | cut -f7,11 | cut -d'|' -f1 | 
 r phosphorylation=kinase
 cat ../../raw/amigo2/protein_dephosphorylation.tsv | cut -f7,11 | cut -d'|' -f1 | grep -v "MDP-1" > protein_dephosphorylation.tsv; cat ../../raw/amigo2/protein_dephosphorylation.tsv | cut -f3,7,11 | cut -d'|' -f1 | grep "MDP-1" | awk '{print $2 "\t" $1}' >> protein_dephosphorylation.tsv; sort protein_dephosphorylation.tsv | uniq > temp && mv temp protein_dephosphorylation.tsv
 r dephosphorylation=phosphatase
+cat ../../raw/amigo2/transcription_factor.tsv | cut -f7,11 | cut -d'|' -f1 | grep -v $'\t$' | sort -u > transcription_factors.tsv
