@@ -1,2 +1,6 @@
 shared_GO_OR.pdf was made with ~/cwd/src/shared_GO.R 
 KP_edges made from WP mat using ~/cwd/src/WP_FDR.R 
+square euler made with ~/cwd/src/square_euler.R
+There are initially used 199 KP nodes, however the work by Chris classifies 214 ORFs as protein kinase or phosphatase.
+Only 191 of those are in the KP node set, so the #potential for KP->KP in venn is 191*(191-1) = 36290.
+
