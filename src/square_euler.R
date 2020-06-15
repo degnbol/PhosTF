@@ -25,7 +25,7 @@ unwhich = function(which, dim=max(which)) {
 tex = function(x) unname(TeX(paste0("$",x)))
 
 
-# KP_edge_fname = "~/cwd/data/inference/74/KP_edges.tsv"
+#KP_edge_fname = "~/cwd/data/inference/74/KP_edges.tsv"
 KP_edge_fnames = commandArgs(trailingOnly=T)
 P_fname = "~/cwd/data/evaluation/P_eval.tsv"
 P_eval_noknownsite_fname = "~/cwd/data/evaluation/KP_targets_noknownsite.txt"
@@ -41,6 +41,10 @@ nP = length(KP)
 nV = length(V)
 nT = length(TF)
 nO = nV-length(PT)
+protein_KPTF_table = read.table("~/cwd/data/network/node_attributes_full.txt", sep="\t", header=T)
+protein_KP = as.character(protein_KPTF_table$ORF[protein_KPTF_table$protein_type0=="KP" & !is.na(protein_KPTF_table$protein_type0)])
+protein_TF = as.character(protein_KPTF_table$ORF[protein_KPTF_table$protein_type0=="TF" & !is.na(protein_KPTF_table$protein_type0)])
+protein_KPTF = c(protein_KP, protein_TF)
 
 rundir = getwd()
 
@@ -52,6 +56,11 @@ for (KP_edge_fname in KP_edge_fnames) {
     P_eval = read.table(P_fname, header=T, sep="\t", quote="", check.names=F)
     # remove diagonals
     P_eval = P_eval[as.character(P_eval$Source) != as.character(P_eval$Target),]
+    # filter for PROTEIN kinase, phosphatases and transcription factors
+    KP_edges = KP_edges[as.character(KP_edges$Target) %in% protein_KPTF,]
+    P_eval = P_eval[as.character(P_eval$Target) %in% protein_KPTF,]
+    KP_edges = KP_edges[as.character(KP_edges$KP) %in% protein_KPTF,]
+    P_eval = P_eval[as.character(P_eval$Source) %in% protein_KPTF,]
     # sanity check
     stopifnot(all(as.character(KP_edges$KP) == as.character(P_eval$Source)))
     stopifnot(all(KP_edges$Target == P_eval$Target))
@@ -87,8 +96,10 @@ for (KP_edge_fname in KP_edge_fnames) {
         list(value=q, p=phyper(q, m, n, sum(drawn), lower.tail=FALSE))
     }
     
-    KP2KP.idx = P_eval$Target%in%KP
-    KP2TF.idx = P_eval$Target%in%TF
+    # KP2KP.idx = P_eval$Target%in%KP
+    # KP2TF.idx = P_eval$Target%in%TF
+    KP2KP.idx = P_eval$Target%in%protein_KP
+    KP2TF.idx = P_eval$Target%in%protein_TF
     stopifnot(all(KP2KP.idx|KP2TF.idx))
     
     ### Plotting
@@ -119,7 +130,7 @@ for (KP_edge_fname in KP_edge_fnames) {
         
         bw = .8
         hn = .05  # horizontal nudge
-        fgscl = 6  # how wide foreground is compared to background
+        fgscl = 4  # how wide foreground is compared to background
         
         # version where we nudge fgs down 1/4
         fgdg = bw/4
@@ -131,9 +142,9 @@ for (KP_edge_fname in KP_edge_fnames) {
             scale_fill_manual(values=list(KP=KP_color, TF=TF_color, inferred="lightgray", potential="white")) +
             annotate("text", x=c(1,2,1,2)+bw/2-.01, vjust=1,   y=euler.plt.bg$value, hjust=c(-hn,-hn,1+hn,1+hn), label=euler.plt.bg$variable, fontface="italic", alpha=c(.65,.65,1,1)) +
             annotate("text", x=c(1,2,1,2)+bw/2-.01, vjust=2.2, y=euler.plt.bg$value, hjust=c(-hn,-hn,1+hn,1+hn), label=euler.plt.bg$count, fontface="bold", alpha=c(.65,.65,1,1)) +
-            annotate("text", x=c(1,2)-fgdg+bw/fgscl, vjust=0, hjust=-hn, y=0, label="known", fontface="italic", color=c(KP_color, TF_color)) +
+            annotate("text", x=c(1,2)-fgdg+bw/fgscl, vjust=0, hjust=.5, y=0, label="known", fontface="italic", color=c(KP_color, TF_color)) +
             annotate("text", x=c(1,2,1,2)-fgdg, vjust=0.5, y=euler.plt.fg$value*fgscl, hjust=c(1+hn,1+hn,-hn,-hn), label=abs(euler.plt.fg$value), fontface="bold", color=rep(c(KP_color, TF_color),2)) +
-            annotate("text", x=c(1,2)-fgdg+bw/fgscl, vjust=0, hjust=-hn, y=10000, label=sprintf("p=%.3g",pvalues), color=c(KP_color, TF_color)) +
+            annotate("text", x=c(1,2)-fgdg, vjust=0.5, hjust=0, y=6000, label=sprintf("p=%.3g",pvalues), color=c(KP_color, TF_color)) +
             coord_flip() + theme_void() + 
             theme(legend.position="none", axis.text.y=element_text(),
                   plot.margin=margin(t=0,b=0,l=0,r=0,unit="pt")) +
@@ -141,9 +152,11 @@ for (KP_edge_fname in KP_edge_fnames) {
         
     }
     
+    plot_square_euler("with_site")
+    
     selections = c("known","literature","invitro","with_site")
     for(selection in selections) {
-        ggsave(paste0("square_euler_", selection, ".pdf"), plot=plot_square_euler(selection), width=6.5, height=1.25)
+        ggsave(paste0("square_euler_", selection, ".pdf"), plot=plot_square_euler(selection), width=6.5, height=1.35)
     }
     
     setwd(rundir)  # go back to so relative dirs for other files still work
