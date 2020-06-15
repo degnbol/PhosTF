@@ -9,7 +9,6 @@ many KP->TF edges are negative, hopefully this can be understood to make biologi
 "
 
 
-
 library(data.table)
 library(ggplot2)
 
@@ -32,8 +31,15 @@ edges[,Substrate:=NULL]
 setnames(edges, "Target", "TF")
 edges = edges[order(-Candidate),]
 
+
+fwrite(edges, "KP_edges_eval_noTN_sharedGO.tsv", sep="\t")
+
+
+# thres==6 gives a good balance between edges in evaluation set and not
 thres = 6
 (edges[evaluation_set==T & shared>=thres,.N] / edges[shared>=thres,.N]) / (edges[evaluation_set==T & shared<thres,.N] / edges[shared<thres,.N])
+
+
 
 # KP repression or activation (repression since largest abs(marker) are negative)
 View(edges[shared>=6,][order(-abs(marker)),])
@@ -62,3 +68,26 @@ View(edges[shared>=2,][order(-marker),])
 # number 1 is YAR019C	YJR094C again
 View(edges[shared>=1,][order(-marker),])
 # number 1 is YAR019C	YJR094C again
+
+
+
+# top 2 edge weight (marker) for different shared GO threshold
+candidates = rbind(
+    edges[shared>=6][order(-abs(marker)),][1:2,],
+    edges[shared>=5][order(-abs(marker)),][1:2,],
+    edges[shared>=4][order(-abs(marker)),][1:2,],
+    edges[shared>=3][order(-abs(marker)),][1:2,],
+    edges[shared>=2][order(-abs(marker)),][1:2,],
+    edges[shared>=1][order(-abs(marker)),][1:2,],
+    edges[shared>=6][order(-marker),][1:2,],
+    edges[shared>=5][order(-marker),][1:2,],
+    edges[shared>=4][order(-marker),][1:2,],
+    edges[shared>=3][order(-marker),][1:2,],
+    edges[shared>=2][order(-marker),][1:2,],
+    edges[shared>=1][order(-marker),][1:2,]
+)
+candidates[,Candidate:=NULL]
+
+fwrite(candidates, "candidates.tsv", sep="\t")
+
+
