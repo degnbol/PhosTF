@@ -34,11 +34,6 @@ nₓnₜnₚ(net::Network) = net.nₓ,net.nₜ,net.nₚ
 
 
 """
-Concentration of active protein, which is either phosphorylated or unphosphorylated concentration of the protein, depending on a bool.
-"""
-ψ(p, ϕ, phos_activation) = @. phos_activation * ϕ + (!phos_activation) * (p-ϕ)
-
-"""
 Mean activation μ given ψ.
 ψ: 1D array. Active nondim concentrations.
 """
