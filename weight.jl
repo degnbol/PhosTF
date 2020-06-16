@@ -65,7 +65,7 @@ end
 
 
 """
-Swap order of PK and TF in matrix (swap between PK-TF-V and TF-PK-V).
+Swap order of KP and TF in matrix (swap between KP-TF-V and TF-KP-V).
 - n1: number of nodes in first group, which will be moved to become the second.
 - n2: number of nodes in the second group, which will be move to become the first.
 """
@@ -75,14 +75,5 @@ Swap order of PK and TF in matrix (swap between PK-TF-V and TF-PK-V).
 	mat = loaddlm(i, Float64)
 	mat = reorder(mat, [n1+1:n1+n2;1:n1;n1+n2+1:maximum(size(mat))])
 	savedlm(o, mat)
-end
-
-"""
-input: WP.mat
-output: a vector indicating PK with 1, and PP with -1. 
-"""
-@main function PKPP(io=nothing, o=nothing)
-	i, o = inout(io, o)
-	savedlm(o, Weight.PKPP(loaddlm(i)))
 end
 
