@@ -53,7 +53,7 @@ end
 Fraction of max activation for a given gene when active TFs are found at a given concentration.
 """
 function f(gene::Gene, ψ::Vector{<:AbstractFloat})
-	if isempty(gene.modules) return 1 end
+    isempty(gene.modules) && 1
 	μs = μ(gene.modules, ψ)
 	# get P{state} for all states, each state is a unique combination of modules
 	P = [prod(μs[state]) * prod(1 .- μs[.!state]) for state in states(length(gene.modules))]
@@ -72,15 +72,8 @@ function estimate_Wₜ(net::Network, i::Integer)
 	mean(estimate_Wₜ(net, i, activation)
 	for activation in [0, noise_activation, weak_activation])
 end
-"Estimate Wₜ by comparing the effect on f when any TF has ϕ=weak or ϕ=strong."
+"Estimate Wₜ by comparing the effect on f when any TF has ψ=weak or ψ=strong."
 estimate_Wₜ(net::Network) = hcat([estimate_Wₜ(net, i) for i in net.nₚ+1:net.nₚ+net.nₜ]...)
-
-"""
-Get the effect nodes ∈ P has on activation, 
-which is an edge=1 for e.g. a kinase regulating a protein that is activated when phosphorylated,
-or e.g. edge=-1 for a kinase regulating a protein that is activated when dephosphorylated.
-"""
-Wₚ_activation(net::Network) = (net.phos_activation .- .!net.phos_activation) .* (net.Wₚₖ .- net.Wₚₚ) .|> sign .|> Integer
 
 end;
 
