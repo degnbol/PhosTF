@@ -131,6 +131,7 @@ function random_KPTFO(B::BitMatrix, nₚ::Integer)
 	subset = subset_edges(B)
 	# good candidates are all the nodes that has at least one "non-destructive" outgoing edge
 	KP_candidates = .!(O .| TF) .& vec(sum(subset, dims=1) .!= 0)
+    
 	KP = falses(n)
 	# find nodes to add to KP one at a time
 	for i ∈ 1:nₚ
@@ -212,7 +213,7 @@ function sort_KPTFO(W, KP, TF, O)
 end
 
 "Random Wₜ, Wₚ from B."
-function random_W(B, nₚ::Integer)
+function random_W(B::AbstractMatrix, nₚ::Integer)
 	KP, TF, O = random_KPTFO(B, nₚ)
 	W = rewire(B, KP, TF, O)
 	add_cascades!(W, KP)
