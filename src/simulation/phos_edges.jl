@@ -6,7 +6,7 @@ Convert a Wₚ from int to float.
 Choosing the float values are done in a manner that will make it likely 
 that presence or absence of regulation should make a difference to down-stream gene expression levels.
 """
-function init_phos_edges(genes::Vector, Wₚ::Matrix, phos_activation::BitVector, λ_phos::Vector)
+function init_phos_edges(genes::Vector, Wₚ::Matrix, λ_phos::Vector)
     nₚ = size(Wₚ,1); nₜ = size(Wₚ,2) - nₚ
     Wₚ = 1.0Wₚ # convert type
     
@@ -15,18 +15,18 @@ function init_phos_edges(genes::Vector, Wₚ::Matrix, phos_activation::BitVector
     # mean_k = avg. dissociation constant k for the outgoing edges of each TF
     Wₚ[nₚ+1:nₚ+nₜ,:] .*= λ_phos[nₚ+1:nₚ+nₜ,:] .* mean_k(genes, nₜ, nₚ)
     
-    Wₚₖ, Wₚₚ = WₚₖWₚₚ(Wₚ)
+    Wₚ₊, Wₚ₋ = Wₚ₊Wₚ₋(Wₚ)
 
-    # split the total effect evenly among edges that share a target. uses max(0,x) to avoid nan div
-    Wₚₚ ./= max.(1., sum(Wₚₚ .> 0, dims=2))
-    Wₚₖ ./= max.(1., sum(Wₚₖ .> 0, dims=2))
+    # split the total effect evenly among edges that share a target. uses max(1,x) to avoid nan div
+    Wₚ₋ ./= max.(1., sum(Wₚ₋ .> 0, dims=2))
+    Wₚ₊ ./= max.(1., sum(Wₚ₊ .> 0, dims=2))
     
     # increase the kinases to counter the effect of phosphatases
-    inc = sum(Wₚₚ, dims=2) ./ max.(1., sum(Wₚₖ .> 0, dims=2))
+    # inc = sum(Wₚ₋ dims=2) ./ max.(1., sum(Wₚ₊ .> 0, dims=2))
     # only add to the nonzero entries
-    Wₚₖ[Wₚₖ .> 0] .+= repeat(inc, 1, size(Wₚₖ,2))[Wₚₖ .> 0]
+    # Wₚ₊[Wₚ₊ .> 0] .+= repeat(inc, 1, size(Wₚ₊,2))[Wₚ₊ .> 0]
 
-    Wₚₖ, Wₚₚ
+    Wₚ₊, Wₚ₋
 end
 
 function mean_edge_k(genes::Vector)
