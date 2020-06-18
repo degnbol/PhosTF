@@ -1,4 +1,4 @@
-if !isdefined(Main, :ArrayUtils) include("../utilities/ArrayUtils.jl") end
+isdefined(Main, :ArrayUtils) || include("../utilities/ArrayUtils.jl")
 using Distributions: Uniform, TruncatedNormal
 
 """
