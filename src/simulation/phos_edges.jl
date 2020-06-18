@@ -34,8 +34,8 @@ end
 function mean_k(genes::Vector, nₜ::Integer, nₚ::Integer)
     ks = mean_edge_k(genes)[:,nₚ+1:nₚ+nₜ]
     # average the nonzero entries in each row
-    nk = vec(sum(ks .!= 0, dims=1))
-    ks = vec(sum(ks, dims=1))
+    nk = sum(ks .!= 0, dims=1) |> vec
+    ks = sum(ks, dims=1) |> vec
     ks[nk .> 0] ./= nk[nk .> 0]
     ks
 end

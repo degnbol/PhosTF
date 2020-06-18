@@ -99,7 +99,9 @@ struct Network
         # weigh by the fraction of regulators that regulate positively.
         positives = sum(mat .> 0; dims=2) |> vec
         negatives = sum(mat .< 0; dims=2) |> vec
-        random_λ(size(mat,1)) .* positives ./ (positives .+ negatives)
+        λ = random_λ(size(mat,1)) .* positives ./ (positives .+ negatives)
+        λ[isnan.(λ)] .= 0  # NaN from div zero which means there are no regulators of a node. In that case it's activation is static.
+        λ
     end
 	
 	"""
