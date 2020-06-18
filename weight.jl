@@ -3,7 +3,7 @@ include("src/utilities/ReadWrite.jl")
 include("src/utilities/CLI.jl")
 include("src/utilities/General.jl")
 include("src/Weight.jl")
-if !isdefined(Main, :ArrayUtils) include("src/utilities/ArrayUtils.jl") end
+isdefined(Main, :ArrayUtils) || include("src/utilities/ArrayUtils.jl")
 
 using Fire
 using .ReadWrite, .ArrayUtils, .General, .Weight, .CLI
@@ -14,8 +14,8 @@ default_Wₜ, default_Wₚ = "WT.mat", "WP.mat"
 """
 Create random W from a adjacency matrix containing B.
 """
-@main function random(B::String, nₚₖ::Integer, nₚₚ::Integer; WT_fname::String=default_Wₜ, WP_fname::String=default_Wₚ)
-	Wₜ, Wₚ = Weight.random_W(loaddlm(B), nₚₖ, nₚₚ)
+@main function random(B::String, nₚ::Integer; WT_fname::String=default_Wₜ, WP_fname::String=default_Wₚ)
+	Wₜ, Wₚ = Weight.random_W(loaddlm(B), nₚ)
 	savedlm(WT_fname, Wₜ)
 	savedlm(WP_fname, Wₚ)
 end
