@@ -1,8 +1,8 @@
 #!/usr/bin/env julia
 include("utilities/XGMML.jl")
-if !isdefined(Main, :ColorUtils) include("utilities/ColorUtils.jl") end
+isdefined(Main, :ColorUtils) || include("utilities/ColorUtils.jl")
 include("utilities/MathUtils.jl")
-if !isdefined(Main, :GeneRegulation) include("simulation/GeneRegulation.jl") end
+isdefined(Main, :GeneRegulation) || include("simulation/GeneRegulation.jl")
 
 module Cytoscape
 using Statistics
