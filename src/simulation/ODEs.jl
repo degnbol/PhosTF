@@ -1,5 +1,5 @@
 # overriding already loaded modules causes problems
-if !isdefined(Main, :GeneRegulation) include("GeneRegulation.jl") end
+isdefined(Main, :GeneRegulation) || include("GeneRegulation.jl")
 
 """
 Defining and solving ODEs to the point of having the resulting simulated logFC values.
