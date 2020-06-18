@@ -37,14 +37,14 @@ struct Network
 		new(genes, Wₚ₊Wₚ₋(Wₚ)..., nᵥ, nᵥ-(nₜ+nₚ), nₜ, nₚ, max_transcription, max_translation, λ_mRNA, λ_prot, λ_phos, r₀, p₀, ψ₀)
 	end
 	function Network(genes::Vector{Gene}, Wₚ::Matrix{<:Integer})
-		λ_phos = random_λ(size(Wₚ,1))
-		Network(genes, init_phos_edges(genes, Wₚ, λ_phos)..., λ_phos)
+		λ_phos = random_λ(Wₚ)
+		Network(genes, init_Wₚ₊Wₚ₋(genes, Wₚ, λ_phos)..., λ_phos)
 	end
 	"""
 	Make sure to be exact about using either integer or float for Wₚ 
 	since a matrix of floats {-1.,0.,1.} will be seen as the exact edge values and not indication of repression, activation, etc.
 	"""
-	Network(genes::Vector{Gene}, Wₚ::Matrix{<:AbstractFloat}) = Network(genes, Wₚ₊Wₚ₋(Wₚ)..., init_phos_activation(Wₚ), random_λ(size(Wₚ,1)))
+	Network(genes::Vector{Gene}, Wₚ::Matrix{<:AbstractFloat}) = Network(genes, Wₚ₊Wₚ₋(Wₚ)..., random_λ(size(Wₚ,1)))
 	function Network(genes::Vector{Gene}, Wₚ₊::Matrix{<:AbstractFloat}, Wₚ₋::Matrix{<:AbstractFloat}, λ_phos::Vector)
 		nᵥ, nₚ = length(genes), size(Wₚ₊,2)
 		nₜ = size(Wₚ₊, 1) - nₚ
@@ -85,13 +85,22 @@ struct Network
             net.λ_mRNA, net.λ_prot, net.λ_phos, net.r₀, net.p₀, net.ψ₀)
 	end
 	
+	random_t½() = TruncNormal(5, 50)
 	"""
 	We have exponential decay, the half-life and the decay rate are thus related by:
 	t½ = ln(2) / λ ⟹
 	λ = ln(2) / t½
 	"""
-	random_λ(n) = log(2) ./ rand(random_t½(), n)
-	random_t½() = TruncNormal(5, 50)
+	random_λ(n::Int) = log(2) ./ rand(random_t½(), n)
+    """
+    For λ_phos to have lower values for nodes that are mostly negatively regulated.
+    """
+    function random_λ(mat::Matrix)
+        # weigh by the fraction of regulators that regulate positively.
+        positives = sum(mat .> 0; dims=2) |> vec
+        negatives = sum(mat .< 0; dims=2) |> vec
+        random_λ(size(mat,1)) .* positives ./ (positives .+ negatives)
+    end
 	
 	"""
 	Initial mRNA. Estimated as

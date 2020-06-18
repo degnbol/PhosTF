@@ -6,7 +6,7 @@ Convert a Wₚ from int to float.
 Choosing the float values are done in a manner that will make it likely 
 that presence or absence of regulation should make a difference to down-stream gene expression levels.
 """
-function init_phos_edges(genes::Vector, Wₚ::Matrix, λ_phos::Vector)
+function init_Wₚ₊Wₚ₋(genes::Vector, Wₚ::Matrix, λ_phos::Vector)
     nₚ = size(Wₚ,1); nₜ = size(Wₚ,2) - nₚ
     Wₚ = 1.0Wₚ # convert type
     
@@ -21,11 +21,6 @@ function init_phos_edges(genes::Vector, Wₚ::Matrix, λ_phos::Vector)
     Wₚ₋ ./= max.(1., sum(Wₚ₋ .> 0, dims=2))
     Wₚ₊ ./= max.(1., sum(Wₚ₊ .> 0, dims=2))
     
-    # increase the kinases to counter the effect of phosphatases
-    # inc = sum(Wₚ₋ dims=2) ./ max.(1., sum(Wₚ₊ .> 0, dims=2))
-    # only add to the nonzero entries
-    # Wₚ₊[Wₚ₊ .> 0] .+= repeat(inc, 1, size(Wₚ₊,2))[Wₚ₊ .> 0]
-
     Wₚ₊, Wₚ₋
 end
 
