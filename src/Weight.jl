@@ -22,7 +22,7 @@ function silent_edges(W::AbstractMatrix, nₚ::Integer)
 	E_last = trues(n,n)  # just any value that is different from E
 	while any(E .!= E_last)
 		E_last .= E
-		E[V,1:nₚ] .|= W[V,1:nₚ] .!= 0   # mark P edges as silent if they are onto a silent node
+		E[V,1:nₚ] .|= W[V,1:nₚ] .!= 0   # mark KP edges as silent if they are onto a silent node
 		V = vec(all((W .== 0) .| E, dims=1))  # recalculate silent nodes where the edges marked silent are removed from W
 	end
 	E
@@ -141,7 +141,7 @@ function random_KPTFO(B::BitMatrix, nₚ::Integer)
 		else  # otherwise add something random that changes B a bit
 			remain = .!(KP .|TF .|O)
 			if !any(remain)
-				@warn("It was not possible to add as many nodes to P as wanted")
+				@warn("It was not possible to add as many nodes to KP as wanted")
 				break
 			end
 			KP[rand((1:n)[remain])] = true
