@@ -49,8 +49,8 @@ struct Network
 		nᵥ, nₚ = length(genes), size(Wₚ₊,2)
 		nₜ = size(Wₚ₊, 1) - nₚ
 		# In the non-dimensionalized model, max_transcription == λ_mRNA and max_translation == λ_prot
-		max_transcription = λ_mRNA = random_λ(n)
-		max_translation = λ_prot = random_λ(n)
+		max_transcription = λ_mRNA = random_λ(nᵥ)
+		max_translation = λ_prot = random_λ(nᵥ)
 		r₀ = initial_r(max_transcription, λ_mRNA, genes)
 		p₀ = initial_p(max_translation, λ_prot, r₀)
 		ψ₀ = initial_ψ(Wₚ₊, Wₚ₋, λ_phos, p₀[1:nₜ+nₚ])

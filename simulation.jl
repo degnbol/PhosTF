@@ -6,8 +6,8 @@ include("src/utilities/CLI.jl")
 include("src/utilities/General.jl")
 include("src/Cytoscape.jl")
 include("src/Plotting.jl")
-# if !isdefined(Main, :Model) include("Model.jl") end # loaded by GeneRegulation
-if !isdefined(Main, :ArrayUtils) include("src/utilities/ArrayUtils.jl") end
+# isdefined(Main, :Model) || include("Model.jl") # loaded by GeneRegulation
+isdefined(Main, :ArrayUtils) || include("src/utilities/ArrayUtils.jl")
 
 
 using Fire
