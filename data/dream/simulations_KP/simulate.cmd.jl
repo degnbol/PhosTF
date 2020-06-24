@@ -1,7 +1,8 @@
 #!/usr/bin/env julia
 using Test  # @test_logs
-expanduser("~/cwd/weight.jl") |> include  # random(...) and correct()
-expanduser("~/cwd/simulation.jl") |> include  # other functions
+# suppress output of Fire function definitions with ";"
+expanduser("~/cwd/weight.jl") |> include;  # random(...) and correct()
+expanduser("~/cwd/simulation.jl") |> include;  # other functions
 
 tryrm(fname) = try rm(fname) catch IOError end
 
