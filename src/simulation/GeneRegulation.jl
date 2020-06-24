@@ -10,7 +10,7 @@ import JSON3
 import ..Model: nₒnₜnₚ, WₜWₚ
 
 export Network, Gene
-export drdt, dpdt, dϕdt
+export drdt, dpdt, dψdt
 export nₒnₜnₚ, estimate_Wₜ
 
 
@@ -37,7 +37,7 @@ nₒnₜnₚ(net::Network) = net.nₒ,net.nₜ,net.nₚ
 Mean activation μ given ψ.
 ψ: 1D array. Active nondim concentrations.
 """
-function μ(m::RegulatoryModule, ψ::Vector{<:AbstractFloat})
+function μ(m::RegulatoryModule, ψ::AbstractVector{<:AbstractFloat})
 	χ = (ψ[m.inputs] ./ m.k) .^ m.ν
 	activator_prod = prod(χ[1:m.n_activators])
 	if m.complex
@@ -48,18 +48,18 @@ function μ(m::RegulatoryModule, ψ::Vector{<:AbstractFloat})
 	end
 	activator_prod / denom
 end
-μ(ms::Vector{RegulatoryModule}, ψ::Vector{<:AbstractFloat}) = [μ(m, ψ) for m in ms]
+μ(ms::Vector{RegulatoryModule}, ψ::AbstractVector{<:AbstractFloat}) = [μ(m, ψ) for m in ms]
 """
 Fraction of max activation for a given gene when active TFs are found at a given concentration.
 """
-function f(gene::Gene, ψ::Vector{<:AbstractFloat})
+function f(gene::Gene, ψ::AbstractVector{<:AbstractFloat})
     isempty(gene.modules) && 1
 	μs = μ(gene.modules, ψ)
 	# get P{state} for all states, each state is a unique combination of modules
 	P = [prod(μs[state]) * prod(1 .- μs[.!state]) for state in states(length(gene.modules))]
 	sum(gene.α .* P)
 end
-f(genes::Vector{Gene}, ψ::Vector{<:AbstractFloat}) = [f(gene, ψ) for gene in genes]
+f(genes::Vector{Gene}, ψ::AbstractVector{<:AbstractFloat}) = [f(gene, ψ) for gene in genes]
 
 
 "Estimate the effect on f for all genes when a given TF has either ψ=weak or ψ=strong."
