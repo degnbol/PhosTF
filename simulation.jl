@@ -1,9 +1,9 @@
 #!/usr/bin/env julia
 include("src/simulation/GeneRegulation.jl")
 include("src/simulation/ODEs.jl")
-include("src/utilities/ReadWrite.jl")
-include("src/utilities/CLI.jl")
-include("src/utilities/General.jl")
+isdefined(Main, :ReadWrite) || include("src/utilities/ReadWrite.jl")
+isdefined(Main, :CLI) || include("src/utilities/CLI.jl")
+isdefined(Main, :General) || include("src/utilities/General.jl")
 include("src/Cytoscape.jl")
 include("src/Plotting.jl")
 # isdefined(Main, :Model) || include("Model.jl") # loaded by GeneRegulation
@@ -35,7 +35,7 @@ Write a graph defined by weight matrices to xgmml format.
 """
 @main function xgmml(Wₜ, Wₚ::String; o=stdout, title=nothing, X=[])
 	Wₜ, Wₚ = loaddlm(Wₜ), loaddlm(Wₚ)
-	_,nₜ,nₚ = nₓnₜnₚ(Wₜ,Wₚ)
+	_,nₜ,nₚ = nₒnₜnₚ(Wₜ,Wₚ)
 	xgmml([Wₜ, Wₚ], o, nₜ, nₚ, title, X)
 end
 @main function xgmml(i=default_net; o=stdout, title=nothing, X=[])
@@ -65,10 +65,10 @@ Create a random network from W.
 """
 @main function network(Wₜ_fname::String=default_Wₜ, Wₚ_fname::String=default_Wₚ; o::String=default_net)
 	Wₜ, Wₚ = loaddlm(Wₜ_fname), loaddlm(Wₚ_fname, Int64)
-	n, nₜ = size(Wₜ)
+	nᵥ, nₜ = size(Wₜ)
 	nₚ = size(Wₚ,2)
 	@assert nₜ == size(Wₚ,1) - nₚ
-	@assert n >= nₜ + nₚ
+	@assert nᵥ >= nₜ + nₚ
 	save(o, Network(Wₜ, Wₚ))
 end
 
@@ -89,18 +89,6 @@ end
 	savedlm(o, Wₜ)
 end
 
-"Get the Wₚ matrix that contains edges indicating activation as opposed to phosphorylation since we don't infer phosphorylation but activation."
-@main function WP_activation(i=default_net; o=stdout)
-	net = loadnet(i)
-	Wₚ_activation = GeneRegulation.Wₚ_activation(net)
-	Wₚ = sign.(net.Wₚₖ .- net.Wₚₚ)
-	phos_regulated = sum(any(Wₚ .!= 0; dims=2))
-	changes = sum(Wₚ .!= Wₚ_activation)
-	@info("""$changes edges were changed.
-	$(sum(net.phos_activation)) out of $(length(net.phos_activation)) TFs/PKs/PPs are phos activated.
-	$phos_regulated are phos regulated.""")
-	savedlm(o, Wₚ_activation)
-end
 
 """
 Simulate a network.
@@ -119,7 +107,7 @@ Make them with either another simulate call, a steaady state call or write them 
 	net = loadnet(i)
 	u₀ = get_u₀(net, r0, p0, phi0)
 	solution = @domainerror ODEs.simulate(net, mut_id, u₀, duration)
-	if solution === nothing return end
+	solution === nothing && return
 	@info(solution.retcode)
 	if solution.retcode in [:Success, :Terminated]
 		savedlm(r,   solution[:,1,:])

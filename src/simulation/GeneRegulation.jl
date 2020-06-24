@@ -1,5 +1,5 @@
 #!/usr/bin/env julia
-include("../Model.jl")
+isdefined(Main, :Model) || include("../Model.jl")
 
 """
 Structs with data defining a gene regulation network and its regulation mechanisms. All functions for initializing the values are found here, including randomized initialization.
@@ -7,11 +7,11 @@ Structs with data defining a gene regulation network and its regulation mechanis
 module GeneRegulation
 using Statistics: mean
 import JSON3
-import ..Model: nₓnₜnₚ, WₜWₚ
+import ..Model: nₒnₜnₚ, WₜWₚ
 
 export Network, Gene
 export drdt, dpdt, dϕdt
-export nₓnₜnₚ, estimate_Wₜ
+export nₒnₜnₚ, estimate_Wₜ
 
 
 const weak_activation = .25
@@ -30,7 +30,7 @@ JSON3.StructType(::Type{Gene}) = JSON3.Struct()
 JSON3.StructType(::Type{Network}) = JSON3.Struct()
 
 
-nₓnₜnₚ(net::Network) = net.nₓ,net.nₜ,net.nₚ
+nₒnₜnₚ(net::Network) = net.nₒ,net.nₜ,net.nₚ
 
 
 """
@@ -62,9 +62,9 @@ end
 f(genes::Vector{Gene}, ψ::Vector{<:AbstractFloat}) = [f(gene, ψ) for gene in genes]
 
 
-"Estimate the effect on f for all genes when a given TF has either ϕ=weak or ϕ=strong."
+"Estimate the effect on f for all genes when a given TF has either ψ=weak or ψ=strong."
 function estimate_Wₜ(net::Network, i::Integer, basal_activation::AbstractFloat)
-	basal = fill(basal_activation, net.n)
+	basal = fill(basal_activation, net.nᵥ)
 	ψ = copy(basal); ψ[i] = 1
 	f(net.genes, ψ) - f(net.genes, basal)
 end

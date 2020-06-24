@@ -41,26 +41,11 @@ LB_WP(W, cs::NamedTuple, λ::Real) = λ*l1(B_star(W, cs).*cs.Mₚ)
 LB_WP(W, cs::NamedTuple, λ::Real, ::Nothing) = LB_WP(W, cs, λ)
 LB_WP(W, cs::NamedTuple, λ::Real, weights) = λ*l1(B_star(W, cs).*cs.Mₚ.*weights)
 
-"""
-If we are using PK vs PP knowledge, we have vector V with elements vᵢ for each node i. 
-"""
-init_V(::Nothing, ::Nothing, ::Any) = nothing
-"""
-vᵢ>0 if phosphorylation of i == activation of i. This will mean that we should generally have wᵢⱼ>0 for j∈PK and wᵢⱼ<0 for j∈PP.
-The opposite should be observed for a protein i that is activated when dephosphorylated.
-elements in W*(Iₚₖ-Iₚₚ) are positive if activation agrees with phosphorylation. sum(..., dims=2) shows overall effect for each target i.
-- W: a weight matrix of activation/repression effects.
-"""
-init_V(Iₚₖ::AbstractMatrix, Iₚₚ::AbstractMatrix, W::Matrix) = sign.(sum(W*(Iₚₖ-Iₚₚ); dims=2)) |> param
-"If W is not provided we assume phosphorylation == activation for all target nodes."
-init_V(Iₚₖ::AbstractMatrix, Iₚₚ::AbstractMatrix, ::Nothing) = FluxUtils.random_weight(size(Iₚₖ,1),1) .|> abs |> param
-
 
 """
 - X: logFC values with measured nodes along axis=1, and different experiment or replicate along axis=2
 - throttle: seconds between prints
 - opt: ADAMW or maybe NADAM
-- Iₚₖ, Iₚₚ: kinase and phosphatase indicator diagonal matrices
 - W: from previous training.
 - J: matrix with 1 for KO and 0 for passive observed node. Shape like X.
 - λWT: should Wₜ be regularized on?
@@ -68,30 +53,28 @@ init_V(Iₚₖ::AbstractMatrix, Iₚₚ::AbstractMatrix, ::Nothing) = FluxUtils.
 - save_every: e.g. 10 to save every tenth epoch. Use zero to not save intermediates. Intermediates are saved to W{T,P}.mat.tmp in PWD.
 """
 function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=10000, λ::Real=.1, λW=0., λWT::Bool=true, opt=ADAMW(), 
-	M=nothing, S=nothing, Iₚₖ=nothing, Iₚₚ=nothing, W=nothing, J=nothing, quadquad::Bool=false, trainWT::Bool=true, W_reg=nothing, save_every::Integer=1)
+	M=nothing, S=nothing, W=nothing, J=nothing, quadquad::Bool=false, trainWT::Bool=true, W_reg=nothing, save_every::Integer=1)
 	@assert W !== nothing
-	n, K = size(X)
-	cs = Model.constants(n, nₜ, nₚ, J === nothing ? K : J)
-	M === nothing && (M = ones(n,n)) # no prior knowledge
+	nᵥ, K = size(X)
+	cs = Model.constants(nᵥ, nₜ, nₚ, J === nothing ? K : J)
+	M === nothing && (M = ones(nᵥ,nᵥ)) # no prior knowledge
 	M = trainWT ? M .* (cs.Mₜ .+ cs.Mₚ) : [M.*cs.Mₜ, M.*cs.Mₚ] # enforce masks
-	V = init_V(Iₚₖ, Iₚₚ, W)
 	W = trainWT ? param(W) : [W.*cs.Mₜ, param(W.*cs.Mₚ)]
-	# if we have Iₚₖ and Iₚₚ given but they do not add up to nₚ it means that ∃ KP ∉ PK ∪ PP
-	Iₚ = V !== nothing && sum(Iₚₖ + Iₚₚ) == nₚ ? Iₚₖ+Iₚₚ : Model.Iₚ(n, nₜ, nₚ)
-	Iₜ = Model.Iₜ(n, nₜ, nₚ)
+	Iₚ = Model.Iₚ(nᵥ, nₜ, nₚ)
+	Iₜ = Model.Iₜ(nᵥ, nₜ, nₚ)
 	λW == 0 && (λW = nothing)
 	
 	error_cost = quadquad ? Model.quadquad : Model.sse
 	B_cost = λWT ? LB : LB_WP
 	function L(X)
-		W′ = Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ)
+		W′ = Model.apply_priors(W, M, S)
 		error_cost(W′, cs, X) + B_cost(W′, cs, λ, W_reg) + L1(W′, λW)
 	end
 	
 	epoch = 0
 	function cb()
 		l = L(X)
-		W′ = Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ)
+		W′ = Model.apply_priors(W, M, S)
 		e = Model.sse(W′, cs, X)
 		lp = l1(Model._Wₚ(W′,Iₚ))
 		
@@ -105,7 +88,7 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 		epoch += 1
 		
 		if save_every > 0 && epoch % save_every == 0
-			W′ = Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ)
+			W′ = Model.apply_priors(W, M, S)
 			Model.isW(W′, nₜ, nₚ) || @error("W has nonzeros in entries that should be zero")
 			Wₜ, Wₚ = Model.WₜWₚ(W′, nₜ, nₚ)
 			trainWT && savedlm("WT.tmp.mat", Wₜ)
@@ -117,14 +100,12 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 	
 	println(trainWT ? "loss\tsse\tLt\tLp\tepoch\ttime" : "loss\tsse\tLp\tepoch\ttime")
 	cb() # epoch 0 print before we start
-	Flux.train!(L, get_params(W, V), ((X,) for _ ∈ 1:epochs), opt; cb=cb)
-	Model.apply_priors(W, V, M, S, Iₚₖ, Iₚₚ)
+	Flux.train!(L, get_params(W), ((X,) for _ ∈ 1:epochs), opt; cb=cb)
+	Model.apply_priors(W, M, S)
 end
 
 get_params(W::AbstractMatrix) = [W]
 get_params(W::AbstractVector) = [W[2]]  # assuming only the WP is a param
-get_params(W, ::Nothing) = get_params(W)
-get_params(W, V) = [get_params(W)..., V]
 
 
 
