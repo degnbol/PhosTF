@@ -92,55 +92,55 @@ end
 
 """
 Simulate a network.
-- r,p,phi: fname. output files with time along axis 2 and protein along axis 1
-- r0, p0, phi0: fname. starting values. Use this to let a mutated network start where the wildtype converged. 
+- r,p,psi: fname. output files with time along axis 2 and protein along axis 1
+- r0, p0, psi0: fname. starting values. Use this to let a mutated network start where the wildtype converged. 
 Make them with either another simulate call, a steaady state call or write them manually.
 """
-@main function simulate(mut_id=nothing, i=default_net; r=nothing, p=nothing, phi=nothing, t=nothing, duration=nothing, r0=nothing, p0=nothing, phi0=nothing)
+@main function simulate(mut_id=nothing, i=default_net; r=nothing, p=nothing, psi=nothing, t=nothing, duration=nothing, r0=nothing, p0=nothing, psi0=nothing)
 	if   r  === nothing   r  = "sim_r"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
 	if   p  === nothing   p  = "sim_p"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
-	if phi  === nothing phi  = "sim_phi" * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
+	if psi  === nothing phi  = "sim_psi" * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
 	if   t  === nothing   t  = "sim_t"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
 	if   r0 !== nothing   r0 = loaddlm(  r0)[:,end] end
 	if   p0 !== nothing   p0 = loaddlm(  p0)[:,end] end
-	if phi0 !== nothing phi0 = loaddlm(phi0)[:,end] end
+	if psi0 !== nothing phi0 = loaddlm(psi0)[:,end] end
 	net = loadnet(i)
-	u₀ = get_u₀(net, r0, p0, phi0)
+	u₀ = get_u₀(net, r0, p0, psi0)
 	solution = @domainerror ODEs.simulate(net, mut_id, u₀, duration)
 	solution === nothing && return
 	@info(solution.retcode)
 	if solution.retcode in [:Success, :Terminated]
 		savedlm(r,   solution[:,1,:])
 		savedlm(p,   solution[:,2,:])
-		savedlm(phi, solution[1:net.nₜ+net.nₚ,3,:])
+		savedlm(psi, solution[1:net.nₜ+net.nₚ,3,:])
 		savedlm(t,   solution.t)
 	end
 end
 
 """
 Plot simulations.
-- nₚ: number of PK/PP.
-- r,p,ϕ: fname. matrices with size=(#proteins, #times)
+- nₚ: number of KPs.
+- r,p,ψ: fname. matrices with size=(#proteins, #times)
 - t: fname. time vector
 - o: optional file to write plot to
 """
-@main function plot(nₚ::Integer, nₜ::Integer, r="sim_r.mat", p="sim_p.mat", ϕ="sim_phi.mat", t="sim_t.mat"; o=stdout)
-	r, p, ϕ, t = loaddlm(r), loaddlm(p), loaddlm(ϕ), loaddlm(t)
+@main function plot(nₚ::Integer, nₜ::Integer, r="sim_r.mat", p="sim_p.mat", ψ="sim_psi.mat", t="sim_t.mat"; o=stdout)
+	r, p, ψ, t = loaddlm(r), loaddlm(p), loaddlm(ψ), loaddlm(t)
 	t = dropdims(t; dims=2)  # should be a column vector in file
-	n = size(r,1); nₓ = n-(nₜ+nₚ)
+	nᵥ = size(r,1); nₒ = nᵥ-(nₜ+nₚ)
 	# protein along axis=1, mRNA,prot,phos along axis=2 and for measurements: time along axis=3
-	values = zeros(n, 3, length(t))
-	values[:,1,:], values[:,2,:], values[1:nₜ+nₚ,3,:] = r, p, ϕ
-	nodes  = [["P$i" for i ∈ 1:nₚ]; ["T$i" for i ∈ 1:nₜ]; ["X$i" for i ∈ 1:nₓ]]
+	values = zeros(nᵥ, 3, length(t))
+	values[:,1,:], values[:,2,:], values[1:nₜ+nₚ,3,:] = r, p, ψ
+	nodes  = [["P$i" for i ∈ 1:nₚ]; ["T$i" for i ∈ 1:nₜ]; ["O$i" for i ∈ 1:nₒ]]
 	labels = ["$i $l" for i ∈ nodes, l ∈ ["mRNA", "prot", "phos"]]
 	styles = [s for i ∈ nodes, s ∈ [:solid, :solid, :dash]]
 	widths = [w for i ∈ nodes, w ∈ [1, 2, 1]]
-	# get [P, T, X] collections of data
+	# get [KP, TF, O] collections of data
 	values = [reshape(values[1:nₚ,:,:], 3nₚ, :), reshape(values[nₚ+1:nₚ+nₜ,:,:], 3nₜ, :), values[nₚ+nₜ+1:end,1,:]]
 	labels = [reshape(labels[1:nₚ,:], :), reshape(labels[nₚ+1:nₚ+nₜ,:], :), labels[nₚ+nₜ+1:end,1]]
 	styles = [reshape(styles[1:nₚ,:], :), reshape(styles[nₚ+1:nₚ+nₜ,:], :), styles[nₚ+nₜ+1:end,1]]
 	widths = [reshape(widths[1:nₚ,:], :), reshape(widths[nₚ+1:nₚ+nₜ,:], :), widths[nₚ+nₜ+1:end,1]]
-	p = Plotting.plot_simulation(t, values, labels, styles, widths, ["PK/PP", "TF", "X"])
+	p = Plotting.plot_simulation(t, values, labels, styles, widths, ["KP", "TF", "O"])
 	Plotting.save(o, p)
 	if o == stdout
 		println("plotting complete")
@@ -157,21 +157,21 @@ If "mutations" is not provided, it refers to index of the protein to mutate.
 - i: network fname.
 - r: out fname for r values.
 - p: out fname for p values.
-- ϕ: out fname for ϕ values.
+- psi: out fname for ψ values.
 - mut_file: optional fname to provided where "mut_id" will then be the index of a column.
 If "mut" is not provided, the first (and ideally only) column of the file will be used.
 """
-@main function steadystate(mut_id=nothing, i=default_net; r=nothing, p=nothing, phi=nothing, mut_file=nothing)
+@main function steadystate(mut_id=nothing, i=default_net; r=nothing, p=nothing, psi=nothing, mut_file=nothing)
 	if r   === nothing r   = "steady_r"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
 	if p   === nothing p   = "steady_p"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
-	if phi === nothing phi = "steady_phi" * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
+	if psi === nothing psi = "steady_psi" * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
 	net = loadnet(i)
 	solution = steady_state(net, mut_id, mut_file)
 	@info(solution.retcode)
 	if solution.retcode in [:Success, :Terminated]
 		savedlm(r,   solution[:,1,end])
 		savedlm(p,   solution[:,2,end])
-		savedlm(phi, solution[1:net.nₜ+net.nₚ,3,end])
+		savedlm(psi, solution[1:net.nₜ+net.nₚ,3,end])
 	end
 end
 steady_state(net, ::Nothing, ::Nothing) = ODEs.steady_state(net)
@@ -195,7 +195,7 @@ Get the log fold-change values comparing mutant transcription levels to wildtype
 """
 @main function logFC(net=default_net; o=stdout)
 	measurements = @domainerror(ODEs.logFC(loadnet(net)))
-	if measurements != nothing
+	if measurements !== nothing
 		@info("logFC values simulated")
 		savedlm(o, measurements)
 	end
@@ -211,7 +211,7 @@ Get the log fold-change values comparing mutant transcription levels to wildtype
 	wildtype = loaddlm(wt)
 	mutants = [loaddlm(mutant) for mutant in [mut; muts...]]
 	measurements = @domainerror(ODEs.logFC(wildtype, mutants))
-	if measurements != nothing
+	if measurements !== nothing
 		@info("logFC values simulated")
 		savedlm(o, measurements)
 	end
