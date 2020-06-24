@@ -33,6 +33,26 @@ JSON3.StructType(::Type{Network}) = JSON3.Struct()
 nₒnₜnₚ(net::Network) = net.nₒ,net.nₜ,net.nₚ
 
 
+random_t½() = TruncNormal(5, 50)
+"""
+We have exponential decay, the half-life and the decay rate are thus related by:
+t½ = ln(2) / λ ⟹
+λ = ln(2) / t½
+"""
+random_λ(n::Int) = log(2) ./ rand(random_t½(), n)
+"""
+For λ_phos to have lower values for nodes that are mostly negatively regulated.
+"""
+function random_λ(mat::Matrix)
+    # weigh by the fraction of regulators that regulate positively.
+    positives = sum(mat .> 0; dims=2) |> vec
+    negatives = sum(mat .< 0; dims=2) |> vec
+    λ = random_λ(size(mat,1)) .* positives ./ (positives .+ negatives)
+    λ[isnan.(λ)] .= 0  # NaN from div zero which means there are no regulators of a node. In that case it's activation is static.
+    λ
+end
+
+
 """
 Mean activation μ given ψ.
 ψ: 1D array. Active nondim concentrations.

@@ -47,7 +47,7 @@ struct Network
 	Network(genes::Vector{Gene}, Wₚ::Matrix{<:AbstractFloat}) = Network(genes, Wₚ₊Wₚ₋(Wₚ)..., random_λ(size(Wₚ,1)))
 	function Network(genes::Vector{Gene}, Wₚ₊::Matrix{<:AbstractFloat}, Wₚ₋::Matrix{<:AbstractFloat}, λ_phos::Vector)
 		nᵥ, nₚ = length(genes), size(Wₚ₊,2)
-		nₜ = size(Wₚ₊, 1) - nₚ
+		nₜ = size(Wₚ₊,1) - nₚ
 		# In the non-dimensionalized model, max_transcription == λ_mRNA and max_translation == λ_prot
 		max_transcription = λ_mRNA = random_λ(nᵥ)
 		max_translation = λ_prot = random_λ(nᵥ)
@@ -84,25 +84,6 @@ struct Network
 		new(net.genes, net.Wₚ₊, net.Wₚ₋, net.nᵥ, net.nᵥ-(net.nₜ+net.nₚ), net.nₜ, net.nₚ, max_transcription, net.max_translation, 
             net.λ_mRNA, net.λ_prot, net.λ_phos, net.r₀, net.p₀, net.ψ₀)
 	end
-	
-	random_t½() = TruncNormal(5, 50)
-	"""
-	We have exponential decay, the half-life and the decay rate are thus related by:
-	t½ = ln(2) / λ ⟹
-	λ = ln(2) / t½
-	"""
-	random_λ(n::Int) = log(2) ./ rand(random_t½(), n)
-    """
-    For λ_phos to have lower values for nodes that are mostly negatively regulated.
-    """
-    function random_λ(mat::Matrix)
-        # weigh by the fraction of regulators that regulate positively.
-        positives = sum(mat .> 0; dims=2) |> vec
-        negatives = sum(mat .< 0; dims=2) |> vec
-        λ = random_λ(size(mat,1)) .* positives ./ (positives .+ negatives)
-        λ[isnan.(λ)] .= 0  # NaN from div zero which means there are no regulators of a node. In that case it's activation is static.
-        λ
-    end
 	
 	"""
 	Initial mRNA. Estimated as
