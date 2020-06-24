@@ -22,12 +22,12 @@ const bg_color = "#FFFFFF"
 Get a matrix containing text in node file format.
 - nᵥ: total number of proteins
 - nₜ: number of TFs
-- nₚ: number of PK/PPs
+- nₚ: number of KPs
 rows are identifiers.
 """
 function nodes(nᵥ::Integer, nₜ::Integer, nₚ::Integer)
-	labels = [["T$i" for i in 1:nₜ]; ["P$i" for i in 1:nₚ]; ["X$i" for i in 1:(nᵥ-(nₜ+nₚ))]]
-	types = [["T" for _ in 1:nₜ]; ["P" for _ in 1:nₚ]; ["X" for _ in 1:(nᵥ-(nₜ+nₚ))]]
+	labels = [["T$i" for i in 1:nₜ]; ["P$i" for i in 1:nₚ]; ["O$i" for i in 1:(nᵥ-(nₜ+nₚ))]]
+	types = [["T" for _ in 1:nₜ]; ["P" for _ in 1:nₚ]; ["O" for _ in 1:(nᵥ-(nₜ+nₚ))]]
 	DataFrame(label=labels, type=types)
 end
 
@@ -57,7 +57,7 @@ function xgmml_labels(nₒ::Integer, nₜ::Integer, nₚ::Integer)
 	pad = max(nₒ, nₜ, nₚ) |> string |> length
 	[["P"*lpad(i,pad,"0") for i in 1:nₚ];
 	 ["T"*lpad(i,pad,"0") for i in 1:nₜ];
-	 ["X"*lpad(i,pad,"0") for i in 1:nₒ]]
+	 ["O"*lpad(i,pad,"0") for i in 1:nₒ]]
 end
 
 function xgmml_fills(nₒ::Integer, nₜ::Integer, nₚ::Integer)
@@ -146,14 +146,14 @@ function _graph(net; title="net")
 end
 _graph(Wₜ::Matrix, Wₚ::Matrix; title="net") = _graph([Wₜ, Wₚ]; title=title)
 
-"Get a PK/PP, TF, X network defined by its Wₜ and Wₚ in .xgmml format which can be imported into Cytoscape."
+"Get a KP, TF, O network defined by its Wₜ and Wₚ in .xgmml format which can be imported into Cytoscape."
 xgmml(Wₜ::Matrix, Wₚ::Matrix; title="net") = XGMML.xgmml(_graph(Wₜ, Wₚ; title=title))
 xgmml(Wₜ::Matrix, Wₚ::Matrix, X::Nothing; title="net") = xgmml(Wₜ, Wₚ; title=title)
 xgmml(net; title="net") = XGMML.xgmml(_graph(net; title=title))
 
 """
 - net: [Wₜ,Wₚ] or simulation Network
-- X: each column is node values to visualize (not to be confused with Xs referring to genes).
+- X: each column is node values to visualize.
 - highlight: index(es) of node(s) to highlight for each column in X.
 """
 function xgmml(net, X::Matrix, highlight=nothing; title="net")
