@@ -1,19 +1,19 @@
 #!/usr/bin/env julia
 isdefined(Main, :ArrayUtils) || include("utilities/ArrayUtils.jl")
 isdefined(Main, :ReadWrite) || include("src/utilities/ReadWrite.jl")
+isdefined(Main, :Model) || include("Model.jl")
 
 "Flux machine learning for gradient descent of errors defined by model loss functions."
 module Inference
 using LinearAlgebra
 using Random
 using Statistics: mean
-using Flux, Flux.Tracker
-using Flux.Tracker: grad, update!
-using ..ArrayUtils: eye, shuffle_columns
-using ..ReadWrite
-include("Model.jl"); using .Model
 using Formatting
 using Dates
+using Flux
+using ..ArrayUtils: eye, shuffle_columns
+using ..ReadWrite
+using .Model
 
 """
 Get random indexes taken from ∈ [1,K] in portions.
@@ -59,7 +59,7 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 	cs = Model.constants(nᵥ, nₜ, nₚ, J === nothing ? K : J)
 	M === nothing && (M = ones(nᵥ,nᵥ)) # no prior knowledge
 	M = trainWT ? M .* (cs.Mₜ .+ cs.Mₚ) : [M.*cs.Mₜ, M.*cs.Mₚ] # enforce masks
-	W = trainWT ? param(W) : [W.*cs.Mₜ, param(W.*cs.Mₚ)]
+	W = trainWT ? W : [W.*cs.Mₜ, W.*cs.Mₚ]
 	Iₚ = Model.Iₚ(nᵥ, nₜ, nₚ)
 	Iₜ = Model.Iₜ(nᵥ, nₜ, nₚ)
 	λW == 0 && (λW = nothing)
