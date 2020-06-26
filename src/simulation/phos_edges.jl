@@ -1,4 +1,4 @@
-using Statistics
+using Statistics: mean
 using SparseArrays
 
 """
@@ -7,15 +7,16 @@ Choosing the float values are done in a manner that will make it likely
 that presence or absence of regulation should make a difference to down-stream gene expression levels.
 """
 function init_Wₚ₊Wₚ₋(genes::Vector, Wₚ::Matrix{<:Integer}, λ_phos::Vector)
-    nₚ = size(Wₚ,1); nₜ = size(Wₚ,2) - nₚ
+    nₚ = size(Wₚ,2)
+    nₜ = size(Wₚ,1) - nₚ
     Wₚ = 1.0Wₚ # convert int to float
     
     # Each edge is given the value that would make sense if we imagined it was the only regulator of its target, 
     # which would be higher than the passive decay of a similar magnitude, so we use the same random distribution here.
     # KP->KP
-    Wₚ[1:nₚ,:]      .*= λ_phos[1:nₚ,:]      .+ random_λ(nₚ) 
+    Wₚ[1:nₚ,:]       .*= λ_phos[1:nₚ]       .+ random_λ(nₚ) 
     # KP->TF. Take into accont how well each target TF binds to their regulon.
-    Wₚ[nₚ+(1:nₜ),:] .*= λ_phos[nₚ+(1:nₜ),:] .+ random_λ(nₜ) .* mean_k(genes, nₜ, nₚ)
+    Wₚ[nₚ.+(1:nₜ),:] .*= λ_phos[nₚ.+(1:nₜ)] .+ random_λ(nₜ) .* mean_k(genes, nₜ, nₚ)
     
     Wₚ₊, Wₚ₋ = Wₚ₊Wₚ₋(Wₚ)
 
