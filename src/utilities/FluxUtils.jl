@@ -2,7 +2,7 @@
 module FluxUtils
 using LinearAlgebra
 using Flux
-using Flux: Tracker
+using Tracker
 import Formatting
 
 export zerodiag
