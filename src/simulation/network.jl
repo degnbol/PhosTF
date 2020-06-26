@@ -6,6 +6,14 @@ Network struct containing genes for simulation.
 
 using .ArrayUtils: TruncNormal
 
+
+function init_genes(Wₜ, nₚ)
+	# row .== 0 → no edge, row .> 0 → activator, row .< 0 → repressor.
+	# .+ nₚ because the indexes among all proteins referring to TFs starts after KPs
+	[Gene(findall(row .> 0) .+ nₚ, findall(row .< 0) .+ nₚ) for row in eachrow(Wₜ)]
+end
+
+
 struct Network
 	genes::Vector{Gene}
 	# KP to TF+KP edges. Using Array instead of Matrix so JSON3 can allow a Vector here before reshape.
@@ -36,15 +44,6 @@ struct Network
 		Wₚ = reshape(Wₚ, (nₚ+nₜ,nₚ))  # un-flatten matrix
 		new(genes, Wₚ₊Wₚ₋(Wₚ)..., nᵥ, nᵥ-(nₜ+nₚ), nₜ, nₚ, max_transcription, max_translation, λ_mRNA, λ_prot, λ_phos, r₀, p₀, ψ₀)
 	end
-	function Network(genes::Vector{Gene}, Wₚ::Matrix{<:Integer})
-		λ_phos = random_λ(Wₚ)
-		Network(genes, init_Wₚ₊Wₚ₋(genes, Wₚ, λ_phos)..., λ_phos)
-	end
-	"""
-	Make sure to be exact about using either integer or float for Wₚ 
-	since a matrix of floats {-1.,0.,1.} will be seen as the exact edge values and not indication of repression, activation, etc.
-	"""
-	Network(genes::Vector{Gene}, Wₚ::Matrix{<:AbstractFloat}) = Network(genes, Wₚ₊Wₚ₋(Wₚ)..., random_λ(size(Wₚ,1)))
 	function Network(genes::Vector{Gene}, Wₚ₊::Matrix{<:AbstractFloat}, Wₚ₋::Matrix{<:AbstractFloat}, λ_phos::Vector)
 		nᵥ, nₚ = length(genes), size(Wₚ₊,2)
 		nₜ = size(Wₚ₊,1) - nₚ
@@ -56,18 +55,20 @@ struct Network
 		ψ₀ = initial_ψ(Wₚ₊, Wₚ₋, λ_phos, p₀[1:nₜ+nₚ])
 		new(genes, Wₚ₊, Wₚ₋, nᵥ, nᵥ-(nₜ+nₚ), nₜ, nₚ, max_transcription, max_translation, λ_mRNA, λ_prot, λ_phos, r₀, p₀, ψ₀)
 	end
-	function Network(Wₜ::Matrix, Wₚ::Matrix)
-		nₚ = size(Wₚ,2)
-		# == 0 → no edge, > 0 → activator, < 0 → repressor.
-		# .+ nₚ because the indexes among all proteins referring to TFs starts after PKs
-		genes = [Gene(findall(row .> 0) .+ nₚ, findall(row .< 0) .+ nₚ) for row in eachrow(Wₜ)]
-		Network(genes, Wₚ)
+	"""
+	Make sure to be exact about using either integer or float for Wₚ 
+	since a matrix of floats {-1.,0.,1.} will be seen as the exact edge values and not indication of repression, activation, etc.
+	"""
+	Network(genes::Vector{Gene}, Wₚ::Matrix{<:AbstractFloat}) = Network(genes, Wₚ₊Wₚ₋(Wₚ)..., random_λ(size(Wₚ,1)))
+	function Network(genes::Vector{Gene}, Wₚ::Matrix{<:Integer})
+		λ_phos = random_λ(Wₚ)
+		Network(genes, init_Wₚ₊Wₚ₋(genes, Wₚ, λ_phos)..., λ_phos)
 	end
-	Network(W, nₜ, nₚ) = Network(WₜWₚ(W,nₜ,nₚ)...)
+	Network(Wₜ::Matrix, Wₚ::Matrix) = Network(init_genes(Wₜ, size(Wₚ,2)), Wₚ)
+	Network(W, nₜ::Integer, nₚ::Integer) = Network(WₜWₚ(W,nₜ,nₚ)...)
 	function Network(net::Network)
 		new(net.genes, net.Wₚ₊, net.Wₚ₋, net.nᵥ, net.nᵥ-(net.nₜ+net.nₚ), net.nₜ, net.nₚ, net.max_transcription, net.max_translation, net.λ_mRNA, net.λ_prot, net.λ_phos, net.r₀, net.p₀, net.ψ₀)
 	end
-	Base.copy(net::Network) = Network(net)
 	"""
 	Create a mutant by making a copy of a wildtype network and changing the max transcription level of 1 or more genes.
 	"""
@@ -84,6 +85,7 @@ struct Network
 		new(net.genes, net.Wₚ₊, net.Wₚ₋, net.nᵥ, net.nᵥ-(net.nₜ+net.nₚ), net.nₜ, net.nₚ, max_transcription, net.max_translation, 
             net.λ_mRNA, net.λ_prot, net.λ_phos, net.r₀, net.p₀, net.ψ₀)
 	end
+	Base.copy(net::Network) = Network(net)
 	
 	"""
 	Initial mRNA. Estimated as
