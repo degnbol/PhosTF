@@ -1,20 +1,21 @@
 #!/usr/bin/env julia
-include("src/simulation/GeneRegulation.jl")
-include("src/simulation/ODEs.jl")
+isdefined(Main, :GeneRegulation) || include("src/simulation/GeneRegulation.jl")
+# isdefined(Main, :Model) || include("Model.jl") # loaded by GeneRegulation
+isdefined(Main, :ODEs) || include("src/simulation/ODEs.jl")
 isdefined(Main, :ReadWrite) || include("src/utilities/ReadWrite.jl")
 isdefined(Main, :CLI) || include("src/utilities/CLI.jl")
 isdefined(Main, :General) || include("src/utilities/General.jl")
-include("src/Cytoscape.jl")
-include("src/Plotting.jl")
-# isdefined(Main, :Model) || include("Model.jl") # loaded by GeneRegulation
 isdefined(Main, :ArrayUtils) || include("src/utilities/ArrayUtils.jl")
+isdefined(Main, :Cytoscape) || ARGS[1] == "xgmml" && include("src/Cytoscape.jl")
+isdefined(Main, :Plotting) || ARGS[1] == "plot" && include("src/Plotting.jl")
+
 
 
 using Fire
 using LinearAlgebra
 using Plots
 using ..ReadWrite, ..ArrayUtils, ..General
-using ..Cytoscape, ..Plotting, ..ODEs, ..Model
+using ..ODEs, ..Model
 using ..GeneRegulation, ..CLI
 
 # defaults
@@ -36,7 +37,7 @@ Write a graph defined by weight matrices to xgmml format.
 @main function xgmml(Wₜ, Wₚ::String; o=stdout, title=nothing, X=[])
 	Wₜ, Wₚ = loaddlm(Wₜ), loaddlm(Wₚ)
 	_,nₜ,nₚ = nₒnₜnₚ(Wₜ,Wₚ)
-	xgmml([Wₜ, Wₚ], o, nₜ, nₚ, title, X)
+	Cytoscape.xgmml([Wₜ, Wₚ], o, nₜ, nₚ, title, X)
 end
 @main function xgmml(i=default_net; o=stdout, title=nothing, X=[])
 	net = loadnet(i)
@@ -48,7 +49,7 @@ end
 	xgmml([Wₜ, Wₚ], o, nₜ, nₚ, title, X)
 end
 function xgmml(i, o, nₜ, nₚ, title=nothing, X=[])
-	if title === nothing title = o == stdout ? "pktfx" : splitext(basename(o))[1] end
+    title !== nothing || (title = o == stdout ? "pktfx" : splitext(basename(o))[1])
 	if isempty(X) write(o, Cytoscape.xgmml(i...; title=title))
 	else
 		X = hcatpad_load(X)
