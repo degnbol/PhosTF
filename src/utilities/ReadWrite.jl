@@ -5,7 +5,7 @@ using DelimitedFiles
 import JSON3
 import BSON
 import JLD
-using Flux: TrackedArray, Tracker.data
+using Tracker: TrackedArray, data
 # problems with JLD2, not using it
 
 export load, save
