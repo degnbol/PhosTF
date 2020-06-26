@@ -13,9 +13,9 @@ function init_Wₚ₊Wₚ₋(genes::Vector, Wₚ::Matrix{<:Integer}, λ_phos::Ve
     # Each edge is given the value that would make sense if we imagined it was the only regulator of its target, 
     # which would be higher than the passive decay of a similar magnitude, so we use the same random distribution here.
     # KP->KP
-    Wₚ[1:nₚ,:]       .*= λ_phos[1:nₚ]       .+ random_λ(nₚ) 
+    Wₚ[1:nₚ,:]      .*= λ_phos[1:nₚ,:]      .+ random_λ(nₚ) 
     # KP->TF. Take into accont how well each target TF binds to their regulon.
-    Wₚ[nₚ+1:nₚ+nₜ,:] .*= λ_phos[nₚ+1:nₚ+nₜ] .+ random_λ(nₜ) .* mean_k(genes, nₜ, nₚ)
+    Wₚ[nₚ+(1:nₜ),:] .*= λ_phos[nₚ+(1:nₜ),:] .+ random_λ(nₜ) .* mean_k(genes, nₜ, nₚ)
     
     Wₚ₊, Wₚ₋ = Wₚ₊Wₚ₋(Wₚ)
 
