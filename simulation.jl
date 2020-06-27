@@ -101,11 +101,11 @@ Make them with either another simulate call, a steaady state call or write them 
 @main function simulate(mut_id=nothing, i=default_net; r=nothing, p=nothing, psi=nothing, t=nothing, duration=nothing, r0=nothing, p0=nothing, psi0=nothing)
 	if   r  === nothing   r  = "sim_r"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
 	if   p  === nothing   p  = "sim_p"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
-	if psi  === nothing phi  = "sim_psi" * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
+	if psi  === nothing psi  = "sim_psi" * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
 	if   t  === nothing   t  = "sim_t"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
 	if   r0 !== nothing   r0 = loaddlm(  r0)[:,end] end
 	if   p0 !== nothing   p0 = loaddlm(  p0)[:,end] end
-	if psi0 !== nothing phi0 = loaddlm(psi0)[:,end] end
+	if psi0 !== nothing psi0 = loaddlm(psi0)[:,end] end
 	net = loadnet(i)
 	u₀ = get_u₀(net, r0, p0, psi0)
     @assert !any(isnan.(u₀))
