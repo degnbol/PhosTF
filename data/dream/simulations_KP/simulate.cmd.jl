@@ -18,8 +18,10 @@ for mat in 1:5
             # make net.bson with a fully defined network instance with all it's constants, etc.
             network()
             xgmml(; o="net.xgmml")
-            simulate()
-            steadystate()
+
+            # simulate()
+            # plot(nₚ, nₜ)  # we could plot now (nₚ and nₜ are not defined, just an example)
+            # steadystate()
             
             tryrm("X_sim.mat")
             # simulate logFC values and test that there are no warnings
