@@ -6,9 +6,10 @@ isdefined(Main, :ReadWrite) || include("src/utilities/ReadWrite.jl")
 isdefined(Main, :CLI) || include("src/utilities/CLI.jl")
 isdefined(Main, :General) || include("src/utilities/General.jl")
 isdefined(Main, :ArrayUtils) || include("src/utilities/ArrayUtils.jl")
-isdefined(Main, :Cytoscape) || ARGS[1] == "xgmml" && include("src/Cytoscape.jl")
-isdefined(Main, :Plotting) || ARGS[1] == "plot" && include("src/Plotting.jl")
-
+if length(ARGS) > 0
+    isdefined(Main, :Cytoscape) || ARGS[1] == "xgmml" && include("src/Cytoscape.jl")
+    isdefined(Main, :Plotting) || ARGS[1] == "plot" && include("src/Plotting.jl")
+end
 
 
 using Fire
@@ -65,7 +66,7 @@ end
 Create a random network from W.
 """
 @main function network(Wₜ_fname::String=default_Wₜ, Wₚ_fname::String=default_Wₚ; o::String=default_net)
-	Wₜ, Wₚ = loaddlm(Wₜ_fname), loaddlm(Wₚ_fname, Int64)
+	Wₜ, Wₚ = loaddlm(Wₜ_fname), loaddlm(Wₚ_fname, Int)
 	nᵥ, nₜ = size(Wₜ)
 	nₚ = size(Wₚ,2)
 	@assert nₜ == size(Wₚ,1) - nₚ
@@ -107,6 +108,7 @@ Make them with either another simulate call, a steaady state call or write them 
 	if psi0 !== nothing phi0 = loaddlm(psi0)[:,end] end
 	net = loadnet(i)
 	u₀ = get_u₀(net, r0, p0, psi0)
+    @assert !any(isnan.(u₀))
 	solution = @domainerror ODEs.simulate(net, mut_id, u₀, duration)
 	solution === nothing && return
 	@info(solution.retcode)

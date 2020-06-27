@@ -89,30 +89,34 @@ struct Network
 	
 	"""
 	Initial mRNA. Estimated as
-	0 = dr/dt = max_transcription*f(ψ) -λ_mRNA*r ⟹ r = m*f(ψ) / λ_mRNA
-	where we use p = 0 ⟹ ψ = 0
+	0 = dr/dt = max_transcription*f(ψ) -λ_mRNA*r ⟹ r = m*f(ψ) / λ_mRNA  
+	where we use p = 0 ⟹ ψ = 0  
 	"""
 	function initial_r(max_transcription::Vector, λ_mRNA::Vector, genes::Vector{Gene})
 		max_transcription .* f(genes, zeros(length(genes))) ./ λ_mRNA
 	end
 	"""
 	Initial protein concentrations. Estimated as
-	0 = dp/dt = max_translation*r - λ_prot*p ⟹ p = max_translation*r / λ_prot
+	0 = dp/dt = max_translation*r - λ_prot*p ⟹ p = max_translation*r / λ_prot  
 	"""
 	initial_p(max_translation::Vector, λ_prot::Vector, r::Vector) = max_translation .* r ./ λ_prot
 	"""
-	Initial active protein concentrations. Estimated as (p is used in place of ψ)
-	0 = dψ/dt = (Wₚ₊ p) (p - ψ) - (Wₚ₋ p + λ_phos) ψ ⟹
-	(Wₚ₊ p) p = (Wₚ₊ p - Wₚ₋ p - λ_phos) ψ ⟹
-	ψ = Wₚ₊ p p / (Wₚ₊ p - Wₚ₋ p - λ_phos)
+	Initial active protein concentrations.
 	- p: protein concentrations of TFs+PKs
 	"""
 	function initial_ψ(Wₚ₊::Matrix, Wₚ₋::Matrix, λ_phos::Vector, p::Vector)
-		# using ψ = p from the KPs, meaning we use fully active KPs at time=0.
 		nₚ = size(Wₚ₊,2)
+        nₚ₊= sum(Wₚ₊ .> 0; dims=2) |> vec
+        nₚ₋= sum(Wₚ₋ .> 0; dims=2) |> vec
+		# Sum the effects from regulators when using ψ = p from the KPs, which is fully active KPs.
 		Wₚ₊p = Wₚ₊ * p[1:nₚ]
 		Wₚ₋p = Wₚ₋ * p[1:nₚ]
-		clamp.(Wₚ₊p .* p ./ (Wₚ₊p .- Wₚ₋p .- λ_phos), 0, p)
+        # Fraction of proteins that are activated on a scale [0,1] as weighted average.
+        # We subtract deactivations from max activity level, and add activations to min activity level.
+        a = @. (Wₚ₊p * nₚ₊ + (1 - Wₚ₋p) * nₚ₋) / (nₚ₊ + nₚ₋)
+        # we get NaN if a protein is not regulated. In that case simply let it be fully active.
+        a[isnan.(a)] .= 1
+        a .* p 
 	end
 end
 
