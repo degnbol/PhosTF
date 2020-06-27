@@ -6,10 +6,8 @@ isdefined(Main, :ReadWrite) || include("src/utilities/ReadWrite.jl")
 isdefined(Main, :CLI) || include("src/utilities/CLI.jl")
 isdefined(Main, :General) || include("src/utilities/General.jl")
 isdefined(Main, :ArrayUtils) || include("src/utilities/ArrayUtils.jl")
-if length(ARGS) > 0
-    isdefined(Main, :Cytoscape) || ARGS[1] == "xgmml" && include("src/Cytoscape.jl")
-    isdefined(Main, :Plotting) || ARGS[1] == "plot" && include("src/Plotting.jl")
-end
+isdefined(Main, :Cytoscape) || (length(ARGS) == 0 || ARGS[1] == "xgmml") && include("src/Cytoscape.jl")
+isdefined(Main, :Plotting) || (length(ARGS) == 0 || ARGS[1] == "plot") && include("src/Plotting.jl")
 
 
 using Fire
