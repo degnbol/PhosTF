@@ -13,7 +13,7 @@ using Dates
 using Flux
 using ..ArrayUtils: eye, shuffle_columns
 using ..ReadWrite
-using .Model
+using ..Model
 
 """
 Get random indexes taken from ∈ [1,K] in portions.

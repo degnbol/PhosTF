@@ -17,7 +17,7 @@ using .ArgParseUtils
 
 function argument_parser()
 	s = ArgParseSettings(description="Infer a weight matrix from logFC data.", autofix_names=true)
-	@add_arg_table s begin
+	@add_arg_table! s begin
 		"X"
 			help = "Filname for LogFC values in a matrix. No column or row names. Space delimiters are recommended."
 			required = true
@@ -139,5 +139,8 @@ function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.
 	trainWT && savedlm(ot, Wₜ)
 end
 
+# parse args if run on command line as opposed to being imported
+if abspath(PROGRAM_FILE) == @__FILE__
+    ArgParseUtils.main(argument_parser(), infer)
+end
 
-ArgParseUtils.main(argument_parser(), infer)
