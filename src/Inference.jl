@@ -95,8 +95,9 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 			savedlm("WP.tmp.mat", Wₚ)
 		end
 	end
-	# throttle callbacks if we are doing a small example
-	n > 100 || (cb = Flux.throttle(cb, 5))
+	# throttle callbacks if we are doing a small example.
+    # BUG: epoch is wrong when throttled, it counts number of times cb is called.
+	nᵥ > 100 || (cb = Flux.throttle(cb, 5))
 	
 	println(trainWT ? "loss\tsse\tLt\tLp\tepoch\ttime" : "loss\tsse\tLp\tepoch\ttime")
 	cb() # epoch 0 print before we start
