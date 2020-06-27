@@ -4,7 +4,7 @@ include("src/utilities/CLI.jl")
 include("src/utilities/ArgParseUtils.jl")
 include("src/utilities/General.jl")
 include("src/Inference.jl")
-include("src/Model.jl")
+isdefined(Main, :Model) || include("src/Model.jl")
 isdefined(Main, :ArrayUtils) || include("src/utilities/ArrayUtils.jl")
 
 # ArgParse used instead of Fire since Fire has a weird bug where it says there's too many arguments.
@@ -77,29 +77,24 @@ function argument_parser()
 		"--WT-reg"
 			help = "Filename of matrix with regularization weights for Wₜ. NOT square. 
 			NaN means the weight should not be allowed, so this will function as masking as well."
-		"--PKPP"
-			help = "Filename of vector. Each element is -1 or 1 indicating PP or PK, respectively. 
-			0s are ignored (unknown or no phosphorylation mode). Length of vector can either be n or nₚ+nₜ."
 	end
 	s
 end
 
 function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; J=nothing, epochs::Integer=5000, 
 	WT=nothing, WP=nothing, WT_prior=nothing, WP_prior=nothing,
-	lambda::Real=.1, lambdaW::Real=0., lambdaWT::Bool=true, trainWT::Bool=true, quadquad::Bool=false, WT_reg=nothing,
-	PKPP=nothing)
+	lambda::Real=.1, lambdaW::Real=0., lambdaWT::Bool=true, trainWT::Bool=true, quadquad::Bool=false, WT_reg=nothing)
 	# empty strings is the same as providing nothing.
 	WT == "" && (WT = nothing)
 	WP == "" && (WP = nothing)
 	WT_prior == "" && (WT_prior = nothing)
 	WP_prior == "" && (WP_prior = nothing)
 	WT_reg == "" && (WT_reg = nothing)
-	PKPP == "" && (PKPP = nothing)
 	ot, op = abspath_(ot), abspath_(op)  # weird PWD issues require abs path
 
 	# load files
 	X = loaddlm(abspath_(X), Float64)
-	n = size(X,1)
+	nᵥ = size(X,1)
 	if J !== nothing
 		J = loaddlm(abspath_(J), Float64)
 		@assert size(J) == size(X)
@@ -107,7 +102,7 @@ function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.
 	WT_reg === nothing || (WT_reg = loaddlm(abspath_(WT_reg)))
 	WT_prior === nothing || (WT_prior = loaddlm(abspath_(WT_prior)))
 	WP_prior === nothing || (WP_prior = loaddlm(abspath_(WP_prior)))
-	W = Model.random_W(n)
+	W = Model.random_W(nᵥ)
 	WT = WT === nothing ? Model._Wₜ(W,nₜ,nₚ) : loaddlm(abspath_(WT))
 	WP = WP === nothing ? Model._Wₚ(W,nₜ,nₚ) : loaddlm(abspath_(WP))
 	W = Model._W(WT, WP)
@@ -123,22 +118,13 @@ function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.
 			WT_reg[nans] .= 1
 		end
 	end
-	M, S = Model.priors(WT_prior, WP_prior, n, nₜ, nₚ)
+	M, S = Model.priors(WT_prior, WP_prior, nᵥ, nₜ, nₚ)
 	
-	if PKPP !== nothing
-		PKPP = vec(loaddlm(abspath_(PKPP)))
-		PKPP = [PKPP; zeros(n-length(PKPP))]
-		Iₚₖ = diagm(PKPP .== +1)
-		Iₚₚ = diagm(PKPP .== -1)
-	else
-		Iₚₖ, Iₚₚ = nothing, nothing
-	end
-
-	nₒ = n-(nₚ+nₜ)
-	W_reg = WT_reg === nothing ? nothing : [ones(n,nₚ) WT_reg ones(n,nₒ)]
+	nₒ = nᵥ-(nₚ+nₜ)
+	W_reg = WT_reg === nothing ? nothing : [ones(nᵥ,nₚ) WT_reg ones(nᵥ,nₒ)]
 
 	W = Inference.infer(X, nₜ, nₚ; epochs=epochs, λ=lambda, λW=lambdaW, λWT=lambdaWT,
-	M=M, S=S, Iₚₖ=Iₚₖ, Iₚₚ=Iₚₚ, W=W, J=J, quadquad=quadquad, trainWT=trainWT, W_reg=W_reg)
+	M=M, S=S, W=W, J=J, quadquad=quadquad, trainWT=trainWT, W_reg=W_reg)
 	Model.isW(W, nₜ, nₚ) || @error("W has nonzeros in entries that should be zero.")
 	Wₜ, Wₚ = Model.WₜWₚ(W, nₜ, nₚ)
 	
