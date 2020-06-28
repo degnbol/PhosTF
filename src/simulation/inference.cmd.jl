@@ -12,7 +12,7 @@ for dir in ARGS
     _,  nₚ = size(loaddlm("WP.mat"))
 
     open("infer.log", "w") do log redirect_stdout(log) do
-            infer("X_sim.mat", nₜ, nₚ; epochs=15000, lambda=.1)
+            infer("X_sim.mat", nₜ, nₚ; epochs=15000, lambda=1.)
     end end
     
     rm("WT.tmp.mat")
