@@ -1,3 +1,4 @@
+#!/usr/bin/env Rscript
 # packages ####
 library(ggplot2)
 library(reshape2)
