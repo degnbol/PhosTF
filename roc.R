@@ -53,7 +53,8 @@ main = function(true_fnames, marker_fnames, tf_true_fnames, tf_marker_fnames, ou
     df$sample = as.factor(df$sample)
     lvls = c("TF →V ", "KP →KP", "KP+→KP", "KP-→KP", "KP →TF", "KP+→TF", "KP-→TF")
     cols = c("#005000", "#B663B1", "#B663B1", "#B663B1", "#6DB845", "#6DB845", "#6DB845")
-    ltyp = c(1, 1, 2, 3, 1, 2, 3)
+    # "31" means 3 units (linewidth) solid, then 1 unit gap. This is the way to control line width separately from size, i.e. how far between dots etc.
+    ltyp = c("solid", "solid", "31", "11", "solid", "31", "11")
     df$edge = factor(paste0(df$source, "→", df$target), levels=lvls)
     
     aucs = calc_auc(ggplot(df, aes(d=D, m=M, color=edge)) + geom_roc())$AUC
@@ -61,7 +62,7 @@ main = function(true_fnames, marker_fnames, tf_true_fnames, tf_marker_fnames, ou
     
     plot = ggplot(df, aes(d=D, m=M, color=edge, linetype=edge)) +
         geom_abline(slope=1, intercept=0, color="lightgray") +
-        geom_roc(n.cuts=0, size=.6) +
+        geom_roc(n.cuts=0, size=1) +
         style_roc(theme=theme_bw, guide=F, xlab="False Positive Rate", ylab="True Positive Rate")
     # + geom_roc(n.cuts=0, aes(fill=sample), linealpha=.1) # transparent individual curves
     
