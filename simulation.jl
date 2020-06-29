@@ -151,7 +151,7 @@ Get the log fold-change values comparing mutant transcription levels to wildtype
 -	o: stdout or file to write result to
 """
 @main function logFC(net=default_net; o=stdout)
-	measurements = @domainerror(ODEs.logFC(loadnet(net)))
+	measurements = ODEs.@domainerror(ODEs.logFC(loadnet(net)))
 	if measurements !== nothing
 		@info("logFC values simulated")
 		savedlm(o, measurements)
@@ -167,7 +167,7 @@ Get the log fold-change values comparing mutant transcription levels to wildtype
 @main function logFC(wt, mut, muts...; o=stdout)
 	wildtype = ReadWrite.loaddlm(wt)
 	mutants = [ReadWrite.loaddlm(mutant) for mutant in [mut; muts...]]
-	measurements = @domainerror(ODEs.logFC(wildtype, mutants))
+	measurements = ODEs.@domainerror(ODEs.logFC(wildtype, mutants))
 	if measurements !== nothing
 		@info("logFC values simulated")
 		ReadWrite.savedlm(o, measurements)
