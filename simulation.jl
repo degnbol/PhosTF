@@ -63,7 +63,7 @@ Make them with either another simulate call, a steaady state call or write them 
 	net = loadnet(i)
 	u₀ = ODEs.get_u₀(net, r0, p0, psi0)
     @assert !any(isnan.(u₀))
-	solution = @domainerror ODEs.simulate(net, mut_id, u₀, duration)
+	solution = ODEs.@domainerror ODEs.simulate(net, mut_id, u₀, duration)
 	solution === nothing && return
 	@info(solution.retcode)
 	if solution.retcode in [:Success, :Terminated]
