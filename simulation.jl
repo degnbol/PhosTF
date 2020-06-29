@@ -1,75 +1,31 @@
 #!/usr/bin/env julia
-isdefined(Main, :GeneRegulation) || include("src/simulation/GeneRegulation.jl")
-# isdefined(Main, :Model) || include("Model.jl") # loaded by GeneRegulation
+include("src/simulation/GeneRegulation.jl")
 isdefined(Main, :ODEs) || include("src/simulation/ODEs.jl")
-isdefined(Main, :ReadWrite) || include("src/utilities/ReadWrite.jl")
-isdefined(Main, :CLI) || include("src/utilities/CLI.jl")
-isdefined(Main, :General) || include("src/utilities/General.jl")
-isdefined(Main, :ArrayUtils) || include("src/utilities/ArrayUtils.jl")
-isdefined(Main, :Cytoscape) || (length(ARGS) == 0 || ARGS[1] == "xgmml") && include("src/Cytoscape.jl")
-isdefined(Main, :Plotting) || (length(ARGS) == 0 || ARGS[1] == "plot") && include("src/Plotting.jl")
+include("src/utilities/ReadWrite.jl")
+(length(ARGS) == 0 || ARGS[1] == "plot") && include("src/Plotting.jl")
 
 
 using Fire
 using LinearAlgebra
 using Plots
-using ..ReadWrite, ..ArrayUtils, ..General
-using ..ODEs, ..Model
-using ..GeneRegulation, ..CLI
 
 # defaults
 default_Wₜ, default_Wₚ = "WT.mat", "WP.mat"
 default_net = "net.bson"
 
 
-loadnet(i) = load(i, Network)
-
-
-"Load file(s) as a single 2D array regardless if they match in length along axis 1."
-hcatpad_load(fnames::Vector) = hcatpad(loaddlm(fname, Float64) for fname ∈ fnames)
-hcatpad_load(fname::String) = loaddlm(fname, Float64)
-
-"""
-Write a graph defined by weight matrices to xgmml format.
-- X: node values. Each column of X is used for a separate copy of the graph.
-"""
-@main function xgmml(Wₜ, Wₚ::String; o=stdout, title=nothing, X=[])
-	Wₜ, Wₚ = loaddlm(Wₜ), loaddlm(Wₚ)
-	_,nₜ,nₚ = nₒnₜnₚ(Wₜ,Wₚ)
-	Cytoscape.xgmml([Wₜ, Wₚ], o, nₜ, nₚ, title, X)
-end
-@main function xgmml(i=default_net; o=stdout, title=nothing, X=[])
-	net = loadnet(i)
-	xgmml([net], o, net.nₜ, net.nₚ, title, X)
-end
-@main function xgmml(W, nₜ::Integer, nₚ::Integer; o=stdout, title=nothing, X=[])
-	W = loaddlm(W)
-	Wₜ, Wₚ = W[:,nₚ+1:nₚ+nₜ], W[:,1:nₚ] # we don't use the Model.WₜWₚ function since we want to allow P→X edges in case W==T
-	xgmml([Wₜ, Wₚ], o, nₜ, nₚ, title, X)
-end
-function xgmml(i, o, nₜ, nₚ, title=nothing, X=[])
-    title !== nothing || (title = o == stdout ? "pktfx" : splitext(basename(o))[1])
-	if isempty(X) write(o, Cytoscape.xgmml(i...; title=title))
-	else
-		X = hcatpad_load(X)
-		K = size(X,2)
-		# highlight each of the proteins if there are as many experiments as PKs+TFs
-		highlight = nₜ+nₚ == K ? (1:K) : nothing
-		write(o, Cytoscape.xgmml(i..., X, highlight; title=title))
-	end
-end
-
+loadnet(i) = ReadWrite.load(i, Network)
 
 """
 Create a random network from W.
 """
 @main function network(Wₜ_fname::String=default_Wₜ, Wₚ_fname::String=default_Wₚ; o::String=default_net)
-	Wₜ, Wₚ = loaddlm(Wₜ_fname), loaddlm(Wₚ_fname, Int)
+	Wₜ, Wₚ = ReadWrite.loaddlm(Wₜ_fname), ReadWrite.loaddlm(Wₚ_fname, Int)
 	nᵥ, nₜ = size(Wₜ)
 	nₚ = size(Wₚ,2)
 	@assert nₜ == size(Wₚ,1) - nₚ
 	@assert nᵥ >= nₜ + nₚ
-	save(o, Network(Wₜ, Wₚ))
+	save(o, GeneRegulation.Network(Wₜ, Wₚ))
 end
 
 @main function display(i=default_net; v::Integer=0)
@@ -101,20 +57,20 @@ Make them with either another simulate call, a steaady state call or write them 
 	if   p  === nothing   p  = "sim_p"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
 	if psi  === nothing psi  = "sim_psi" * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
 	if   t  === nothing   t  = "sim_t"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
-	if   r0 !== nothing   r0 = loaddlm(  r0)[:,end] end
-	if   p0 !== nothing   p0 = loaddlm(  p0)[:,end] end
-	if psi0 !== nothing psi0 = loaddlm(psi0)[:,end] end
+	if   r0 !== nothing   r0 = ReadWrite.loaddlm(  r0)[:,end] end
+	if   p0 !== nothing   p0 = ReadWrite.loaddlm(  p0)[:,end] end
+	if psi0 !== nothing psi0 = ReadWrite.loaddlm(psi0)[:,end] end
 	net = loadnet(i)
-	u₀ = get_u₀(net, r0, p0, psi0)
+	u₀ = ODEs.get_u₀(net, r0, p0, psi0)
     @assert !any(isnan.(u₀))
 	solution = @domainerror ODEs.simulate(net, mut_id, u₀, duration)
 	solution === nothing && return
 	@info(solution.retcode)
 	if solution.retcode in [:Success, :Terminated]
-		savedlm(r,   solution[:,1,:])
-		savedlm(p,   solution[:,2,:])
-		savedlm(psi, solution[1:net.nₜ+net.nₚ,3,:])
-		savedlm(t,   solution.t)
+		ReadWrite.savedlm(r,   solution[:,1,:])
+		ReadWrite.savedlm(p,   solution[:,2,:])
+		ReadWrite.savedlm(psi, solution[1:net.nₜ+net.nₚ,3,:])
+		ReadWrite.savedlm(t,   solution.t)
 	end
 end
 
@@ -126,7 +82,7 @@ Plot simulations.
 - o: optional file to write plot to
 """
 @main function plot(nₚ::Integer, nₜ::Integer, r="sim_r.mat", p="sim_p.mat", ψ="sim_psi.mat", t="sim_t.mat"; o=stdout)
-	r, p, ψ, t = loaddlm(r), loaddlm(p), loaddlm(ψ), loaddlm(t)
+    r, p, ψ, t = ReadWrite.loaddlm.([r, p, ψ, t])
 	t = dropdims(t; dims=2)  # should be a column vector in file
 	nᵥ = size(r,1); nₒ = nᵥ-(nₜ+nₚ)
 	# protein along axis=1, mRNA,prot,phos along axis=2 and for measurements: time along axis=3
@@ -170,14 +126,14 @@ If "mut" is not provided, the first (and ideally only) column of the file will b
 	solution = steady_state(net, mut_id, mut_file)
 	@info(solution.retcode)
 	if solution.retcode in [:Success, :Terminated]
-		savedlm(r,   solution[:,1,end])
-		savedlm(p,   solution[:,2,end])
-		savedlm(psi, solution[1:net.nₜ+net.nₚ,3,end])
+		ReadWrite.savedlm(r,   solution[:,1,end])
+		ReadWrite.savedlm(p,   solution[:,2,end])
+		ReadWrite.savedlm(psi, solution[1:net.nₜ+net.nₚ,3,end])
 	end
 end
 steady_state(net, ::Nothing, ::Nothing) = ODEs.steady_state(net)
 steady_state(net, mutation::Integer, ::Nothing) = ODEs.steady_state(net, mutation)
-steady_state(net, mutation_col, mutations_file::String) = steady_state(net, mutation_col, loaddlm(mutations_file, Int))
+steady_state(net, mutation_col, mutations_file::String) = steady_state(net, mutation_col, ReadWrite.loaddlm(mutations_file, Int))
 function steady_state(net, ::Nothing, mutations::Matrix)
 	if size(mutations,2) == 1 return steady_state(net, 1, mutations)
 	else error("column in mutation file not selected, use first arg") end
@@ -209,12 +165,12 @@ Get the log fold-change values comparing mutant transcription levels to wildtype
 -	o: stdout or file to write result to
 """
 @main function logFC(wt, mut, muts...; o=stdout)
-	wildtype = loaddlm(wt)
-	mutants = [loaddlm(mutant) for mutant in [mut; muts...]]
+	wildtype = ReadWrite.loaddlm(wt)
+	mutants = [ReadWrite.loaddlm(mutant) for mutant in [mut; muts...]]
 	measurements = @domainerror(ODEs.logFC(wildtype, mutants))
 	if measurements !== nothing
 		@info("logFC values simulated")
-		savedlm(o, measurements)
+		ReadWrite.savedlm(o, measurements)
 	end
 end
 
