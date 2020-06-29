@@ -11,7 +11,7 @@ using ..ArrayUtils: eye
 import ..FluxUtils
 
 export offdiag, random_W
-export sse, sse_B, sse_T, linex, quadquad
+export sse, sse_B, sse_T
 export l1
 export _B, B_star, _T
 
@@ -144,29 +144,6 @@ function sse_alt(W::AbstractMatrix, cs::NamedTuple, X::Matrix)
 	sum(E.^2)
 end
 
-"""
-Alternative to SSE, that punishes undershooting more than overshooting. 
-That is, if a true logFC value is 1, then 2 is punished less than 0 as opposed to what is the case for SSE.
-- W: either Matrix with Wt and Wp, or vector with Wt and Wp matrices, or tracked versions.
-"""
-function linex(W, cs::NamedTuple, X::Matrix)
-	signs = sign.(X)
-	# set zero signs to -1 or 1
-	signs[signs .== 0] .= rand([-1,1], sum(signs .== 0))
-	αE = -signs .* E(W,cs,X)
-	sum(exp.(αE) .- αE .- 1.)
-end
-
-"""
-Alternative to SSE, that punishes undershooting more than overshooting. 
-That is, if a true logFC value is 1, then 2 is punished less than 0 as opposed to what is the case for SSE.
-- W: either Matrix with Wt and Wp, or vector with Wt and Wp matrices, or tracked versions.
-"""
-function quadquad(W, cs::NamedTuple, X::Matrix)
-	α = abs.(X) ./ (abs.(X) .+ .5)
-	X̂ = _B(W,cs,X)
-	sum(cs.U .* ((1. .- α .* (X̂.*X.>X.*X)) .* (X.-X̂).^2))
-end
 
 """
 Loss function to train parameters in W to result in a B that is as similar to a solution to B from LLC method (Eberhardt).
