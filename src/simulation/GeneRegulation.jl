@@ -41,15 +41,19 @@ t½ = ln(2) / λ ⟹
 """
 random_λ(n::Int) = log(2) ./ rand(random_t½(), n)
 """
-For λ_phos to have lower values for nodes that are mostly negatively regulated.
+For λ₊, λ₋ to have lower values for nodes that are mostly negatively regulated.
 """
 function random_λ(mat::Matrix)
     # weigh by the fraction of regulators that regulate positively.
     positives = sum(mat .> 0; dims=2) |> vec
     negatives = sum(mat .< 0; dims=2) |> vec
-    λ = random_λ(size(mat,1)) .* positives ./ (positives .+ negatives)
-    λ[isnan.(λ)] .= 0  # NaN from div zero which means there are no regulators of a node. In that case it's activation is static.
-    λ
+    λ₊ = random_λ(size(mat,1)) .* negatives ./ (positives .+ negatives)
+    λ₋ = random_λ(size(mat,1)) .* positives ./ (positives .+ negatives)
+    # NaN from div zero which means there are no regulators of a node. In that case it's activation is static.
+    noreg = positives .+ negatives .== 0
+    λ₊[noreg] .= random_λ(sum(noreg))
+    λ₋[noreg] .= 0
+    λ₊, λ₋
 end
 
 
