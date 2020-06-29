@@ -62,7 +62,7 @@ main = function(true_fnames, marker_fnames, tf_true_fnames, tf_marker_fnames, ou
     
     plot = ggplot(df, aes(d=D, m=M, color=edge, linetype=edge)) +
         geom_abline(slope=1, intercept=0, color="lightgray") +
-        geom_roc(n.cuts=0, size=1) +
+        geom_roc(n.cuts=0, size=.8) +
         style_roc(theme=theme_bw, guide=F, xlab="False Positive Rate", ylab="True Positive Rate")
     # + geom_roc(n.cuts=0, aes(fill=sample), linealpha=.1) # transparent individual curves
     
