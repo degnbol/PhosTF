@@ -85,7 +85,7 @@ xgmml_nodes(WₜWₚ::Tuple; kwargs...) = xgmml_nodes(nₒnₜnₚ(WₜWₚ)...;
 function xgmml_nodes(net; kwargs...)
 	xgmml_nodes(nₒnₜnₚ(net)...;
 	max_transcription=net.max_transcription, max_translation=net.max_translation,
-	λ_mRNA=net.λ_mRNA, λ_prot=net.λ_prot, λ_phos=[net.λ_phos; zeros(net.nₒ)],
+	λ_mRNA=net.λ_mRNA, λ_prot=net.λ_prot, λ₊=[net.λ₊; zeros(net.nₒ)], λ₋=[net.λ₋; zeros(net.nₒ)],
 	α₀=[g.α[1] for g in net.genes], kwargs...)
 end
 
