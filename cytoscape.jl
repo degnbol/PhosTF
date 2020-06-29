@@ -1,5 +1,5 @@
 #!/usr/bin/env julia
-isdefined(Main, :Model) || include("Model.jl") 
+isdefined(Main, :Model) || include("src/Model.jl") 
 isdefined(Main, :ReadWrite) || include("src/utilities/ReadWrite.jl")
 isdefined(Main, :ArrayUtils) || include("src/utilities/ArrayUtils.jl")
 isdefined(Main, :Cytoscape) || include("src/Cytoscape.jl")
