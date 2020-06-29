@@ -52,12 +52,12 @@ main = function(true_fnames, marker_fnames, tf_true_fnames, tf_marker_fnames, ou
     df = bind_rows(dfs)
     df$sample = as.factor(df$sample)
     lvls = c("TF →V ", "KP →KP", "KP+→KP", "KP-→KP", "KP →TF", "KP+→TF", "KP-→TF")
-    cols = c("#005000", "purple", "red", "blue", "purple", "red", "blue")
-    ltyp = c(1, 2, 2, 2, 1, 1, 1)
+    cols = c("#005000", "#B663B1", "#B663B1", "#B663B1", "#6DB845", "#6DB845", "#6DB845")
+    ltyp = c(1, 1, 2, 3, 1, 2, 3)
     df$edge = factor(paste0(df$source, "→", df$target), levels=lvls)
     
     aucs = calc_auc(ggplot(df, aes(d=D, m=M, color=edge)) + geom_roc())$AUC
-    labels = paste0(levels(df$edge), " (AUC=", sprintf("%.3f", aucs), ")")
+    labels = paste(levels(df$edge), sprintf("%.3f", aucs))
     
     plot = ggplot(df, aes(d=D, m=M, color=edge, linetype=edge)) +
         geom_abline(slope=1, intercept=0, color="lightgray") +
