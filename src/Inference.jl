@@ -53,7 +53,7 @@ LB_WP(W, cs::NamedTuple, λ::Real, weights) = λ*l1(B_star(W, cs).*cs.Mₚ.*weig
 - save_every: e.g. 10 to save every tenth epoch. Use zero to not save intermediates. Intermediates are saved to W{T,P}.mat.tmp in PWD.
 """
 function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=10000, λ::Real=.1, λW=0., λWT::Bool=true, opt=ADAMW(), 
-	M=nothing, S=nothing, W=nothing, J=nothing, quadquad::Bool=false, trainWT::Bool=true, W_reg=nothing, save_every::Integer=1)
+	M=nothing, S=nothing, W=nothing, J=nothing, trainWT::Bool=true, W_reg=nothing, save_every::Integer=1)
 	@assert W !== nothing
 	nᵥ, K = size(X)
 	cs = Model.constants(nᵥ, nₜ, nₚ, J === nothing ? K : J)
@@ -64,11 +64,10 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 	Iₜ = Model.Iₜ(nᵥ, nₜ, nₚ)
 	λW == 0 && (λW = nothing)
 	
-	error_cost = quadquad ? Model.quadquad : Model.sse
 	B_cost = λWT ? LB : LB_WP
 	function L(X)
 		W′ = Model.apply_priors(W, M, S)
-		error_cost(W′, cs, X) + B_cost(W′, cs, λ, W_reg) + L1(W′, λW)
+		Model.sse(W′, cs, X) + B_cost(W′, cs, λ, W_reg) + L1(W′, λW)
 	end
 	
 	epoch = 0
