@@ -14,7 +14,7 @@ default_Wₜ, default_Wₚ = "WT.mat", "WP.mat"
 default_net = "net.bson"
 
 
-loadnet(i) = ReadWrite.load(i, Network)
+loadnet(i) = ReadWrite.load(i, GeneRegulation.Network)
 
 """
 Create a random network from W.
