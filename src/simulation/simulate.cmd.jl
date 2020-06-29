@@ -16,8 +16,8 @@ max_attempts = 3  # if a random net turns out to have unstable differential equa
 
 using Test  # @test_logs
 # suppress output of Fire function definitions with ";"
-expanduser("~/cwd/weight.jl") |> include;  # random(...) and correct()
-expanduser("~/cwd/simulation.jl") |> include;  # other functions
+include("../../weight.jl");  # random(...) and correct()
+include("../../simulation.jl");  # other functions
 
 tryrm(fname) = try rm(fname) catch IOError end
 
