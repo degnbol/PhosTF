@@ -58,7 +58,7 @@ main = function(true_fnames, marker_fnames, tf_true_fnames, tf_marker_fnames, ou
     df$edge = factor(paste0(df$source, "→", df$target), levels=lvls)
     
     aucs = calc_auc(ggplot(df, aes(d=D, m=M, color=edge)) + geom_roc())$AUC
-    labels = paste(levels(df$edge), sprintf("%.3f", aucs))
+    labels = paste0(levels(df$edge), "   ", sprintf("%.3f", aucs), " ")
     
     plot = ggplot(df, aes(d=D, m=M, color=edge, linetype=edge)) +
         geom_abline(slope=1, intercept=0, color="lightgray") +
@@ -68,10 +68,11 @@ main = function(true_fnames, marker_fnames, tf_true_fnames, tf_marker_fnames, ou
     
     # legend and title
     font = "DejaVu Sans Mono"
+    legend_title = "   Src.→Trg.  AUC"
     plot = plot +
-        scale_color_manual(labels=labels, values=cols) +
-        scale_linetype_manual(labels=labels, values=ltyp) +
-        theme(legend.text=element_text(family=font), legend.title=element_blank(), legend.position=c(1,0), 
+        scale_color_manual(labels=labels, values=cols, name=legend_title) +
+        scale_linetype_manual(labels=labels, values=ltyp, name=legend_title) +
+        theme(legend.text=element_text(family=font, size=9), legend.title=element_text(family=font, size=9), legend.position=c(1,0), 
               legend.justification=c(1,0), legend.box.margin=margin(0, 1, 1, 0), legend.margin=margin(0,0,0,0)) +
         ggtitle(title)
     
