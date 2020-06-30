@@ -13,6 +13,6 @@ done; done
 ~/cwd/src/simulation/inference.cmd.jl ?_?/
 
 # roc
-~/cwd/roc.R -t ?_?/WP.mat -m ?_?/WP_infer.mat --tf-true ?_?/WT.mat --tf-marker ?_?/WT_infer.mat
+~/cwd/roc.R -t ?_?/WP.mat -m ?_?/WP_infer.mat --tf-true ?_?/WT.mat --tf-marker ?_?/WT_infer.mat --title ""
 
 
