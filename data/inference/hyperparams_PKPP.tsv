@@ -1,5 +1,0 @@
-folder	X	J	epochs	lambda	lambdaW	lambdaWT	trainWT	quadquad	WT_reg	WT_mask	WP_mask	WT	WP	PKPP	score	GO_score
-51	~/cwd/data/perturbation/logFC_inner.mat	~/cwd/data/perturbation/J_inner.mat	50	0.1	0	false	false	false			~/cwd/data/network/KP_mask.mat	~/cwd/data/network/WT_FDR10_sign.mat	WP_infer_1.mat	~/cwd/data/network/PKPP.txt		
-52	~/cwd/data/perturbation/logFC_inner.mat	~/cwd/data/perturbation/J_inner.mat	50	0.1	0	false	false	false			~/cwd/data/network/KP_mask.mat	~/cwd/data/network/WT_FDR20_sign.mat	WP_infer_1.mat	~/cwd/data/network/PKPP.txt		
-51	~/cwd/data/perturbation/logFC_inner.mat	~/cwd/data/perturbation/J_inner.mat	50	0.1	0	false	false	false			~/cwd/data/network/KP_mask.mat	~/cwd/data/network/WT_FDR10_sign.mat	~/cwd/data/network/KP_priors/WP_noise_KP2TF.mat	~/cwd/data/network/PKPP.txt		
-52	~/cwd/data/perturbation/logFC_inner.mat	~/cwd/data/perturbation/J_inner.mat	50	0.1	0	false	false	false			~/cwd/data/network/KP_mask.mat	~/cwd/data/network/WT_FDR20_sign.mat	~/cwd/data/network/KP_priors/WP_noise_KP2TF.mat	~/cwd/data/network/PKPP.txt		
