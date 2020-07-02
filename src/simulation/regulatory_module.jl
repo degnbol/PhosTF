@@ -1,5 +1,5 @@
 isdefined(Main, :ArrayUtils) || include("../utilities/ArrayUtils.jl")
-using Distributions: Uniform, TruncatedNormal
+using Distributions: Uniform, truncated, Normal
 
 """
 Regulatory module struct for gene regulation simulation.
@@ -35,7 +35,7 @@ struct RegulatoryModule
 	Hill coeficient ν for each input protein.
 	GNW defaults are μ=2, σ=2, min=1, max=10
 	"""
-	random_ν(n::Integer) = rand(TruncatedNormal(2., 2., .5, 8.), n)
+    random_ν(n::Integer) = rand(truncated(Normal(2., 2.), .5, 8.), n)
 	"""
 	Dissociation constant k for each input protein.
 	"""

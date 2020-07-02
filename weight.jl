@@ -1,8 +1,8 @@
 #!/usr/bin/env julia
-include("src/utilities/ReadWrite.jl")
-include("src/utilities/CLI.jl")
-include("src/utilities/General.jl")
-include("src/Weight.jl")
+isdefined(Main, :ReadWrite) || include("src/utilities/ReadWrite.jl")
+isdefined(Main, :CLI) || include("src/utilities/CLI.jl")
+isdefined(Main, :General) || include("src/utilities/General.jl")
+isdefined(Main, :Weight) || include("src/Weight.jl")
 isdefined(Main, :ArrayUtils) || include("src/utilities/ArrayUtils.jl")
 
 using Fire
