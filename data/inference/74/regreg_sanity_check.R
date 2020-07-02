@@ -20,8 +20,11 @@ pert_prods = function(edges) {
     return(unlist(out))
 }
 
-prods = pert_prods(KP_edges)
+prods = pert_prods(KP_edges[confusion=="TP",])
 
+
+sum(prods < -1)
+sum(prods > +1)
 
 
 
