@@ -45,6 +45,7 @@ KP = sort(unique(KP))
 KP_KO = sort(unique(KP_KO))
 TF = sort(unique(TF[!(TF%in%KP)]))
 measured = sort(unique(measured))
+write.table(measured, file="perturbation_measured.txt", quote=F, row.names=F, col.names=F)
 
 write.table(TF, file="TF_putative.txt", quote=F, row.names=F, col.names=F)
 # filter TF edges. It is necessary to do (TF_edges$TF %in% TF) since KSS1 has been removed from TF by removal of KPs
