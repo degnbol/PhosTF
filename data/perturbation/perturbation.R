@@ -65,9 +65,9 @@ NA2avg = function(x, copy_from) {
 
 setwd("~/cwd/data/perturbation")
 ## read
-KP_names = flatten(read.table("../network/KP.txt"))
+KP_names = fread("../network/KP_protein.tsv", sep="\t")$ORF
 TF_names = flatten(read.table("../network/TF.txt"))
-V_names = flatten(read.table("../network/V.txt"))
+V_names = flatten(read.table("../network/V_protein.txt"))
 O_names = V_names[!(V_names%in%c(KP_names,TF_names))]
 
 fnames = c("../processed/holstege_2010/PK_KO.tsv",
