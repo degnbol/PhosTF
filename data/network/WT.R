@@ -2,6 +2,7 @@
 library(Matrix)
 library(ggplot2)
 library(fdrtool)
+library(data.table)
 
 options(stringsAsFactors=FALSE)
 
