@@ -19,5 +19,5 @@ for(kp in kps) {
     
     
     DT$KP = kp
-    write.table(DT, paste0("KP2TF_parts/", kp, ".tsv"), sep="\t", quote=F, row.names=F)
+    fwrite(DT, paste0("KP2TF_parts/", kp, ".tsv"), sep="\t")
 }
