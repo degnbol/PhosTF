@@ -12,8 +12,8 @@ flatten = function(x) as.vector(as.matrix(x))
 
 setwd("~/cwd/data/network/KP_priors")
 # read
-KPs = flatten(read.table("../KP.txt"))
-TFs = flatten(read.table("../TF.txt"))
+KPs = fread("../KP_protein.tsv")$ORF
+TFs = fread("../TF.txt", header=F)$V1
 KPTFs = c(KPs, TFs)
 KP2KP = fread("KP2KP.tsv", sep="\t", quote="", header=T)
 KP2TF = fread("KP2TF.tsv", sep="\t", quote="", header=T)
@@ -23,7 +23,7 @@ nTF = length(TFs)
 nPT = nKP+nTF
 
 MP = as.matrix(read.table("../KP_mask.csv", sep=",", header=T, quote=""))
-noise_sd = sqrt(1/(sum(MP)-199)) # diagonal should be zero
+noise_sd = sqrt(1/(sum(MP)-length(KPs))) # diagonal should be zero
 
 KP2TF_FDR10 = KP2TF[q < .1,]
 KP2TF_FDR20 = KP2TF[q < .2,]
