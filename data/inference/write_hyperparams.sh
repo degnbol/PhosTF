@@ -5,7 +5,7 @@
 cat $1 | tr -d '\r' > temp && mv temp $1
 
 nTF=$(cat ../network/TF.txt | wc -l | xargs)
-nKP=$(cat ../network/KP_protein.tsv | wc -l | xargs)
+nKP=$(sed 1d ../network/KP_protein.tsv | wc -l | xargs)
 echo "nTF=$nTF\tnKP=$nKP"
 
 sed 1d $1 | tr '\t' ',' | while IFS=',' read `head -n1 $1`; do
