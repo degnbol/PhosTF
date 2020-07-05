@@ -91,12 +91,12 @@ function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.
 		J = ReadWrite.loaddlm(General.abspath_(J), Float64)
 		@assert size(J) == size(X)
 	end
-	WT_reg === nothing || (WT_reg = ReadWrite.loaddlm(abspath_(WT_reg)))
-	WT_prior === nothing || (WT_prior = ReadWrite.loaddlm(abspath_(WT_prior)))
-	WP_prior === nothing || (WP_prior = ReadWrite.loaddlm(abspath_(WP_prior)))
+	WT_reg === nothing || (WT_reg = ReadWrite.loaddlm(General.abspath_(WT_reg)))
+	WT_prior === nothing || (WT_prior = ReadWrite.loaddlm(General.abspath_(WT_prior)))
+	WP_prior === nothing || (WP_prior = ReadWrite.loaddlm(General.abspath_(WP_prior)))
 	W = Model.random_W(nᵥ)
-	WT = WT === nothing ? Model._Wₜ(W,nₜ,nₚ) : ReadWrite.loaddlm(abspath_(WT))
-	WP = WP === nothing ? Model._Wₚ(W,nₜ,nₚ) : ReadWrite.loaddlm(abspath_(WP))
+	WT = WT === nothing ? Model._Wₜ(W,nₜ,nₚ) : ReadWrite.loaddlm(General.abspath_(WT))
+	WP = WP === nothing ? Model._Wₚ(W,nₜ,nₚ) : ReadWrite.loaddlm(General.abspath_(WP))
 	W = Model._W(WT, WP)
 
 	# use NaNs from WT_reg for masking
