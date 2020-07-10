@@ -65,7 +65,7 @@ function μ(m::RegulatoryModule, ψ::AbstractVector{<:AbstractFloat})
 	χ = (ψ[m.inputs] ./ m.k) .^ m.ν
 	activator_prod = prod(χ[1:m.n_activators])
 	if m.complex
-		denom = 1 .+ activator_prod
+		denom = 1 + activator_prod
 		if m.n_repressors > 0 denom += prod(χ) end
 	else
 		denom = prod(1 .+ χ)
