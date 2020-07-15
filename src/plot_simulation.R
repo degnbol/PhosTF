@@ -88,18 +88,11 @@ readfunc = function(fnames) {
 # setwd("~/cwd/data/testdata/simi"); nt = 2; np = 3; no = 1
 # setwd("~/cwd/data/toy/simulation"); nt = 2; np = 3; no = 1
 args = commandArgs(T)
-if(length(args) >= 3) {
-    np = args[1]
-    nt = args[2]
-    no = args[3]
-}
-if(length(args) == 4) {
-    mut = args[4]
-    outfname = paste0("simulation_", mut, ".pdf")
-} else {
-    outfname = "simulation.pdf"
-}
-
+np = args[1]
+nt = args[2]
+no = args[3]
+mut = args[4]
+outfname = paste0("simulation_", mut, ".pdf")
 
 n = np+nt+no
 wt_fnames = list(
@@ -108,7 +101,6 @@ wt_fnames = list(
     psi = "sim_psi.mat",
     t = "sim_t.mat"
 )
-mut = 1
 mut_fnames = list(
     r = paste0("sim_r_", mut, ".mat"),
     p = paste0("sim_p_", mut, ".mat"),
@@ -134,11 +126,11 @@ p = ggplot(data, aes(x=time, y=value, group=variable, color=node)) +
     geom_line(aes(linetype=measure, size=measure)) +
     scale_linetype_manual(values=c("solid", "solid", "dashed")) +
     scale_size_manual(values=c(1.2, .5, .5)) +
-    scale_color_manual(values=c(P_colors[1:np], T_colors[1:nt], O_colors[1:no])) +
+    scale_color_manual(values=c(KP_colors[1:np], TF_colors[1:nt], O_colors[1:no])) +
     scale_x_continuous(expand=c(0,0)) +
     xlab("time [min]") +
     ylab("nondimensionalized concentration") + 
-    ggtitle("Steady state simulation") +
+    #ggtitle("Steady state simulation") +
     guides(color = guide_legend(override.aes = list(size=8))) +
     theme_linedraw() +
     theme(panel.grid.major = element_line(colour = "gray"), 
@@ -151,10 +143,7 @@ p = p + facet_grid(vars(type), vars(experiment), scales="free_x")
 # x_scales = list(Wildtype=scale_x_continuous(), Mutant=scale_x_reverse())
 # p = p + facet_grid_sc(vars(type), vars(experiment), scales=list(x=x_scales))
 
-ggsave("~/cwd/data/toy/simulation/simulation_KP1.pdf", p, width=7, height=5)
-
+ggsave(outfname, p, width=7, height=5)
 
 #####
-
-
 
