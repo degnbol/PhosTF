@@ -1,5 +1,5 @@
 #!/usr/bin/env julia
-include("../Model.jl")
+isdefined(Main, :Model) || include("../Model.jl")
 
 """
 Structs with data defining a gene regulation network and its regulation mechanisms. All functions for initializing the values are found here, including randomized initialization.
@@ -7,11 +7,11 @@ Structs with data defining a gene regulation network and its regulation mechanis
 module GeneRegulation
 using Statistics: mean
 import JSON3
-import ..Model: nₓnₜnₚ, WₜWₚ
+import ..Model: nₒnₜnₚ, WₜWₚ
 
 export Network, Gene
-export drdt, dpdt, dϕdt
-export nₓnₜnₚ, estimate_Wₜ
+export drdt, dpdt, dψdt
+export nₒnₜnₚ, estimate_Wₜ
 
 
 const weak_activation = .25
@@ -30,46 +30,65 @@ JSON3.StructType(::Type{Gene}) = JSON3.Struct()
 JSON3.StructType(::Type{Network}) = JSON3.Struct()
 
 
-nₓnₜnₚ(net::Network) = net.nₓ,net.nₜ,net.nₚ
+nₒnₜnₚ(net::Network) = net.nₒ,net.nₜ,net.nₚ
 
 
+random_t½() = TruncNormal(5, 50)
 """
-Concentration of active protein, which is either phosphorylated or unphosphorylated concentration of the protein, depending on a bool.
+We have exponential decay, the half-life and the decay rate are thus related by:
+t½ = ln(2) / λ ⟹
+λ = ln(2) / t½
 """
-ψ(p, ϕ, phos_activation) = @. phos_activation * ϕ + (!phos_activation) * (p-ϕ)
+random_λ(n::Int) = log(2) ./ rand(random_t½(), n)
+"""
+For λ₊, λ₋ to have lower values for nodes that are mostly negatively regulated.
+"""
+function random_λ(mat::Matrix)
+    # weigh by the fraction of regulators that regulate positively.
+    positives = sum(mat .> 0; dims=2) |> vec
+    negatives = sum(mat .< 0; dims=2) |> vec
+    λ₊ = random_λ(size(mat,1)) .* negatives ./ (positives .+ negatives)
+    λ₋ = random_λ(size(mat,1)) .* positives ./ (positives .+ negatives)
+    # NaN from div zero which means there are no regulators of a node. In that case it's activation is static.
+    noreg = positives .+ negatives .== 0
+    λ₊[noreg] .= random_λ(sum(noreg))
+    λ₋[noreg] .= 0
+    λ₊, λ₋
+end
+
 
 """
 Mean activation μ given ψ.
 ψ: 1D array. Active nondim concentrations.
 """
-function μ(m::RegulatoryModule, ψ::Vector{<:AbstractFloat})
+function μ(m::RegulatoryModule, ψ::AbstractVector{<:AbstractFloat})
 	χ = (ψ[m.inputs] ./ m.k) .^ m.ν
 	activator_prod = prod(χ[1:m.n_activators])
 	if m.complex
-		denom = 1 .+ activator_prod
+		denom = 1 + activator_prod
 		if m.n_repressors > 0 denom += prod(χ) end
 	else
 		denom = prod(1 .+ χ)
 	end
 	activator_prod / denom
 end
-μ(ms::Vector{RegulatoryModule}, ψ::Vector{<:AbstractFloat}) = [μ(m, ψ) for m in ms]
+μ(ms::Vector{RegulatoryModule}, ψ::AbstractVector{<:AbstractFloat}) = [μ(m, ψ) for m in ms]
 """
 Fraction of max activation for a given gene when active TFs are found at a given concentration.
 """
-function f(gene::Gene, ψ::Vector{<:AbstractFloat})
-	if isempty(gene.modules) return 1 end
+function f(gene::Gene, ψ::AbstractVector{<:AbstractFloat})
+    isempty(gene.modules) && 1
 	μs = μ(gene.modules, ψ)
 	# get P{state} for all states, each state is a unique combination of modules
 	P = [prod(μs[state]) * prod(1 .- μs[.!state]) for state in states(length(gene.modules))]
 	sum(gene.α .* P)
 end
-f(genes::Vector{Gene}, ψ::Vector{<:AbstractFloat}) = [f(gene, ψ) for gene in genes]
+f(genes::Vector{Gene}, ψ::AbstractVector{<:AbstractFloat}) = [f(gene, ψ) for gene in genes]
 
 
-"Estimate the effect on f for all genes when a given TF has either ϕ=weak or ϕ=strong."
+"Estimate the effect on f for all genes when a given TF has either ψ=weak or ψ=strong."
 function estimate_Wₜ(net::Network, i::Integer, basal_activation::AbstractFloat)
-	basal = fill(basal_activation, net.n)
+	basal = fill(basal_activation, net.nᵥ)
 	ψ = copy(basal); ψ[i] = 1
 	f(net.genes, ψ) - f(net.genes, basal)
 end
@@ -77,15 +96,8 @@ function estimate_Wₜ(net::Network, i::Integer)
 	mean(estimate_Wₜ(net, i, activation)
 	for activation in [0, noise_activation, weak_activation])
 end
-"Estimate Wₜ by comparing the effect on f when any TF has ϕ=weak or ϕ=strong."
+"Estimate Wₜ by comparing the effect on f when any TF has ψ=weak or ψ=strong."
 estimate_Wₜ(net::Network) = hcat([estimate_Wₜ(net, i) for i in net.nₚ+1:net.nₚ+net.nₜ]...)
-
-"""
-Get the effect nodes ∈ P has on activation, 
-which is an edge=1 for e.g. a kinase regulating a protein that is activated when phosphorylated,
-or e.g. edge=-1 for a kinase regulating a protein that is activated when dephosphorylated.
-"""
-Wₚ_activation(net::Network) = (net.phos_activation .- .!net.phos_activation) .* (net.Wₚₖ .- net.Wₚₚ) .|> sign .|> Integer
 
 end;
 

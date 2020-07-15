@@ -2,6 +2,7 @@
 library(Matrix)
 library(ggplot2)
 library(fdrtool)
+library(data.table)
 
 options(stringsAsFactors=FALSE)
 
@@ -41,8 +42,8 @@ setwd("~/cwd/data/network")
 # read
 edges = read.table("TF_priors/TF_edges.tsv", sep="\t", header=T, quote="")
 TFs = read.table("TF_mode.tsv", sep="\t", header=T, quote="")
-Vs  = flatten(read.table("V.txt", quote=""))
-simulated = flatten(read.table("../yeast_simulation/simulations/01/WT_est.mat", sep=" "))
+Vs  = flatten(read.table("V_protein.txt", quote=""))
+simulated = flatten(read.table("~/cwd/data/yeast_simulation/simulations/01/WT_est.mat", sep=" "))
 simulated = simulated[simulated != 0]
 nTF = nrow(TFs)
 nV = length(Vs)

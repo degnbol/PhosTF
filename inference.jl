@@ -4,20 +4,16 @@ include("src/utilities/CLI.jl")
 include("src/utilities/ArgParseUtils.jl")
 include("src/utilities/General.jl")
 include("src/Inference.jl")
-include("src/Model.jl")
+isdefined(Main, :Model) || include("src/Model.jl")
 isdefined(Main, :ArrayUtils) || include("src/utilities/ArrayUtils.jl")
 
 # ArgParse used instead of Fire since Fire has a weird bug where it says there's too many arguments.
 using ArgParse
 using LinearAlgebra
-using .ReadWrite, .ArrayUtils, .General
-using .Model
-using .Inference, .CLI
-using .ArgParseUtils
 
 function argument_parser()
 	s = ArgParseSettings(description="Infer a weight matrix from logFC data.", autofix_names=true)
-	@add_arg_table s begin
+	@add_arg_table! s begin
 		"X"
 			help = "Filname for LogFC values in a matrix. No column or row names. Space delimiters are recommended."
 			required = true
@@ -70,46 +66,37 @@ function argument_parser()
 			arg_type = Bool
 			default = true
 			help = "Whether the WT edges are trained at all. If set to false, --WT/-T has to be provided with fully trusted edges."
-		"--quadquad"
-			arg_type = Bool
-			default = false
-			help = "Use quadquad cost function instead of SSE (sum of squared error) to punish undershooting effects more than overshooting them."
 		"--WT-reg"
 			help = "Filename of matrix with regularization weights for Wₜ. NOT square. 
 			NaN means the weight should not be allowed, so this will function as masking as well."
-		"--PKPP"
-			help = "Filename of vector. Each element is -1 or 1 indicating PP or PK, respectively. 
-			0s are ignored (unknown or no phosphorylation mode). Length of vector can either be n or nₚ+nₜ."
 	end
 	s
 end
 
 function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.mat"; J=nothing, epochs::Integer=5000, 
 	WT=nothing, WP=nothing, WT_prior=nothing, WP_prior=nothing,
-	lambda::Real=.1, lambdaW::Real=0., lambdaWT::Bool=true, trainWT::Bool=true, quadquad::Bool=false, WT_reg=nothing,
-	PKPP=nothing)
+	lambda::Real=.1, lambdaW::Real=0., lambdaWT::Bool=true, trainWT::Bool=true, WT_reg=nothing)
 	# empty strings is the same as providing nothing.
 	WT == "" && (WT = nothing)
 	WP == "" && (WP = nothing)
 	WT_prior == "" && (WT_prior = nothing)
 	WP_prior == "" && (WP_prior = nothing)
 	WT_reg == "" && (WT_reg = nothing)
-	PKPP == "" && (PKPP = nothing)
-	ot, op = abspath_(ot), abspath_(op)  # weird PWD issues require abs path
+	ot, op = General.abspath_(ot), General.abspath_(op)  # weird PWD issues require abs path
 
 	# load files
-	X = loaddlm(abspath_(X), Float64)
-	n = size(X,1)
+	X = ReadWrite.loaddlm(General.abspath_(X), Float64)
+	nᵥ = size(X,1)
 	if J !== nothing
-		J = loaddlm(abspath_(J), Float64)
+		J = ReadWrite.loaddlm(General.abspath_(J), Float64)
 		@assert size(J) == size(X)
 	end
-	WT_reg === nothing || (WT_reg = loaddlm(abspath_(WT_reg)))
-	WT_prior === nothing || (WT_prior = loaddlm(abspath_(WT_prior)))
-	WP_prior === nothing || (WP_prior = loaddlm(abspath_(WP_prior)))
-	W = Model.random_W(n)
-	WT = WT === nothing ? Model._Wₜ(W,nₜ,nₚ) : loaddlm(abspath_(WT))
-	WP = WP === nothing ? Model._Wₚ(W,nₜ,nₚ) : loaddlm(abspath_(WP))
+	WT_reg === nothing || (WT_reg = ReadWrite.loaddlm(General.abspath_(WT_reg)))
+	WT_prior === nothing || (WT_prior = ReadWrite.loaddlm(General.abspath_(WT_prior)))
+	WP_prior === nothing || (WP_prior = ReadWrite.loaddlm(General.abspath_(WP_prior)))
+	W = Model.random_W(nᵥ)
+	WT = WT === nothing ? Model._Wₜ(W,nₜ,nₚ) : ReadWrite.loaddlm(General.abspath_(WT))
+	WP = WP === nothing ? Model._Wₚ(W,nₜ,nₚ) : ReadWrite.loaddlm(General.abspath_(WP))
 	W = Model._W(WT, WP)
 
 	# use NaNs from WT_reg for masking
@@ -123,22 +110,12 @@ function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.
 			WT_reg[nans] .= 1
 		end
 	end
-	M, S = Model.priors(WT_prior, WP_prior, n, nₜ, nₚ)
+	M, S = Model.priors(WT_prior, WP_prior, nᵥ, nₜ, nₚ)
 	
-	if PKPP !== nothing
-		PKPP = vec(loaddlm(abspath_(PKPP)))
-		PKPP = [PKPP; zeros(n-length(PKPP))]
-		Iₚₖ = diagm(PKPP .== +1)
-		Iₚₚ = diagm(PKPP .== -1)
-	else
-		Iₚₖ, Iₚₚ = nothing, nothing
-	end
+	nₒ = nᵥ-(nₚ+nₜ)
+	W_reg = WT_reg === nothing ? nothing : [ones(nᵥ,nₚ) WT_reg ones(nᵥ,nₒ)]
 
-	nₒ = n-(nₚ+nₜ)
-	W_reg = WT_reg === nothing ? nothing : [ones(n,nₚ) WT_reg ones(n,nₒ)]
-
-	W = Inference.infer(X, nₜ, nₚ; epochs=epochs, λ=lambda, λW=lambdaW, λWT=lambdaWT,
-	M=M, S=S, Iₚₖ=Iₚₖ, Iₚₚ=Iₚₚ, W=W, J=J, quadquad=quadquad, trainWT=trainWT, W_reg=W_reg)
+	W = Inference.infer(X, nₜ, nₚ; epochs=epochs, λ=lambda, λW=lambdaW, λWT=lambdaWT, M=M, S=S, W=W, J=J, trainWT=trainWT, W_reg=W_reg)
 	Model.isW(W, nₜ, nₚ) || @error("W has nonzeros in entries that should be zero.")
 	Wₜ, Wₚ = Model.WₜWₚ(W, nₜ, nₚ)
 	
@@ -146,12 +123,15 @@ function infer(X, nₜ::Integer, nₚ::Integer, ot="WT_infer.mat", op="WP_infer.
 		n_changes = sum(WT .!= Wₜ)
 		diff = sum(abs.(WT - Wₜ))
 		@error("There has been $n_changes changes made to Wₜ even though it was not intented to be trained on (difference=$diff).")
-		savedlm(ot, Wₜ)
+		ReadWrite.savedlm(ot, Wₜ)
 	end
 
-	savedlm(op, Wₚ)
-	trainWT && savedlm(ot, Wₜ)
+	ReadWrite.savedlm(op, Wₚ)
+	trainWT && ReadWrite.savedlm(ot, Wₜ)
 end
 
+# parse args if run on command line as opposed to being imported
+if abspath(PROGRAM_FILE) == @__FILE__
+    ArgParseUtils.main(argument_parser(), infer)
+end
 
-ArgParseUtils.main(argument_parser(), infer)

@@ -1,6 +1,6 @@
 #!/usr/bin/env julia
-if !isdefined(Main, :Model) include("Model.jl") end
-if !isdefined(Main, :ArrayUtils) include("utilities/ArrayUtils.jl") end
+isdefined(Main, :Model) || include("Model.jl")
+isdefined(Main, :ArrayUtils) || include("utilities/ArrayUtils.jl")
 
 "Construction of valid and random weight matrices, detection of silent edges and weight matrix correction."
 module Weight
@@ -22,19 +22,10 @@ function silent_edges(W::AbstractMatrix, nₚ::Integer)
 	E_last = trues(n,n)  # just any value that is different from E
 	while any(E .!= E_last)
 		E_last .= E
-		E[V,1:nₚ] .|= W[V,1:nₚ] .!= 0   # mark P edges as silent if they are onto a silent node
+		E[V,1:nₚ] .|= W[V,1:nₚ] .!= 0   # mark KP edges as silent if they are onto a silent node
 		V = vec(all((W .== 0) .| E, dims=1))  # recalculate silent nodes where the edges marked silent are removed from W
 	end
 	E
-end
-
-"""
-Proteins regulated only by phosphatases, which means the phosphate edges serve no purpose since the protein will always be unphosphorylated.
-return: 1D bit vector, length size(Wₚ,1). true for each protein regulated by only phosphatases (and at least 1), false otherwise.
-"""
-function silent_phosphatases(Wₚ::AbstractMatrix)
-	kinase_reg, phosphate_reg = vec(any(Wₚ.>0, dims=2)), vec(any(Wₚ.<0, dims=2))
-	phosphate_reg .& .!kinase_reg
 end
 
 
@@ -70,7 +61,7 @@ function correct_self_loops!(Wₜ::AbstractMatrix, Wₚ::AbstractMatrix)
 	return any(self_loops_Wₜ) || any(self_loops_Wₚ)
 end
 """
-Set silent (PK/PP) edges to zero and show a warning if any are found.
+Set silent KP edges to zero and show a warning if any are found.
 return: bool indicating if any were found.
 """
 function correct_silent_edges!(W::AbstractMatrix, nₚ::Integer)
@@ -80,23 +71,12 @@ function correct_silent_edges!(W::AbstractMatrix, nₚ::Integer)
 	return any(E)
 end
 function correct_silent_edges!(Wₜ::AbstractMatrix, Wₚ::AbstractMatrix)
-	_, nₜ, nₚ = Model.nₓnₜnₚ(Wₜ, Wₚ)
+	_, nₜ, nₚ = Model.nₒnₜnₚ(Wₜ, Wₚ)
 	W = Model._W(Wₜ, Wₚ)
 	out = correct_silent_edges!(W, nₚ)
 	Wₜ[:], Wₚ[:] = Model.WₜWₚ(W, nₜ, nₚ)
 	return out
 end
-"""
-Set (PK/PP) phosphate edges to zero if they will be silent in simulation and show a warning if any are found.
-return: bool indicating if any were found.
-"""
-function correct_silent_phosphates!(Wₚ::AbstractMatrix)
-	phosphates = silent_phosphatases(Wₚ)
-	check(phosphates, "silent phosphate regulations")
-	Wₚ[phosphates,:] .= 0
-	return any(phosphates)
-end
-correct_silent_phosphates!(W::AbstractMatrix, nₚ::Integer) = correct_silent_phosphates!(View(W,:,1:nₚ))
 
 """
 Correct self loops, silent edges, and silent phosphorylation regulations.
@@ -104,16 +84,12 @@ return: bool indicating if anything was corrected.
 """
 function correct!(Wₜ::AbstractMatrix, Wₚ::AbstractMatrix)
 	corrected = correct_self_loops!(Wₜ, Wₚ)
-	while correct_silent_edges!(Wₜ, Wₚ) | correct_silent_phosphates!(Wₚ)
-		corrected = true
-	end
+	while correct_silent_edges!(Wₜ, Wₚ) corrected = true end
 	corrected
 end
 function correct!(W::AbstractMatrix, nₚ::Integer)
 	corrected = correct_self_loops!(W)
-	while correct_silent_edges!(W, nₚ) | correct_silent_phosphates!(W, nₚ)
-		corrected = true
-	end
+	while correct_silent_edges!(W, nₚ) corrected = true end
 	corrected
 end
 
@@ -138,147 +114,112 @@ has_single_regulator(B) = vec(sum(B, dims=2) .== 1)
 only_regulator(B::BitMatrix) = vec(sum(B[has_single_regulator(B),:], dims=1) .!= 0)
 
 """
-Randomly split edges into sets P, T or X where X is nodes without outgoing edges, 
-P has to have edges in B to nodes that is also regulated by T.
-- nₚ: assign this many nodes to the set P.
+Randomly split edges into sets KP, TF or O where O is nodes without outgoing edges, 
+KP has to have edges in B to nodes that is also regulated by TF.
+- nₚ: assign this many nodes to the set KP.
 """
-random_PTX(B::Matrix, nₚ::Integer) = random_PTX(B .!= 0, nₚ)
-function random_PTX(B::BitMatrix, nₚ::Integer)
+random_KPTFO(B::Matrix, nₚ::Integer) = random_KPTFO(B .!= 0, nₚ)
+function random_KPTFO(B::BitMatrix, nₚ::Integer)
 	n = size(B,1)
-	# a node with zero outgoing edges belong to X
-	X = vec(sum(B,dims=1) .== 0)
-	# if a node is the only regulator of another, it will have to be in T,
+	# a node with zero outgoing edges belong to O
+    O = vec(sum(B,dims=1) .== 0)
+	# if a node is the only regulator of another, it will have to be in TF,
 	# since there would be no way for it to perform its regulation otherwise
-	T = only_regulator(B)
-	# find edges that are a "subset" as a PK edge: the target does not control more than the source, 
+	TF = only_regulator(B)
+	# find edges that are a "subset" as a KP edge: the target does not control more than the source, 
 	# that is, bᵢⱼ is allowed if bₖⱼ >= bₖᵢ for any k.
 	subset = subset_edges(B)
 	# good candidates are all the nodes that has at least one "non-destructive" outgoing edge
-	P_candidates = .!(X .| T) .& vec(sum(subset, dims=1) .!= 0)
-	P = falses(n)
-	# find nodes to add to P one at a time
+	KP_candidates = .!(O .| TF) .& vec(sum(subset, dims=1) .!= 0)
+    
+	KP = falses(n)
+	# find nodes to add to KP one at a time
 	for i ∈ 1:nₚ
-		# add one node to P at a time from the good candidates if there are any
-		if any(P_candidates)
-			P[rand((1:n)[P_candidates])] = true
+		# add one node to KP at a time from the good candidates if there are any
+		if any(KP_candidates)
+			KP[rand((1:n)[KP_candidates])] = true
 		else  # otherwise add something random that changes B a bit
-			remain = .!(P .|T .|X)
+			remain = .!(KP .|TF .|O)
 			if !any(remain)
-				@warn("It was not possible to add as many nodes to P as wanted")
+				@warn("It was not possible to add as many nodes to KP as wanted")
 				break
 			end
-			P[rand((1:n)[remain])] = true
+			KP[rand((1:n)[remain])] = true
 		end
-		# T grows as well so we always make sure that a P does not end up being the only regulator of some node
-		T[.!P] .|= only_regulator(B[:,.!P])
-		P_candidates .&= .!(P .| T)  # remove anything in P or T from candidates
+		# TF grows as well so we always make sure that a KP does not end up being the only regulator of some node
+		TF[.!KP] .|= only_regulator(B[:,.!KP])
+		KP_candidates .&= .!(KP .| TF)  # remove anything in KP or TF from candidates
 	end
-	P, .!(P .|X), X
+	KP, .!(KP .|O), O
 end
 
 """
-Rewire P edges to random Ts that regulate their final target given as a B edge
+Rewire KP edges to random TFs that regulate their final target given as a B edge
 """
-rewire(B::Matrix, P,T,X) = rewire(B .!= 0, P,T,X)
-function rewire(B::BitMatrix, P,T,X)
+rewire(B::Matrix, KP, TF, O) = rewire(B .!= 0, KP, TF, O)
+function rewire(B::BitMatrix, KP, TF, O)
 	n = size(B,1)
 	W = falses(n,n)
-	W[:,T] .= B[:,T]  # T edges are the same
-	P_num = (1:n)[P]  # logical to numerical index
-	T_num = (1:n)[T]  # logical to numerical index
-	for j ∈ P_num  # each P
-		for i ∈ (1:n)[B[:,j]]  # each P b edge, numerical index
-			# randomly select a tf to re-route through
-			tf = rand(T_num[B[i,T]])
+	W[:,TF] .= B[:,TF]  # TF edges are the same
+	KP_num = (1:n)[KP]  # logical to numerical index
+	TF_num = (1:n)[TF]  # logical to numerical index
+	for j ∈ KP_num  # each KP
+		for i ∈ (1:n)[B[:,j]]  # each KP b edge, numerical index
+			# randomly select a TF to re-route through
+			tf = rand(TF_num[B[i,TF]])
 			W[tf,j] = true
 			# check if we have fully described the intended effect (NO transcription cycles)
-			if all(W * W[:,j] >= B[:,j]) break end
+			all(W * W[:,j] >= B[:,j]) && break
 		end
 	end
 	W
 end
 
 """
-Find Ps that regulate "subsets" of what other Ps regulate and connect a random pair so that the one regulating less is the target.
+Find KPs that regulate "subsets" of what other KPs regulate and connect a random pair so that the one regulating less is the target.
 Repeat until there is no more cascade edges to add.
 """
-function add_cascades!(W, P)
-	nₚₖ = sum(P)
-	# which P can be a "subset" of another P?
-	subset = subset_edges(W[:,P])
+function add_cascades!(W, KP)
+	nₚ = sum(KP)
+	# which KP can be a "subset" of another KP?
+	subset = subset_edges(W[:,KP])
 	while any(subset)
 		# choose a random "subsetting" edge to add (linear index)
-		idx = rand((1:nₚₖ^2)[vec(subset)])
-		view(W,P,P)[idx] = true  # add P->P edge
+		idx = rand((1:nₚ^2)[vec(subset)])
+		view(W,KP,KP)[idx] = true  # add KP->KP edge
 		cartesian = CartesianIndices(subset)[idx]  # we need to know from and to which protein
-		view(W,:,P)[:,cartesian[2]] .-= view(W,:,P)[:,cartesian[1]]  # remove edges that are now described indirectly through the new P->P edge
+		view(W,:,KP)[:,cartesian[2]] .-= view(W,:,KP)[:,cartesian[1]]  # remove edges that are now described indirectly through the new KP->KP edge
 		# update
-		subset = subset_edges(W[:,P])
+		subset = subset_edges(W[:,KP])
 	end
 	W
 end
 
 """
-Set a number of nodes ∈ P as a node ∈ PP, with the requirement that it cannot be the only phos regulator of any node.
-Random extra kinase edges are added to balance out regulation.
-- nₚₚ: number of phosphatases to create. 
-"""
-function phosphatases(W, P, nₚₚ::Integer)
-	n = size(W,1)
-
-	PP = tological(shuffle((1:n)[P])[1:nₚₚ], n)
-	PK = P .& .!PP
-
-	# find the nodes that has a PP regulator but no PK regulator
-	only_has_PP = any(W[:,PP]; dims=2) .& .!any(W[:,PK]; dims=2)
-	# add a single random PK edge onto each node that is currently only regulated by PP.
-	# make sure it is not a self-loop that is added.
-	for i ∈ (1:n)[vec(only_has_PP)]
-		available_PKs = copy(PK)
-		available_PKs[i] = false
-		W[i,rand((1:n)[available_PKs])] = 1
-	end
-	
-	# set the sign for PP
-	W = 1W
-	W[:,PP] .*= -1
-	return W
-end
-
-"""
-Set about half the TF edges as repressing.
+Set about half the edges as repressing/deactivating.
 - W: edges.
-- T: logical index of which nodes are Ts.
 """
-function repressors(W, T)
+function set_signs(W)
 	W = 1W  # convert to int
-	W[:,T] .*= rand([-1, 1], size(W))[:,T]
+	W .*= rand([-1, 1], size(W))
 	W
 end
 
-"Sort an adjacency matrix so proteins are in order PK, PP, T, X."
-function sort_PTX(W, P, T, X)
+"Sort an adjacency matrix so proteins are in order KP, TF, O."
+function sort_KPTFO(W, KP, TF, O)
 	n = size(W,1)
-	order = [(1:n)[P]; (1:n)[T]; (1:n)[X]]
+	order = [(1:n)[KP]; (1:n)[TF]; (1:n)[O]]
 	reorder(W, order)
 end
 
 "Random Wₜ, Wₚ from B."
-function random_W(B, nₚₖ::Integer, nₚₚ::Integer)
-	P, T, X = random_PTX(B, nₚₖ + nₚₚ)
-	W = rewire(B, P,T,X)
-	add_cascades!(W, P)
-	W = phosphatases(W, P, nₚₚ)
-	W = repressors(W, T)
-	W = sort_PTX(W, P, T, X)
-	Model.WₜWₚ(W, sum(T), sum(P))
-end
-
-"Get a vector with -1 and 1 indicating which nodes ∈ P are ∈ PP and ∈ PK. 0 means it is in neither."
-function PKPP(Wₚ::Matrix)
-	PK = all(Wₚ .>= 0; dims=1)
-	PP = all(Wₚ .<= 0; dims=1)
-	(PK .& .!PP) - (PP .& .!PK)
+function random_W(B::AbstractMatrix, nₚ::Integer)
+	KP, TF, O = random_KPTFO(B, nₚ)
+	W = rewire(B, KP, TF, O)
+	add_cascades!(W, KP)
+	W = set_signs(W)
+	W = sort_KPTFO(W, KP, TF, O)
+	Model.WₜWₚ(W, sum(TF), sum(KP))
 end
 
 

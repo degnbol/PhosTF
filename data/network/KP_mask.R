@@ -1,13 +1,15 @@
 #!/usr/bin/env Rscript
 # make a KP mask by limiting which KPs and TFs can be a target from the documented phosphorylation sites from BioGRID
 
+library(data.table)
+
 # functions
 flatten = function(x) as.vector(as.matrix(x))
 read.flat = function(x) flatten(read.table(x))
 
 setwd("~/cwd/data/network")
 
-KPs = read.flat("KP.txt")
+KPs = fread("KP_protein.tsv", sep="\t")$ORF
 TFs = read.flat("TF.txt")
 KPTFs = c(KPs, TFs)
 targets = read.flat("../processed/biogrid/targets.txt")

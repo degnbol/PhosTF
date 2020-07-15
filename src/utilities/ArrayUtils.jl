@@ -31,7 +31,7 @@ end
 """
 Adding some default values to μ and σ.
 """
-TruncNormal(l, u) = TruncatedNormal((l+u)/2, (u-l)/6, l, u)
+TruncNormal(l, u) = truncated(Normal((l+u)/2, (u-l)/6), l, u)
 
 """
 Ability to create non-square identity matrices by using dense matrix type.

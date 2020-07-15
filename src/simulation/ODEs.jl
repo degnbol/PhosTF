@@ -1,5 +1,5 @@
 # overriding already loaded modules causes problems
-if !isdefined(Main, :GeneRegulation) include("GeneRegulation.jl") end
+isdefined(Main, :GeneRegulation) || include("GeneRegulation.jl")
 
 """
 Defining and solving ODEs to the point of having the resulting simulated logFC values.
@@ -25,19 +25,19 @@ dtmax = 1  # minutes. used to limit step size to avoid instability. Reduction in
 _dflt(::Nothing, default) = default
 _dflt(value, ::Any) = value
 
-""" ϕ₀ == 0 for non-regulating proteins in order to have vectors match in length """
-get_u₀(net::Network) = [net.r₀ net.p₀ [net.ϕ₀; zeros(net.nₓ)]]
-get_u₀(net::Network, r₀, p₀, ϕ₀) = [_dflt(r₀,net.r₀) _dflt(p₀,net.p₀) [_dflt(ϕ₀,net.ϕ₀); zeros(net.nₓ)]]
+""" ψ₀ == 0 for non-regulating proteins in order to have vectors match in length """
+get_u₀(net::Network) = [net.r₀ net.p₀ [net.ψ₀; zeros(net.nₒ)]]
+get_u₀(net::Network, r₀, p₀, ψ₀) = [_dflt(r₀,net.r₀) _dflt(p₀,net.p₀) [_dflt(ψ₀,net.ψ₀); zeros(net.nₒ)]]
 
 function ODE!(du, u, net, t)
 	u .= clamp.(u, 0., 1.) # can be used against dt <= dtmin warnings and domain errors.
 	r = @view u[:,1]
 	p = @view u[:,2]
-	ϕ = @view u[:,3]
-	ϕₜₚ = @view ϕ[1:net.nₜ+net.nₚ]
-	du[:,1] .= drdt(net, r, p, ϕₜₚ)
+	ψ = @view u[:,3]
+	ψₜₚ = @view ψ[1:net.nₜ+net.nₚ]
+	du[:,1] .= drdt(net, r, p, ψₜₚ)
 	du[:,2] .= dpdt(net, r, p)
-	du[1:net.nₚ+net.nₜ,3] .= dϕdt(net, view(p,1:net.nₚ+net.nₜ), ϕₜₚ)
+	du[1:net.nₚ+net.nₜ,3] .= dψdt(net, view(p,1:net.nₚ+net.nₜ), ψₜₚ)
 end
 
 default_callback(u₀) = CallbackSet(steady_state_callback, PositiveDomain(u₀))

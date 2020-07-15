@@ -85,7 +85,7 @@ struct Gene
 		else return random_medium_α₀() end
 	end
 	"GNW has both used (0,.05,0,weak) and (.001,.05,.001,weak)"
-	random_low_α₀()    = rand(TruncatedNormal(.05, .05, .01, weak_activation))
+    random_low_α₀()    = rand(truncated(Normal(.05, .05), .01, weak_activation))
 	random_medium_α₀() = rand(TruncNormal(weak_activation, 1. - weak_activation))
 	random_high_α₀()   = rand(TruncNormal(strong_activation, 1.))
 end

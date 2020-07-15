@@ -13,9 +13,9 @@ setwd("~/cwd/data/network/KP_priors")
 # read
 perturbation = as.matrix(read.table("../../perturbation/logFC_inner.csv", sep=",", header=T, quote=""))
 # all p-values are significant in TF_edges.tsv
-TF_edges = read.table("../TF_edges.tsv", sep="\t", header=T, quote="")[,1:3] # discard incomplete edge mode column
+TF_edges = read.table("../TF_priors/TF_edges.tsv", sep="\t", header=T, quote="")[,1:3] # discard incomplete edge mode column
 TF_edges = TF_edges[TF_edges$TF %in% colnames(perturbation),]
-KPs = flatten(read.table("../KP.txt"))
+KPs = fread("../KP_protein.tsv")$ORF
 KPs = KPs[KPs %in% colnames(perturbation)]  # we can only do wilcoxon test for KPs that are pertubed
 TFs = read.table("../TF_mode.tsv", sep="\t", header=T, quote="", stringsAsFactors=FALSE)
 TFs = TFs[TFs$TF%in%TF_edges$TF,]

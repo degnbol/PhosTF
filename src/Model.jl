@@ -1,6 +1,6 @@
 #!/usr/bin/env julia
-include("utilities/ArrayUtils.jl")
-include("utilities/FluxUtils.jl")
+isdefined(Main, :ArrayUtils) || include("utilities/ArrayUtils.jl")
+isdefined(Main, :FluxUtils) || include("utilities/FluxUtils.jl")
 
 "Core model describing the equations of the model etc."
 module Model
@@ -11,7 +11,7 @@ using ..ArrayUtils: eye
 import ..FluxUtils
 
 export offdiag, random_W
-export sse, sse_B, sse_T, linex, quadquad
+export sse, sse_B, sse_T
 export l1
 export _B, B_star, _T
 
@@ -29,14 +29,14 @@ function random_W(n::Integer)
 end
 
 
-function default_Mₜ(n::Integer, nₜ::Integer, nₚ::Integer)::Matrix{Bool}
-	mat = zeros(Bool, n, n)
+function default_Mₜ(nᵥ::Integer, nₜ::Integer, nₚ::Integer)::Matrix{Bool}
+	mat = zeros(Bool, nᵥ, nᵥ)
 	mat[:, nₚ+1:nₚ+nₜ] .= 1
 	mat[diagind(mat)] .= 0
 	mat
 end
-function default_Mₚ(n::Integer, nₜ::Integer, nₚ::Integer)::Matrix{Bool}
-	mat = zeros(Bool, n, n)
+function default_Mₚ(nᵥ::Integer, nₜ::Integer, nₚ::Integer)::Matrix{Bool}
+	mat = zeros(Bool, nᵥ, nᵥ)
 	mat[1:nₜ+nₚ, 1:nₚ] .= 1
 	mat[diagind(mat)] .= 0
 	mat
@@ -51,32 +51,25 @@ return:
 - Mₚ: Masking matrix for KP. Square.
 - U: Matrix holding column vectors of non-KO indexes for each experiment. No need to be square but has to have same shape as X.
 """
-constants(n::Integer, nₜ::Integer, nₚ::Integer, J::AbstractMatrix) = (Mₜ=default_Mₜ(n,nₜ,nₚ), Mₚ=default_Mₚ(n,nₜ,nₚ), U=_U(J))
+constants(nᵥ::Integer, nₜ::Integer, nₚ::Integer, J::AbstractMatrix) = (Mₜ=default_Mₜ(nᵥ,nₜ,nₚ), Mₚ=default_Mₚ(nᵥ,nₜ,nₚ), U=_U(J))
 "- K: number of experiments (k in 1:K)"
-constants(n::Integer, nₜ::Integer, nₚ::Integer, K::Integer=nₜ+nₚ) = constants(n,nₜ,nₚ, eye(n,K))
-constants(Wₜ::AbstractMatrix, Wₚ::AbstractMatrix) = constants(nnₜnₚ(Wₜ,Wₚ)...)
+constants(nᵥ::Integer, nₜ::Integer, nₚ::Integer, K::Integer=nₜ+nₚ) = constants(nᵥ,nₜ,nₚ, eye(nᵥ,K))
+constants(Wₜ::AbstractMatrix, Wₚ::AbstractMatrix) = constants(nᵥnₜnₚ(Wₜ,Wₚ)...)
 
 
-nnₜnₚ(Wₜ::AbstractMatrix, Wₚ::AbstractMatrix) = size(Wₜ,1), size(Wₜ,2), size(Wₚ,2)
-function nₓnₜnₚ(Wₜ::AbstractMatrix, Wₚ::AbstractMatrix)
-	(n,nₜ), nₚ = size(Wₜ), size(Wₚ,2)
-	n-(nₜ+nₚ),nₜ,nₚ
+nᵥnₜnₚ(Wₜ::AbstractMatrix, Wₚ::AbstractMatrix) = size(Wₜ,1), size(Wₜ,2), size(Wₚ,2)
+function nₒnₜnₚ(Wₜ::AbstractMatrix, Wₚ::AbstractMatrix)
+	(nᵥ,nₜ), nₚ = size(Wₜ), size(Wₚ,2)
+	nᵥ-(nₜ+nₚ),nₜ,nₚ
 end
-nₓnₜnₚ(WₜWₚ::Array) = nₓnₜnₚ(WₜWₚ...)
-nₓnₜnₚ(WₜWₚ::Tuple) = nₓnₜnₚ(WₜWₚ...)
+nₒnₜnₚ(WₜWₚ::Array) = nₒnₜnₚ(WₜWₚ...)
+nₒnₜnₚ(WₜWₚ::Tuple) = nₒnₜnₚ(WₜWₚ...)
 
 function _W(Wₜ, Wₚ)
-	nₓ, nₜ, nₚ = nₓnₜnₚ(Wₜ, Wₚ)
-	[[Wₚ; zeros(nₓ,nₚ)] Wₜ zeros(nₓ+nₜ+nₚ,nₓ)]
+	nₒ, nₜ, nₚ = nₒnₜnₚ(Wₜ, Wₚ)
+	[[Wₚ; zeros(nₒ,nₚ)] Wₜ zeros(nₒ+nₜ+nₚ,nₒ)]
 end
 
-"""
-wₚᵢⱼ := vᵢ⋅(|wₚₖᵢⱼ| - |wₚₚᵢⱼ|)
-As vector notation:
-Wₚ := V (Wₚₖ' - Wₚₚ')
-We use rowwise multiplication with .* here instead of diagonal matrix multiplication so make sure V is a 2D column vector.
-"""
-_Wₚ(W::AbstractMatrix, V, Iₚₖ::AbstractMatrix, Iₚₚ::AbstractMatrix) = V .* (abs.(W)*(Iₚₖ-Iₚₚ))
 _Wₜ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = W[:,nₚ+1:nₚ+nₜ]
 _Wₚ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = W[1:nₜ+nₚ,1:nₚ]
 _Wₜ(W::AbstractMatrix, Iₜ) = W*Iₜ
@@ -101,11 +94,11 @@ function isW(W::AbstractVector, nₜ::Integer, nₚ::Integer)
 end
 
 
-Iₚ(n::Integer, nₜ::Integer, nₚ::Integer) = diagm([[1 for _ in 1:nₚ]; [0 for _ in nₚ+1:n]])
-Iₜ(n::Integer, nₜ::Integer, nₚ::Integer) = diagm([[0 for _ in 1:nₚ]; [1 for _ in 1:nₜ]; [0 for _ in nₚ+nₜ+1:n]])
-Iₒ(n::Integer, nₜ::Integer, nₚ::Integer) = diagm([[0 for _ in 1:nₚ+nₜ]; [1 for _ in nₚ+nₜ+1:n]])
-"All except nodes ∈ PK ∪ PP"
-I₋ₖₚ(Iₚₖ::AbstractMatrix, Iₚₚ::AbstractMatrix) = I(size(Iₚₖ,1)) - (Iₚₖ+Iₚₚ)
+Iₚ(nᵥ::Integer, nₜ::Integer, nₚ::Integer) = diagm([[1 for _ in 1:nₚ]; [0 for _ in nₚ+1:nᵥ]])
+Iₜ(nᵥ::Integer, nₜ::Integer, nₚ::Integer) = diagm([[0 for _ in 1:nₚ]; [1 for _ in 1:nₜ]; [0 for _ in nₚ+nₜ+1:nᵥ]])
+Iₒ(nᵥ::Integer, nₜ::Integer, nₚ::Integer) = diagm([[0 for _ in 1:nₚ+nₜ]; [1 for _ in nₚ+nₜ+1:nᵥ]])
+"All except nodes ∈ KP"
+I₋ₖₚ(Iₚ₊::AbstractMatrix, Iₚ₋::AbstractMatrix) = I(size(Iₚ₊,1)) - (Iₚ₊+Iₚ₋)
 
 _B(W::AbstractMatrix, cs::NamedTuple) = (W.*cs.Mₜ) * inv(I(size(W,1)) - W.*cs.Mₚ)
 """
@@ -151,29 +144,6 @@ function sse_alt(W::AbstractMatrix, cs::NamedTuple, X::Matrix)
 	sum(E.^2)
 end
 
-"""
-Alternative to SSE, that punishes undershooting more than overshooting. 
-That is, if a true logFC value is 1, then 2 is punished less than 0 as opposed to what is the case for SSE.
-- W: either Matrix with Wt and Wp, or vector with Wt and Wp matrices, or tracked versions.
-"""
-function linex(W, cs::NamedTuple, X::Matrix)
-	signs = sign.(X)
-	# set zero signs to -1 or 1
-	signs[signs .== 0] .= rand([-1,1], sum(signs .== 0))
-	αE = -signs .* E(W,cs,X)
-	sum(exp.(αE) .- αE .- 1.)
-end
-
-"""
-Alternative to SSE, that punishes undershooting more than overshooting. 
-That is, if a true logFC value is 1, then 2 is punished less than 0 as opposed to what is the case for SSE.
-- W: either Matrix with Wt and Wp, or vector with Wt and Wp matrices, or tracked versions.
-"""
-function quadquad(W, cs::NamedTuple, X::Matrix)
-	α = abs.(X) ./ (abs.(X) .+ .5)
-	X̂ = _B(W,cs,X)
-	sum(cs.U .* ((1. .- α .* (X̂.*X.>X.*X)) .* (X.-X̂).^2))
-end
 
 """
 Loss function to train parameters in W to result in a B that is as similar to a solution to B from LLC method (Eberhardt).
@@ -206,18 +176,18 @@ function priors(Wₜ_prior::AbstractMatrix, Wₚ_prior::AbstractMatrix)
 	_W(Wₜ_prior, Wₚ_prior), _W(Wₜ_prior_sign, Wₚ_prior_sign)
 end
 priors(Wₜ_prior::AbstractMatrix, nₚ::Integer) = priors(Wₜ_prior, ones(size(Wₜ_prior,2)+nₚ, nₚ))
-priors(n::Integer, Wₚ_prior::AbstractMatrix) = priors(ones(n, size(Wₚ_prior,1)-size(Wₚ_prior,2)), Wₚ_prior)
+priors(nᵥ::Integer, Wₚ_prior::AbstractMatrix) = priors(ones(nᵥ, size(Wₚ_prior,1)-size(Wₚ_prior,2)), Wₚ_prior)
 """
 Get priors from files with the indicators 0=no edge, 1=possible edge, "+"=positive edge, "-"=negative edge.
 Can be fed nothing values, and produces nothing values when a matrix would otherwise provide no additional information.
 - WT_prior/WP_prior: should be either matrix with 0,1,+,- or bitmatrix.
 return: priors, priors_sign
 """
-function priors(WT_prior::Union{AbstractMatrix,Nothing}, WP_prior::Union{AbstractMatrix,Nothing}, n::Integer, nₜ::Integer, nₚ::Integer)
+function priors(WT_prior::Union{AbstractMatrix,Nothing}, WP_prior::Union{AbstractMatrix,Nothing}, nᵥ::Integer, nₜ::Integer, nₚ::Integer)
 	if WT_prior === nothing && WP_prior === nothing return nothing, nothing end
-	M, S = Model.priors(WT_prior === nothing ? n : WT_prior, WP_prior === nothing ? nₚ : WP_prior)
+	M, S = Model.priors(WT_prior === nothing ? nᵥ : WT_prior, WP_prior === nothing ? nₚ : WP_prior)
 	if all(Model._Wₜ(M,nₜ,nₚ) .== 1) && all(Model._Wₚ(M,nₜ,nₚ) .== 1) M = nothing end
-	if all(S == 0) S = nothing end
+    any(S .!= 0) || (S = nothing)
 	M, S
 end
 
@@ -231,13 +201,5 @@ apply_priors(W::AbstractVector, M::AbstractMatrix) = [W[1].*M,    W[2].*M]
 apply_priors(W::AbstractVector, M::AbstractVector) = [W[1].*M[1], W[2].*M[2]]
 apply_priors(W, M, ::Nothing) = apply_priors(W, M)
 apply_priors(W, ::Nothing, ::Nothing) = W
-"If we know which nodes are ∈ PK and ∈ PP, then use that information."
-apply_priors(W::AbstractMatrix, V::AbstractArray, M, S, Iₚₖ::Matrix, Iₚₚ::Matrix) = apply_priors(W*I₋ₖₚ(Iₚₖ,Iₚₚ) + _Wₚ(W,V,Iₚₖ,Iₚₚ), M, S)
-"""
-W[2]*I₋ₖₚ(Iₚₖ,Iₚₚ) for the nodes ∈ KP where it is not known if they are a kinase or phosphatase 
-(or where we do not wish to simply describe them as only one or the other).
-"""
-apply_priors(W::AbstractVector, V::AbstractArray, M, S, Iₚₖ::AbstractMatrix, Iₚₚ::AbstractMatrix) = apply_priors([W[1], W[2]*I₋ₖₚ(Iₚₖ,Iₚₚ) + _Wₚ(W[2],V,Iₚₖ,Iₚₚ)], M, S)
-apply_priors(W, ::Nothing, M, S, ::Any, ::Any) = apply_priors(W, M, S)
 
 end;
