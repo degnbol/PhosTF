@@ -12,13 +12,13 @@ library(facetscales)
 # constants ####
 mRNA = "mRNA"
 prot = "protein"
-phos = "phos. protein"
+phos = "active protein"
 wildtype = "Wildtype"
 mutant = "KP1 Knockout"
 
-P_colors = c("#af70b6", "#654169", "#9f3b5a", "#9400d3")
-T_colors = c("#87ac33", "#50661e", "#2fa540", "#8FBC8F")
-O_colors = c("#79712f", "#DAA520")
+KP_colors = c("#af70b6", "#654169", "#9f3b5a", "#9400d3")
+TF_colors = c("#87ac33", "#50661e", "#2fa540", "#8FBC8F")
+O_colors  = c("#79712f", "#DAA520")
 
 # functions ####
 readfunc = function(fnames) {
@@ -29,12 +29,12 @@ readfunc = function(fnames) {
     }
     
     # time along axis=1, node along axis=2
-    for (i in c("r", "p", "phi")) {
+    for (i in c("r", "p", "psi")) {
         meas[[i]] = t(meas[[i]])
     }
     
-    KP = cbind(meas[["r"]][,1:np], meas[["p"]][,1:np], meas[["phi"]][,1:np])
-    TF = cbind(meas[["r"]][,np+1:nt], meas[["p"]][,np+1:nt], meas[["phi"]][,np+1:nt])
+    KP = cbind(meas[["r"]][,1:np], meas[["p"]][,1:np], meas[["psi"]][,1:np])
+    TF = cbind(meas[["r"]][,np+1:nt], meas[["p"]][,np+1:nt], meas[["psi"]][,np+1:nt])
     if(no > 0) O = meas[["r"]][,np+nt+1:no]
     
     KP = data.frame(KP)
@@ -82,22 +82,37 @@ readfunc = function(fnames) {
 }
 
 # settings ####
+# mut = 1; outfname = "simulation_KP1.pdf"
 # setwd("~/cwd/data/testdata/data_cas"); nt = 3; np = 3; no = 1
 # setwd("~/cwd/data/testdata/pres18c"); nt = 3; np = 3; no = 0
 # setwd("~/cwd/data/testdata/simi"); nt = 2; np = 3; no = 1
-setwd("~/cwd/data/toy/simulation"); nt = 2; np = 3; no = 1
-n = nt+np+no
+# setwd("~/cwd/data/toy/simulation"); nt = 2; np = 3; no = 1
+args = commandArgs(T)
+if(length(args) >= 3) {
+    np = args[1]
+    nt = args[2]
+    no = args[3]
+}
+if(length(args) == 4) {
+    mut = args[4]
+    outfname = paste0("simulation_", mut, ".pdf")
+} else {
+    outfname = "simulation.pdf"
+}
+
+
+n = np+nt+no
 wt_fnames = list(
     r = "sim_r.mat",
     p = "sim_p.mat",
-    phi = "sim_phi.mat",
+    psi = "sim_psi.mat",
     t = "sim_t.mat"
 )
 mut = 1
 mut_fnames = list(
     r = paste0("sim_r_", mut, ".mat"),
     p = paste0("sim_p_", mut, ".mat"),
-    phi = paste0("sim_phi_", mut, ".mat"),
+    psi = paste0("sim_psi_", mut, ".mat"),
     t = paste0("sim_t_", mut, ".mat")
 )
 # process ####
