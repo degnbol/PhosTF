@@ -1,10 +1,10 @@
 #!/usr/bin/env Rscript
 ## packages
-suppressPackageStartupMessages(library(data.table))
-suppressPackageStartupMessages(library(dplyr))
-suppressPackageStartupMessages(library(reshape2))
-suppressPackageStartupMessages(library(Matrix))
-suppressPackageStartupMessages(library(ggplot2))
+library(dplyr)
+library(Matrix)
+library(ggplot2)
+library(reshape2) # acast. before data.table to use data.table melt
+library(data.table)
 
 ## functions
 
@@ -76,8 +76,6 @@ fnames = c("../processed/holstege_2010/PK_KO.tsv",
            "../processed/luscombe_2010/PK_KO.tsv",
            "../processed/fiedler_2009/avg_KO.tsv",
            "../processed/zelezniak_2018/PK_KO.tsv",
-           "../processed/goncalves_2017/KP_KO_TF.tsv",
-           "../processed/goncalves_2017/KP_KO_KP.tsv",
            "../processed/chua_2006/TF_KO.tsv",
            "../processed/chua_2006/TF_OE.tsv")
 pert_tables = list()
@@ -87,7 +85,8 @@ colnames(pert_tables[[OE_fname]])[2:ncol(pert_tables[[OE_fname]])] = paste(colna
 pert_melt = list()
 for (i in 1:length(pert_tables)) {pert_melt[[i]] = melt(pert_tables[[i]], id.vars="ORF", variable.name="Mutant")}
 pert_melt = bind_rows(pert_melt)
-pert_melt_avg = pert_melt[,list(value=mean(value,na.rm=TRUE)),by=list(ORF,Mutant)]
+stopifnot(length(class(pert_melt))==2)  # should be data.table not data.frame
+pert_melt_avg = pert_melt[, list(value=mean(value,na.rm=TRUE)), by=list(ORF,Mutant)]
 pert_outer = merge_outer(pert_tables) # merge all data, keeping all datapoints
 stopifnot(sum(!is.na(pert_outer[,!"ORF"])) == sum(!is.na(pert_melt$value))) # are all values kept
 pert_inner = as.data.table(acast(pert_melt_avg, ORF ~ Mutant), "ORF") # merge all data, where there is a single averaged value for each unique entry
@@ -167,20 +166,21 @@ sum(is.na(pert_inner_updated))
 pert_outer_updated[is.na(pert_outer_updated)] = 0
 pert_inner_updated[is.na(pert_inner_updated)] = 0
 # save unenhanced versions
-write.table(pert_outer_updated, "logFC_outer_raw.mat", sep=" ", quote=F, row.names=F, col.names=F)
-write.table(pert_inner_updated, "logFC_inner_raw.mat", sep=" ", quote=F, row.names=F, col.names=F)
+fwrite(pert_outer_updated, "logFC_outer_raw.mat", sep=" ", quote=F, row.names=F, col.names=F)
+fwrite(pert_inner_updated, "logFC_inner_raw.mat", sep=" ", quote=F, row.names=F, col.names=F)
 # enhancing.
 # reducing KOs
-pert_outer_updated[KO_outer] = pert_outer_updated[KO_outer] - 4
-pert_inner_updated[KO_inner] = pert_inner_updated[KO_inner] - 4
+reduction = 1
+pert_outer_updated[KO_outer] = pert_outer_updated[KO_outer] - reduction
+pert_inner_updated[KO_inner] = pert_inner_updated[KO_inner] - reduction
 # increase OE
 pert_outer_updated[OE_outer] = pert_outer_updated[OE_outer] + 1
 pert_inner_updated[OE_inner] = pert_inner_updated[OE_inner] + 1
 # write. there's spaces in colnames (OE)
-write.table(pert_outer_updated, "logFC_outer.csv", sep=",", quote=F)
-write.table(pert_inner_updated, "logFC_inner.csv", sep=",", quote=F)
-write.table(pert_outer_updated, "logFC_outer.mat", sep=" ", quote=F, row.names=F, col.names=F)
-write.table(pert_inner_updated, "logFC_inner.mat", sep=" ", quote=F, row.names=F, col.names=F)
+write.table(pert_outer_updated, paste0("logFC_outer_", reduction, ".csv"), sep=",", quote=F)
+write.table(pert_inner_updated, paste0("logFC_inner_", reduction, ".csv"), sep=",", quote=F)
+fwrite(pert_outer_updated, paste0("logFC_outer_", reduction, ".mat"), sep=" ", quote=F, row.names=F, col.names=F)
+fwrite(pert_inner_updated, paste0("logFC_inner_", reduction, ".mat"), sep=" ", quote=F, row.names=F, col.names=F)
 
 
 
@@ -217,10 +217,10 @@ plt = plt + geom_step(data=stepdf, aes(x=xmin, y=y, color=label)) +
     scale_x_continuous(name="log fold-change", breaks=c(-10,-5,-1,0,1,5), labels=c("-10","-5","-1","0","1","5")) +
     theme(panel.grid.major=element_line(colour="lightgray"), panel.grid.minor=element_blank()) +
     scale_y_log10(limits=c(1,1.2e7), expand=c(0,0)) +
-    ggtitle("Enhanced perturbations") +
+    # ggtitle("Enhanced perturbations") +
     ylab("measurements")
 
-ggsave("enhanced_perturbations.pdf", plot=plt, width=7, height=2, units="in")
+ggsave(paste0("perturbations_enhance_",reduction,".pdf"), plot=plt, width=7, height=2, units="in")
 
 
 
