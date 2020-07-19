@@ -12,3 +12,6 @@ sed 's/-//g' WT_FDR20_sign.mat > WT_FDR20_abssign_mask.mat
 # now to go KP_priors
 ./KP_priors/commands.sh
 
+# you can update gzipped versions with
+ls *.gz | sed 's/\.gz//' | while read line; do gzip -f --keep $line; done
+

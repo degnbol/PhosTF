@@ -10,10 +10,10 @@ flatten = function(x) as.vector(as.matrix(x))
 setwd("~/cwd/data/network")
 
 TFs = read.table("TF.tsv", sep="\t", header=T, stringsAsFactors=F)
-V = flatten(read.table("V.txt"))
+V = flatten(read.table("V_protein.txt"))
 edges = read.table("TF_priors/TF_edges.tsv", sep="\t", header=T, quote="", stringsAsFactors=F)
 # fall back on perturbation data to find expression mode
-perturbation = as.matrix(read.table("../perturbation/logFC_inner.csv", sep=",", row.names=1, header=T, quote="", check.names=F, stringsAsFactors=F))
+perturbation = as.matrix(read.table("../perturbation/logFC_inner_1.csv", sep=",", row.names=1, header=T, quote="", check.names=F, stringsAsFactors=F))
 
 # assign each TF as either activator or repressor sign by using the mode of regulation most supported in the data
 dominant_sign = function(edges) {
@@ -59,7 +59,7 @@ for(i in 1:nrow(edges)) {if (is.na(edges$sign[i])) {
 
 edges$sign[is.na(edges$sign)] = dominant_sign(edges)[is.na(edges$sign)]
 unresolved = unique(edges$TF[is.na(edges$sign)])
-length(unresolved) # 27 TFs that are unsigned
+length(unresolved) # 18 TFs that are unsigned
 
 TF_signs = edges$sign[match(TFs$TF, edges$TF)]
 
@@ -67,10 +67,16 @@ TF_signs = edges$sign[match(TFs$TF, edges$TF)]
 for (TF in unresolved) {if (TF %in% rownames(perturbation)) {
     targets = edges$Target[edges$TF == TF]
     targets = targets[targets %in% rownames(perturbation)]
-    corr = as.vector(cor(rep(perturbation[TF,], length(targets)), matrix(perturbation[targets,], byrow=T)))
-    if (!is.na(corr)) {  # will be NA if all values are zero for TF, which is the case for e.g. MATA1
-        if (corr < 0) {TF_signs[TFs$TF == TF] = "-"}
-        if (corr > 0) {TF_signs[TFs$TF == TF] = "+"}
+    
+    source_measurements = rep(perturbation[TF,], length(targets))
+    # all measurements will be zero if the source is actually never KOed. 
+    # This check serves kinda the same function as the na check, but it is to avoid a warning message.
+    if(any(source_measurements != 0)) {
+        corr = as.vector(cor(source_measurements, matrix(perturbation[targets,], byrow=T)))
+        if (!is.na(corr)) {  # will be NA if all values are zero for TF, which is the case for e.g. MATA1
+            if (corr < 0) {TF_signs[TFs$TF == TF] = "-"}
+            if (corr > 0) {TF_signs[TFs$TF == TF] = "+"}
+        }
     }
 }}
 
@@ -80,11 +86,12 @@ TFs$Mode[TF_signs == "-" & !is.na(TF_signs) & TFs$Mode == ""] = "repressor"
 
 
 # manually looking up the only remaining TFs:
+stopifnot(TFs$TF[TFs$Mode == ""] == c("MAL63", "MATA1", "YER108C"))
 # SGD says MATA1 represses genes, and YER108C is a point mutated copy of YER109C (FLO8) which is an activator, MAL63 is positive regulation
 TFs$Mode[TFs$TF == "MATA1"] = "repressor"
 TFs$Mode[TFs$TF == "YER108C"] = "activator"
 TFs$Mode[TFs$TF == "MAL63"] = "activator"
-all(TFs$Mode != "")
+stopifnot(all(TFs$Mode != ""))
 
 
 write.table(TFs, "TF_mode.tsv", sep="\t", quote=F, row.names=F)
