@@ -20,7 +20,7 @@ KP2TF[,sign:= sign(median_weight)]
 KP2TF[,q:=fdrtool(p.value, statistic="pvalue", plot=FALSE)$qval]
 stopifnot(all(unique(KP2TF$KP) == KPs))
 KP2TF = KP2TF[,c("KP", "TF", "p.value", "q", "sign", "median_weight")] # reorder and select columns
-write.table(KP2TF, "KP2TF.tsv", sep="\t", quote=F, row.names=F)
+fwrite(KP2TF, "KP2TF.tsv", sep="\t", quote=F)
 
 
 # analysis
