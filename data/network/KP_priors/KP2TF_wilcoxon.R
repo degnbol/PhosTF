@@ -2,8 +2,8 @@
 setwd("~/cwd/data/network/KP_priors")
 load("wilcoxon.RData")
 # packages
-suppressPackageStartupMessages(library(data.table))
-suppressPackageStartupMessages(library(tidyverse))
+library(data.table)
+library(tidyverse)
 
 kps = commandArgs(trailingOnly=TRUE)
 

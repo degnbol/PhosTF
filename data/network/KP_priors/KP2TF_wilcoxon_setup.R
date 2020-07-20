@@ -11,7 +11,7 @@ flatten = function(x) as.vector(as.matrix(x))
 
 setwd("~/cwd/data/network/KP_priors")
 # read
-perturbation = as.matrix(read.table("../../perturbation/logFC_inner.csv", sep=",", header=T, quote=""))
+perturbation = as.matrix(read.table("../../perturbation/logFC_inner_raw.csv", sep=",", header=T, quote=""))
 # all p-values are significant in TF_edges.tsv
 TF_edges = read.table("../TF_priors/TF_edges.tsv", sep="\t", header=T, quote="")[,1:3] # discard incomplete edge mode column
 TF_edges = TF_edges[TF_edges$TF %in% colnames(perturbation),]
