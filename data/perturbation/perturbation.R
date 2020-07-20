@@ -166,6 +166,8 @@ sum(is.na(pert_inner_updated))
 pert_outer_updated[is.na(pert_outer_updated)] = 0
 pert_inner_updated[is.na(pert_inner_updated)] = 0
 # save unenhanced versions
+write.table(pert_outer_updated, "logFC_outer_raw.csv", sep=",", quote=F)
+write.table(pert_inner_updated, "logFC_inner_raw.csv", sep=",", quote=F)
 fwrite(pert_outer_updated, "logFC_outer_raw.mat", sep=" ", quote=F, row.names=F, col.names=F)
 fwrite(pert_inner_updated, "logFC_inner_raw.mat", sep=" ", quote=F, row.names=F, col.names=F)
 # enhancing.
