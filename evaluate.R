@@ -37,7 +37,7 @@ tex = function(x) unname(TeX(paste0("$",x)))
 # WP_fname = "~/cwd/data/inference/02/WP_infer.mat"
 WP_fnames = commandArgs(trailingOnly=T)
 P_fname = "~/cwd/data/evaluation/P_eval.tsv"
-P_eval_noknownsite = read.vector("~/cwd/data/evaluation/KP_targets_noknownsite.txt")
+KP_targets_noknownsite = read.vector("~/cwd/data/network/KP_targets_noknownsite.txt")
 KP = fread("~/cwd/data/network/KP_protein.tsv")$ORF
 TF = read.vector("~/cwd/data/network/TF.txt")
 V = read.vector("~/cwd/data/network/V_protein.txt")
@@ -90,9 +90,9 @@ for (WP_fname in WP_fnames) {
     venndata$curated = venndata$yeastkid | venndata$ptmod
     venndata$known = venndata$literature | venndata$curated
     venndata$invitro = venndata$known | venndata$ptacek
-    venndata$with_site = venndata$invitro & !P_eval$Target%in%P_eval_noknownsite
+    venndata$with_site = venndata$invitro & !P_eval$Target%in%KP_targets_noknownsite
     
-    # write KP targets that are in the evaluation dataset
+    # write KP targets that are in the evaluation dataset. This was used before to make KP_targets_noknownsite, not sure if we still use it now.
     # write.table(PT[PT%in%P_eval$Target[venndata$invitro]], "~/cwd/data/evaluation/KP_targets.txt", row.names=F, col.names=F, quote=F)
     
     # index indicating which edge is inferred most strongly to most weakly
