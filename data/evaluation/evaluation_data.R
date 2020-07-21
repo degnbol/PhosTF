@@ -1,5 +1,6 @@
-
+#!/usr/bin/env Rscript
 # packages
+library(data.table)
 library(reshape2)
 library(Matrix)
 
@@ -55,12 +56,9 @@ colnames(P_ptacek) = c("Source", "Target"); P_ptacek$ptacek = 1
 # colnames(T_harbison_conds) = c("Source", "Target", "harbison_conds")
 # colnames(T_horak) = c("Source", "Target", "horak")
 
-KP_fname = "../network/KP.txt"
-TF_fname = "../network/TF.txt"
-V_fname = "../network/V.txt"
-KP = read.vector(KP_fname)
-TF = read.vector(TF_fname)
-V = read.vector(V_fname)
+KP = fread("../network/KP_protein.tsv")$ORF
+TF = read.vector("../network/TF.txt")
+V = read.vector("../network/V_protein.txt")
 PT = c(KP,TF)
 
 # make source and target identification that will match the melted version of inferred adjacencny matrices
