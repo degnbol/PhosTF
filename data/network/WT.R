@@ -51,6 +51,7 @@ nV = length(Vs)
 # find a fit
 plot(seq(0,1,.01), dbeta(seq(0,1,.01), 1, 20), type="l")
 # create unsigned edge weights
+edges$gauss001 = qhalfnorm_(edges$Pval, 0.01)
 edges$gauss01 = qhalfnorm_(edges$Pval, 0.10)
 edges$gauss025 = qhalfnorm_(edges$Pval, 0.25)
 edges$weight = qbeta(edges$qval, 1, 20, lower.tail=F)
@@ -158,8 +159,7 @@ write.table(sign(adjacencies_FDR20[[1]]), "WT_FDR20_sign.mat", sep=" ", quote=F,
 
 
 fwrite(sparsematrix(edges$Target, edges$TF, edges$gauss01), "WT_gauss01.mat", sep=" ", row.names=F, col.names=F)
-
-
+fwrite(sparsematrix(edges_FDR20$Target, edges_FDR20$TF, edges_FDR20$gauss001), "WT_FDR20_gauss001.mat", sep=" ", row.names=F, col.names=F)
 
 
 
