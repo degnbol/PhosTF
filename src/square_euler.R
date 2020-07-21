@@ -29,7 +29,7 @@ tex = function(x) unname(TeX(paste0("$",x)))
 #KP_edge_fname = "~/cwd/data/inference/74/KP_edges.tsv"
 KP_edge_fnames = commandArgs(trailingOnly=T)
 P_fname = "~/cwd/data/evaluation/P_eval.tsv"
-P_eval_noknownsite = read.vector("~/cwd/data/evaluation/KP_targets_noknownsite.txt")
+KP_targets_noknownsite = read.vector("~/cwd/data/network/KP_targets_noknownsite.txt")
 KP = fread("~/cwd/data/network/KP_protein.tsv")$ORF
 TF = read.vector("~/cwd/data/network/TF.txt")
 V = read.vector("~/cwd/data/network/V_protein.txt")
@@ -77,7 +77,7 @@ for (KP_edge_fname in KP_edge_fnames) {
     venndata$curated = venndata$yeastkid | venndata$ptmod
     venndata$known = venndata$literature | venndata$curated
     venndata$invitro = venndata$known | venndata$ptacek
-    venndata$with_site = venndata$invitro & !P_eval$Target%in%P_eval_noknownsite
+    venndata$with_site = venndata$invitro & !P_eval$Target%in%KP_targets_noknownsite
     
     p.selection = function(col_select, row_idx) {
         drawn = top_marked[row_idx]
