@@ -37,7 +37,7 @@ KPTF = c(KP,TF)
 nKP = length(KP)
 nV = length(V)
 nTF = length(TF)
-nO = nV-length(PT)
+nO = nV-length(KPTF)
 
 rundir = getwd()
 
