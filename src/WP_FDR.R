@@ -1,5 +1,6 @@
 #!/usr/bin/env Rscript
 
+library(data.table)
 library(fdrtool)
 library(reshape2)
 library(ggplot2)
@@ -19,9 +20,9 @@ melt_matrix = function(x) {
 
 # WP_fname = "~/cwd/data/inference/74/WP_infer_1.mat"
 WP_fnames = commandArgs(trailingOnly=T)
-KP = read.vector("~/cwd/data/network/KP.txt")
+KP = fread("~/cwd/data/network/KP_protein.tsv")$ORF
 TF = read.vector("~/cwd/data/network/TF.txt")
-V = read.vector("~/cwd/data/network/V.txt")
+V = read.vector("~/cwd/data/network/V_protein.txt")
 PT = c(KP,TF)
 nP = length(KP)
 nV = length(V)
