@@ -1,6 +1,7 @@
 #!/usr/bin/env Rscript
 
 # packages
+library(data.table)
 suppressPackageStartupMessages(library(reshape2))
 suppressPackageStartupMessages(library(Matrix))
 suppressPackageStartupMessages(library(eulerr))
@@ -29,13 +30,10 @@ tex = function(x) unname(TeX(paste0("$",x)))
 KP_edge_fnames = commandArgs(trailingOnly=T)
 P_fname = "~/cwd/data/evaluation/P_eval.tsv"
 P_eval_noknownsite_fname = "~/cwd/data/evaluation/KP_targets_noknownsite.txt"
-KP_fname = "~/cwd/data/network/KP.txt"
-TF_fname = "~/cwd/data/network/TF.txt"
-V_fname = "~/cwd/data/network/V.txt"
 P_eval_noknownsite = read.vector(P_eval_noknownsite_fname)
-KP = read.vector(KP_fname)
-TF = read.vector(TF_fname)
-V = read.vector(V_fname)
+KP = fread("~/cwd/data/network/KP_protein.tsv")$ORF
+TF = read.vector("~/cwd/data/network/TF.txt")
+V = read.vector("~/cwd/data/network/V_protein.txt")
 PT = c(KP,TF)
 nP = length(KP)
 nV = length(V)
