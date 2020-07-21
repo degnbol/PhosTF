@@ -93,7 +93,7 @@ for (WP_fname in WP_fnames) {
     venndata$with_site = venndata$invitro & !P_eval$Target%in%P_eval_noknownsite
     
     # write KP targets that are in the evaluation dataset
-    # write.table(PT[PT%in%P_eval$Target[venndata$invitro]], "~/cwd/data/evaluation/KP_targets.txt", row.names=F, col.names=F, quote=F)
+    write.table(PT[PT%in%P_eval$Target[venndata$invitro]], "~/cwd/data/evaluation/KP_targets.txt", row.names=F, col.names=F, quote=F)
     
     # index indicating which edge is inferred most strongly to most weakly
     marker_order = function(k, index) {
