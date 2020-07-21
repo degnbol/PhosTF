@@ -29,20 +29,15 @@ tex = function(x) unname(TeX(paste0("$",x)))
 #KP_edge_fname = "~/cwd/data/inference/74/KP_edges.tsv"
 KP_edge_fnames = commandArgs(trailingOnly=T)
 P_fname = "~/cwd/data/evaluation/P_eval.tsv"
-P_eval_noknownsite_fname = "~/cwd/data/evaluation/KP_targets_noknownsite.txt"
-P_eval_noknownsite = read.vector(P_eval_noknownsite_fname)
+P_eval_noknownsite = read.vector("~/cwd/data/evaluation/KP_targets_noknownsite.txt")
 KP = fread("~/cwd/data/network/KP_protein.tsv")$ORF
 TF = read.vector("~/cwd/data/network/TF.txt")
 V = read.vector("~/cwd/data/network/V_protein.txt")
-PT = c(KP,TF)
-nP = length(KP)
+KPTF = c(KP,TF)
+nKP = length(KP)
 nV = length(V)
-nT = length(TF)
+nTF = length(TF)
 nO = nV-length(PT)
-protein_KPTF_table = read.table("~/cwd/data/network/node_attributes_full.txt", sep="\t", header=T)
-protein_KP = as.character(protein_KPTF_table$ORF[protein_KPTF_table$protein_type0=="KP" & !is.na(protein_KPTF_table$protein_type0)])
-protein_TF = as.character(protein_KPTF_table$ORF[protein_KPTF_table$protein_type0=="TF" & !is.na(protein_KPTF_table$protein_type0)])
-protein_KPTF = c(protein_KP, protein_TF)
 
 rundir = getwd()
 
@@ -55,10 +50,10 @@ for (KP_edge_fname in KP_edge_fnames) {
     # remove diagonals
     P_eval = P_eval[as.character(P_eval$Source) != as.character(P_eval$Target),]
     # filter for PROTEIN kinase, phosphatases and transcription factors
-    KP_edges = KP_edges[as.character(KP_edges$Target) %in% protein_KPTF,]
-    P_eval = P_eval[as.character(P_eval$Target) %in% protein_KPTF,]
-    KP_edges = KP_edges[as.character(KP_edges$KP) %in% protein_KPTF,]
-    P_eval = P_eval[as.character(P_eval$Source) %in% protein_KPTF,]
+    KP_edges = KP_edges[as.character(KP_edges$Target) %in% KPTF,]
+    P_eval = P_eval[as.character(P_eval$Target) %in% KPTF,]
+    KP_edges = KP_edges[as.character(KP_edges$KP) %in% KPTF,]
+    P_eval = P_eval[as.character(P_eval$Source) %in% KPTF,]
     # sanity check
     stopifnot(all(as.character(KP_edges$KP) == as.character(P_eval$Source)))
     stopifnot(all(KP_edges$Target == P_eval$Target))
@@ -94,10 +89,8 @@ for (KP_edge_fname in KP_edge_fnames) {
         list(value=q, p=phyper(q, m, n, sum(drawn), lower.tail=FALSE))
     }
     
-    # KP2KP.idx = P_eval$Target%in%KP
-    # KP2TF.idx = P_eval$Target%in%TF
-    KP2KP.idx = P_eval$Target%in%protein_KP
-    KP2TF.idx = P_eval$Target%in%protein_TF
+    KP2KP.idx = P_eval$Target%in%KP
+    KP2TF.idx = P_eval$Target%in%TF
     stopifnot(all(KP2KP.idx|KP2TF.idx))
     
     ### Plotting
