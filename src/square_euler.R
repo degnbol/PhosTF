@@ -153,9 +153,7 @@ for (KP_edge_fname in KP_edge_fnames) {
         
     }
     
-    plot_square_euler("with_site")
-    
-    selections = c("known","literature","invitro","with_site")
+    selections = c("known","literature","invitro")
     for(selection in selections) {
         ggsave(paste0("square_euler_", selection, ".pdf"), plot=plot_square_euler(selection), width=6.5, height=1.35)
     }

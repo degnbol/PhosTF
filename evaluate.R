@@ -47,6 +47,12 @@ nV = length(V)
 nT = length(TF)
 nO = nV-length(PT)
 
+
+## settings
+# assuming we are masking KP edges based on known phos site from BioGrid
+masking_KP = TRUE
+
+
 rundir = getwd()
 
 for (WP_fname in WP_fnames) {
@@ -90,8 +96,12 @@ for (WP_fname in WP_fnames) {
     venndata$curated = venndata$yeastkid | venndata$ptmod
     venndata$known = venndata$literature | venndata$curated
     venndata$invitro = venndata$known | venndata$ptacek
-    venndata$with_site = venndata$invitro & !P_eval$Target%in%KP_targets_noknownsite
     
+    # not evaluating on uninferrable edges
+    if(masking_KP) {
+        venndata[P_eval$Target%in%KP_targets_noknownsite,] = FALSE
+    }
+
     # write KP targets that are in the evaluation dataset. This was used before to make KP_targets_noknownsite, not sure if we still use it now.
     # write.table(PT[PT%in%P_eval$Target[venndata$invitro]], "~/cwd/data/evaluation/KP_targets.txt", row.names=F, col.names=F, quote=F)
     
@@ -115,7 +125,7 @@ for (WP_fname in WP_fnames) {
         evaldata = venndata[row_idx, col_select]
         q = sum(evaldata[drawn])  # number of correct inferences
         m = sum(evaldata) # number of true edges
-        n = length(evaldata) - m  # number of potential edges (not in true edge set)
+        n = sum(venndata[row_idx, "potential"]) - m  # number of black balls to pick/"false" edges/potential edges not in set of known
         list(value=q, p=phyper(q, m, n, sum(drawn), lower.tail=FALSE))
     }
     
@@ -137,7 +147,7 @@ for (WP_fname in WP_fnames) {
     stopifnot(all(KP2KP.idx|KP2TF.idx))
     
     eval.table = data.frame()
-    selections = c("known","literature","invitro","with_site")
+    selections = c("known","literature","invitro")
     for (selection in selections) {
         selection.table = rbind(data.frame(p.selection.q(quantiles, selection, KP2KP.idx), substrate="KP"),
                                 data.frame(p.selection.q(quantiles, selection, KP2TF.idx), substrate="TF"))
