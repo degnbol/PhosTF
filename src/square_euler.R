@@ -39,6 +39,12 @@ nV = length(V)
 nTF = length(TF)
 nO = nV-length(KPTF)
 
+
+## settings
+# assuming we are masking KP edges based on known phos site from BioGrid
+masking_KP = TRUE
+
+
 rundir = getwd()
 
 for (KP_edge_fname in KP_edge_fnames) {
@@ -77,7 +83,11 @@ for (KP_edge_fname in KP_edge_fnames) {
     venndata$curated = venndata$yeastkid | venndata$ptmod
     venndata$known = venndata$literature | venndata$curated
     venndata$invitro = venndata$known | venndata$ptacek
-    venndata$with_site = venndata$invitro & !P_eval$Target%in%KP_targets_noknownsite
+
+    # not evaluating on uninferrable edges
+    if(masking_KP) {
+        venndata[P_eval$Target%in%KP_targets_noknownsite,] = FALSE
+    }
     
     p.selection = function(col_select, row_idx) {
         drawn = top_marked[row_idx]
@@ -85,7 +95,7 @@ for (KP_edge_fname in KP_edge_fnames) {
         evaldata = venndata[row_idx, col_select]
         q = sum(evaldata[drawn])  # number of correct inferences
         m = sum(evaldata) # number of true edges
-        n = length(evaldata) - m  # number of potential edges (not in true edge set)
+        n = sum(venndata[row_idx, "potential"]) - m  # number of black balls to pick/"false" edges/potential edges not in set of known
         list(value=q, p=phyper(q, m, n, sum(drawn), lower.tail=FALSE))
     }
     
