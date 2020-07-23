@@ -5,6 +5,7 @@ library(reshape2)
 library(Matrix)
 library(eulerr)
 library(ggplot2)
+library(ggpubr)
 library(data.table)
 
 # functions
@@ -132,48 +133,47 @@ if(masking_KP) {
 }
 
 
-
 #KP_edge_fname = "~/cwd/data/inference/03/KP_edges.tsv"
 KP_edge_fnames = commandArgs(trailingOnly=T)
 rundir = getwd()
 
-for (KP_edge_fname in KP_edge_fnames) {
-    cat(KP_edge_fname, "\n")
-    setwd(dirname(KP_edge_fname))
-    KP_edges = fread(basename(KP_edge_fname), drop="marker")
-    KP_edges$infer = KP_edges$q < .05
-    KP_edges[,q:=NULL]
-    
-    # all targets should be protein KP or TF
-    stopifnot(all(KP_edges$KP%in%KP))
-    stopifnot(all(KP_edges$Target%in%KPTF))
-    stopifnot(all(KP_eval$Source%in%KP))
-    stopifnot(all(KP_eval$Target%in%KPTF))
-    # sanity check
-    stopifnot(all(KP_edges$KP == KP_eval$Source))
-    stopifnot(all(KP_edges$Target == KP_eval$Target))
-    # add eval data
-    KP_edges = cbind(KP_edges, KP_eval[,!c("Source", "Target")])
-    # filter for possible edges and remove then redundant column
-    KP_edges = KP_edges[possible==T,][,possible:=NULL]
-    
-    KP_edges[Target%in%KP,Target:="KP"]
-    KP_edges[Target%in%TF,Target:="TF"]
-    KP_edges[,KP:=NULL]
-    
-    for(evalname in c("known", "literature", "invitro")) {
+for(evalname in c("known", "literature", "invitro")) {
+    plts = list()
+    for (i_file in 1:length(KP_edge_fnames)) {
+        KP_edge_fname = KP_edge_fnames[i_file]
+        cat(KP_edge_fname, "\n")
+        setwd(dirname(KP_edge_fname))
+        KP_edges = fread(basename(KP_edge_fname), drop="marker")
+        KP_edges$infer = KP_edges$q < .05
+        KP_edges[,q:=NULL]
         
+        # all targets should be protein KP or TF
+        stopifnot(all(KP_edges$KP%in%KP))
+        stopifnot(all(KP_edges$Target%in%KPTF))
+        stopifnot(all(KP_eval$Source%in%KP))
+        stopifnot(all(KP_eval$Target%in%KPTF))
+        # sanity check
+        stopifnot(all(KP_edges$KP == KP_eval$Source))
+        stopifnot(all(KP_edges$Target == KP_eval$Target))
+        # add eval data
+        KP_edges = cbind(KP_edges, KP_eval[,!c("Source", "Target")])
+        # filter for possible edges and remove then redundant column
+        KP_edges = KP_edges[possible==T,][,possible:=NULL]
+        
+        KP_edges[Target%in%KP,Target:="KP"]
+        KP_edges[Target%in%TF,Target:="TF"]
+        KP_edges[,KP:=NULL]
+            
         DT = KP_edges[, c("Target", "infer", evalname), with=F]
         ps = c(get_p(DT[Target=="KP"][[evalname]], DT[Target=="KP"][["infer"]]), 
                get_p(DT[Target=="TF"][[evalname]], DT[Target=="TF"][["infer"]]))
         
         setnames(DT, "Target", "substrate")
         setnames(DT, evalname, "eval")
-        plt = plot_square_euler(DT, ps)
-        ggsave(paste0("square_euler_", evalname, ".pdf"), plot=plt, width=6.5, height=1.35)
+        plts[[i_file]] = plot_square_euler(DT, ps)
+            
+        setwd(rundir)  # go back to so relative dirs for other files still work
     }
-    
-    setwd(rundir)  # go back to so relative dirs for other files still work
+    plt = ggarrange(plotlist=plts, ncol=1, labels=KP_edge_fnames)
+    ggsave(paste0("square_euler_", evalname, ".pdf"), plot=plt, width=6.5, height=1.35)
 }
-
-
