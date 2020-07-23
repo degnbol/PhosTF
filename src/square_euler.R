@@ -32,7 +32,7 @@ get_p = function(evalset, drawn) {
 }
 # DT has columns substrate, infer, eval. Substrate is "KP" or "TF". infer and eval are Boolean.
 # ps is p-value for KP2KP and KP2TF
-plot_square_euler(DT, ps) {
+plot_square_euler = function(DT, ps) {
     ## constants
     KP_color = "#bd61b6"
     TF_color = "#75b42f"
