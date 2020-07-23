@@ -14,6 +14,6 @@ mkdir -p $folder
 echo "#!/usr/bin/env zsh
 export JULIA_NUM_THREADS=4
 export OPENBLAS_NUM_THREADS=4
-../../../inference.jl \"$X\" $nTF $nKP --J \"$J\" --epochs $epochs --lambda $lambda --lambdaW $lambdaW --lambdaWT $lambdaWT --WT-prior \"$WT_mask\" --WP-prior \"$WP_mask\" --WT-reg \"$WT_reg\" --WT \"$WT\" --WP \"$WP\" --trainWT $trainWT | tee $3" > $folder/$2
+../../../inference.jl \"$X\" $nTF $nKP --J \"$J\" --epochs $epochs -η $lr -d $decay -λ $lambda --lambdaW $lambdaW --lambdaWT $lambdaWT --WT-prior \"$WT_mask\" --WP-prior \"$WP_mask\" --WT-reg \"$WT_reg\" --WT \"$WT\" --WP \"$WP\" --trainWT $trainWT | tee $3" > $folder/$2
 chmod 755 $folder/$2
 done

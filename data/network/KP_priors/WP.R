@@ -97,10 +97,10 @@ fwrite(add_noise(adjacency_KP2TF_gauss, 1), "WP_KP2TF_gauss.mat", sep=" ", row.n
 fwrite(add_noise(adjacency_KP2TF_gauss01, .1), "WP_KP2TF_gauss01.mat", sep=" ", row.names=F, col.names=F)
 fwrite(add_noise(adjacency_KP2TF_gauss001, .01), "WP_KP2TF_gauss001.mat", sep=" ", row.names=F, col.names=F)
 fwrite(add_noise(adjacency_KP2TF_gauss003, noise_sd), "WP_KP2TF_gauss003.mat", sep=" ", row.names=F, col.names=F)
+fwrite(sign(add_noise(adjacency_KP2TF_gauss003, noise_sd)) * noise_sd, "WP_KP2TF_sign003.mat", sep=" ", row.names=F, col.names=F)
 
 
-fwrite(matrix(rnorm(nPT*nKP, sd=0.01), nrow=nPT, ncol=nKP),
-       "WP_gauss001.mat", sep=" ", row.names=F, col.names=F)
-
+fwrite(matrix(rnorm(nPT*nKP, sd=0.01), nrow=nPT, ncol=nKP), "WP_gauss001.mat", sep=" ", row.names=F, col.names=F)
+fwrite(sign(matrix(rnorm(nPT*nKP), nrow=nPT, ncol=nKP)) * noise_sd, "WP_sign003.mat", sep=" ", row.names=F, col.names=F)
 
 
