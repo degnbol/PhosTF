@@ -57,9 +57,10 @@ for (WP_fname in WP_fnames) {
     stopifnot(!any(KP2KP.idx & KP2TF.idx))
     
     
-    KP_edges$q = NA
-    KP_edges$q[KP2KP.idx] = fdrtool(KP_edges$marker[KP2KP.idx], plot=FALSE)$qval
-    KP_edges$q[KP2TF.idx] = fdrtool(KP_edges$marker[KP2TF.idx], plot=FALSE)$qval
+    # KP_edges$q = NA
+    # KP_edges$q[KP2KP.idx] = fdrtool(KP_edges$marker[KP2KP.idx], plot=FALSE)$qval
+    # KP_edges$q[KP2TF.idx] = fdrtool(KP_edges$marker[KP2TF.idx], plot=FALSE)$qval
+    KP_edges$q = fdrtool(KP_edges$marker, plot=F)$qval
     
     write.table(KP_edges, "KP_edges.tsv", sep="\t", quote=F, row.names=F)
     KP_edges$infer = KP_edges$q < .05
