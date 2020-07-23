@@ -1,4 +1,8 @@
 #!/usr/bin/env julia
+
+# totally bad quickfix
+try import Flux catch; end
+
 include("src/utilities/ReadWrite.jl")
 include("src/utilities/CLI.jl")
 include("src/utilities/ArgParseUtils.jl")
