@@ -111,18 +111,20 @@ for (KP_edge_fname in KP_edge_fnames) {
         eulerdata.KP = data.frame(venndata[KP2KP.idx,c("potential", selection)], inferred=top_marked[KP2KP.idx])
         eulerdata.TF = data.frame(venndata[KP2TF.idx,c("potential", selection)], inferred=top_marked[KP2TF.idx])
         
-        euler.plt.bg = rbind(data.frame(substrate="KP", inferred =-sum(eulerdata.KP$inferred), potential = sum(!eulerdata.KP$inferred)),
-                             data.frame(substrate="TF", inferred =-sum(eulerdata.TF$inferred), potential = sum(!eulerdata.TF$inferred)))
-        euler.plt.fg = rbind(data.frame(substrate="KP", TP       =-sum( eulerdata.KP$inferred & eulerdata.KP[selection]),
-                                        FN       = sum(!eulerdata.KP$inferred & eulerdata.KP[selection])),
-                             data.frame(substrate="TF", TP       =-sum( eulerdata.TF$inferred & eulerdata.TF[selection]),
-                                        FN       = sum(!eulerdata.TF$inferred & eulerdata.TF[selection])))
+        euler.plt.bg = rbind(data.frame(substrate="KP", inferred =-sum(eulerdata.KP$potential &  eulerdata.KP$inferred), 
+                                                        potential= sum(eulerdata.KP$potential)),
+                             data.frame(substrate="TF", inferred =-sum(eulerdata.TF$potential &  eulerdata.TF$inferred),
+                                                        potential= sum(eulerdata.TF$potential)))
+        euler.plt.fg = rbind(data.frame(substrate="KP", TP       =-sum(eulerdata.KP$potential &  eulerdata.KP$inferred & eulerdata.KP[,selection]),
+                                                        FN       = sum(eulerdata.KP$potential & !eulerdata.KP$inferred & eulerdata.KP[,selection])),
+                             data.frame(substrate="TF", TP       =-sum(eulerdata.TF$potential &  eulerdata.TF$inferred & eulerdata.TF[,selection]),
+                                                        FN       = sum(eulerdata.TF$potential & !eulerdata.TF$inferred & eulerdata.TF[,selection])))
         euler.plt.bg = melt(euler.plt.bg, id.vars="substrate")
         euler.plt.fg = melt(euler.plt.fg, id.vars="substrate")
         euler.plt.bg$count = abs(euler.plt.bg$value)
-        # include the inferred in the actual count of potentials
-        euler.plt.bg$count[euler.plt.bg$variable == "potential" & euler.plt.bg$substrate == "KP"] = sum(euler.plt.bg$count[euler.plt.bg$substrate == "KP"])
-        euler.plt.bg$count[euler.plt.bg$variable == "potential" & euler.plt.bg$substrate == "TF"] = sum(euler.plt.bg$count[euler.plt.bg$substrate == "TF"])
+        # reduce the size of the area for "not inferred" region to exclude "inferred" since the label is "potential".
+        euler.plt.bg$value[euler.plt.bg$variable == "potential" & euler.plt.bg$substrate == "KP"] = sum(euler.plt.bg$count[euler.plt.bg$substrate == "KP"])
+        euler.plt.bg$value[euler.plt.bg$variable == "potential" & euler.plt.bg$substrate == "TF"] = sum(euler.plt.bg$count[euler.plt.bg$substrate == "TF"])
         
         
         pvalues = c(p.selection(selection, KP2KP.idx)$p,
