@@ -163,15 +163,17 @@ for (i_file in 1:length(KP_edge_fnames)) {
     KP_edges[Target%in%TF,Target:="TF"]
     KP_edges[,KP:=NULL]
     
+    ps = list()
     for (evalname in evalnames) {
         DT = KP_edges[, c("Target", "infer", evalname), with=F]
-        ps = c(get_p(DT[Target=="KP"][[evalname]], DT[Target=="KP"][["infer"]]), 
-               get_p(DT[Target=="TF"][[evalname]], DT[Target=="TF"][["infer"]]))
+        ps[[evalname]] = c(get_p(DT[Target=="KP"][[evalname]], DT[Target=="KP"][["infer"]]), 
+                           get_p(DT[Target=="TF"][[evalname]], DT[Target=="TF"][["infer"]]))
         
         setnames(DT, "Target", "substrate")
         setnames(DT, evalname, "eval")
-        plts[[evalname]][[i_file]] = plot_square_euler(DT, ps)
+        plts[[evalname]][[i_file]] = plot_square_euler(DT, ps[[evalname]])
     }
+    write(-sum(log10(unlist(ps))), "score.txt")
         
     setwd(rundir)  # go back to so relative dirs for other files still work
 }
