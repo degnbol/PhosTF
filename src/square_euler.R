@@ -178,6 +178,6 @@ for (i_file in 1:length(KP_edge_fnames)) {
 
 for(evalname in evalnames) {
     plt = ggarrange(plotlist=plts[[evalname]], ncol=1, labels=KP_edge_fnames)
-    ggsave(paste0("square_euler_", evalname, ".pdf"), plot=plt, width=6.5, height=1.35)
+    ggsave(paste0("square_euler_", evalname, ".pdf"), plot=plt, width=6.5, height=1.35*length(plts[[evalname]]))
 }
 
