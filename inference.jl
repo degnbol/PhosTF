@@ -14,6 +14,7 @@ isdefined(Main, :ArrayUtils) || include("src/utilities/ArrayUtils.jl")
 # ArgParse used instead of Fire since Fire has a weird bug where it says there's too many arguments.
 using ArgParse
 using LinearAlgebra
+using Flux
 
 function argument_parser()
 	s = ArgParseSettings(description="Infer a weight matrix from logFC data.", autofix_names=true)
@@ -51,7 +52,7 @@ function argument_parser()
             help = "Learning rate for gradient descent method (ADAMW)."
         "--decay", "-d"
             arg_type = Float64
-            default = 0
+            default = 0.0
             range_tester = x -> x >= 0
             help = "Weight decay for ADAMW. https://fluxml.ai/Flux.jl/stable/training/optimisers/#Flux.Optimise.ADAMW"
 		"--WT", "-T"
@@ -129,7 +130,7 @@ function infer(X, nₜ::Integer, nₚ::Integer, ot::String="WT_infer.mat", op::S
 	nₒ = nᵥ-(nₚ+nₜ)
 	W_reg = WT_reg === nothing ? nothing : [ones(nᵥ,nₚ) WT_reg ones(nᵥ,nₒ)]
 
-    W = Inference.infer(X, nₜ, nₚ; epochs=epochs, opt=ADAMW(η=lr, decay=decay), λ=lambda, λW=lambdaW, λWT=lambdaWT, M=M, S=S, W=W, J=J, trainWT=trainWT, W_reg=W_reg)
+    W = Inference.infer(X, nₜ, nₚ; epochs=epochs, opt=ADAMW(lr, (0.9, 0.999), decay), λ=lambda, λW=lambdaW, λWT=lambdaWT, M=M, S=S, W=W, J=J, trainWT=trainWT, W_reg=W_reg)
 	Model.isW(W, nₜ, nₚ) || @error("W has nonzeros in entries that should be zero.")
 	Wₜ, Wₚ = Model.WₜWₚ(W, nₜ, nₚ)
 	
