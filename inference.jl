@@ -45,11 +45,14 @@ function argument_parser()
 			default = 500
 			range_tester = x -> x >= 0
 			help = "Number of times to train using all data in X."
+        "--opt", "-o"
+            default = "ADAMW"
+            help = "Optimizer algorithm for gradient descent."
         "--lr", "-η"
             arg_type = Float64
             default = 0.001
             range_tester = x -> x > 0
-            help = "Learning rate for gradient descent method (ADAMW)."
+            help = "Learning rate for gradient descent."
         "--decay", "-d"
             arg_type = Float64
             default = 0.0
@@ -88,7 +91,14 @@ function argument_parser()
 	s
 end
 
-function infer(X, nₜ::Integer, nₚ::Integer, ot::String="WT_infer.mat", op::String="WP_infer.mat"; J=nothing, epochs::Integer=5000, lr::Float64=0.001, decay::Real=0,
+
+function parse_optimizer(name::String, η::Float64, decay)
+    if name == "ADAMW" ADAMW(η, (0.9, 0.999), decay)
+    else getfield(Flux, Symbol(name))(η)  # assuming learning rate is first argument, which it is for most available optimizers. 
+    end
+end
+
+function infer(X, nₜ::Integer, nₚ::Integer, ot::String="WT_infer.mat", op::String="WP_infer.mat"; J=nothing, epochs::Integer=5000, opt="ADAMW", lr::Float64=0.001, decay::Real=0,
 	WT=nothing, WP=nothing, WT_prior=nothing, WP_prior=nothing,
 	lambda::Real=.1, lambdaW::Real=0., lambdaWT::Bool=true, trainWT::Bool=true, WT_reg=nothing)
 	# empty strings is the same as providing nothing.
@@ -130,7 +140,7 @@ function infer(X, nₜ::Integer, nₚ::Integer, ot::String="WT_infer.mat", op::S
 	nₒ = nᵥ-(nₚ+nₜ)
 	W_reg = WT_reg === nothing ? nothing : [ones(nᵥ,nₚ) WT_reg ones(nᵥ,nₒ)]
 
-    W = Inference.infer(X, nₜ, nₚ; epochs=epochs, opt=ADAMW(lr, (0.9, 0.999), decay), λ=lambda, λW=lambdaW, λWT=lambdaWT, M=M, S=S, W=W, J=J, trainWT=trainWT, W_reg=W_reg)
+    W = Inference.infer(X, nₜ, nₚ; epochs=epochs, opt=parse_optimizer(opt, lr, decay), λ=lambda, λW=lambdaW, λWT=lambdaWT, M=M, S=S, W=W, J=J, trainWT=trainWT, W_reg=W_reg)
 	Model.isW(W, nₜ, nₚ) || @error("W has nonzeros in entries that should be zero.")
 	Wₜ, Wₚ = Model.WₜWₚ(W, nₜ, nₚ)
 	
