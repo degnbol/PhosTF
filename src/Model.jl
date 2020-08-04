@@ -74,17 +74,17 @@ _Wₜ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = W[:,nₚ+1:nₚ+nₜ]
 _Wₚ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = W[1:nₜ+nₚ,1:nₚ]
 _Wₜ(W::AbstractMatrix, Iₜ) = W*Iₜ
 _Wₚ(W::AbstractMatrix, Iₚ) = W*Iₚ
-_Wₜ(W::AbstractVector, Iₜ) = W[1]*Iₜ
-_Wₚ(W::AbstractVector, Iₚ) = W[2]*Iₚ
+_Wₜ(W::Vector, Iₜ) = W[1]*Iₜ
+_Wₚ(W::Vector, Iₚ) = W[2]*Iₚ
 WₜWₚ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = _Wₜ(W,nₜ,nₚ), _Wₚ(W,nₜ,nₚ)
-WₜWₚ(W::AbstractVector, nₜ::Integer, nₚ::Integer) = _Wₜ(W[1],nₜ,nₚ), _Wₚ(W[2],nₜ,nₚ)
+WₜWₚ(W::Vector, nₜ::Integer, nₚ::Integer) = _Wₜ(W[1],nₜ,nₚ), _Wₚ(W[2],nₜ,nₚ)
 "Assert that untrainable areas are in fact zero."
 function isW(W::AbstractMatrix, nₜ::Integer, nₚ::Integer)
 	all(W[nₜ+nₚ+1:end,1:nₚ] .== 0) && 
 	all(W[:,nₜ+nₚ+1:end] .== 0) && 
 	all(diag(W) .== 0)
 end
-function isW(W::AbstractVector, nₜ::Integer, nₚ::Integer)
+function isW(W::Vector, nₜ::Integer, nₚ::Integer)
 	all(W[1][:,1:nₚ] .== 0) && 
 	all(W[1][:,nₜ+nₚ+1:end] .== 0) && 
 	all(W[2][nₜ+nₚ+1:end,1:nₚ] .== 0) && 
@@ -106,12 +106,12 @@ _B(W::AbstractMatrix, cs::NamedTuple) = (W.*cs.Mₜ) * inv(I(size(W,1)) - W.*cs.
 - W[2]: Wₚ, square
 I has to have a known size to not produce an error that might be fixed in later release.
 """
-_B(W::AbstractVector, cs::NamedTuple) = (W[1].*cs.Mₜ) * inv(I(size(W[2],1)) - W[2].*cs.Mₚ)
+_B(W::Vector, cs::NamedTuple) = (W[1].*cs.Mₜ) * inv(I(size(W[2],1)) - W[2].*cs.Mₚ)
 "To avoid finding inverse matrix, we can instead solve if given the x in B^-1 * x"
 _B(W::AbstractMatrix, cs::NamedTuple, x) = (W.*cs.Mₜ) * ((I(size(W,1)) - W.*cs.Mₚ) \ x)
-_B(W::AbstractVector, cs::NamedTuple, x) = (W[1].*cs.Mₜ) * ((I(size(W[2],1)) - W[2].*cs.Mₚ) \ x)
+_B(W::Vector, cs::NamedTuple, x) = (W[1].*cs.Mₜ) * ((I(size(W[2],1)) - W[2].*cs.Mₚ) \ x)
 B_star(W::AbstractMatrix, cs::NamedTuple) = _B(abs.(W), cs)
-B_star(W::AbstractVector, cs::NamedTuple) = _B([abs.(W[1]), abs.(W[2])], cs)
+B_star(W::Vector, cs::NamedTuple) = _B([abs.(W[1]), abs.(W[2])], cs)
 
 
 _T(B) = (I(size(B,1)) - (B.*offdiag(B))) \ B
@@ -156,7 +156,7 @@ function sse_T(W::AbstractMatrix, cs::NamedTuple, X::Matrix)
 end
 
 l1(W::AbstractMatrix) = norm(W,1)
-l1(W::AbstractVector) = norm(W[1],1)+norm(W[2],1)
+l1(W::Vector) = norm(W[2],1)
 
 
 """
@@ -193,12 +193,12 @@ end
 
 
 
-apply_priors(W, M, S) = apply_priors(apply_priors(W, M), nothing, S)
-apply_priors(W::AbstractMatrix, ::Nothing, S) = W .* (S.==0) .+ abs.(W) .* S
-apply_priors(W::AbstractVector, ::Nothing, S) = [apply_priors(W[1], nothing, S), apply_priors(W[2], nothing, S)]
+apply_priors(W, M, S::AbstractMatrix) = apply_priors(apply_priors(W, M), nothing, S)
+apply_priors(W::AbstractMatrix, ::Nothing, S::AbstractMatrix) = W .* (S.==0) .+ abs.(W) .* S
+apply_priors(W::Vector, ::Nothing, S::AbstractMatrix) = [apply_priors(W[1], nothing, S), apply_priors(W[2], nothing, S)]
 apply_priors(W::AbstractMatrix, M::AbstractMatrix) = W.*M
-apply_priors(W::AbstractVector, M::AbstractMatrix) = [W[1].*M,    W[2].*M]
-apply_priors(W::AbstractVector, M::AbstractVector) = [W[1].*M[1], W[2].*M[2]]
+apply_priors(W::Vector, M::AbstractMatrix) = [W[1].*M,    W[2].*M]
+apply_priors(W::Vector, M::Vector) = [W[1].*M[1], W[2].*M[2]]
 apply_priors(W, M, ::Nothing) = apply_priors(W, M)
 apply_priors(W, ::Nothing, ::Nothing) = W
 

@@ -31,7 +31,7 @@ end
 L1(W, ::Nothing) = 0
 L1(W::AbstractMatrix, λ::Real) = λ*l1(W)
 "Assuming here that if we are splitting WT and WP it means we only care to train on WP, therefore, we only reg on WP."
-L1(W::AbstractVector, λ::Real) = λ*l1(W[2])
+L1(W::Vector, λ::Real) = λ*l1(W[2])
 "Loss from B star"
 LB(W, cs::NamedTuple, λ::Real) = λ*l1(B_star(W, cs))
 LB(W, cs::NamedTuple, λ::Real, ::Nothing) = LB(W, cs, λ)
@@ -58,8 +58,8 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 	nᵥ, K = size(X)
 	cs = Model.constants(nᵥ, nₜ, nₚ, J === nothing ? K : J)
 	M === nothing && (M = ones(nᵥ,nᵥ)) # no prior knowledge
-	M = trainWT ? M .* (cs.Mₜ .+ cs.Mₚ) : [M.*cs.Mₜ, M.*cs.Mₚ] # enforce masks
-	W = trainWT ? W : [W.*cs.Mₜ, W.*cs.Mₚ]
+	M = trainWT ? M .* (cs.Mₜ .+ cs.Mₚ) : [M .* cs.Mₜ, M .* cs.Mₚ] # enforce masks
+	W = trainWT ? W : [W .* cs.Mₜ, W .* cs.Mₚ]
 	Iₚ = Model.Iₚ(nᵥ, nₜ, nₚ)
 	Iₜ = Model.Iₜ(nᵥ, nₜ, nₚ)
 	λW == 0 && (λW = nothing)
@@ -105,7 +105,7 @@ function infer(X::AbstractMatrix, nₜ::Integer, nₚ::Integer; epochs::Integer=
 end
 
 get_params(W::AbstractMatrix) = [W]
-get_params(W::AbstractVector) = [W[2]]  # assuming only the WP is a param
+get_params(W::Vector) = [W[2]]  # assuming only the WP is a param
 
 
 
