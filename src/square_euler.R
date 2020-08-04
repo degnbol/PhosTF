@@ -142,8 +142,8 @@ for (i_file in 1:length(KP_edge_fnames)) {
     KP_edge_fname = KP_edge_fnames[i_file]
     cat(KP_edge_fname, "\n")
     setwd(dirname(KP_edge_fname))
-    KP_edges = fread(basename(KP_edge_fname), drop="marker")
-    KP_edges$infer = KP_edges$q < .05
+    KP_edges = fread(basename(KP_edge_fname))
+    #KP_edges$infer = KP_edges$q < .05  # replaced further down
     KP_edges[,q:=NULL]
     
     # all targets should be protein KP or TF
@@ -162,6 +162,7 @@ for (i_file in 1:length(KP_edge_fnames)) {
     KP_edges[Target%in%KP,Target:="KP"]
     KP_edges[Target%in%TF,Target:="TF"]
     KP_edges[,KP:=NULL]
+    KP_edges[,infer:=abs(marker) > quantile(abs(marker), .8),by=Target]  # top 20%
     
     ps = list()
     for (evalname in evalnames) {
