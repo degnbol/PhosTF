@@ -111,7 +111,7 @@ _B(W::Tuple, cs::NamedTuple) = (W[1].*cs.Mₜ) * inv(I(size(W[2],1)) - W[2].*cs.
 _B(W::AbstractMatrix, cs::NamedTuple, x) = (W.*cs.Mₜ) * ((I(size(W,1)) - W.*cs.Mₚ) \ x)
 _B(W::Tuple, cs::NamedTuple, x) = (W[1].*cs.Mₜ) * ((I(size(W[2],1)) - W[2].*cs.Mₚ) \ x)
 B_star(W::AbstractMatrix, cs::NamedTuple) = _B(abs.(W), cs)
-B_star(W::Tuple, cs::NamedTuple) = _B([abs.(W[1]), abs.(W[2])], cs)
+B_star(W::Tuple, cs::NamedTuple) = _B((abs.(W[1]), abs.(W[2])), cs)
 
 
 _T(B) = (I(size(B,1)) - (B.*offdiag(B))) \ B
@@ -195,10 +195,10 @@ end
 
 apply_priors(W, M, S::AbstractMatrix) = apply_priors(apply_priors(W, M), nothing, S)
 apply_priors(W::AbstractMatrix, ::Nothing, S::AbstractMatrix) = W .* (S.==0) .+ abs.(W) .* S
-apply_priors(W::Tuple, ::Nothing, S::AbstractMatrix) = [apply_priors(W[1], nothing, S), apply_priors(W[2], nothing, S)]
+apply_priors(W::Tuple, ::Nothing, S::AbstractMatrix) = (apply_priors(W[1], nothing, S), apply_priors(W[2], nothing, S))
 apply_priors(W::AbstractMatrix, M::AbstractMatrix) = W.*M
-apply_priors(W::Tuple, M::AbstractMatrix) = [W[1].*M,    W[2].*M]
-apply_priors(W::Tuple, M::Tuple) = [W[1].*M[1], W[2].*M[2]]
+apply_priors(W::Tuple, M::AbstractMatrix) = (W[1].*M, W[2].*M)
+apply_priors(W::Tuple, M::Tuple) = (W[1].*M[1], W[2].*M[2])
 apply_priors(W, M, ::Nothing) = apply_priors(W, M)
 apply_priors(W, ::Nothing, ::Nothing) = W
 
