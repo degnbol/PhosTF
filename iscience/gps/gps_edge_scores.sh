@@ -1,0 +1,1 @@
+sed 's/^MPK$/MAPK/' family2oln.tsv | tr '_' '-' | mlr --tsv join -f gps_scores_max_norm.tsv -j family -r Family -l kinase then cut -x -f family then join -f epsd_oln.tsv -j EPSD -j substrate -l EPSD --lp substrate_ then cut -x -f substrate then rename substrate_OLN,substrate,OLN,kinase then reorder -f kinase | table_unjag.sh 1 $'\t' ' ' > gps_edge_scores.tsv
