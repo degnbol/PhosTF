@@ -1,0 +1,1 @@
+cut -f-2 Saccharomyces_cerevisiae.txt | mlr --tsv rename 'EPSD ID,EPSD,UniProt ID,ACC' then uniq -a then join -f ../../data/processed/uniprot/acc_oln.tsv -j ACC then cut -x -f ACC then uniq -a then reorder -f EPSD | mlr --tsv sort -f EPSD > epsd_oln.tsv
