@@ -1,10 +1,7 @@
 #!/usr/bin/env Rscript
 # eval gps, netphorest and phosTF on evaluation data with precision, recall, specificity, auc, roc, etc.
 suppressPackageStartupMessages(library(data.table))
-suppressPackageStartupMessages(library(pROC))
 library(matrixStats)
-library(ggplot2)
-library(pammtools)
 
 setwd("~/PhosTF/iscience/eval/")
 
@@ -141,10 +138,10 @@ beta_est = 5000 / (140 * 200)
 beta_lower = 3067 / (140 * 200)
 beta_upper = 14026 / (140 * 200)
 
-n.replicates = 10
+n.replicates = 50000
 
 TPRs.FPRs = data.table()
-for(b in c(beta_est, beta_lower, beta_upper)) {
+for(beta in c(beta_est, beta_lower, beta_upper)) {
     TPRs.FPRs_pho = get_TPRs.FPRs(pho[eval==T, rank], pho[eval==F, rank], beta, n.replicates)
     TPRs.FPRs_net = get_TPRs.FPRs(net[eval==T, rank], net[eval==F, rank], beta, n.replicates)
     TPRs.FPRs_gps = get_TPRs.FPRs(gps[eval==T, rank], gps[eval==F, rank], beta, n.replicates)
@@ -152,40 +149,16 @@ for(b in c(beta_est, beta_lower, beta_upper)) {
     TPRs.FPRs_net$method = "NetPhorest"
     TPRs.FPRs_gps$method = "GPS"
     TPRs.FPRs_beta = rbind(TPRs.FPRs_pho, TPRs.FPRs_net, TPRs.FPRs_gps)
-    TPRs.FPRs_beta$beta = b
+    TPRs.FPRs_beta$beta = beta
     TPRs.FPRs = rbind(TPRs.FPRs, TPRs.FPRs_beta)
 }
 
-
-ggplot() + geom_step(data=TPRs.FPRs[beta==beta_lower], mapping=aes(x=FPR, y=TPR, color=method, lty=bound))
-
-# # DT has col FPR and TPR
-# line2step = function(DT) {
-#     DT = rbind(data.table(FPR=0, TPR=0), unique(DT[order(FPR, TPR)]), data.table(FPR=1, TPR=1))
-#     rbind(DT, data.table(FPR=DT$FPR[-1], TPR=DT$TPR[-nrow(DT)]))[order(FPR, TPR)]
-# }
-# TPRs.FPRs_step = unique(TPRs.FPRs[,line2step(.SD), by=c("bound", "method")])
-# ggplot() + geom_line(data=TPRs.FPRs_step, mapping=aes(x=FPR, y=TPR, color=method, lty=bound))
-
-
-# given a natural number that might be between two observations of a step function, get the correct TPR.
-# this is just the max TPR that is before the given FPR
-get_ROC_TPR = function(DT, fpr, meth) {
-    max(DT[method==meth][FPR==max(FPR[FPR <= fpr]), TPR])
-}
-
 # expand so we have multiple TPRs for the same FPRs for comparisons that needs to be done.
-TPRs.FPRs.2 = unique(rbind(TPRs.FPRs[, .(FPR=0, TPR=0), by=c("method", "bound", "beta")], TPRs.FPRs))
-TPRs.FPRs.2[(bound=="upper") & (beta==beta_est), .(TPR=get_ROC_TPR(TPRs.FPRs.2[(bound=="lower") & (beta==beta_est)], FPR, method)), by=c("TPR", "FPR", "method")]
-TPRs.FPRs.2[(bound=="lower") & (beta==beta_est), .(TPR=get_ROC_TPR(TPRs.FPRs.2[(bound=="upper") & (beta==beta_est)], FPR, method)), by=c("TPR", "FPR", "method")]
-TPRs.FPRs.2[(bound=="upper") & (beta==beta_upper), .(TPR=get_ROC_TPR(TPRs.FPRs.2[(bound=="upper") & (beta==beta_est)], FPR, method)), by=c("TPR", "FPR", "method")]
-TPRs.FPRs.2[(bound=="lower") & (beta==beta_upper), .(TPR=get_ROC_TPR(TPRs.FPRs.2[(bound=="lower") & (beta==beta_est)], FPR, method)), by=c("TPR", "FPR", "method")]
+TPRs.FPRs = unique(rbind(TPRs.FPRs[, .(FPR=0, TPR=0), by=c("method", "bound", "beta")], TPRs.FPRs))[order(FPR,TPR)]
 
 
-TPRs.FPRs.2 = rbind(TPRs.FPRs.ub, TPRs.FPRs.lb)[order(FPR, TPR_lb, TPR_ub)]
+TPRs.FPRs[beta==beta_est, beta:="beta_est"]
+TPRs.FPRs[beta==beta_upper, beta:="beta_upper"]
+TPRs.FPRs[beta==beta_lower, beta:="beta_lower"]
 
-ggplot(TPRs.FPRs.2, aes(x=FPR, ymin=TPR_lb, ymax=TPR_ub, fill=method)) +
-    geom_stepribbon(alpha=0.4)
-
-
-
+fwrite(TPRs.FPRs, "roc.tsv", sep='\t')
