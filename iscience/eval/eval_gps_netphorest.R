@@ -157,8 +157,9 @@ for(beta in c(beta_est, beta_lower, beta_upper)) {
 TPRs.FPRs = unique(rbind(TPRs.FPRs[, .(FPR=0, TPR=0), by=c("method", "bound", "beta")], TPRs.FPRs))[order(FPR,TPR)]
 
 
-TPRs.FPRs[beta==beta_est, beta:="beta_est"]
-TPRs.FPRs[beta==beta_upper, beta:="beta_upper"]
-TPRs.FPRs[beta==beta_lower, beta:="beta_lower"]
+TPRs.FPRs[beta==beta_est, Beta:="beta_est"]
+TPRs.FPRs[beta==beta_upper, Beta:="beta_upper"]
+TPRs.FPRs[beta==beta_lower, Beta:="beta_lower"]
+setnames(TPRs.FPRs, "Beta", "beta")
 
 fwrite(TPRs.FPRs, "roc.tsv", sep='\t')
