@@ -138,7 +138,7 @@ beta_est = 5000 / (140 * 200)
 beta_lower = 3067 / (140 * 200)
 beta_upper = 14026 / (140 * 200)
 
-n.replicates = 50000
+n.replicates = 10
 
 TPRs.FPRs = data.table()
 for(beta in c(beta_est, beta_lower, beta_upper)) {
