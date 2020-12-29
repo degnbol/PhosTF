@@ -160,6 +160,7 @@ TPRs.FPRs = unique(rbind(TPRs.FPRs[, .(FPR=0, TPR=0), by=c("method", "bound", "b
 TPRs.FPRs[beta==beta_est, Beta:="beta_est"]
 TPRs.FPRs[beta==beta_upper, Beta:="beta_upper"]
 TPRs.FPRs[beta==beta_lower, Beta:="beta_lower"]
+TPRs.FPRs[, beta:=NULL]
 setnames(TPRs.FPRs, "Beta", "beta")
 
 fwrite(TPRs.FPRs, "roc.tsv", sep='\t')
