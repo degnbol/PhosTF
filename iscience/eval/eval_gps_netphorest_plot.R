@@ -62,10 +62,16 @@ ggplot() +
 ROC.dt.lim = ROC.dt.bounds[beta!="beta_est", .(TPR_ub=max(TPR_ub), TPR_lb=min(TPR_lb)), by=c("method", "FPR")]
 
 ggplot() +
+    geom_path(data=data.table(x=c(0,1), y=c(0,1)), mapping=aes(x=x, y=y), alpha=0.5) +
     geom_step(data=TPRs.FPRs[(beta=="beta_est") & (bound=="upper")], mapping=aes(x=FPR, y=TPR, color=method)) +
     geom_step(data=TPRs.FPRs[(beta=="beta_est") & (bound=="lower")], mapping=aes(x=FPR, y=TPR, color=method)) +
-    geom_stepribbon(data=ROC.dt.lim, mapping=aes(x=FPR, ymin=TPR_lb, ymax=TPR_ub, fill=method), alpha=0.25)
+    geom_stepribbon(data=ROC.dt.lim, mapping=aes(x=FPR, ymin=TPR_lb, ymax=TPR_ub, fill=method), alpha=0.25) +
+    theme_linedraw() +
+    scale_x_continuous(name="FPR", expand=c(0,0)) + scale_y_continuous(name="TPR", expand=c(0,0)) +
+    theme(panel.grid.minor=element_line(color="lightgray"))
 
+
+ggsave("roc_boot.pdf")
 
 
 
