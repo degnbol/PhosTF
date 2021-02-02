@@ -9,21 +9,16 @@ TPRs.FPRs = fread("roc.tsv")
 
 
 ggplot() + 
-    geom_step(data=TPRs.FPRs[(beta=="beta_est") & (bound=="upper")], mapping=aes(x=FPR, y=TPR, color=method)) +
-    geom_step(data=TPRs.FPRs[(beta=="beta_est") & (bound=="lower")], mapping=aes(x=FPR, y=TPR, color=method))
+    geom_step(data=TPRs.FPRs[(beta=="beta_lower") & (bound=="upper")], mapping=aes(x=FPR, y=TPR, color=method)) +
+    geom_step(data=TPRs.FPRs[(beta=="beta_lower") & (bound=="lower")], mapping=aes(x=FPR, y=TPR, color=method))
 
 
 
 
 ROC.dt = data.table()
 for (meth in unique(TPRs.FPRs$method)) {
-    ROC.dt = rbind(ROC.dt, merge(
-        TPRs.FPRs[(method==meth) & (beta == "beta_est")],
-        CJ(FPR=TPRs.FPRs[(method==meth) & (beta == "beta_est"), FPR], bound=c("upper", "lower"), method=meth, beta="beta_est", unique=T)
-        , by=c("FPR", "bound", "method", "beta"), all=T),
-        merge(
-            TPRs.FPRs[(method==meth) & (beta != "beta_est")],
-            CJ(FPR=TPRs.FPRs[(method==meth) & (beta != "beta_est"), FPR], bound=c("upper", "lower"), method=meth, beta=c("beta_upper", "beta_lower"), unique=T)
+    ROC.dt = rbind(ROC.dt, merge(TPRs.FPRs[method==meth],
+            CJ(FPR=TPRs.FPRs[method==meth, FPR], bound=c("upper", "lower"), method=meth, beta=c("beta_upper", "beta_lower"), unique=T)
             , by=c("FPR", "bound", "method", "beta"), all=T)
     )
 }
@@ -45,33 +40,21 @@ ROC.dt.bounds = merge(
     by=c("FPR","method","beta"))
 
 
-ggplot() +
-    geom_step(data=TPRs.FPRs[(beta=="beta_est") & (bound=="upper")], mapping=aes(x=FPR, y=TPR, color=method)) +
-    geom_step(data=TPRs.FPRs[(beta=="beta_est") & (bound=="lower")], mapping=aes(x=FPR, y=TPR, color=method)) +
-    geom_stepribbon(data=ROC.dt.bounds[beta=="beta_est"], mapping=aes(x=FPR, ymin=TPR_lb, ymax=TPR_ub, fill=method), alpha=0.4)
+ribbon_alpha = 0.4
+ribbon_stroke_alpha = 0.8
 
-ggplot() +
-    geom_step(data=TPRs.FPRs[(beta=="beta_lower") & (bound=="upper")], mapping=aes(x=FPR, y=TPR, color=method)) +
-    geom_step(data=TPRs.FPRs[(beta=="beta_lower") & (bound=="lower")], mapping=aes(x=FPR, y=TPR, color=method)) +
-    geom_stepribbon(data=ROC.dt.bounds[beta=="beta_lower"], mapping=aes(x=FPR, ymin=TPR_lb, ymax=TPR_ub, fill=method), alpha=0.3) +
-    geom_step(data=TPRs.FPRs[(beta=="beta_upper") & (bound=="upper")], mapping=aes(x=FPR, y=TPR, color=method)) +
-    geom_step(data=TPRs.FPRs[(beta=="beta_upper") & (bound=="lower")], mapping=aes(x=FPR, y=TPR, color=method)) +
-    geom_stepribbon(data=ROC.dt.bounds[beta=="beta_upper"], mapping=aes(x=FPR, ymin=TPR_lb, ymax=TPR_ub, fill=method), alpha=0.3)
-
-
-ROC.dt.lim = ROC.dt.bounds[beta!="beta_est", .(TPR_ub=max(TPR_ub), TPR_lb=min(TPR_lb)), by=c("method", "FPR")]
-
-ggplot() +
+ggplot() + 
     geom_path(data=data.table(x=c(0,1), y=c(0,1)), mapping=aes(x=x, y=y), alpha=0.5) +
-    geom_step(data=TPRs.FPRs[(beta=="beta_est") & (bound=="upper")], mapping=aes(x=FPR, y=TPR, color=method)) +
-    geom_step(data=TPRs.FPRs[(beta=="beta_est") & (bound=="lower")], mapping=aes(x=FPR, y=TPR, color=method)) +
-    geom_stepribbon(data=ROC.dt.lim, mapping=aes(x=FPR, ymin=TPR_lb, ymax=TPR_ub, fill=method), alpha=0.25) +
-    theme_linedraw() +
-    scale_x_continuous(name="FPR", expand=c(0,0)) + scale_y_continuous(name="TPR", expand=c(0,0)) +
-    theme(panel.grid.minor=element_line(color="lightgray"))
+    theme_linedraw() + scale_x_continuous(name="FPR", expand=c(0,0)) + scale_y_continuous(name="TPR", expand=c(0,0)) + 
+    theme(panel.grid.minor=element_line(color="lightgray"), panel.spacing = unit(2, "lines")) + # panel spacing separates the two subplots a bit more
+    # geom_step(data=TPRs.FPRs[(beta=="beta_lower") & (bound=="upper")], mapping=aes(x=FPR, y=TPR, color=method), alpha=ribbon_stroke_alpha) +
+    # geom_step(data=TPRs.FPRs[(beta=="beta_lower") & (bound=="lower")], mapping=aes(x=FPR, y=TPR, color=method), alpha=ribbon_stroke_alpha) +
+    facet_grid(cols=vars(beta)) +
+    geom_stepribbon(data=ROC.dt.bounds, mapping=aes(x=FPR, ymin=TPR_lb, ymax=TPR_ub, fill=method), alpha=ribbon_alpha) +
+    coord_fixed()  # force square
 
 
-ggsave("roc_boot.pdf")
+ggsave("roc_boot.pdf", width=11, height=5)
 
 
 

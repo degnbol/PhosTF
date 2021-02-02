@@ -133,15 +133,14 @@ get_TPRs.FPRs = function(P.L.ranks, U.ranks, beta, n.replicates=2000) {
     rbind(UB, LB)
 }
 
+# min and max number of TFs that could have mediated KP->TF effects based off of 
+beta_lower = 3067 / (163 * 213)
+beta_upper = 14026 / (163 * 213)
 
-beta_est = 5000 / (140 * 200)
-beta_lower = 3067 / (140 * 200)
-beta_upper = 14026 / (140 * 200)
-
-n.replicates = 10000
+n.replicates = 1000
 
 TPRs.FPRs = data.table()
-for(beta in c(beta_est, beta_lower, beta_upper)) {
+for(beta in c(beta_lower, beta_upper)) {
     TPRs.FPRs_pho = get_TPRs.FPRs(pho[eval==T, rank], pho[eval==F, rank], beta, n.replicates)
     TPRs.FPRs_net = get_TPRs.FPRs(net[eval==T, rank], net[eval==F, rank], beta, n.replicates)
     TPRs.FPRs_gps = get_TPRs.FPRs(gps[eval==T, rank], gps[eval==F, rank], beta, n.replicates)
@@ -157,7 +156,6 @@ for(beta in c(beta_est, beta_lower, beta_upper)) {
 TPRs.FPRs = unique(rbind(TPRs.FPRs[, .(FPR=0, TPR=0), by=c("method", "bound", "beta")], TPRs.FPRs))[order(FPR,TPR)]
 
 
-TPRs.FPRs[beta==beta_est, Beta:="beta_est"]
 TPRs.FPRs[beta==beta_upper, Beta:="beta_upper"]
 TPRs.FPRs[beta==beta_lower, Beta:="beta_lower"]
 TPRs.FPRs[, beta:=NULL]
