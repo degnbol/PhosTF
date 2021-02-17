@@ -7,6 +7,9 @@ library(pammtools)
 setwd("~/PhosTF/iscience/eval/")
 TPRs.FPRs = fread("roc.tsv")
 
+TPRs.FPRs[(method=="PhosTF") & (bound=="median") & (beta=="beta_lower") & (P >= 8776)]
+TPRs.FPRs[(method=="PhosTF") & (bound=="median") & (beta=="beta_upper") & (P >= 8776)]
+
 
 ggplot() + 
     geom_step(data=TPRs.FPRs[(beta=="beta_lower") & (bound=="upper")], mapping=aes(x=FPR, y=TPR, color=method)) +
@@ -47,10 +50,9 @@ ggplot() +
     geom_path(data=data.table(x=c(0,1), y=c(0,1)), mapping=aes(x=x, y=y), alpha=0.5) +
     theme_linedraw() + scale_x_continuous(name="FPR", expand=c(0,0)) + scale_y_continuous(name="TPR", expand=c(0,0)) + 
     theme(panel.grid.minor=element_line(color="lightgray"), panel.spacing = unit(2, "lines")) + # panel spacing separates the two subplots a bit more
-    # geom_step(data=TPRs.FPRs[(beta=="beta_lower") & (bound=="upper")], mapping=aes(x=FPR, y=TPR, color=method), alpha=ribbon_stroke_alpha) +
-    # geom_step(data=TPRs.FPRs[(beta=="beta_lower") & (bound=="lower")], mapping=aes(x=FPR, y=TPR, color=method), alpha=ribbon_stroke_alpha) +
     facet_grid(cols=vars(beta)) +
     geom_stepribbon(data=ROC.dt.bounds, mapping=aes(x=FPR, ymin=TPR_lb, ymax=TPR_ub, fill=method), alpha=ribbon_alpha) +
+    geom_step(data=TPRs.FPRs[(bound=="median") & (method=="PhosTF")], mapping=aes(x=FPR, y=TPR), color="blue") +
     coord_fixed()  # force square
 
 

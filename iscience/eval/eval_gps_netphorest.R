@@ -5,7 +5,7 @@ library(matrixStats)
 
 setwd("~/PhosTF/iscience/eval/")
 
-DT = fread("../data/KP_edges.tsv")
+DT = fread("../../data/evaluation/P_eval.tsv")
 DT[,biogrid:=biogrid!=""]
 DT[,fiedler:=fiedler!=""]
 DT[,fasolo:=!is.na(fasolo)]
@@ -15,13 +15,20 @@ DT[,yeastkid05:=yeastkid>4.52 & !is.na(yeastkid)]
 DT[,yeastkid01:=yeastkid>6.40 & !is.na(yeastkid)]
 DT[,ptmod5:=ptmod>500 & !is.na(ptmod)]
 DT[,eval:=biogrid|fiedler|fasolo|parca|ptacek|yeastkid05|ptmod5]
+setnames(DT, c("Source", "Target"), c("kinase", "substrate"))
+GPS = fread("../gps/gps_edge_scores.tsv")
+setnames(GPS, "score_max_norm", "gps")
+DT = merge(DT, GPS, all=T, by=c("kinase", "substrate"))
+PhosTF = fread("../../data/inference/KP_edges.tsv", drop="q")
+setnames(PhosTF, "marker", "phostf")
+DT = merge(DT, PhosTF, all=T, by=c("kinase", "substrate"))
 
 # discard everything we are not going to use for better overview
-DT = DT[, .(eval, q, netphorest, gps)]
+DT = DT[, .(eval, phostf, netphorest, gps)]
 # split for each method
-pho = DT[, .(eval, score=q, rank=rank(q))]
-net = DT[, .(eval, score=netphorest, rank=rank(-netphorest))]
-gps = DT[, .(eval, score=gps, rank=rank(-gps))]
+pho = DT[!is.na(phostf), .(eval, score=phostf, rank=rank(-phostf))]
+net = DT[!is.na(netphorest), .(eval, score=netphorest, rank=rank(-netphorest))]
+gps = DT[!is.na(gps), .(eval, score=gps, rank=rank(-gps))]
 
 # all unlabeled are considered negatives here, i.e. beta = 0
 # pho[,plot(roc(eval, score, direction=">"))]
@@ -43,13 +50,13 @@ get_T = function(P.L.ranks, U.ranks, n.replicates=2000) {
     ranks.range = sort(unique(c(P.L.ranks, U.ranks)))
     
     tprs.boot = replicate(n.replicates, get_boot_tprs(P.L.ranks, ranks.range))
-    TPR.L.CI = rowQuantiles(tprs.boot, probs=c(0.025, 0.975))
+    TPR.L.CI = rowQuantiles(tprs.boot, probs=c(0.025, 0.5, 0.975))
     
     # look at bootstrapped CI of rank vs TPR
     # plot(ranks.range, rowMeans(tprs.boot), type='l')
     # lines(ranks.range, TPR.L.CI[,1])
     # lines(ranks.range, TPR.L.CI[,2])
-    list(lb=TPR.L.CI[,1], ub=TPR.L.CI[,2])
+    list(lb=TPR.L.CI[,1], med=TPR.L.CI[,2], ub=TPR.L.CI[,3])
 }
 
 # eq. 10
@@ -119,23 +126,33 @@ get_TPRs.FPRs = function(P.L.ranks, U.ranks, beta, n.replicates=2000) {
     
     con_UB = get_contingency(P.L.ranks, U.ranks, n.P.U.star, get_theta.ub(T.$ub, n.P.U.star))
     con_LB = get_contingency(P.L.ranks, U.ranks, n.P.U.star, get_theta.lb(T.$lb, n.P.U.star))
+    con_med = get_contingency(P.L.ranks, U.ranks, n.P.U.star, T.$med * n.P.U.star)
     
     UB = data.table(
         TPR=con_UB$TP / (n.P.L + n.P.U.star),
-        FPR=con_UB$FP / (0     + n.N.U.star)  # no known negatives
+        FPR=con_UB$FP / (0     + n.N.U.star),  # no known negatives
+        P=con_UB$TP+con_UB$FP  # also keep the number of edges classified as a positive at a given threshold
     )
     UB$bound = "upper"
     LB = data.table(
         TPR=con_LB$TP / (n.P.L + n.P.U.star),
-        FPR=con_LB$FP / (0     + n.N.U.star)   # no known negatives
+        FPR=con_LB$FP / (0     + n.N.U.star),   # no known negatives
+        P=con_LB$TP+con_LB$FP  # also keep the number of edges classified as a positive at a given threshold
     )
     LB$bound = "lower"
-    rbind(UB, LB)
+    MED = data.table(
+        TPR=con_med$TP / (n.P.L + n.P.U.star),
+        FPR=con_med$FP / (0     + n.N.U.star),   # no known negatives
+        P=con_med$TP+con_med$FP  # also keep the number of edges classified as a positive at a given threshold
+    )
+    MED$bound = "median"
+    rbind(UB, LB, MED)
 }
 
 # min and max number of TFs that could have mediated KP->TF effects based off of 
-beta_lower = 3067 / (163 * 213)
-beta_upper = 14026 / (163 * 213)
+n.known = DT[, sum(eval)]
+beta_lower = (3067 - n.known) / (163 * 213)
+beta_upper = (14026 - n.known) / (163 * 213)
 
 n.replicates = 1000
 
@@ -152,8 +169,9 @@ for(beta in c(beta_lower, beta_upper)) {
     TPRs.FPRs = rbind(TPRs.FPRs, TPRs.FPRs_beta)
 }
 
+
 # expand so we have multiple TPRs for the same FPRs for comparisons that needs to be done.
-TPRs.FPRs = unique(rbind(TPRs.FPRs[, .(FPR=0, TPR=0), by=c("method", "bound", "beta")], TPRs.FPRs))[order(FPR,TPR)]
+TPRs.FPRs = unique(rbind(TPRs.FPRs[, .(FPR=0, TPR=0, P=0), by=c("method", "bound", "beta")], TPRs.FPRs))[order(FPR,TPR,P)]
 
 
 TPRs.FPRs[beta==beta_upper, Beta:="beta_upper"]
