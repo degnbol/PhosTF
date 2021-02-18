@@ -38,25 +38,21 @@ gps = DT[!is.na(gps), .(eval, score=gps, rank=rank(-gps))]
 
 ## estimate CI with bootstrap from the known positives
 
-get_tprs = function(P.L.ranks, ranks.range) {
-    rowMeans(matrix(P.L.ranks, nrow=length(ranks.range), ncol=length(P.L.ranks), byrow=T) <= matrix(ranks.range, nrow=length(ranks.range), ncol=length(P.L.ranks), byrow=F))
+get_boot_tpr_quantiles = function(P.L.ranks, rank.range, n.replicates=1, probs=c(0.025, 0.975)) {
+    P.L.ranks.boot = matrix(sample(P.L.ranks, size=length(P.L.ranks) * n.replicates, replace=T), ncol=n.replicates)
+    sapply(rank.range, function (r) quantile(colMeans(P.L.ranks.boot <= r), probs=probs))
 }
 
-get_boot_tprs = function(P.L.ranks, ranks.range) {
-    get_tprs(sample(P.L.ranks, replace=T), ranks.range)
-}
-
-get_T = function(P.L.ranks, U.ranks, n.replicates=2000) {
-    ranks.range = sort(unique(c(P.L.ranks, U.ranks)))
+get_T = function(P.L.ranks, U.ranks, n.replicates=100) {
+    rank.range = sort(unique(c(P.L.ranks, U.ranks)))
     
-    tprs.boot = replicate(n.replicates, get_boot_tprs(P.L.ranks, ranks.range))
-    TPR.L.CI = rowQuantiles(tprs.boot, probs=c(0.025, 0.5, 0.975))
+    TPR.L.CI = get_boot_tpr_quantiles(P.L.ranks, rank.range, n.replicates)
     
     # look at bootstrapped CI of rank vs TPR
-    # plot(ranks.range, rowMeans(tprs.boot), type='l')
-    # lines(ranks.range, TPR.L.CI[,1])
-    # lines(ranks.range, TPR.L.CI[,2])
-    list(lb=TPR.L.CI[,1], med=TPR.L.CI[,2], ub=TPR.L.CI[,3])
+    # plot(rank.range, rowMeans(tprs.boot), type='l')
+    # lines(rank.range, TPR.L.CI[1,])
+    # lines(rank.range, TPR.L.CI[2,])
+    list(lb=TPR.L.CI[1,], ub=TPR.L.CI[2,])
 }
 
 # eq. 10
@@ -69,36 +65,36 @@ get_theta.lb = function(T.lb, n.P.U.star) {
 }
 
 
-get_n.head = function(ranks, ranks.range) {
-    rowSums(matrix(ranks, nrow=length(ranks.range), ncol=length(ranks), byrow=T) <= matrix(ranks.range, nrow=length(ranks.range), ncol=length(ranks), byrow=F))
+get_n.head = function(ranks, rank.range) {
+    rowSums(matrix(ranks, nrow=length(rank.range), ncol=length(ranks), byrow=T) <= matrix(rank.range, nrow=length(rank.range), ncol=length(ranks), byrow=F))
 }
-get_n.tail = function(ranks, ranks.range) {
-    rowSums(matrix(ranks, nrow=length(ranks.range), ncol=length(ranks), byrow=T) >  matrix(ranks.range, nrow=length(ranks.range), ncol=length(ranks), byrow=F))
+get_n.tail = function(ranks, rank.range) {
+    rowSums(matrix(ranks, nrow=length(rank.range), ncol=length(ranks), byrow=T) >  matrix(rank.range, nrow=length(rank.range), ncol=length(ranks), byrow=F))
 }
 
 # eq. 11
-get_n.head_P.U.star = function(n.head_U, n.tail_U, ranks.range, n.P.U.star, theta) {
+get_n.head_P.U.star = function(n.head_U, n.tail_U, rank.range, n.P.U.star, theta) {
     cond = n.P.U.star - theta <= n.tail_U
     rowMins(cbind(n.head_U, theta)) * cond + (n.P.U.star - n.tail_U) * (1-cond)
 }
 
 
 get_contingency = function(P.L.ranks, U.ranks, n.P.U.star, theta) {
-    ranks.range = sort(unique(c(P.L.ranks, U.ranks)))
+    rank.range = sort(unique(c(P.L.ranks, U.ranks)))
     n.U = length(U.ranks)
     n.P.L = length(P.L.ranks)
     n.N.U.star = n.U - n.P.U.star
-    n.head_U = get_n.head(U.ranks, ranks.range)
+    n.head_U = get_n.head(U.ranks, rank.range)
     n.tail_U = n.U - n.head_U
     
     # these are the 4 values for the contingency table in eq. 12 for any rank r:
-    n.head_P.U.star = get_n.head_P.U.star(n.head_U, n.tail_U, ranks.range, n.P.U.star, theta)
+    n.head_P.U.star = get_n.head_P.U.star(n.head_U, n.tail_U, rank.range, n.P.U.star, theta)
     n.tail_P.U.star = n.P.U.star - n.head_P.U.star
     n.head_N.U.star = n.head_U - n.head_P.U.star
     n.tail_N.U.star = n.N.U.star - n.head_N.U.star
     
     # the 4 values for the contingency table of known labels
-    n.head_P.L = get_n.head(P.L.ranks, ranks.range)
+    n.head_P.L = get_n.head(P.L.ranks, rank.range)
     n.tail_P.L = n.P.L - n.head_P.L
     n.head_N.L = 0  # no known negatives
     n.tail_N.L = 0  # no known negatives
