@@ -24,11 +24,11 @@ setnames(PhosTF, "marker", "phostf")
 DT = merge(DT, PhosTF, all=T, by=c("kinase", "substrate"))
 
 # discard everything we are not going to use for better overview
-DT = DT[, .(eval, phostf, netphorest, gps)]
+DT = DT[!is.na(eval), .(eval, phostf, netphorest, gps)]
 # split for each method
-pho = DT[!is.na(phostf) & !is.na(eval), .(eval, score=phostf, rank=rank(-phostf))]
-net = DT[!is.na(netphorest) & !is.na(eval), .(eval, score=netphorest, rank=rank(-netphorest))]
-gps = DT[!is.na(gps) & !is.na(eval), .(eval, score=gps, rank=rank(-gps))]
+pho = DT[!is.na(phostf), .(eval, score=phostf, rank=rank(-phostf))]
+net = DT[!is.na(netphorest), .(eval, score=netphorest, rank=rank(-netphorest))]
+gps = DT[!is.na(gps), .(eval, score=gps, rank=rank(-gps))]
 
 # all unlabeled are considered negatives here, i.e. beta = 0
 # pho[,plot(roc(eval, score, direction=">"))]
@@ -121,6 +121,7 @@ get_TPRs.FPRs = function(P.L.ranks, U.ranks, beta, n.replicates=2000) {
     n.N.U.star = n.U - n.P.U.star
     # correct the input beta
     beta = n.P.U.star / n.U
+    stopifnot(!is.na(beta))
     
     T. = get_T(P.L.ranks, U.ranks, n.replicates)
     
