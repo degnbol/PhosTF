@@ -154,7 +154,7 @@ n.known = DT[, sum(eval)]
 beta_lower = (3067 - n.known) / (163 * 213)
 beta_upper = (14026 - n.known) / (163 * 213)
 
-n.replicates = 1000
+n.replicates = 100
 
 TPRs.FPRs = data.table()
 for(beta in c(beta_lower, beta_upper)) {
