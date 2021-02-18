@@ -22,9 +22,9 @@ DT = merge(DT, GPS, all=T, by=c("kinase", "substrate"))
 PhosTF = fread("../../data/inference/KP_edges.tsv", drop="q")
 setnames(PhosTF, "marker", "phostf")
 DT = merge(DT, PhosTF, all=T, by=c("kinase", "substrate"))
+DT = DT[!is.na(eval) & (!substrate%in%kinase)]
 
-# discard everything we are not going to use for better overview
-DT = DT[!is.na(eval), .(eval, phostf, netphorest, gps)]
+
 # split for each method
 pho = DT[!is.na(phostf), .(eval, score=phostf, rank=rank(-phostf))]
 net = DT[!is.na(netphorest), .(eval, score=netphorest, rank=rank(-netphorest))]
@@ -155,8 +155,11 @@ n.replicates = 100
 
 TPRs.FPRs = data.table()
 for(beta in c(beta_lower, beta_upper)) {
+    message("pho")
     TPRs.FPRs_pho = get_TPRs.FPRs(pho[eval==T, rank], pho[eval==F, rank], beta, n.replicates)
+    message("net")
     TPRs.FPRs_net = get_TPRs.FPRs(net[eval==T, rank], net[eval==F, rank], beta, n.replicates)
+    message("gps")
     TPRs.FPRs_gps = get_TPRs.FPRs(gps[eval==T, rank], gps[eval==F, rank], beta, n.replicates)
     TPRs.FPRs_pho$method = "PhosTF"
     TPRs.FPRs_net$method = "NetPhorest"
