@@ -7,8 +7,8 @@ library(pammtools)
 setwd("~/PhosTF/iscience/eval/")
 TPRs.FPRs = fread("roc.tsv")
 
-TPRs.FPRs[(method=="PhosTF") & (bound=="median") & (beta=="beta_lower") & (P >= 8776)]
-TPRs.FPRs[(method=="PhosTF") & (bound=="median") & (beta=="beta_upper") & (P >= 8776)]
+TPRs.FPRs[(method=="PhosTF") & (beta=="beta_lower") & (P >= 8776)]
+TPRs.FPRs[(method=="PhosTF") & (beta=="beta_upper") & (P >= 8776)]
 
 
 ggplot() + 
