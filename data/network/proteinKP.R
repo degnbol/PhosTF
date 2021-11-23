@@ -1,9 +1,8 @@
 #!/usr/bin/env Rscript
+suppressPackageStartupMessages(library(data.table))
+suppressPackageStartupMessages(library(here))
 
-library(data.table)
-
-
-setwd("~/cwd/data/network")
+setwd(paste0(here(), "/data/network"))
 
 
 TFs = fread("TF_mode.tsv", sep="\t")
