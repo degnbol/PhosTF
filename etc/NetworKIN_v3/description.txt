@@ -1,0 +1,5 @@
+I added the NetworKIN bash script to be used for running.
+It simply sets some of the parameters that are not supposed to be changed in the project, which is location of other code we need and that we use yeast.
+Run as: NetworKIN proteins.fasta > networKIN_result.txt
+A symlink has been added in datafile so data/4932.protein.sequences.fa refers to a file.
+Everything in this project is outdated so I ran blastp manually with settings copied from their internal blastall command and commented out some of their python code.

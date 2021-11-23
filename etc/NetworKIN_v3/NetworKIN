@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+dir=$(dirname $0)
+python2 $dir/NetworKIN.py -b /usr/local/ncbi/blast/bin/blastp -n $dir/../NetPhorest*/netphorest --threads 4 --blast-result $dir/../../data/processed/SGD/orfs_blast_sort.tab 4932 $@
