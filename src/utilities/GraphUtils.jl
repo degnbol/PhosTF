@@ -2,7 +2,7 @@
 include("XGMML.jl")
 isdefined(Main, :ColorUtils) || include("ColorUtils.jl")
 include("MathUtils.jl")
-isdefined(Main, :GeneRegulation) || include("GeneRegulation.jl")
+isdefined(Main, :GeneRegulation) || include("../simulation/GeneRegulation.jl")
 
 module GraphUtils
 using Statistics
