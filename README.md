@@ -4,9 +4,11 @@ Simulation and inference of networks of gene regulation with Protein Kinase, Tra
 ## REQUIRMENTS
 - Julia. Currently on 1.6.4
 
-## SETUP
-- Set up some commands by running setup.sh
+## CONFIG
+- Configure some commands by running config.sh.
 
 ## INSTALL
-- Julia dependencies can be installed with install.jl
+- Julia dependencies can be insalled with install.jl either with
+ - `./install.jl` to install newest versions to main environment or
+ - `./install.jl env` to install to isolated environment `/`git root/`/src`. Activate it by setting `JULIA_PROJECT`, e.g. temporarily with `./activate.jl`
 
