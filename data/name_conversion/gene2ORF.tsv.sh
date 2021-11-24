@@ -1,5 +1,6 @@
-Name conversion, priority is SGD, uniprot, yeastract, then SGD aliases.
-A small disagreement between SGD website and downloaded file is fixed by:
+#!/usr/bin/env zsh
+# Name conversion, priority is SGD, uniprot, yeastract, then SGD aliases.
+# A small disagreement between SGD website and downloaded file is fixed by:
 echo $'YFL057C\tAAD16' | cat - ../processed/SGD/gene2ORF.tsv ../processed/uniprot/gene2ORF.tsv ../processed/yeastract/gene2ORF.tsv ../processed/SGD/alias2ORF.tsv > gene2ORF.tsv
 
 # manually add rare unpublished conversions
