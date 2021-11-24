@@ -1,10 +1,9 @@
 #!/usr/bin/env julia
 
-"PhosTF project plotting functions to visualize gene expression simulation etc."
+"Plotting functions to visualize gene expression simulation etc."
 module PlotSimulation
 using Plots
 using DifferentialEquations: ODESolution
-
 
 
 function save(o, p)
