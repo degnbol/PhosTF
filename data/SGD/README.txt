@@ -1,2 +1,2 @@
-Reference genome downloaded from https://downloads.yeastgenome.org/sequence/S288C_reference/orf_protein/
-gene associations downloaded from http://downloads.yeastgenome.org/curation/literature/gene_association.sgd.gz
+Gene associations gene_association.sgd.gaf.gz and ORF translations downloaded from SGD (yeastgenome.org).
+Run raw.sh to download.
