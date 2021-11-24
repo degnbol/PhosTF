@@ -1,11 +1,13 @@
-
+#!/usr/bin/env Rscript
 # count number of GO terms in common for each pair of genes
 
-library(data.table)
+SuppressPackageStartupMessages(library(data.table))
 library(ggplot2)
+SuppressPackageStartupMessages(library(here))
 
+cwd = function(s) paste0(here(), "/", s)
 flatten = function(x) as.vector(as.matrix(x))
-read.vector = function(x) flatten(read.table(x))
+read.vector = function(x) flatten(read.table(cwd(x)))
 melt_ = function(x) melt(x, id.vars="ORF", variable.name="KP", value.name="shared")
 prepare = function(GO_table) {
     GO_table$GOID = as.numeric(gsub("GO:", "", GO_table$GOID))
@@ -30,14 +32,14 @@ get_shared_GO = function(GO_table) {
 }
 
 
-KPs = read.vector("~/cwd/data/network/KP.txt")
-TFs = read.vector("~/cwd/data/network/TF.txt")
-Vs = read.vector("~/cwd/data/network/V.txt")
-GO = fread("~/cwd/data/processed/SGD/GO.tsv", 
+KPs = read.vector("data/network/KP.txt")
+TFs = read.vector("data/network/TF.txt")
+Vs = read.vector("data/network/V.txt")
+GO = fread(cwd("data/processed/SGD/GO.tsv"), 
            sep="\t", col.names=c("ORF", "Aspect", "GOID"), key="ORF")
-GOP250 = fread("~/cwd/data/processed/SGD/GOP250.tsv", sep="\t", key="ORF")
-GOP400 = fread("~/cwd/data/processed/SGD/GOP400.tsv", sep="\t", key="ORF")
-GOP500 = fread("~/cwd/data/processed/SGD/GOP500.tsv", sep="\t", key="ORF")
+GOP250 = fread(cwd("data/processed/SGD/GOP250.tsv"), sep="\t", key="ORF")
+GOP400 = fread(cwd("data/processed/SGD/GOP400.tsv"), sep="\t", key="ORF")
+GOP500 = fread(cwd("data/processed/SGD/GOP500.tsv"), sep="\t", key="ORF")
 
 GO = prepare(GO)
 GOP250 = prepare(GOP250)
