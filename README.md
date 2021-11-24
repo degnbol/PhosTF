@@ -4,6 +4,9 @@ Simulation and inference of networks of gene regulation with Protein Kinase, Tra
 ## REQUIRMENTS
 - Julia. Currently on 1.6.4
 
+## SETUP
+- Set up some commands by running setup.sh
+
 ## INSTALL
 - Julia dependencies can be installed with install.jl
 
