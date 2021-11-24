@@ -8,3 +8,5 @@ positive_elongation.tsv: GO class (direct) = positive regulation of transcriptio
 protein phosphorylation and dephosphorylation searched are also GO class (direct)
 protein_kinase.tsv and protein_phosphatase.tsv are from GO class (direct) protein kinase activity and similar for phosphatase.
 transcription_factor.tsv from GO class (direct) DNA-binding transcription factor activity.
+
+Turns out there is no difference between the two groups of KP GO terms in terms of the resulting conclusion of what is kinase or phosphatase.
