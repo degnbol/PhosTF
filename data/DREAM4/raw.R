@@ -1,4 +1,6 @@
 #!/usr/bin/env Rscript
+# Alternative download method, although it seems only unsigned.
+
 if (!requireNamespace("BiocManager", quietly=TRUE))
     install.packages("BiocManager")
 
