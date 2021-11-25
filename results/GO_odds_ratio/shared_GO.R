@@ -1,108 +1,136 @@
 #!/usr/bin/env Rscript
+
 # count number of GO terms in common for each pair of genes
 
-SuppressPackageStartupMessages(library(data.table))
+library(data.table)
 library(ggplot2)
-SuppressPackageStartupMessages(library(here))
+library(latex2exp)
 
-cwd = function(s) paste0(here(), "/", s)
 flatten = function(x) as.vector(as.matrix(x))
-read.vector = function(x) flatten(read.table(cwd(x)))
-melt_ = function(x) melt(x, id.vars="ORF", variable.name="KP", value.name="shared")
-prepare = function(GO_table) {
-    GO_table$GOID = as.numeric(gsub("GO:", "", GO_table$GOID))
-    GO_table = GO_table[Vs,]
-    GO_table[,ORF:=factor(GO_table$ORF, levels=Vs)]
-    GO_table
+read.vector = function(x) flatten(read.table(x))
+lower_tri = function(DT) as.matrix(DT)[lower.tri(DT)]
+melt_ = function(x) melt(x, id.vars="ORF", variable.name="KP", value.name="w")
+wilcox_p = function(dataset) {
+    wilcox.test(dataset[infer==TRUE,shared], dataset[infer==FALSE,shared], alternative="g")$p.value
 }
-get_shared_GO = function(GO_table) {
-    pairs = data.table(ORF=Vs, key="ORF")
-    for(v in Vs) {
-        # GO IDs for an ORF
-        GOIDs = GO_table[ORF==v,GOID]
-        # count how many of those GO IDs are found for all other ORFs
-        shared = GO_table[GOID%in%GOIDs, .N, by=ORF]
-        v = as.character(v)
-        # left join on ORF,
-        # which means NA are inserted for each pair where no GO IDs are in common
-        pairs[shared, on="ORF", (v):=N]
+# convert tex code to expression object (use \\ for \ and combine expressions with list() instead of c())
+tex = function(x) unname(TeX(paste0("$",x)))
+
+
+# constants
+KP_color = "#bd61b6"
+TF_color = "#75b42f"
+
+KPs = read.vector("~/cwd/data/network/KP.txt")
+TFs = read.vector("~/cwd/data/network/TF.txt")
+Vs = read.vector("~/cwd/data/network/V.txt")
+PTs = c(KPs, TFs)
+nKP = length(KPs)
+nTF = length(TFs)
+nPT = nKP+nTF
+
+
+# KP_edges_fname = "~/cwd/data/inference/74/KP_edges.tsv"
+KP_edges_fnames = commandArgs(trailingOnly=TRUE)
+
+init_dir = getwd()
+for(KP_edges_fname in KP_edges_fnames) {
+    cat(KP_edges_fname, "\n")
+    setwd(dirname(KP_edges_fname))
+    KP_edges = fread(basename(KP_edges_fname), sep="\t")
+    KP_edges[,infer:=q<.05]
+    colnames(KP_edges)[colnames(KP_edges)=="Target"] = "ORF"
+    shared_GO = fread("~/cwd/data/go/shared_GO.tsv", sep="\t")
+    
+    shared_GO[KP_edges,on=c("ORF","KP"),infer:=infer]
+    stopifnot(!any(is.na(shared_GO$infer)))
+    
+    shared_GOP = shared_GO[Aspect=="P",!"Aspect"]
+    
+    get_contingency = function(substrate, limit) {
+        shared_GOP[Substrate==substrate,.(shared=shared>=limit),by=c("ORF", "KP", "infer")][,.N,by=c("infer", "shared")]
     }
-    pairs[is.na(pairs)] = 0
-    pairs
+    
+    get_odds_ratio = function(substrate, limit) {
+        contingency = get_contingency(substrate, limit)
+        prod(contingency[shared==infer,N]) / prod(contingency[shared!=infer,N])
+    }
+    
+    get_logOR_sd = function(substrate, limit) {
+        sqrt(sum(1/get_contingency(substrate, limit)$N))
+    }
+    
+    
+    odds_ratios = rbind(
+        data.table(shared=1:max(shared_GOP[Substrate=="TF",shared]), Substrate="TF"),
+        data.table(shared=1:max(shared_GOP[Substrate=="KP",shared]), Substrate="KP"))
+    odds_ratios[,OR:=get_odds_ratio(Substrate, shared), by=c("Substrate", "shared")]
+    odds_ratios[,logOR_sd:=get_logOR_sd(Substrate, shared), by=c("Substrate", "shared")]
+    odds_ratios[,CI_low :=exp(log(OR)-qnorm(.975, sd=logOR_sd))]
+    odds_ratios[,CI_high:=exp(log(OR)+qnorm(.975, sd=logOR_sd))]
+    odds_ratios[,CI_null:=exp(qnorm(.975, sd=logOR_sd))]
+    # add copy of final value for visuals
+    odds_ratios_max = rbind(
+        odds_ratios[Substrate=="TF"][max(shared)],
+        odds_ratios[Substrate=="KP"][max(shared)])
+    odds_ratios_max$shared=odds_ratios_max$shared+1
+    odds_ratios = rbind(odds_ratios, odds_ratios_max)
+    
+    odds_ratios$Substrate = factor(odds_ratios$Substrate, levels=c("TF", "KP"))
+    
+    
+    plt = 
+    ggplot(odds_ratios, aes(shared-.5, OR, color=Substrate)) +
+        geom_step(size=1) +
+        # geom_step(data=odds_ratios, mapping=aes(y=CI_low), linetype=2) +
+        # geom_step(data=odds_ratios, mapping=aes(y=CI_high), linetype=2) +
+        geom_step(data=odds_ratios, mapping=aes(y=CI_null), linetype=2) +
+        scale_x_continuous(limits=c(0.5,8.5), breaks=c(1,2,5,8), minor_breaks=c(3:4,6:9), expand=c(0,0)) +
+        scale_y_continuous(limits=c(1,max(odds_ratios$OR)+2), breaks=c(1,2,seq(4,16,4)), expand=c(0,0), trans="log10") +
+        scale_color_manual(values=c(TF_color, KP_color), labels=parse(text=c(tex("KP\\rightarrow TF"),tex("KP\\rightarrow KP")))) +
+        theme_linedraw() +
+        xlab(expression("shared GO processes">="")) +
+        ylab("Odds Ratio") +
+        theme(
+            legend.title=element_blank(),
+            panel.grid.major=element_line(colour="gray"), 
+            panel.grid.minor=element_line(colour="lightgray"))
+    
+    ggsave("shared_GO_OR.pdf", plot=plt, width=5, height=2)
+    
+    p.values = data.frame(Substrate=c("KP","TF"),
+                          p=c(wilcox_p(shared_GOP[Substrate == "KP",]),
+                              wilcox_p(shared_GOP[Substrate == "TF",])))
+    
+    # mean shared GO terms for different interesting groupings
+    shared_GO_dens = shared_GO[,.N,by=c("infer", "Aspect", "Substrate", "shared")]
+    shared_GO_dens[shared_GO[,.(out_of=.N),by=c("infer", "Aspect", "Substrate")],
+                   on=c("infer", "Aspect", "Substrate"), out_of:=out_of]
+    shared_GO_dens[,density:=N/out_of]
+    
+    plt = ggplot(shared_GO_dens[Aspect=="P",]) +
+        geom_col(mapping=aes(x=shared, y=density, fill=infer), position="dodge", width=.8) +
+        theme_linedraw() +
+        scale_fill_manual(name="inferred", values=c("darkgray", "black"), breaks=list(TRUE,FALSE), labels=c("yes", "no")) +
+        scale_x_continuous(breaks=c(0,1,2,5,10), limits=c(-.5,14.5), expand=c(0,0), minor_breaks=c(3,4,6,7,8,9)) +
+        facet_grid(vars(Substrate)) + 
+        xlab("shared GO pathways") + 
+        theme(panel.grid.major=element_line(colour="gray"), 
+              panel.grid.minor=element_line(colour="lightgray")) +
+        geom_text(data=p.values, mapping=aes(label=sprintf("p=%.3g",p)), x=11.5, y=.7)
+        
+    
+    ggsave("shared_GO.pdf", plot=plt, width=6, height=3)
+    
+    setwd(init_dir)
 }
 
 
-KPs = read.vector("data/network/KP.txt")
-TFs = read.vector("data/network/TF.txt")
-Vs = read.vector("data/network/V.txt")
-GO = fread(cwd("data/processed/SGD/GO.tsv"), 
-           sep="\t", col.names=c("ORF", "Aspect", "GOID"), key="ORF")
-GOP250 = fread(cwd("data/processed/SGD/GOP250.tsv"), sep="\t", key="ORF")
-GOP400 = fread(cwd("data/processed/SGD/GOP400.tsv"), sep="\t", key="ORF")
-GOP500 = fread(cwd("data/processed/SGD/GOP500.tsv"), sep="\t", key="ORF")
-
-GO = prepare(GO)
-GOP250 = prepare(GOP250)
-GOP400 = prepare(GOP400)
-GOP500 = prepare(GOP500)
-
-Vs = factor(Vs, levels=Vs)
-nV = length(Vs)
 
 
-GO_C = GO[Aspect=="C",]
-GO_F = GO[Aspect=="F",]
-GO_P = GO[Aspect=="P",]
-
-# takes time, load from compressed result files
-# shared_GO_C = get_shared_GO(GO_C)
-# shared_GO_F = get_shared_GO(GO_F)
-# shared_GO_P = get_shared_GO(GO_P)
-# shared_GOP250 = get_shared_GO(GOP250)
-# shared_GOP400 = get_shared_GO(GOP400)
-# shared_GOP500 = get_shared_GO(GOP500)
-# fwrite(shared_GO_C, "shared_GO_C.csv", sep=",")
-# fwrite(shared_GO_F, "shared_GO_F.csv", sep=",")
-# fwrite(shared_GO_P, "shared_GO_P.csv", sep=",")
-# fwrite(shared_GOP250, "shared_GOP250.csv", sep=",")
-# fwrite(shared_GOP400, "shared_GOP400.csv", sep=",")
-# fwrite(shared_GOP500, "shared_GOP500.csv", sep=",")
-shared_GO_C = fread("shared_GO_C.csv.gz", sep=",", key="ORF")
-shared_GO_F = fread("shared_GO_F.csv.gz", sep=",", key="ORF")
-shared_GO_P = fread("shared_GO_P.csv.gz", sep=",", key="ORF")
-shared_GOP250 = fread("shared_GOP250.csv.gz", sep=",", key="ORF")
-shared_GOP400 = fread("shared_GOP400.csv.gz", sep=",", key="ORF")
-shared_GOP500 = fread("shared_GOP500.csv.gz", sep=",", key="ORF")
-
-shared_GO = rbind(
-    melt_(shared_GO_C[KPs,c("ORF",..KPs)])[,c("Aspect","Substrate"):=.("C","KP")],
-    melt_(shared_GO_F[KPs,c("ORF",..KPs)])[,c("Aspect","Substrate"):=.("F","KP")],
-    melt_(shared_GO_P[KPs,c("ORF",..KPs)])[,c("Aspect","Substrate"):=.("P","KP")],
-    melt_(shared_GO_C[TFs,c("ORF",..KPs)])[,c("Aspect","Substrate"):=.("C","TF")],
-    melt_(shared_GO_F[TFs,c("ORF",..KPs)])[,c("Aspect","Substrate"):=.("F","TF")],
-    melt_(shared_GO_P[TFs,c("ORF",..KPs)])[,c("Aspect","Substrate"):=.("P","TF")])
 
 
-GO_melt = function(GO_table) {
-    rbind(
-        melt_(GO_table[KPs,c("ORF",..KPs)])[,Substrate:="KP"],
-        melt_(GO_table[TFs,c("ORF",..KPs)])[,Substrate:="TF"])
-}
 
-shared_GOP250_melt = GO_melt(shared_GOP250)
-shared_GOP400_melt = GO_melt(shared_GOP400)
-shared_GOP500_melt = GO_melt(shared_GOP500)
-
-# no self loops
-shared_GO = shared_GO[ORF!=KP,]
-shared_GOP250_melt = shared_GOP250_melt[ORF!=KP,]
-shared_GOP400_melt = shared_GOP400_melt[ORF!=KP,]
-shared_GOP500_melt = shared_GOP500_melt[ORF!=KP,]
-
-fwrite(shared_GO, "shared_GO.tsv", sep="\t")
-fwrite(shared_GOP250_melt, "shared_GOP250.tsv", sep="\t")
-fwrite(shared_GOP400_melt, "shared_GOP400.tsv", sep="\t")
-fwrite(shared_GOP500_melt, "shared_GOP500.tsv", sep="\t")
 
 
 
