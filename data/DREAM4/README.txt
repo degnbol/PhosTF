@@ -1,3 +1,5 @@
+https://dx.doi.org/10.1371%2Fjournal.pone.0013397
+
 "Gold standard" signed adjacency matrices from the DREAM4 challenge.
 In the DREAM4 challenge participants were given in-silico expression levels generated with GeneNetWeaver that was given a signed set of transcription factor interactions.
 The goal was to reverse engineer the gold standard set of directed interactions, ignoring sign.
