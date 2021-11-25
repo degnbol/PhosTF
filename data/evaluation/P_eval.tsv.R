@@ -1,5 +1,4 @@
 #!/usr/bin/env Rscript
-# packages
 library(data.table)
 library(reshape2)
 library(Matrix)
