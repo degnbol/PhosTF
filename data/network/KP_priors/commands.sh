@@ -1,3 +1,4 @@
+#!/usr/bin/env zsh
 ./KP2TF_wilcoxon_setup.R  # makes KP.txt and wilcoxon.RData
 ./split_KPs.sh
 

@@ -1,3 +1,4 @@
+#!/usr/bin/env zsh
 ./TF_priors/putative_TF_edges.R
 # also makes TF_priors/TF_edges.tsv
 ./nodes.R

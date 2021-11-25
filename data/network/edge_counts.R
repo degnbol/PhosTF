@@ -1,4 +1,4 @@
-
+#!/usr/bin/env Rscript
 # purpose is to make column EDGES in table for edge data, 
 # indicating how many unique edges are described in the data based on having source node among KP or TF and target node among V
 
@@ -100,9 +100,6 @@ sum((KP_edges_pred$P %in% KPs) & (KP_edges_pred$Target %in% KPTFs))
 sum((TF_edges$TF %in% TFs) & (TF_edges$Target %in% Vs))
 length(KPs) * length(KPTFs) - length(KPs)  # potential (no self-loops)
 length(TFs) * length(Vs) - length(TFs)  # potential (no self-loops)
-
-
-
 
 
 
