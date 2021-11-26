@@ -13,6 +13,8 @@ default_Wₜ, default_Wₚ = "WT.mat", "WP.mat"
 
 """
 Create random W from a adjacency matrix containing B.
+- B: filename for B matrix, usually goldstandard matrix from DREAM4.
+- nₚ: how many of the nodes should be attempted to be assigned as KP rather than TF?
 """
 @main function random(B::String, nₚ::Integer; WT_fname::String=default_Wₜ, WP_fname::String=default_Wₚ)
 	Wₜ, Wₚ = WeightConstruction.random_W(loaddlm(B), nₚ)
@@ -27,15 +29,18 @@ end
 @main function correct(io=nothing, o=nothing; np=nothing, save::Bool=false)
 	if np === nothing @error("supply --np"); return end
 	i, o = inout(io, o)
-	W = loaddlm(io)
+	W = loaddlm(i)
 	if WeightConstruction.correct!(W, np)
 		@info("Corrections made.")
 		savedlm(o, W)
 	else
 		@info("NO corrections made.")
-		if save savedlm(o, W) end
+		save && savedlm(o, W)
 	end
 end
+"""
+This version of the function is run when no arguments are supplied.
+"""
 @main function correct(Wₜ_fname::String=default_Wₜ, Wₚ_fname::String=default_Wₚ; ot="WT_cor.mat", op="WP_cor.mat", save::Bool=false)
 	Wₜ, Wₚ = loadmat(Wₜ_fname), loadmat(Wₚ_fname)
 
