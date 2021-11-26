@@ -1,7 +1,6 @@
 #!/usr/bin/env julia
-
 # totally bad quickfix
-try import Flux catch; end
+#= try import Flux catch; end =#
 
 include("../utilities/ReadWrite.jl")
 include("../utilities/CLI.jl")
@@ -9,85 +8,80 @@ include("../utilities/ArgParseUtils.jl")
 include("GradientDescent.jl")
 isdefined(Main, :Model) || include("Model.jl")
 isdefined(Main, :ArrayUtils) || include("../utilities/ArrayUtils.jl")
-
-# ArgParse used instead of Fire since Fire has a weird bug where it says there's too many arguments.
 using ArgParse
 using LinearAlgebra
 using Flux
 
-function argument_parser()
-	s = ArgParseSettings(description="Infer a weight matrix from logFC data.", autofix_names=true)
-	@add_arg_table! s begin
-		"X"
-			help = "Filname for LogFC values in a matrix. No column or row names. Space delimiters are recommended."
-			required = true
-		"nₜ"
-			arg_type = Int
-			range_tester = x -> x > 0
-			help = "Number of TFs."
-			required = true
-		"nₚ"
-			arg_type = Int
-			range_tester = x -> x > 0
-			help = "Number of KPs."
-			required = true
-		"ot"
-			default = "WT_infer.mat"
-			help = "Outfile for inferred Wₜ adjacency matrix."
-		"op"
-			default = "WP_infer.mat"
-			help = "Outfile for inferred Wₚ adjacency matrix."
-		"--J", "-J"
-			help = "Filename for J, which has 1s indicating mutated genes in each experiment and zeros otherwise. Default is using the identity matrix."
-		"--epochs", "-e"
-			arg_type = Int
-			default = 500
-			range_tester = x -> x >= 0
-			help = "Number of times to train using all data in X."
-        "--opt", "-o"
-            default = "ADAMW"
-            help = "Optimizer algorithm for gradient descent."
-        "--lr", "-η"
-            arg_type = Float64
-            default = 0.001
-            range_tester = x -> x > 0
-            help = "Learning rate for gradient descent."
-        "--decay", "-d"
-            arg_type = Float64
-            default = 0.0
-            range_tester = x -> x >= 0
-            help = "Weight decay for ADAMW. https://fluxml.ai/Flux.jl/stable/training/optimisers/#Flux.Optimise.ADAMW"
-		"--WT", "-T"
-			help = "Wₜ from a previous run to continue or to use as the true Wₜ. Default is starting from random noise."
-		"--WP", "-P"
-			help = "Wₚ from a previous run to continue or to use as the true Wₚ. Default is starting from random noise."
-		"--WT-prior", "-t"
-			help = "Masking trainable weights in Wₜ, and masking sign. 0, 1, +, and - are untrainable, trainable, positive and negative edge."
-		"--WP-prior", "-p"
-			help = "Masking trainable weights in Wₚ, and masking sign. 0, 1, +, and - are untrainable, trainable, positive and negative edge."
-		"--lambda", "-λ"
-			arg_type = Float64
-			default = 0.1
-			range_tester = x -> x >= 0
-			help = "Regularization factor for B*."
-		"--lambdaW", "-w"
-			arg_type = Float64
-			default = 0.0
-			range_tester = x -> x >= 0
-			help = "Regularization factor for abs(W)."
-		"--lambdaWT"
-			arg_type = Bool
-			default = true
-			help = "Whether the WT edges are regularized. Should only be used if highly trusted WT_priors are provided."
-		"--trainWT"
-			arg_type = Bool
-			default = true
-			help = "Whether the WT edges are trained at all. If set to false, --WT/-T has to be provided with fully trusted edges."
-		"--WT-reg"
-			help = "Filename of matrix with regularization weights for Wₜ. NOT square. 
-			NaN means the weight should not be allowed, so this will function as masking as well."
-	end
-	s
+argument_parser = ArgParseSettings(description="Infer a weight matrix from logFC data.", autofix_names=true)
+@add_arg_table! argument_parser begin
+    "X"
+        help = "Filname for LogFC values in a matrix. No column or row names. Space delimiters are recommended."
+        required = true
+    "nₜ"
+        arg_type = Int
+        range_tester = x -> x > 0
+        help = "Number of TFs."
+        required = true
+    "nₚ"
+        arg_type = Int
+        range_tester = x -> x > 0
+        help = "Number of KPs."
+        required = true
+    "ot"
+        default = "WT_infer.mat"
+        help = "Outfile for inferred Wₜ adjacency matrix."
+    "op"
+        default = "WP_infer.mat"
+        help = "Outfile for inferred Wₚ adjacency matrix."
+    "--J", "-J"
+        help = "Filename for J, which has 1s indicating mutated genes in each experiment and zeros otherwise. Default is using the identity matrix."
+    "--epochs", "-e"
+        arg_type = Int
+        default = 500
+        range_tester = x -> x >= 0
+        help = "Number of times to train using all data in X."
+    "--opt", "-o"
+        default = "ADAMW"
+        help = "Optimizer algorithm for gradient descent."
+    "--lr", "-η"
+        arg_type = Float64
+        default = 0.001
+        range_tester = x -> x > 0
+        help = "Learning rate for gradient descent."
+    "--decay", "-d"
+        arg_type = Float64
+        default = 0.0
+        range_tester = x -> x >= 0
+        help = "Weight decay for ADAMW. https://fluxml.ai/Flux.jl/stable/training/optimisers/#Flux.Optimise.ADAMW"
+    "--WT", "-T"
+        help = "Wₜ from a previous run to continue or to use as the true Wₜ. Default is starting from random noise."
+    "--WP", "-P"
+        help = "Wₚ from a previous run to continue or to use as the true Wₚ. Default is starting from random noise."
+    "--WT-prior", "-t"
+        help = "Masking trainable weights in Wₜ, and masking sign. 0, 1, +, and - are untrainable, trainable, positive and negative edge."
+    "--WP-prior", "-p"
+        help = "Masking trainable weights in Wₚ, and masking sign. 0, 1, +, and - are untrainable, trainable, positive and negative edge."
+    "--lambda", "-λ"
+        arg_type = Float64
+        default = 0.1
+        range_tester = x -> x >= 0
+        help = "Regularization factor for B*."
+    "--lambdaW", "-w"
+        arg_type = Float64
+        default = 0.0
+        range_tester = x -> x >= 0
+        help = "Regularization factor for abs(W)."
+    "--lambdaWT"
+        arg_type = Bool
+        default = true
+        help = "Whether the WT edges are regularized. Should only be used if highly trusted WT_priors are provided."
+    "--trainWT"
+        arg_type = Bool
+        default = true
+        help = "Whether the WT edges are trained at all. If set to false, --WT/-T has to be provided with fully trusted edges."
+    "--WT-reg"
+        help = "Filename of matrix with regularization weights for Wₜ. NOT square. 
+        NaN means the weight should not be allowed, so this will function as masking as well."
 end
 
 
@@ -158,6 +152,6 @@ end
 
 # parse args if run on command line as opposed to being imported
 if abspath(PROGRAM_FILE) == @__FILE__
-    ArgParseUtils.main(argument_parser(), infer)
+    ArgParseUtils.main(argument_parser, infer)
 end
 
