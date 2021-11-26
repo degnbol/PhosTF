@@ -2,12 +2,11 @@
 include("GeneRegulation.jl")
 isdefined(Main, :ODEs) || include("ODEs.jl")
 include("../utilities/ReadWrite.jl")
-(length(ARGS) == 0 || ARGS[1] == "plot") && include("../visualization/PlotSimulation.jl")
-
-
 using Fire
 using LinearAlgebra
 using Plots
+using Test  # @test_logs used in randomNetLogFCs
+using .Threads: @threads
 
 # defaults
 default_Wₜ, default_Wₚ = "WT.mat", "WP.mat"
@@ -47,12 +46,12 @@ end
 
 
 """
-Simulate a network.
+Simulate a network and return the full time series.
 - r,p,psi: fname. output files with time along axis 2 and protein along axis 1
 - r0, p0, psi0: fname. starting values. Use this to let a mutated network start where the wildtype converged. 
 Make them with either another simulate call, a steaady state call or write them manually.
 """
-@main function simulate(mut_id=nothing, i=default_net; r=nothing, p=nothing, psi=nothing, t=nothing, duration=nothing, r0=nothing, p0=nothing, psi0=nothing)
+@main function timeseries(mut_id=nothing, i=default_net; r=nothing, p=nothing, psi=nothing, t=nothing, duration=nothing, r0=nothing, p0=nothing, psi0=nothing)
 	if   r  === nothing   r  = "sim_r"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
 	if   p  === nothing   p  = "sim_p"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
 	if psi  === nothing psi  = "sim_psi" * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
@@ -63,7 +62,7 @@ Make them with either another simulate call, a steaady state call or write them 
 	net = loadnet(i)
 	u₀ = ODEs.get_u₀(net, r0, p0, psi0)
     @assert !any(isnan.(u₀))
-	solution = ODEs.@domainerror ODEs.simulate(net, mut_id, u₀, duration)
+	solution = ODEs.@domainerror ODEs.timeseries(net, mut_id, u₀, duration)
 	solution === nothing && return
 	@info(solution.retcode)
 	if solution.retcode in [:Success, :Terminated]
@@ -82,6 +81,8 @@ Plot simulations.
 - o: optional file to write plot to
 """
 @main function plot(nₚ::Integer, nₜ::Integer, r="sim_r.mat", p="sim_p.mat", ψ="sim_psi.mat", t="sim_t.mat"; o=stdout)
+    include("../visualization/PlotSimulation.jl") # save startup time by only including it when necessary
+
     r, p, ψ, t = ReadWrite.loaddlm.([r, p, ψ, t])
 	t = dropdims(t; dims=2)  # should be a column vector in file
 	nᵥ = size(r,1); nₒ = nᵥ-(nₜ+nₚ)
@@ -147,8 +148,8 @@ end
 
 """
 Get the log fold-change values comparing mutant transcription levels to wildtype.
--	net: a network
--	o: stdout or file to write result to
+- net: a network
+- o: stdout or file to write result to
 """
 @main function logFC(net=default_net; o=stdout)
 	measurements = ODEs.@domainerror(ODEs.logFC(loadnet(net)))
@@ -159,10 +160,10 @@ Get the log fold-change values comparing mutant transcription levels to wildtype
 end
 """
 Get the log fold-change values comparing mutant transcription levels to wildtype.
--	wt: wildtype expression level matrix. String fname
--	mut: mutant expression level matrix. String fname
--	muts...: additional mutant expression level matrices. list of string fname
--	o: stdout or file to write result to
+- wt: wildtype expression level matrix. String fname
+- mut: mutant expression level matrix. String fname
+- muts...: additional mutant expression level matrices. list of string fname
+- o: stdout or file to write result to
 """
 @main function logFC(wt, mut, muts...; o=stdout)
 	wildtype = ReadWrite.loaddlm(wt)
@@ -172,5 +173,49 @@ Get the log fold-change values comparing mutant transcription levels to wildtype
 		@info("logFC values simulated")
 		ReadWrite.savedlm(o, measurements)
 	end
+end
+
+"""
+Given adjacency matrices without KP, TF, O assignment, generate random network(s) and simulate them, returning the logFC values.
+- B: path of gold standard matrix which is an adjacency matrix without assignments of node types.
+- outdirs: path(s) separated by comma of output directories to store result files. Multiple paths means multiple parallel runs. All files are saved with default names, e.g. WT.mat, WP.mat, net.bson, X_sim.mat
+- max_np: Try to get this many nodes assigned as KP. Upper limit. Default=30% of nodes.
+- max_attempts: Maximum number of tries to generate a random net before giving up if there keeps being a convergence or other error from simulation.
+"""
+@main function randomNetLogFCs(B::String, outdirs...; max_np::Int=nothing, max_attempts::Int=3)
+    # suppress Fire output with ;
+    include("weight.jl");  # random(...) and correct()
+    # set max_nₚ to default 30% of nodes if not specified.
+    if max_np === nothing
+        n = size(ReadWrite.loaddlm(B), 1)
+        max_np = ceil(Int, n * .3)
+    end
+
+    @threads for dir in outdirs
+        println(dir)
+        Wₜfname = joinpath(dir, default_Wₜ)
+        Wₚfname = joinpath(dir, default_Wₚ)
+        netfname = joinpath(dir, default_net)
+        logFCfname = joinpath(dir, "X_sim.mat")
+        
+        for attempt in 1:max_attempts
+            attempt == 1 || println("$dir attempt $attempt")
+            # make WT and WP with {-1, 0, 1} for deactvation, no edge and activation
+            random(B, max_nₚ; WT_fname=Wₜfname, WP_fname=Wₚfname)
+            # there should be nothing to correct
+            correct(Wₜfname, Wₚfname; ot=Wₜfname, op=Wₚfname)
+            # make net.bson which has a fully defined network instance with all it's constants, etc.
+            network(Wₜfname, Wₚfname; o=netfname)
+
+            rm(logFCfname; force=true)
+            # simulate logFC values and test that there are no warnings
+            try
+                @test_logs (:info, "$dir logFC values simulated") logFC(o=logFCfname)
+            catch
+                continue
+            end
+            break
+        end
+    end
 end
 

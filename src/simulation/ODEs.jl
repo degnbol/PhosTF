@@ -14,9 +14,9 @@ using LinearAlgebra: I
 using ..GeneRegulation
 
 export get_u₀
-export simulate, steady_state
+export timeseries, steady_state
 export logFC
-export @domainerror, simulate_domain
+export @domainerror, timeseries_domain
 
 const default_duration = 24 # hours
 steady_state_callback = TerminateSteadyState(1e-4, 1e-6)
@@ -46,17 +46,17 @@ default_callback(u₀) = CallbackSet(steady_state_callback, PositiveDomain(u₀)
 """
 Save progression through time for plotting and inspection.
 """
-function simulate(network::Network; u₀::Matrix=get_u₀(network), duration::Real=default_duration)
+function timeseries(network::Network; u₀::Matrix=get_u₀(network), duration::Real=default_duration)
 	problem = ODEProblem(ODE!, u₀, (0., duration*60.), network)
 	solve(problem, callback=default_callback(u₀), save_everystep=true, dtmax=dtmax, force_dtmin=true)
 end
 """
 Mutate a wildtype and simulate through time.
 """
-simulate(network::Network,  mutation, u₀, duration) = simulate(Network(network, mutation); u₀=_dflt(u₀,get_u₀(network)), duration=_dflt(duration,default_duration))
-simulate(network::Network, ::Nothing, u₀, duration) = simulate(network; u₀=_dflt(u₀,get_u₀(network)), duration=_dflt(duration,default_duration))
-simulate(network::Network,  mutation) = simulate(Network(network, mutation))
-simulate(network::Network, ::Nothing) = simulate(network)
+timeseries(network::Network,  mutation, u₀, duration) = timeseries(Network(network, mutation); u₀=_dflt(u₀,get_u₀(network)), duration=_dflt(duration,default_duration))
+timeseries(network::Network, ::Nothing, u₀, duration) = timeseries(network; u₀=_dflt(u₀,get_u₀(network)), duration=_dflt(duration,default_duration))
+timeseries(network::Network,  mutation) = timeseries(Network(network, mutation))
+timeseries(network::Network, ::Nothing) = timeseries(network)
 
 """
 Find the steady-state solution.
@@ -104,7 +104,7 @@ macro domainerror(ex)
 end
 
 
-simulate_domain(args...) = @domainerror(simulate(args...))
+timeseries_domain(args...) = @domainerror(timeseries(args...))
 logFC_domain(args...) = @domainerror(logFC(args...))
 
 
