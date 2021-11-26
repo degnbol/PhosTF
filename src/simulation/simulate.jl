@@ -187,8 +187,8 @@ Given adjacency matrices without KP, TF, O assignment, generate random network(s
     include("weight.jl");  # random(...) and correct()
     # set max_nₚ to default 30% of nodes if not specified.
     if max_np === nothing
-        n = size(ReadWrite.loaddlm(B), 1)
-        max_np = ceil(Int, n * .3)
+        nᵥ = size(ReadWrite.loaddlm(B), 1)
+        max_np = ceil(Int, nᵥ * .3)
     end
 
     @threads for dir in outdirs
