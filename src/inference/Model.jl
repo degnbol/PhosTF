@@ -11,12 +11,12 @@ using ..ArrayUtils: eye
 import ..FluxUtils
 
 export offdiag, random_W
-export sse, sse_B, sse_T
-export l1
+export SSE, SSE_B, SSE_T
+export L1
 export _B, B_star, _T
 
 "A mask to remove diagonal of a matrix."
-function offdiag(matrix)
+function offdiag(matrix::AbstractMatrix)
 	out = ones(size(matrix))
 	out[diagind(out)] .= 0
 	out
@@ -70,25 +70,25 @@ function _W(Wₜ, Wₚ)
 	[[Wₚ; zeros(nₒ,nₚ)] Wₜ zeros(nₒ+nₜ+nₚ,nₒ)]
 end
 
-_Wₜ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = W[:,nₚ+1:nₚ+nₜ]
-_Wₚ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = W[1:nₜ+nₚ,1:nₚ]
+_Wₜ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = W[:, nₚ+1:nₚ+nₜ]
+_Wₚ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = W[1:nₜ+nₚ, 1:nₚ]
 _Wₜ(W::AbstractMatrix, Iₜ) = W*Iₜ
 _Wₚ(W::AbstractMatrix, Iₚ) = W*Iₚ
 _Wₜ(W::Tuple, Iₜ) = W[1]*Iₜ
 _Wₚ(W::Tuple, Iₚ) = W[2]*Iₚ
-WₜWₚ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = _Wₜ(W,nₜ,nₚ), _Wₚ(W,nₜ,nₚ)
-WₜWₚ(W::Tuple, nₜ::Integer, nₚ::Integer) = _Wₜ(W[1],nₜ,nₚ), _Wₚ(W[2],nₜ,nₚ)
+WₜWₚ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = _Wₜ(W, nₜ, nₚ), _Wₚ(W, nₜ, nₚ)
+WₜWₚ(W::Tuple, nₜ::Integer, nₚ::Integer) = _Wₜ(W[1], nₜ, nₚ), _Wₚ(W[2], nₜ, nₚ)
 "Assert that untrainable areas are in fact zero."
 function isW(W::AbstractMatrix, nₜ::Integer, nₚ::Integer)
-	all(W[nₜ+nₚ+1:end,1:nₚ] .== 0) && 
-	all(W[:,nₜ+nₚ+1:end] .== 0) && 
+	all(W[nₜ+nₚ+1:end, 1:nₚ] .== 0) && 
+	all(W[:, nₜ+nₚ+1:end] .== 0) && 
 	all(diag(W) .== 0)
 end
 function isW(W::Tuple, nₜ::Integer, nₚ::Integer)
-	all(W[1][:,1:nₚ] .== 0) && 
-	all(W[1][:,nₜ+nₚ+1:end] .== 0) && 
-	all(W[2][nₜ+nₚ+1:end,1:nₚ] .== 0) && 
-	all(W[2][:,nₚ+1:end] .== 0) && 
+	all(W[1][:, 1:nₚ] .== 0) && 
+	all(W[1][:, nₜ+nₚ+1:end] .== 0) && 
+	all(W[2][nₜ+nₚ+1:end, 1:nₚ] .== 0) && 
+	all(W[2][:, nₚ+1:end] .== 0) && 
 	all(diag(W[1]) .== 0) &&
 	all(diag(W[2]) .== 0)
 end
@@ -121,7 +121,7 @@ Get the total effects from each node to each node as a simple linear regression 
 Section 6.1 of Eberhardt report "Learning Linear Cyclic Causal Models with Latent Variables".
 Note that self-loops are removed.
 """
-X2T(X) = X.*offdiag(X) ./ repeat(diag(X)', size(X,1), 1)
+X2T(X) = X .* offdiag(X) ./ repeat(diag(X)', size(X,1), 1)
 
 """
 Error. Difference between prediction and truth.
@@ -134,11 +134,11 @@ E(W, cs::NamedTuple, X::Matrix) = cs.U .* (_B(W,cs,X) .- X)
 - W: either Matrix with Wt and Wp, or vector with Wt and Wp matrices, or tracked versions.
 - X: Matrix holding column vectors of measured (simulated) logFC values. No need to be square but has to have the same shape as J.
 """
-sse(W, cs::NamedTuple, X::Matrix) = sum(E(W,cs,X) .^ 2)
+SSE(W, cs::NamedTuple, X::Matrix) = sum(E(W,cs,X) .^ 2)
 "- ks: If we are using batches, then indicate which batches are used"
-sse(W, cs::NamedTuple, X::Matrix, ks) = sum((cs.U[:,ks] .* (_B(W,cs,X) .- X)) .^ 2)
+SSE(W, cs::NamedTuple, X::Matrix, ks) = sum((cs.U[:,ks] .* (_B(W,cs,X) .- X)) .^ 2)
 "Alternative SSE where both TF and KP edges onto a KO are removed instead of only TF. Reduces edges among KP."
-function sse_alt(W::AbstractMatrix, cs::NamedTuple, X::Matrix)
+function SSE_alt(W::AbstractMatrix, cs::NamedTuple, X::Matrix)
 	i = I(size(W,1))
 	E = cs.U .* X .- hcat([(W.*cs.Mₜ .* uₖ) * ((i - W.*cs.Mₚ .* uₖ) \ x) for (uₖ, x) in zip(eachcol(cs.U), eachcol(X))]...)
 	sum(E.^2)
@@ -148,15 +148,15 @@ end
 """
 Loss function to train parameters in W to result in a B that is as similar to a solution to B from LLC method (Eberhardt).
 """
-sse_B(W::AbstractMatrix, cs::NamedTuple, B_LLC::Matrix) = sum((_B(W,cs) .- B_LLC).^2)
+SSE_B(W::AbstractMatrix, cs::NamedTuple, B_LLC::Matrix) = sum((_B(W,cs) .- B_LLC).^2)
 
-function sse_T(W::AbstractMatrix, cs::NamedTuple, X::Matrix)
+function SSE_T(W::AbstractMatrix, cs::NamedTuple, X::Matrix)
 	n,K = size(X)
-	sum(([X2T(X) zeros(n,n-K)] - _T(W,cs)).^2)
+	sum(([X2T(X) zeros(n, n-K)] - _T(W, cs)).^2)
 end
 
-l1(W::AbstractMatrix) = norm(W,1)
-l1(W::Tuple) = norm(W[2],1)
+L1(W::AbstractMatrix) = norm(W, 1)
+L1(W::Tuple) = norm(W[2], 1)
 
 
 """
@@ -165,27 +165,27 @@ Get a mask for trainable weights and/or restriction to sign of weights.
 Also works if W is a BitMatrix with true (1) and false (0)
 return: mask for W, mask for sign
 """
-function priors(W_prior::AbstractMatrix)
-	positives, negatives = W_prior .== "+", W_prior .== "-"
-	possible = (W_prior .== 1) .| positives .| negatives
+function masks(W_mask::AbstractMatrix)
+	positives, negatives = W_mask .== "+", W_mask .== "-"
+	possible = (W_mask .== 1) .| positives .| negatives
 	possible, positives - negatives
 end
-function priors(Wₜ_prior::AbstractMatrix, Wₚ_prior::AbstractMatrix)
-	Wₜ_prior, Wₜ_prior_sign = priors(Wₜ_prior)
-	Wₚ_prior, Wₚ_prior_sign = priors(Wₚ_prior)
-	_W(Wₜ_prior, Wₚ_prior), _W(Wₜ_prior_sign, Wₚ_prior_sign)
+function masks(Wₜ_mask::AbstractMatrix, Wₚ_mask::AbstractMatrix)
+	Wₜ_mask, Wₜ_mask_sign = masks(Wₜ_mask)
+	Wₚ_mask, Wₚ_mask_sign = masks(Wₚ_mask)
+	_W(Wₜ_mask, Wₚ_mask), _W(Wₜ_mask_sign, Wₚ_mask_sign)
 end
-priors(Wₜ_prior::AbstractMatrix, nₚ::Integer) = priors(Wₜ_prior, ones(size(Wₜ_prior,2)+nₚ, nₚ))
-priors(nᵥ::Integer, Wₚ_prior::AbstractMatrix) = priors(ones(nᵥ, size(Wₚ_prior,1)-size(Wₚ_prior,2)), Wₚ_prior)
+masks(Wₜ_mask::AbstractMatrix, nₚ::Integer) = masks(Wₜ_mask, ones(size(Wₜ_mask, 2) + nₚ, nₚ))
+masks(nᵥ::Integer, Wₚ_mask::AbstractMatrix) = masks(ones(nᵥ, size(Wₚ_mask, 1) - size(Wₚ_mask, 2)), Wₚ_mask)
 """
-Get priors from files with the indicators 0=no edge, 1=possible edge, "+"=positive edge, "-"=negative edge.
+Get masks from files with the indicators 0=no edge, 1=possible edge, "+"=positive edge, "-"=negative edge.
 Can be fed nothing values, and produces nothing values when a matrix would otherwise provide no additional information.
-- WT_prior/WP_prior: should be either matrix with 0,1,+,- or bitmatrix.
-return: priors, priors_sign
+- WT_mask/WP_mask: should be either matrix with 0,1,+,- or bitmatrix.
+return: masks, masks_sign
 """
-function priors(WT_prior::Union{AbstractMatrix,Nothing}, WP_prior::Union{AbstractMatrix,Nothing}, nᵥ::Integer, nₜ::Integer, nₚ::Integer)
-	if WT_prior === nothing && WP_prior === nothing return nothing, nothing end
-	M, S = Model.priors(WT_prior === nothing ? nᵥ : WT_prior, WP_prior === nothing ? nₚ : WP_prior)
+function masks(WT_mask::Union{AbstractMatrix,Nothing}, WP_mask::Union{AbstractMatrix,Nothing}, nᵥ::Integer, nₜ::Integer, nₚ::Integer)
+	if WT_mask === nothing && WP_mask === nothing return nothing, nothing end
+	M, S = Model.masks(WT_mask === nothing ? nᵥ : WT_mask, WP_mask === nothing ? nₚ : WP_mask)
 	if all(Model._Wₜ(M,nₜ,nₚ) .== 1) && all(Model._Wₚ(M,nₜ,nₚ) .== 1) M = nothing end
     any(S .!= 0) || (S = nothing)
 	M, S
@@ -193,13 +193,13 @@ end
 
 
 
-apply_priors(W, M, S::AbstractMatrix) = apply_priors(apply_priors(W, M), nothing, S)
-apply_priors(W::AbstractMatrix, ::Nothing, S::AbstractMatrix) = W .* (S.==0) .+ abs.(W) .* S
-apply_priors(W::Tuple, ::Nothing, S::AbstractMatrix) = (apply_priors(W[1], nothing, S), apply_priors(W[2], nothing, S))
-apply_priors(W::AbstractMatrix, M::AbstractMatrix) = W.*M
-apply_priors(W::Tuple, M::AbstractMatrix) = (W[1].*M, W[2].*M)
-apply_priors(W::Tuple, M::Tuple) = (W[1].*M[1], W[2].*M[2])
-apply_priors(W, M, ::Nothing) = apply_priors(W, M)
-apply_priors(W, ::Nothing, ::Nothing) = W
+apply_masks(W, M, S::AbstractMatrix) = apply_masks(apply_masks(W, M), nothing, S)
+apply_masks(W::AbstractMatrix, ::Nothing, S::AbstractMatrix) = W .* (S.==0) .+ abs.(W) .* S
+apply_masks(W::Tuple, ::Nothing, S::AbstractMatrix) = (apply_masks(W[1], nothing, S), apply_masks(W[2], nothing, S))
+apply_masks(W::AbstractMatrix, M::AbstractMatrix) = W.*M
+apply_masks(W::Tuple, M::AbstractMatrix) = (W[1].*M, W[2].*M)
+apply_masks(W::Tuple, M::Tuple) = (W[1].*M[1], W[2].*M[2])
+apply_masks(W, M, ::Nothing) = apply_masks(W, M)
+apply_masks(W, ::Nothing, ::Nothing) = W
 
 end;
