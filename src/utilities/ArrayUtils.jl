@@ -1,6 +1,6 @@
 #!/usr/bin/env julia
 module ArrayUtils
-using LinearAlgebra: diagind
+using LinearAlgebra: diagind, I
 using Random: shuffle
 using Distributions
 
@@ -33,9 +33,9 @@ Adding some default values to μ and σ.
 """
 TruncNormal(l, u) = truncated(Normal((l+u)/2, (u-l)/6), l, u)
 
-"""
-Ability to create non-square identity matrices by using dense matrix type.
-"""
+"Create non-square identity matrices using sparse matrix type."
+LinearAlgebra.I(n::Integer, m::Integer) = I(max(n, m))[1:n, 1:m]
+"Create non-square identity matrices using dense matrix type."
 function eye(n::Integer, m::Integer)
 	mat = zeros(n, m)
 	mat[diagind(mat)] .= 1

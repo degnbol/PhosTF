@@ -7,11 +7,11 @@ Structs with data defining a gene regulation network and its regulation mechanis
 module GeneRegulation
 using Statistics: mean
 import JSON3
-import ..Model: nₒnₜnₚ, WₜWₚ
+import ..Model: WₜWₚ
 
 export Network, Gene
 export drdt, dpdt, dψdt
-export nₒnₜnₚ, estimate_Wₜ
+export estimate_Wₜ
 
 
 const weak_activation = .25
@@ -28,9 +28,6 @@ include("Network.jl")
 JSON3.StructType(::Type{RegulatoryModule}) = JSON3.Struct()
 JSON3.StructType(::Type{Gene}) = JSON3.Struct()
 JSON3.StructType(::Type{Network}) = JSON3.Struct()
-
-
-nₒnₜnₚ(net::Network) = net.nₒ,net.nₜ,net.nₚ
 
 
 random_t½() = TruncNormal(5, 50)

@@ -71,7 +71,7 @@ function correct_silent_edges!(W::AbstractMatrix, nₚ::Integer)
 	return any(E)
 end
 function correct_silent_edges!(Wₜ::AbstractMatrix, Wₚ::AbstractMatrix)
-	_, nₜ, nₚ = Model.nₒnₜnₚ(Wₜ, Wₚ)
+    nₜ, nₚ = size(Wₜ, 2), size(Wₚ, 2)
 	W = Model._W(Wₜ, Wₚ)
 	out = correct_silent_edges!(W, nₚ)
 	Wₜ[:], Wₚ[:] = Model.WₜWₚ(W, nₜ, nₚ)
