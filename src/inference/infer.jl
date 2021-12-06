@@ -109,36 +109,20 @@ end
 
 
 """
-Get a mask for trainable weights and/or restriction to sign of weights.
-- W: matrix with 0(/unrecognized)=no edge, 1==possible edge, "+"==positive edge, "-"==negative edge.
-Also works if W is a BitMatrix with true (1) and false (0)
-return: mask for W, mask for sign
+Get masks M, S for trainable weights and/or restriction to sign of weights.
+- mat: Matrix{String} or BitMatrix, or other Matrix with 0(/unrecognized)=no edge, 1==possible edge, "+"==positive edge, "-"==negative edge.
+return: mask M for trainable weights, mask S for sign restriction
 """
-function masks(W_mask::AbstractMatrix)
-	positives, negatives = W_mask .== "+", W_mask .== "-"
-	possible = (W_mask .== 1) .| positives .| negatives
-	possible, positives - negatives
+function mat2MS(mat::AbstractMatrix)
+	positives = mat .== "+"
+	negatives = mat .== "-"
+	S = positives - negatives
+    M = (mat .== 1) .| (S .!= 0)
+    if !any(M .== 0) M = nothing end
+    if !any(S .!= 0) S = nothing end
+    M, S
 end
-function masks(Wₜ_mask::AbstractMatrix, Wₚ_mask::AbstractMatrix)
-	Wₜ_mask, Wₜ_mask_sign = masks(Wₜ_mask)
-	Wₚ_mask, Wₚ_mask_sign = masks(Wₚ_mask)
-	_W(Wₜ_mask, Wₚ_mask), _W(Wₜ_mask_sign, Wₚ_mask_sign)
-end
-masks(Wₜ_mask::AbstractMatrix, nₚ::Integer) = masks(Wₜ_mask, ones(size(Wₜ_mask, 2) + nₚ, nₚ))
-masks(nᵥ::Integer, Wₚ_mask::AbstractMatrix) = masks(ones(nᵥ, size(Wₚ_mask, 1) - size(Wₚ_mask, 2)), Wₚ_mask)
-"""
-Get masks from files with the indicators 0=no edge, 1=possible edge, "+"=positive edge, "-"=negative edge.
-Can be fed nothing values, and produces nothing values when a matrix would otherwise provide no additional information.
-- WT_mask/WP_mask: should be either matrix with 0,1,+,- or bitmatrix.
-return: masks, masks_sign
-"""
-function masks(WT_mask::Union{AbstractMatrix,Nothing}, WP_mask::Union{AbstractMatrix,Nothing}, nᵥ::Integer, nₜ::Integer, nₚ::Integer)
-	if WT_mask === nothing && WP_mask === nothing return nothing, nothing end
-	M, S = Model.masks(WT_mask === nothing ? nᵥ : WT_mask, WP_mask === nothing ? nₚ : WP_mask)
-    if all(M[:, 1:nₜ] .== 1) && all(M[1:nₜ+nₚ, nₜ+1:nₜ+nₚ]) .== 1) M = nothing end
-    any(S .!= 0) || (S = nothing)
-	M, S
-end
+mat2MS(::Nothing) = nothing, nothing
 
 
 function infer(X, nₜ::Integer, nₚ::Integer, out_WT::String="WT_infer.mat", out_WP::String="WP_infer.mat"; J=nothing, epochs::Integer=5000, opt="ADAMW", 
@@ -149,22 +133,17 @@ function infer(X, nₜ::Integer, nₚ::Integer, out_WT::String="WT_infer.mat", o
     J = loaddlm_(J, Float64)
     initial_Wₜ = loaddlm_(WT)
     initial_Wₚ = loaddlm_(WP)
-	Wₜmask = loaddlm_(WT_mask)
-	Wₚmask = loaddlm_(WP_mask)
+    Mₜ, Sₜ = mat2MS(loaddlm_(WT_mask))
+    Mₚ, Sₚ = mat2MS(loaddlm_(WP_mask))
     
     J === nothing || @assert(size(J) == size(X))
     
 	nᵥ, K = size(X)
 	nₒ = nᵥ - (nₜ + nₚ)
-    
-	M, S = masks(Wₜmask, Wₚmask, nᵥ, nₜ, nₚ)
-	# TODO: apply the masks
-    
-	mdl = Model.Mdl(nᵥ, nₜ, nₚ, J === nothing ? K : J)
+
+    mdl = Model.Mdl(nₜ, nₚ, nₒ, J === nothing ? K : J; Wₜ=initial_Wₜ, Wₚ=initial_Wₚ, Mₜ=Mₜ, Mₚ=Mₚ, Sₜ=Sₜ, Sₚ=Sₚ)
+    Model.make_trainable(train_WT)
 	
-    # TODO: train_WT should be used to set WT weights untrainable
-
-
     opt = parse_optimizer(opt, lr, decay)
     Wₜ, Wₚ = GradientDescent.train(mdl, X; epochs=epochs, opt=opt, λBstar=lambda_Bstar, λabsW=lambda_absW, reg_Wₜ=reg_WT)
 	

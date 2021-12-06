@@ -27,7 +27,7 @@ function batches(K::Integer, batch_size::Integer)
 end
 
 
-# TODO: if any of the λs are zero then avoid adding that part to the loss, e.g. using ::Nothing
+# If any of the λs are zero then avoid adding that part to the loss, e.g. using ::Nothing
 get_loss_func(mdl, λBstar::Float64, λabsW::Float64, reg_Wₜ::Bool) = begin
     if λBstar == 0 return get_loss_func(mdl, nothing, λabsW, reg_Wₜ) end
     if λabsW == 0 return get_loss_func(mdl, λabsW, nothing, reg_Wₜ) end
