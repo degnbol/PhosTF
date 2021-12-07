@@ -72,8 +72,8 @@ Mdl(nₜ::Integer, nₚ::Integer, nₒ::Integer, J::AbstractMatrix; Wₜ=nothing
     Mₚ !== nothing || (Mₚ = _Mₚ(nₜ, nₚ))
     Mdl(Wₜ, Wₚ, Mₜ, Mₚ, J; Sₜ=Sₜ, Sₚ=Sₚ)
 end
-Mdl(Wₜ, Wₜ, Mₜ::Matrix{Bool}, Mₚ::Matrix{Bool}, J::AbstractMatrix; Sₜ::Nothing, Sₚ::Nothing) = Mdl(Wₜ, Wₚ, Mₜ, Mₚ, J2U(J), I(Mₚ))
-Mdl(Wₜ, Wₜ, Mₜ::Matrix{Bool}, Mₚ::Matrix{Bool}, J::AbstractMatrix; Sₜ, Sₚ) = MdlS(Wₜ, Wₚ, Mₜ, Mₚ, Sₜ, Sₚ, J2U(J), I(Mₚ))
+Mdl(Wₜ, Wₚ, Mₜ::Matrix{Bool}, Mₚ::Matrix{Bool}, J::AbstractMatrix; Sₜ::Nothing, Sₚ::Nothing) = Mdl(Wₜ, Wₚ, Mₜ, Mₚ, J2U(J), I(Mₚ))
+Mdl(Wₜ, Wₚ, Mₜ::Matrix{Bool}, Mₚ::Matrix{Bool}, J::AbstractMatrix; Sₜ, Sₚ) = MdlS(Wₜ, Wₚ, Mₜ, Mₚ, Sₜ, Sₚ, J2U(J), I(Mₚ))
 
 
 "Make the struct models trainable either using both Wₜ and Wₚ or only the latter."

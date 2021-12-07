@@ -1,12 +1,11 @@
 #!/usr/bin/env julia
 isdefined(Main, :ReadWrite) || include("../utilities/ReadWrite.jl")
 isdefined(Main, :CLI) || include("../utilities/CLI.jl")
-isdefined(Main, :General) || include("../utilities/General.jl")
 isdefined(Main, :WeightConstruction) || include("WeightConstruction.jl")
 isdefined(Main, :ArrayUtils) || include("../utilities/ArrayUtils.jl")
 
 using Fire
-using .ReadWrite, .ArrayUtils, .General, .WeightConstruction, .CLI
+using .ReadWrite, .ArrayUtils, .WeightConstruction, .CLI
 using Chain: @chain
 
 # defaults

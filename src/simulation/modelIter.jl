@@ -1,7 +1,6 @@
 #!/usr/bin/env julia
 include("../utilities/ReadWrite.jl")
 include("../utilities/CLI.jl")
-include("../utilities/General.jl")
 include("ModelIteration.jl")
 isdefined(Main, :Model) || include("../inference/Model.jl")
 isdefined(Main, :ArrayUtils) || include("../utilities/ArrayUtils.jl")
@@ -9,7 +8,7 @@ isdefined(Main, :ArrayUtils) || include("../utilities/ArrayUtils.jl")
 
 using Fire
 using LinearAlgebra
-using ..ReadWrite, ..ArrayUtils, ..General
+using ..ReadWrite, ..ArrayUtils
 using ..ModelIteration, ..Model
 using ..CLI
 

@@ -32,16 +32,16 @@ get_loss_func(mdl, λBstar::Float64, λabsW::Float64, reg_Wₜ::Bool) = begin
     if λBstar == 0 return get_loss_func(mdl, nothing, λabsW, reg_Wₜ) end
     if λabsW == 0 return get_loss_func(mdl, λabsW, nothing, reg_Wₜ) end
 	if reg_Wₜ
-        return X -> SSE(mdl, X) + λBstar * L1(Bstar(mdl)) + λabsW * L1(mdl)
+        return X -> SSE(mdl, X) + λBstar * L1(_Bstar(mdl)) + λabsW * L1(mdl)
     else
-        return X -> SSE(mdl, X) + λBstar * L1(Bstar(mdl) .* mdl.Mₚ) + λabsW * L1(mdl)
+        return X -> SSE(mdl, X) + λBstar * L1(_Bstar(mdl) .* mdl.Mₚ) + λabsW * L1(mdl)
     end
 end
 get_loss_func(mdl, λBstar::Float64, λabsW::Nothing, reg_Wₜ::Bool) = begin
 	if reg_Wₜ
-        return X -> SSE(mdl, X) + λBstar * L1(Bstar(mdl))
+        return X -> SSE(mdl, X) + λBstar * L1(_Bstar(mdl))
     else
-        return X -> SSE(mdl, X) + λBstar * L1(Bstar(mdl) .* mdl.Mₚ)
+        return X -> SSE(mdl, X) + λBstar * L1(_Bstar(mdl) .* mdl.Mₚ)
     end
 end
 # TODO: should reg_Wₜ have effect on the λabsW term? Also in the Float64, Float64 func

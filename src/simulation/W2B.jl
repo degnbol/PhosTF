@@ -4,7 +4,7 @@ isdefined(Main, :Model) || include("inference/Model.jl")
 
 using Fire
 using LinearAlgebra
-using .ReadWrite, .General, .Model
+using .ReadWrite, .Model
 
 abspath_(path::AbstractString) = abspath(expanduser(path))
 

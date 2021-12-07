@@ -1,5 +1,6 @@
 #!/usr/bin/env julia
 module ArrayUtils
+using LinearAlgebra
 using LinearAlgebra: diagind, I
 using Random: shuffle
 using Distributions

@@ -10,5 +10,5 @@ Simulation and inference of networks of gene regulation with Protein Kinase, Tra
 ## INSTALL
 - Julia dependencies can be insalled with `install.jl` either by running
   - `./install.jl` to install newest versions to main environment or
-  - `./install.jl env` to install to the isolated environment `src/`. Activate it by setting `JULIA_PROJECT`, e.g. temporarily with `./activate.jl`
+  - `./install.jl env` to install to the isolated environment `src/`. Activate it by setting `JULIA_PROJECT`, e.g. temporarily with `. ./activate.sh`
 
