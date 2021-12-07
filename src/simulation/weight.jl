@@ -7,9 +7,17 @@ isdefined(Main, :ArrayUtils) || include("../utilities/ArrayUtils.jl")
 
 using Fire
 using .ReadWrite, .ArrayUtils, .General, .WeightConstruction, .CLI
+using Chain: @chain
 
 # defaults
-default_Wₜ, default_Wₚ = "WT.mat", "WP.mat"
+default_Wₜ = "WT.mat"
+default_Wₚ = "WP.mat"
+
+
+"deal with string B, e.g. containing '.', '+', '-'"
+parse_matrix(mat::Matrix{String}) = (mat .== "+") .- (mat .== "-")
+parse_matrix(mat) = mat
+
 
 """
 Create random W from a adjacency matrix containing B.
@@ -17,7 +25,11 @@ Create random W from a adjacency matrix containing B.
 - nₚ: how many of the nodes should be attempted to be assigned as KP rather than TF?
 """
 @main function random(B::String, nₚ::Integer; WT_fname::String=default_Wₜ, WP_fname::String=default_Wₚ)
-	Wₜ, Wₚ = WeightConstruction.random_W(loaddlm(B), nₚ)
+	Wₜ, Wₚ = @chain B begin
+	    loaddlm
+	    parse_matrix
+	    WeightConstruction.random_WₜWₚ(nₚ)
+    end
 	savedlm(WT_fname, Wₜ)
 	savedlm(WP_fname, Wₚ)
 end
@@ -70,7 +82,9 @@ end
 
 
 """
-Swap order of KP and TF in matrix (swap between KP-TF-V and TF-KP-V).
+Swap order of KP and TF in matrix (swap between KP-TF-O and TF-KP-O).
+This was written when I changed the standard from KP-TF-O to TF-KP-O ordering.
+The former is now legacy.
 - n1: number of nodes in first group, which will be moved to become the second.
 - n2: number of nodes in the second group, which will be move to become the first.
 """
@@ -78,7 +92,7 @@ Swap order of KP and TF in matrix (swap between KP-TF-V and TF-KP-V).
 	i, o = inout(io, o)
 	if n1 === nothing || n2 === nothing @error("Provide --n1 and --n2.") end
 	mat = loaddlm(i, Float64)
-	mat = reorder(mat, [n1+1:n1+n2;1:n1;n1+n2+1:maximum(size(mat))])
+	mat = reorder(mat, [n1+1:n1+n2; 1:n1; n1+n2+1:maximum(size(mat))])
 	savedlm(o, mat)
 end
 
