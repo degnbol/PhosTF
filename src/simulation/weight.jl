@@ -79,19 +79,3 @@ Remove edges less than a given threshold.
 	savedlm(o, mat)
 end
 
-
-"""
-Swap order of KP and TF in matrix (swap between KP-TF-O and TF-KP-O).
-This was written when I changed the standard from KP-TF-O to TF-KP-O ordering.
-The former is now legacy.
-- n1: number of nodes in first group, which will be moved to become the second.
-- n2: number of nodes in the second group, which will be move to become the first.
-"""
-@main function swapPT(io=nothing, o=nothing; n1=nothing, n2=nothing)
-	i, o = inout(io, o)
-	if n1 === nothing || n2 === nothing @error("Provide --n1 and --n2.") end
-	mat = loaddlm(i, Float64)
-	mat = reorder(mat, [n1+1:n1+n2; 1:n1; n1+n2+1:maximum(size(mat))])
-	savedlm(o, mat)
-end
-
