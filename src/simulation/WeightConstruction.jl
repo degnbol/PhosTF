@@ -10,6 +10,10 @@ using ..Model, ..ArrayUtils
 using Random
 using Chain: @chain
 
+"""
+Get Wₜ, Wₚ from square W with nodes sorted in order TF, KP, O.
+"""
+WₜWₚ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = W[:, 1:nₜ], W[1:nₜ+nₚ, nₜ+1:nₜ+nₚ]
 
 self_loops(mat::AbstractMatrix, k::Integer=0) = (diag(mat, k) .!= 0)
 
@@ -73,9 +77,9 @@ function correct_silent_edges!(W::AbstractMatrix, nₚ::Integer)
 end
 function correct_silent_edges!(Wₜ::AbstractMatrix, Wₚ::AbstractMatrix)
     nₜ, nₚ = size(Wₜ, 2), size(Wₚ, 2)
-	W = Model._W(Wₜ, Wₚ)
+	W = _W(Wₜ, Wₚ)
 	out = correct_silent_edges!(W, nₚ)
-	Wₜ[:], Wₚ[:] = Model.WₜWₚ(W, nₜ, nₚ)
+	Wₜ[:], Wₚ[:] = WₜWₚ(W, nₜ, nₚ)
 	return out
 end
 
@@ -86,11 +90,6 @@ return: bool indicating if anything was corrected.
 function correct!(Wₜ::AbstractMatrix, Wₚ::AbstractMatrix)
 	corrected = correct_self_loops!(Wₜ, Wₚ)
 	while correct_silent_edges!(Wₜ, Wₚ) corrected = true end
-	corrected
-end
-function correct!(W::AbstractMatrix, nₚ::Integer)
-	corrected = correct_self_loops!(W)
-	while correct_silent_edges!(W, nₚ) corrected = true end
 	corrected
 end
 
@@ -223,11 +222,6 @@ function sort_TFKPO(W::AbstractMatrix, TF::BitVector, KP::BitVector, O::BitVecto
 	order = [(1:n)[TF]; (1:n)[KP]; (1:n)[O]]
 	reorder(W, order)
 end
-
-"""
-Get Wₜ, Wₚ from square W with nodes sorted in order TF, KP, O.
-"""
-WₜWₚ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = W[:, 1:nₜ], W[1:nₜ+nₚ, nₜ+1:nₜ+nₚ]
 
 "Random Wₜ, Wₚ from B. Main function in this file."
 function random_WₜWₚ(B::AbstractMatrix, nₚ::Integer)

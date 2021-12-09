@@ -2,6 +2,7 @@
 module ReadWrite
 
 using DelimitedFiles
+using Chain: @chain
 import JSON3
 import BSON
 import JLD
@@ -30,14 +31,21 @@ end
 
 function loaddlm(fname::String)
 	ext = splitext(fname)[2]
-	if ext in [".mat", ".txt", ".ssv", ".adj"] readdlm(fname, ' ')
+	if ext in [".mat", ".adj"] readdlm(fname, ' ') |> parse_matrix
+    elseif ext in [".txt", ".ssv"] readdlm(fname, ' ')
 	elseif ext == ".csv" readdlm(fname, ',')
 	elseif ext == ".tsv" readdlm(fname, '\t')
 	else error("File format not recognized.") end
 end
 function loaddlm(fname::String, T::Type)
 	ext = splitext(fname)[2]
-	if ext in [".mat", ".txt", ".ssv", ".adj"] readdlm(fname, ' ', T)
+	if ext in [".mat", ".adj"]
+		@chain fname begin
+			readdlm(' ')
+			parse_matrix
+			convert.(T, _)
+		end
+    elseif ext in [".txt", ".ssv"] readdlm(fname, ' ', T)
 	elseif ext == ".csv" readdlm(fname, ',', T)
 	elseif ext == ".tsv" readdlm(fname, '\t', T)
 	else error("File format not recognized.") end
@@ -86,5 +94,18 @@ savedlm(o::Base.TTY, x::Matrix) = writedlm(o, x)
 save_JSON(fname::String, x) = open(fname, "w") do io JSON3.write(io, x) end
 save_BSON(fname::String, x) = BSON.bson(fname, Dict(default_identifier => x))
 save_JLD(fname::String, x) = JLD.save(fname, default_identifier, x)
+
+"""
+Deal with string matrices containing '.', '+', '-' to represent 0, 1, -1.
+The DelimitedFiles.readdlm should read string characters as Matrix{Any}
+"""
+parse_matrix(mat::Matrix{Any}) = (mat .== "+") .- (mat .== "-")
+parse_matrix(mat::Union{BitMatrix,Matrix{<:Real}}) = mat
+function pretty_matrix(mat::Matrix{<:Real})
+    out = fill('.', size(mat))
+    out[mat .== +1] .= '+'
+    out[mat .== -1] .= '-'
+    out
+end
 
 end;

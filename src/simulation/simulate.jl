@@ -21,10 +21,10 @@ Create a random network from W.
 @main function network(Wₜ_fname::String=default_Wₜ, Wₚ_fname::String=default_Wₚ; o::String=default_net)
 	Wₜ, Wₚ = ReadWrite.loaddlm(Wₜ_fname), ReadWrite.loaddlm(Wₚ_fname, Int)
 	nᵥ, nₜ = size(Wₜ)
-	nₚ = size(Wₚ,2)
-	@assert nₜ == size(Wₚ,1) - nₚ
+	nₚ = size(Wₚ, 2)
+	@assert nₜ == size(Wₚ, 1) - nₚ
 	@assert nᵥ >= nₜ + nₚ
-	save(o, GeneRegulation.Network(Wₜ, Wₚ))
+	ReadWrite.save(o, GeneRegulation.Network(Wₜ, Wₚ))
 end
 
 @main function display(i=default_net; v::Integer=0)
@@ -176,46 +176,44 @@ Get the log fold-change values comparing mutant transcription levels to wildtype
 end
 
 """
-Given adjacency matrices without KP, TF, O assignment, generate random network(s) and simulate them, returning the logFC values.
+Given an adjacency matrix without KP, TF, O assignment, generate a random network and simulate it, returning the logFC values.
 - B: path of gold standard matrix which is an adjacency matrix without assignments of node types.
-- outdirs: path(s) separated by comma of output directories to store result files. Multiple paths means multiple parallel runs. All files are saved with default names, e.g. WT.mat, WP.mat, net.bson, X_sim.mat
+- dir: path of output directory to store result files. All files are saved with default names, e.g. WT.mat, WP.mat, net.bson, X_sim.mat
 - max_np: Try to get this many nodes assigned as KP. Upper limit. Default=30% of nodes.
 - max_attempts: Maximum number of tries to generate a random net before giving up if there keeps being a convergence or other error from simulation.
 """
-@main function randomNetLogFCs(B::String, outdirs...; max_np::Int=nothing, max_attempts::Int=3)
+@main function randomNetLogFCs(B::String, dir::String; max_np::Union{Int,Nothing}=nothing, max_attempts::Int=3)
     # suppress Fire output with ;
-    include("weight.jl");  # random(...) and correct()
+    include(readchomp(`git root`) * "/src/simulation/weight.jl");  # random(...) and correct()
     # set max_nₚ to default 30% of nodes if not specified.
     if max_np === nothing
         nᵥ = size(ReadWrite.loaddlm(B), 1)
         max_np = ceil(Int, nᵥ * .3)
     end
 
-    @threads for dir in outdirs
-        println(dir)
-        Wₜfname = joinpath(dir, default_Wₜ)
-        Wₚfname = joinpath(dir, default_Wₚ)
-        netfname = joinpath(dir, default_net)
-        logFCfname = joinpath(dir, "X_sim.mat")
-        
-        for attempt in 1:max_attempts
-            attempt == 1 || println("$dir attempt $attempt")
-            # make WT and WP with {-1, 0, 1} for deactvation, no edge and activation
-            random(B, max_nₚ; WT_fname=Wₜfname, WP_fname=Wₚfname)
-            # there should be nothing to correct
-            correct(Wₜfname, Wₚfname; ot=Wₜfname, op=Wₚfname)
-            # make net.bson which has a fully defined network instance with all it's constants, etc.
-            network(Wₜfname, Wₚfname; o=netfname)
+    println(dir)
+    Wₜfname = joinpath(dir, default_Wₜ)
+    Wₚfname = joinpath(dir, default_Wₚ)
+    netfname = joinpath(dir, default_net)
+    logFCfname = joinpath(dir, "X_sim.mat")
+    
+    for attempt in 1:max_attempts
+        attempt == 1 || println("$dir attempt $attempt")
+        # make WT and WP with {-1, 0, 1} for deactvation, no edge and activation
+        random(B, max_np; WT=Wₜfname, WP=Wₚfname)
+        # there should be nothing to correct
+        #= correct(Wₜfname, Wₚfname; ot=Wₜfname, op=Wₚfname) =#
+        # make net.bson which has a fully defined network instance with all it's constants, etc.
+        network(Wₜfname, Wₚfname; o=netfname)
 
-            rm(logFCfname; force=true)
-            # simulate logFC values and test that there are no warnings
-            try
-                @test_logs (:info, "$dir logFC values simulated") logFC(o=logFCfname)
-            catch
-                continue
-            end
-            break
+        rm(logFCfname; force=true)
+        # simulate logFC values and test that there are no warnings
+        try
+            @test_logs (:info, "$dir logFC values simulated") logFC(netfname; o=logFCfname)
+        catch
+            continue
         end
+        break
     end
 end
 

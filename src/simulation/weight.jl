@@ -6,25 +6,11 @@ isdefined(Main, :ArrayUtils) || include("../utilities/ArrayUtils.jl")
 
 using Fire
 using .ReadWrite, .ArrayUtils, .WeightConstruction, .CLI
-using Chain: @chain
 
 # defaults
 default_Wₜ = "WT.mat"
 default_Wₚ = "WP.mat"
 
-
-"""
-Deal with string B, e.g. containing '.', '+', '-'.
-The DelimitedFiles.readdlm should read string characters as Matrix{Any}
-"""
-parse_matrix(mat::Matrix{Any}) = (mat .== "+") .- (mat .== "-")
-parse_matrix(mat::Union{BitMatrix,Matrix{<:Real}}) = mat
-function pretty_matrix(mat::Matrix{<:Real})
-    out = fill('.', size(mat))
-    out[mat .== +1] .= '+'
-    out[mat .== -1] .= '-'
-    out
-end
 
 """
 Create random W from a adjacency matrix containing B.
@@ -33,11 +19,7 @@ Create random W from a adjacency matrix containing B.
 - pretty: set to true to get outputs written with '.', '+', '-' instead of 0, 1, -1.
 """
 @main function random(B::String, nₚ::Integer; WT::String=default_Wₜ, WP::String=default_Wₚ, pretty::Bool=false)
-	Wₜ, Wₚ = @chain B begin
-	    loaddlm
-	    parse_matrix
-	    WeightConstruction.random_WₜWₚ(nₚ)
-    end
+	Wₜ, Wₚ = WeightConstruction.random_WₜWₚ(loaddlm(B), nₚ)
     if pretty
         Wₜ = pretty_matrix(Wₜ)
         Wₚ = pretty_matrix(Wₚ)
