@@ -84,7 +84,7 @@ Examples:
 `reorder(rand(4,4), [3,4,1,2,5])` throws BoundsError.
 `reorder(rand(4,4), [3,4,1])` works and removes a single row and column.
 """
-function reorder(adj::AbstractMatrix, order)
+function reorder(adj::AbstractMatrix, order::Vector{Int})
 	n, m = size(adj)
 	row_idx = [i for i in order if i<=n]
 	col_idx = [i for i in order if i<=m]

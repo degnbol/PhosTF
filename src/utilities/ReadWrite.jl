@@ -30,14 +30,14 @@ end
 
 function loaddlm(fname::String)
 	ext = splitext(fname)[2]
-	if ext in [".mat", ".txt", ".ssv"] readdlm(fname, ' ')
+	if ext in [".mat", ".txt", ".ssv", ".adj"] readdlm(fname, ' ')
 	elseif ext == ".csv" readdlm(fname, ',')
 	elseif ext == ".tsv" readdlm(fname, '\t')
 	else error("File format not recognized.") end
 end
 function loaddlm(fname::String, T::Type)
 	ext = splitext(fname)[2]
-	if ext in [".mat", ".txt", ".ssv"] readdlm(fname, ' ', T)
+	if ext in [".mat", ".txt", ".ssv", ".adj"] readdlm(fname, ' ', T)
 	elseif ext == ".csv" readdlm(fname, ',', T)
 	elseif ext == ".tsv" readdlm(fname, '\t', T)
 	else error("File format not recognized.") end
@@ -76,7 +76,7 @@ end
 
 function savedlm(fname::String, x::AbstractArray)
 	ext = splitext(fname)[2]
-	if ext in [".mat", ".txt", ".ssv"] writedlm(fname, x, ' ')
+	if ext in [".mat", ".txt", ".ssv", ".adj"] writedlm(fname, x, ' ')
 	elseif ext == ".csv" writedlm(fname, x, ',')
 	elseif ext == ".tsv" writedlm(fname, x, '\t')
 	else error("File format not recognized.") end

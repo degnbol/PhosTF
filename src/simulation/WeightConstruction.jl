@@ -124,7 +124,7 @@ KP has to have edges in B to nodes that is also regulated by TF.
 - nₚ: assign this many nodes to the set KP, or at least try to get this many valid nodes.
 """
 random_TFKPO(B::Matrix, nₚ::Integer) = random_TFKPO(B .!= 0, nₚ)
-function random_TFKPO(B::BitMatrix, nₚ::Integer)::Tuple{BitVector}
+function random_TFKPO(B::BitMatrix, nₚ::Integer)::Tuple{BitVector,BitVector,BitVector}
 	n = size(B, 1)
 	# a node with zero outgoing edges belong to O
     O = vec(sum(B, dims=1) .== 0)
@@ -161,20 +161,24 @@ end
 """
 Rewire KP edges to random TFs that regulate their final target given as a B edge
 """
-function rewire_KP_thru_TF(B::AbstractMatrix, TF::BitVector, KP::BitVector, O::BitVector)
+function redirect_KP_thru_TF(B::AbstractMatrix, TF::BitVector, KP::BitVector, O::BitVector)
 	n = size(B, 1)
     W = copy(B) # it will have same type as B, e.g. BitMatrix or Matrix{Int}
     # TF->V edges are unchanged
 	W[:, KP] .= 0
     for kp ∈ (1:n)[KP]  # each KP
-		for i ∈ (1:n)[B[:, kp] .!= 0]  # each KP b edge, numerical index
-			# randomly select a TF to re-route through among the TFs that has an edge to i
-            tf = rand((1:n)[B[i, :] .!= 0 .& TF])
-            # set the weight to what it needs to result in the same product of sign through KP->TF->i as it was through KP->i.
+		for target ∈ (1:n)[B[:, kp] .!= 0]  # each KP regulatory target. Numerical index
+			# Find the best TF to reroute through. First find all TFs, where TF->target
+            TFs_reg_target = (1:n)[(B[target, :] .!= 0) .& TF]
+			# The weight that the needs to be used to result in the same product of sign through KP->TF->target as it was through KP->target.
             # In case of BitMatrix this will always just be true * true == true
-            W[tf, kp] = W[i, kp] * W[i, tf]
+            ws = B[target, kp] .* B[target, TFs_reg_target]
+            # count how many values does not match between the KP and the TFs being considered.
+            imperfections = sum(B[:, TFs_reg_target] .* ws' .!= B[:, kp], dims=1) |> vec
+			# Then select the one that closest match the KP in its intended regulatory effect
+            W[TFs_reg_target[argmin(imperfections)], kp] = ws[argmin(imperfections)]
 			# check if we have fully described the intended effect (NO transcription cycles)
-			all(W * W[:, kp] .!= 0 >= B[:, kp]) && break
+			all(W * W[:, kp] .!= 0 .>= B[:, kp]) && break
 		end
 	end
 	W
@@ -185,7 +189,8 @@ Find KPs that regulate subsets of the set of nodes that other KPs regulate.
 Then connect a random pair so that the one regulating less becomes the target of the other.
 Repeat until there is no more cascade edges to add.
 """
-function rewire_KP_thru_KP!(W::AbstractMatrix, KP::BitVector)
+function redirect_KP_thru_KP(W::AbstractMatrix, KP::BitVector)
+    W = copy(W)
 	nₚ = sum(KP)
 	# which KP regulates a subset of the nodes that another KP regulates?
 	Wₚsub = subset_adj(W[:, KP])
@@ -219,15 +224,21 @@ function sort_TFKPO(W::AbstractMatrix, TF::BitVector, KP::BitVector, O::BitVecto
 	reorder(W, order)
 end
 
+"""
+Get Wₜ, Wₚ from square W with nodes sorted in order TF, KP, O.
+"""
+WₜWₚ(W::AbstractMatrix, nₜ::Integer, nₚ::Integer) = W[:, 1:nₜ], W[1:nₜ+nₚ, nₜ+1:nₜ+nₚ]
+
 "Random Wₜ, Wₚ from B. Main function in this file."
 function random_WₜWₚ(B::AbstractMatrix, nₚ::Integer)
 	TF, KP, O = random_TFKPO(B, nₚ)
+    @info "Found $(sum(O)) non-regulators assigned to O, $(sum(KP)) that could be assigned to KP, and the remaining $(sum(TF)) were assigned to TF."
 	@chain B begin
-	    rewire_KP_thru_TF(TF, KP, O)
-	    rewire_KP_thru_KP!(KP)
+	    redirect_KP_thru_TF(TF, KP, O)
+	    redirect_KP_thru_KP(KP)
         set_signs
         sort_TFKPO(TF, KP, O)
-        Model.WₜWₚ(sum(TF), sum(KP))
+        WₜWₚ(sum(TF), sum(KP))
     end
 end
 
