@@ -7,24 +7,25 @@ using LinearAlgebra
 using Plots
 using Test  # @test_logs used in randomNetLogFCs
 using .Threads: @threads
+using .ReadWrite
 
 # defaults
 default_Wₜ, default_Wₚ = "WT.mat", "WP.mat"
 default_net = "net.bson"
 
 
-loadnet(i) = ReadWrite.load(i, GeneRegulation.Network)
+loadnet(i) = load(i, GeneRegulation.Network)
 
 """
 Create a random network from W.
 """
 @main function network(Wₜ_fname::String=default_Wₜ, Wₚ_fname::String=default_Wₚ; o::String=default_net)
-	Wₜ, Wₚ = ReadWrite.loaddlm(Wₜ_fname), ReadWrite.loaddlm(Wₚ_fname, Int)
+	Wₜ, Wₚ = loaddlm(Wₜ_fname), loaddlm(Wₚ_fname, Int)
 	nᵥ, nₜ = size(Wₜ)
 	nₚ = size(Wₚ, 2)
 	@assert nₜ == size(Wₚ, 1) - nₚ
 	@assert nᵥ >= nₜ + nₚ
-	ReadWrite.save(o, GeneRegulation.Network(Wₜ, Wₚ))
+	save(o, GeneRegulation.Network(Wₜ, Wₚ))
 end
 
 @main function display(i=default_net; v::Integer=0)
@@ -66,10 +67,10 @@ Make them with either another simulate call, a steaady state call or write them 
 	solution === nothing && return
 	@info(solution.retcode)
 	if solution.retcode in [:Success, :Terminated]
-		ReadWrite.savedlm(r,   solution[:,1,:])
-		ReadWrite.savedlm(p,   solution[:,2,:])
-		ReadWrite.savedlm(psi, solution[1:net.nₜ+net.nₚ,3,:])
-		ReadWrite.savedlm(t,   solution.t)
+		savedlm(r,   solution[:,1,:])
+		savedlm(p,   solution[:,2,:])
+		savedlm(psi, solution[1:net.nₜ+net.nₚ,3,:])
+		savedlm(t,   solution.t)
 	end
 end
 
@@ -127,9 +128,9 @@ If "mut" is not provided, the first (and ideally only) column of the file will b
 	solution = steady_state(net, mut_id, mut_file)
 	@info(solution.retcode)
 	if solution.retcode in [:Success, :Terminated]
-		ReadWrite.savedlm(r,   solution[:,1,end])
-		ReadWrite.savedlm(p,   solution[:,2,end])
-		ReadWrite.savedlm(psi, solution[1:net.nₜ+net.nₚ,3,end])
+		savedlm(r,   solution[:,1,end])
+		savedlm(p,   solution[:,2,end])
+		savedlm(psi, solution[1:net.nₜ+net.nₚ,3,end])
 	end
 end
 steady_state(net, ::Nothing, ::Nothing) = ODEs.steady_state(net)
@@ -171,7 +172,7 @@ Get the log fold-change values comparing mutant transcription levels to wildtype
 	measurements = ODEs.@domainerror(ODEs.logFC(wildtype, mutants))
 	if measurements !== nothing
 		@info("logFC values simulated")
-		ReadWrite.savedlm(o, measurements)
+		savedlm(o, measurements)
 	end
 end
 
