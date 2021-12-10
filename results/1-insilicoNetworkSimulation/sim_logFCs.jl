@@ -1,8 +1,6 @@
 #!/usr/bin/env julia
-# Run from `git root`/results/*-insilicoNetworkConstruction
+# Run from `git root`/results/*-insilicoNetworkSimulation
 ROOT=readchomp(`git root`)
-# comment this out to use your own env:
-using Pkg; Pkg.activate(ROOT * "/src")
 include(ROOT * "/src/simulation/simulate.jl");
 using .Threads: @threads
 using .Iterators: product # since @threads does not support nested loops yet

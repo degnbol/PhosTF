@@ -1,10 +1,11 @@
 #!/usr/bin/env julia
-include("../utilities/ReadWrite.jl")
-include("../utilities/CLI.jl")
-include("../utilities/ArgParseUtils.jl")
-include("GradientDescent.jl")
-isdefined(Main, :Model) || include("Model.jl")
-isdefined(Main, :ArrayUtils) || include("../utilities/ArrayUtils.jl")
+SRC = readchomp(`git root`) * "/src/"
+include(SRC * "utilities/ReadWrite.jl")
+include(SRC * "utilities/CLI.jl")
+include(SRC * "utilities/ArgParseUtils.jl")
+include(SRC * "inference/GradientDescent.jl")
+isdefined(Main, :Model) || include(SRC * "inference/Model.jl")
+isdefined(Main, :ArrayUtils) || include(SRC * "utilities/ArrayUtils.jl")
 using ArgParse
 using LinearAlgebra
 using Flux
@@ -13,17 +14,19 @@ using Flux
 argument_parser = ArgParseSettings(description="Infer a weight matrix from logFC data.", autofix_names=true)
 @add_arg_table! argument_parser begin
     "X"
-        help = "Filename for LogFC values in a matrix. No column or row names. Space delimiters are recommended."
+        help = """Filename for LogFC values in a matrix. Space delimiters are recommended. 
+No column or row names, but rows should be sorted TF, KP, O and columns should be each experiment. 
+If TF, KP, O memberships are completely unknown then set nₜ=nᵥ and nₚ=nᵥ effectively assuming that all nodes may be TF and KP."""
         required = true
     "nₜ"
         arg_type = Int
         range_tester = x -> x > 0
-        help = "Number of TFs."
+        help = "Number of TFs. If unknown, set to nᵥ."
         required = true
     "nₚ"
         arg_type = Int
         range_tester = x -> x > 0
-        help = "Number of KPs."
+        help = "Number of KPs. If unknown, set to nᵥ."
         required = true
     "out_WT"
         default = "WT_infer.mat"
@@ -32,7 +35,7 @@ argument_parser = ArgParseSettings(description="Infer a weight matrix from logFC
         default = "WP_infer.mat"
         help = "Outfile for inferred Wₚ adjacency matrix."
     "--J", "-J"
-        help = "Filename for J, which has 1s indicating mutated genes in each experiment and zeros otherwise. Default is using the identity matrix."
+        help = "Filename for J, which has 1s indicating mutated genes in each experiment and zeros otherwise. Default is using the identity matrix, i.e. each node has been mutated once, in order corresponding to the rows of X."
     "--epochs", "-e"
         arg_type = Int
         default = 500
@@ -98,6 +101,7 @@ loaddlm_(path::AbstractString) = begin
     path != "" || return nothing
     ReadWrite.loaddlm(abspath_(path))
 end
+loaddlm_(path::Nothing, T::Type) = nothing
 loaddlm_(path::AbstractString, T::Type) = begin
 	# empty strings is the same as providing nothing.
     path != "" || return nothing
@@ -125,7 +129,7 @@ end
 mat2MS(::Nothing) = nothing, nothing
 
 
-function infer(X, nₜ::Integer, nₚ::Integer, out_WT::String="WT_infer.mat", out_WP::String="WP_infer.mat"; J=nothing, epochs::Integer=5000, opt="ADAMW", 
+function infer(X::String, nₜ::Integer, nₚ::Integer, out_WT::String="WT_infer.mat", out_WP::String="WP_infer.mat"; J=nothing, epochs::Integer=5000, opt="ADAMW", 
         lr::Float64=0.001, decay::Real=0, WT=nothing, WP=nothing, WT_mask=nothing, WP_mask=nothing,
         lambda_Bstar::Real=.1, lambda_absW::Real=0., reg_WT::Bool=true, train_WT::Bool=true)
     # read matrices that were given
@@ -140,8 +144,10 @@ function infer(X, nₜ::Integer, nₚ::Integer, out_WT::String="WT_infer.mat", o
     
 	nᵥ, K = size(X)
 	nₒ = nᵥ - (nₜ + nₚ)
-
-    mdl = Model.Mdl(nₜ, nₚ, nₒ, J === nothing ? K : J; Wₜ=initial_Wₜ, Wₚ=initial_Wₚ, Mₜ=Mₜ, Mₚ=Mₚ, Sₜ=Sₜ, Sₚ=Sₚ)
+    
+    mdl = Model.get_model(nₜ, nₚ, nₒ, J === nothing ? K : J; Wₜ=initial_Wₜ, Wₚ=initial_Wₚ, Mₜ=Mₜ, Mₚ=Mₚ, Sₜ=Sₜ, Sₚ=Sₚ)
+    # test that model works
+    @assert size(mdl(X)) == size(X)
     Model.make_trainable(train_WT)
 	
     opt = parse_optimizer(opt, lr, decay)

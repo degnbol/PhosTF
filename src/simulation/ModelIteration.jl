@@ -42,7 +42,7 @@ end
 function converge(Wₜ::AbstractMatrix, Wₚ::AbstractMatrix, C=nothing, X₀=nothing; tolerance::Float64=default_tolerance, max_iterations::Integer=default_max_iterations)
 	nₜ, nₚ, nₒ = Model.nₜnₚnₒ(Wₜ, Wₚ)
 	K = C === nothing ? nₜ+nₚ : size(C, 2)
-	mdl = Model.Mdl(nₜ, nₚ, nₒ, K)
+	mdl = Model.get_model(nₜ, nₚ, nₒ, K)
 	if C === nothing C = random_C(mdl.U) end
 	if X₀ === nothing X₀ = C end
 	converge(mdl, C, X₀, tolerance=tolerance, max_iterations=max_iterations)

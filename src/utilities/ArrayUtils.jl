@@ -34,20 +34,15 @@ Adding some default values to μ and σ.
 """
 TruncNormal(l, u) = truncated(Normal((l+u)/2, (u-l)/6), l, u)
 
-"Create non-square identity matrices using sparse matrix type."
+"Create non-square identity matrices using sparse matrix type with ones in the default diagonal."
 LinearAlgebra.I(n::Integer, m::Integer) = I(max(n, m))[1:n, 1:m]
 "Create non-square identity matrices using dense matrix type."
-function eye(n::Integer, m::Integer)
+function eye(n::Integer, m::Integer, k::Integer=0)
 	mat = zeros(n, m)
-	mat[diagind(mat)] .= 1
+	mat[diagind(mat, k)] .= 1
 	mat
 end
-function eye(size::Tuple)
-	mat = zeros(size)
-	mat[diagind(mat)] .= 1
-	mat
-end
-eye(matrix::AbstractMatrix) = eye(size(matrix))
+eye(matrix::AbstractMatrix, k::Integer=0,) = eye(size(matrix)..., k)
 
 shuffle_rows(matrix::AbstractMatrix) = matrix[shuffle(1:end), :]
 shuffle_rows_(matrix::AbstractMatrix) = @view matrix[shuffle(1:end), :]

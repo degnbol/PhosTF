@@ -26,6 +26,7 @@ function batches(K::Integer, batch_size::Integer)
 	(ks[1+batch_size*(i-1):batch_size*i] for i ∈ 1:n_batches)
 end
 
+L1(x) = sum(abs, x)
 
 # If any of the λs are zero then avoid adding that part to the loss, e.g. using ::Nothing
 get_loss_func(mdl, λBstar::Float64, λabsW::Float64, reg_Wₜ::Bool) = begin
@@ -56,7 +57,7 @@ end
 
 """
 - mdl: Model
-- X: logFC values with measured nodes along axis=1, and different experiment or replicate along axis=2
+- X: logFC values with measured nodes along axis=1 sorted in order TF, KP, O, and different experiment or replicate along axis=2
 - epochs: number of epochs to train for
 - λBstar: reg factor for B*
 - λabsW: reg for abs(W)
@@ -68,6 +69,8 @@ end
 - save_every: e.g. 10 to save every tenth epoch. Use zero to not save intermediates. Intermediates are saved to W{T,P}.mat.tmp in PWD.
 """
 function train(mdl, X::AbstractMatrix; epochs::Integer=10000, λBstar::Real=.1, λabsW::Real=0., opt=ADAMW(), reg_Wₜ::Bool=true, save_every::Integer=1)
+    # Flux.trainable(mdl) will be set to either (Wₚ,) or (Wₜ, Wₚ) in Model, so we use it to see if we intent to train Wₜ.
+    train_Wₜ = length(Flux.trainable(mdl)) == 2
     loss = get_loss_func(mdl, λBstar, λabsW, reg_Wₜ)
 
 	epoch = 0
@@ -86,8 +89,8 @@ function train(mdl, X::AbstractMatrix; epochs::Integer=10000, λBstar::Real=.1, 
 		epoch += 1
 		
 		if save_every > 0 && epoch % save_every == 0
-			Wₜ, Wₚ = Model.WₜWₚ(mdl)
-			train_WT && savedlm("WT.tmp.mat", Wₜ)
+            Wₜ, Wₚ = Model.WₜWₚ(mdl)
+			train_Wₜ && savedlm("WT.tmp.mat", Wₜ)
 			savedlm("WP.tmp.mat", Wₚ)
 		end
 	end
@@ -96,10 +99,10 @@ function train(mdl, X::AbstractMatrix; epochs::Integer=10000, λBstar::Real=.1, 
 	nᵥ = size(X, 1)
 	nᵥ > 100 || (cb = Flux.throttle(cb, 5))
 	
-	println(train_WT ? "loss\tSSE\tLt\tLp\tepoch\ttime" : "loss\tSSE\tLp\tepoch\ttime")
+	println(train_Wₜ ? "loss\tSSE\tLt\tLp\tepoch\ttime" : "loss\tSSE\tLp\tepoch\ttime")
 	cb() # epoch 0 print before we start
 	Flux.train!(loss, params(mdl), ((X,) for _ ∈ 1:epochs), opt; cb=cb)
-    WₜWₚ(mdl)
+    Model.WₜWₚ(mdl)
 end
 
 end;
