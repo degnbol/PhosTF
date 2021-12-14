@@ -9,7 +9,7 @@ for n in [10, 100]
     for i in 1:5
         for rep in 1:5
             fname = ROOT * "/data/DREAM4/adjacencies/goldstandard_$(n)_$(i).adj"
-            random(fname, Int(.3 * n); WT="WT_$(n)_$(i)-rep$(rep).adj", WP="WP_$(n)_$(i)-rep$(rep).adj", pretty=true);
+            random(fname, Int(.3 * n); WT="adjacencies/WT_$(n)_$(i)-rep$(rep).adj", WP="adjacencies/WP_$(n)_$(i)-rep$(rep).adj", pretty=true);
         end
     end
 end

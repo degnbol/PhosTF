@@ -3,14 +3,10 @@ isdefined(Main, :ReadWrite) || include("../utilities/ReadWrite.jl")
 isdefined(Main, :CLI) || include("../utilities/CLI.jl")
 isdefined(Main, :WeightConstruction) || include("WeightConstruction.jl")
 isdefined(Main, :ArrayUtils) || include("../utilities/ArrayUtils.jl")
+isdefined(Main, :Model) || include("../inference/Model.jl")
 
 using Fire
 using .ReadWrite, .ArrayUtils, .WeightConstruction, .CLI
-
-# defaults
-default_Wₜ = "WT.mat"
-default_Wₚ = "WP.mat"
-
 
 """
 Create random W from a adjacency matrix containing B.
@@ -18,14 +14,17 @@ Create random W from a adjacency matrix containing B.
 - nₚ: how many of the nodes should be attempted to be assigned as KP rather than TF?
 - pretty: set to true to get outputs written with '.', '+', '-' instead of 0, 1, -1.
 """
-@main function random(B::String, nₚ::Integer; WT::String=default_Wₜ, WP::String=default_Wₚ, pretty::Bool=false)
+@main function random(B::String, nₚ::Integer; WT::String="WT.mat", WP::String="WP.mat", pretty::Bool=false)
 	Wₜ, Wₚ = WeightConstruction.random_WₜWₚ(loaddlm(B), nₚ)
     if pretty
-        Wₜ = pretty_matrix(Wₜ)
-        Wₚ = pretty_matrix(Wₚ)
+        Wₜ = ReadWrite.pretty_matrix(Wₜ)
+        Wₚ = ReadWrite.pretty_matrix(Wₚ)
     end
-	savedlm(WT, Wₜ)
-	savedlm(WP, Wₚ)
+	# the nodes gets sorted TF, KP, O so we can add some row and column names
+    nₜ, nₚ, nₒ = Model.nₜnₚnₒ(Wₜ, Wₚ)
+    names = vcat(["TF$i" for i in 1:nₜ], ["KP$i" for i in 1:nₚ], ["O$i" for i in 1:nₒ])
+    savedlm(WT, Wₜ; colnames=names[1:nₜ], rownames=names)
+    savedlm(WP, Wₚ; colnames=names[nₜ+1:nₜ+nₚ], rownames=names[1:nₜ+nₚ])
 end
 
 """
@@ -47,9 +46,9 @@ end
 """
 This version of the function is run when no arguments are supplied.
 """
-@main function correct(Wₜ_fname::String=default_Wₜ, Wₚ_fname::String=default_Wₚ; ot="WT_cor.mat", op="WP_cor.mat", save::Bool=false)
-	Wₜ, Wₚ = loadmat(Wₜ_fname), loadmat(Wₚ_fname)
-
+@main function correct(Wₜfname::String="WT.mat", Wₚfname::String="WP.mat", op="WP_cor.mat", save::Bool=false)
+	Wₜ, Wₚ = loadmat(Wₜfname), loadmat(Wₚfname)
+    
 	if WeightConstruction.correct!(Wₜ, Wₚ)
 		@info("Corrections made.")
 		savedlm(ot, Wₜ)

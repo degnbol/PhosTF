@@ -17,10 +17,16 @@ default_net = "net.bson"
 loadnet(i) = load(i, GeneRegulation.Network)
 
 """
-Create a random network from W.
+Create a random network from Wₜ and Wₚ.
+- Wₜfname, Wₚfname: filenames of Wₜ and Wₚ matrices with edge presence and sign integer data. 
+    Sizes are nᵥ×nₜ and nₜ+nₚ×nₚ, and the first dimension should be sorted TF, KP, O.
+- header: bool indicating if weight matrices contains headers (and then possibly row names).
+    Note that it is not (yet) implemented to store this info in the generated network model.
 """
-@main function network(Wₜ_fname::String=default_Wₜ, Wₚ_fname::String=default_Wₚ; o::String=default_net)
-	Wₜ, Wₚ = loaddlm(Wₜ_fname), loaddlm(Wₚ_fname, Int)
+@main function network(Wₜfname::String=default_Wₜ, Wₚfname::String=default_Wₚ; header::Bool=false, o::String=default_net)
+	Wₜ = loaddlm(Wₜfname; header=header) |> Matrix
+	# make sure to enforce that it is Int which indicates weight presence and sign as opposed to Float that indicates weight magnitude.
+	Wₚ = loaddlm(Wₚfname, Int; header=header) |> Matrix
 	nᵥ, nₜ = size(Wₜ)
 	nₚ = size(Wₚ, 2)
 	@assert nₜ == size(Wₚ, 1) - nₚ
@@ -128,9 +134,9 @@ If "mut" is not provided, the first (and ideally only) column of the file will b
 	solution = steady_state(net, mut_id, mut_file)
 	@info(solution.retcode)
 	if solution.retcode in [:Success, :Terminated]
-		savedlm(r,   solution[:,1,end])
-		savedlm(p,   solution[:,2,end])
-		savedlm(psi, solution[1:net.nₜ+net.nₚ,3,end])
+		savedlm(r,   solution[:, 1, end])
+		savedlm(p,   solution[:, 2, end])
+		savedlm(psi, solution[1:net.nₜ+net.nₚ, 3, end])
 	end
 end
 steady_state(net, ::Nothing, ::Nothing) = ODEs.steady_state(net)
@@ -153,10 +159,13 @@ Get the log fold-change values comparing mutant transcription levels to wildtype
 - o: stdout or file to write result to
 """
 @main function logFC(net=default_net; o=stdout)
-	measurements = ODEs.@domainerror(ODEs.logFC(loadnet(net)))
+    net = loadnet(net)
+	measurements = ODEs.@domainerror(ODEs.logFC(net))
 	if measurements !== nothing
 		@info("logFC values simulated")
-		savedlm(o, measurements)
+        # add some default names to the logFC table, custom names not implemented (yet).
+        names = vcat(["TF$i" for i in 1:net.nₜ], ["KP$i" for i in 1:net.nₚ], ["O$i" for i in 1:net.nₒ])
+        savedlm(o, measurements; colnames=names[1:net.nₜ+net.nₚ], rownames=names)
 	end
 end
 """

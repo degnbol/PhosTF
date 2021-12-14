@@ -81,6 +81,7 @@ Examples:
 """
 function reorder(adj::AbstractMatrix, order::Vector{Int})
 	n, m = size(adj)
+	# the ifs allows for n != m use cases.
 	row_idx = [i for i in order if i<=n]
 	col_idx = [i for i in order if i<=m]
 	if (length(row_idx) < length(order) && n>=m) || (length(col_idx) < length(order) && m>=n)
@@ -89,7 +90,7 @@ function reorder(adj::AbstractMatrix, order::Vector{Int})
 	if length(row_idx) < length(order) || length(col_idx) < length(order)
 		@warn("Indexing outside range of shortest axis.")
 	end
-	adj[row_idx,:][:,col_idx]  # reorders rows then columns
+	adj[row_idx, :][:, col_idx]  # reorders rows then columns
 end
 
 

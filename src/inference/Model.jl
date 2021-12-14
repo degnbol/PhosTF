@@ -120,12 +120,13 @@ _B(m) = _Wₜ(m) * inv(I - _Wₚ(m))
 _Bstar(m) = abs.(_Wₜ(m)) * inv(I - abs.(_Wₚ(m)))
 
 """
-- Wₜ: nonsquare weight matrix for TF -> V with dimensions nᵥ×nₜ+nₚ
-- Wₚ: nonsquare weight matrix for KP -> TFKP
+- Wₜ: nonsquare weight matrix for TF -> V with dimensions nᵥ×nₜ
+- Wₚ: nonsquare weight matrix for KP -> TFKP with dimensions nₜ+nₚ×nₚ
 """
 function nₜnₚnₒ(Wₜ::AbstractMatrix, Wₚ::AbstractMatrix)
-	(nᵥ, nₜ), nₚ = size(Wₜ), size(Wₚ, 2)
-	nₜ, nₚ, nᵥ - (nₜ+nₚ)
+	nᵥ, nₜ = size(Wₜ)
+	nₚ = size(Wₚ, 2)
+	nₜ, nₚ, nᵥ - (nₜ + nₚ)
 end
 
 "Total effects as defined in LLC."
