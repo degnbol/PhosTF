@@ -7,23 +7,25 @@ using .Iterators: product # since @threads does not support nested loops yet
 using Glob
 
 mkpath("inferredWeights")
+mkpath("logs")
 
 cd(ROOT * "/results/2-insilicoNetworkInference")
 logFC_dir = glob("../*-insilicoNetworkSimulation/sim_logFCs/") |> only
-X = logFC_dir * "sim_logFC_10_1-rep1.mat"
-J = nothing
+#= logFC_fname = logFC_dir * "sim_logFC_100_1-rep1.mat" =#
 WT = nothing
 WP = nothing
 WT_mask = nothing
 WP_mask = nothing
-nₜ = 7
-nₚ = 3
+TF = r"^TF[0-9]+$"
+KP = r"^KP[0-9]+$"
+mut_sep = nothing
+#= infer(logFC_fname, TF, KP) =#
 
-infer(X, 7, 3)
-
-#= for n in [10, 100] =#
-#=     @threads for (i, rep) in collect(product(1:5, 1:5)) =#
-#=          =#
-#=     end =#
-#= end =#
+for n in [10]
+    for (i, rep) in collect(product(1:5, 1:5))
+        SUF="_$(n)_$(i)-rep$(rep)"
+        logFC_fname = logFC_dir * "sim_logFC$SUF.mat"
+        infer(logFC_fname, TF, KP, "inferredWeights/WT$SUF.adj", "inferredWeights/WP$SUF.adj"; log="logs/log$SUF.tsv")
+    end
+end
 

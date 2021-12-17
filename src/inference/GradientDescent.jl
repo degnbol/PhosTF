@@ -8,10 +8,10 @@ module GradientDescent
 using LinearAlgebra
 using Random
 using Statistics: mean
-using Formatting
+#= using Formatting =#
+using Printf
 using Dates
 using Flux
-using ..ArrayUtils: eye, shuffle_columns
 using ..ReadWrite
 using ..Model
 
@@ -65,44 +65,44 @@ end
 - W: from previous training.
 - J: matrix with 1 for KO and 0 for passive observed node. Shape like X.
 - reg_Wₜ: should Wₜ be regularized on?
-- train_Wₜ: should Wₜ be trained or only Wₚ? if both are trained it is done together using W, otherwise we use W=[Wₜ,param(Wₚ)]
-- save_every: e.g. 10 to save every tenth epoch. Use zero to not save intermediates. Intermediates are saved to W{T,P}.mat.tmp in PWD.
+- save_times: e.g. 10 to save 10 intermediary results 10 times under gradient descent. Intermediates are saved to W{T,P}.mat.tmp in PWD.
 """
-function train(mdl, X::AbstractMatrix; epochs::Integer=10000, λBstar::Real=.1, λabsW::Real=0., opt=ADAMW(), reg_Wₜ::Bool=true, save_every::Integer=1)
+function train(mdl, X::AbstractMatrix, log::IO=stdout; epochs::Integer=10000, λBstar::Real=.1, λabsW::Real=0., opt=ADAMW(), reg_Wₜ::Bool=true, save_times::Integer=0)
     # Flux.trainable(mdl) will be set to either (Wₚ,) or (Wₜ, Wₚ) in Model, so we use it to see if we intent to train Wₜ.
     train_Wₜ = length(Flux.trainable(mdl)) == 2
     loss = get_loss_func(mdl, λBstar, λabsW, reg_Wₜ)
+    save_every = save_times == 0 ? 0 : Int(epochs / save_times)
 
-	epoch = 0
-	function cb()
+	function cb(epoch::Integer)
 		l = loss(X)
 		e = SSE(mdl, X)
-		lp = L1(Model._Wₚ(mdl))
+        lp = L1(Model._Wₚ(mdl))
+        vals = train_Wₜ ? (l, e, L1(Model._Wₜ(mdl)), lp) : (l, e, lp)
+		println(log, @sprintf(join(["%.3f" for _ in vals], '\t'), vals...) * "\t$epoch\t$(Dates.now())")
 		
-		try train_Wₜ ? printfmt(5, l, e, L1(Model._Wₜ(mdl)), lp) : printfmt(5, l, e, lp)
-		catch exception
-			if isa(exception, InexactError) # if the values are crazy big we get issues with showing floats
-				train_Wₜ ? print("$l\t$e\t$(L1(Model._Wₜ(W)))\t$lp") : print("$l\t$e\t$lp")
-			else rethrow() end
-		end
-		println("\t$epoch\t$(Dates.now())")
-		epoch += 1
-		
-		if save_every > 0 && epoch % save_every == 0
+		if save_times > 0 && epoch % save_every == 0
             Wₜ, Wₚ = Model.WₜWₚ(mdl)
 			train_Wₜ && savedlm("WT.tmp.mat", Wₜ)
 			savedlm("WP.tmp.mat", Wₚ)
 		end
 	end
 	# throttle callbacks if we are doing a small example.
-    # BUG: epoch is wrong when throttled, it counts number of times cb is called.
-	nᵥ = size(X, 1)
-	nᵥ > 100 || (cb = Flux.throttle(cb, 5))
+	_cb = size(X, 1) > 100 ? cb : Flux.throttle(cb, 5)
 	
-	println(train_Wₜ ? "loss\tSSE\tLt\tLp\tepoch\ttime" : "loss\tSSE\tLp\tepoch\ttime")
-	cb() # epoch 0 print before we start
-	Flux.train!(loss, params(mdl), ((X,) for _ ∈ 1:epochs), opt; cb=cb)
+    println(log, train_Wₜ ? "loss\tSSE\tL1(Wt)\tL1(Wp)\tepoch\ttime" : "loss\tSSE\tL1(Wp)\tepoch\ttime")
+	_cb(0) # epoch 0 print before we start
+    for epoch in 1:epochs
+        Flux.train!(loss, params(mdl), ((X,),), opt)
+        _cb(epoch)
+    end
+    cb(epochs) # last epoch print after finish
     Model.WₜWₚ(mdl)
+end
+# if a log file name is provided
+function train(mdl, X::AbstractMatrix, log::AbstractString; kwargs...)
+    open(log, "w") do fh
+        return train(mdl, X, fh; kwargs...)
+    end
 end
 
 end;
