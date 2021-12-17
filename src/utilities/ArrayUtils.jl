@@ -52,10 +52,7 @@ shuffle_columns_(matrix::AbstractMatrix) = @view matrix[:, shuffle(1:end)]
 """
 A conversion of array to string that writes empty array as [] instead of e.g. Any[].
 """
-function tostring(array::AbstractArray)
-	if isempty(array) return "[]" end
-	string(array)
-end
+tostring(array::AbstractArray) = isempty(array) ? "[]" : string(array)
 
 """
 hcat but instead of error when dimensions are mismatched a value is padded below short arrays.
@@ -67,6 +64,17 @@ function hcatpad(X::Vector; pad=0)
 end
 hcatpad(V::Vector{<:Number}; pad=0) = hcat(V)
 
+"""
+Like indexin, but all values must be found and there can be no duplicates.
+"""
+function strict_indexin(a::Vector, b::Vector)::Vector{Int}
+    @assert allunique(a) "Values in a not unique."
+    @assert allunique(b) "Values in b not unique."
+    out = indexin(a, b)
+    @assert !any(out .=== nothing) "$(sum(out .=== nothing)) value(s) from a not found in b."
+    out
+end
+strict_indexin(a, b) = error("$a\n$b")
 
 """
 Reorder rows and columns in an adjacency matrix, making sure edge values belong to the same target and source.
