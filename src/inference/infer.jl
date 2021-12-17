@@ -6,36 +6,35 @@ include(SRC * "utilities/ArgParseUtils.jl")
 include(SRC * "inference/GradientDescent.jl")
 isdefined(Main, :Model) || include(SRC * "inference/Model.jl")
 isdefined(Main, :ArrayUtils) || include(SRC * "utilities/ArrayUtils.jl")
+isdefined(Main, :DataFrameUtils) || include(SRC * "utilities/DataFrameUtils.jl")
 using ArgParse
 using LinearAlgebra
 using Flux
+using DataFrames
+
 
 # autofix_names=true changes names with dashes to underscores.
 argument_parser = ArgParseSettings(description="Infer a weight matrix from logFC data.", autofix_names=true)
 @add_arg_table! argument_parser begin
-    "X"
-        help = """Filename for LogFC values in a matrix. Space delimiters are recommended. 
-No column or row names, but rows should be sorted TF, KP, O and columns should be each experiment. 
-If TF, KP, O memberships are completely unknown then set nₜ=nᵥ and nₚ=nᵥ effectively assuming that all nodes may be TF and KP."""
+    "logFC"
+        help = "Filename for LogFC values in a matrix. Column names are mutated gene(s) in an experiment, first column has row names which are measured genes."
         required = true
-    "nₜ"
-        arg_type = Int
-        range_tester = x -> x > 0
-        help = "Number of TFs. If unknown, set to nᵥ."
-        required = true
-    "nₚ"
-        arg_type = Int
-        range_tester = x -> x > 0
-        help = "Number of KPs. If unknown, set to nᵥ."
-        required = true
+    "TF"
+        help = "Filename with a gene name per line that are (potential) TF. Alternatively supply a regex pattern to match against mutated genes. If nothing is provided, then all mutated genes are considered potential."
+    "KP"
+        help = "Filename with a gene name per line that are (potential) KP. Alternatively supply a regex pattern to match against mutated genes. If nothing is provided, then all mutated genes are considered potential."
     "out_WT"
         default = "WT_infer.mat"
         help = "Outfile for inferred Wₜ adjacency matrix."
     "out_WP"
         default = "WP_infer.mat"
         help = "Outfile for inferred Wₚ adjacency matrix."
-    "--J", "-J"
-        help = "Filename for J, which has 1s indicating mutated genes in each experiment and zeros otherwise. Default is using the identity matrix, i.e. each node has been mutated once, in order corresponding to the rows of X."
+    "--log"
+        default = stdout
+        help = "File to write log to. Default is stdout."
+    "--mut-sep", "-s"
+        arg_type = Char
+        help = "Character that separate gene names given in a column name when multiple genes are mutated in an experiment. By default all column names are assumed to be a single gene."
     "--epochs", "-e"
         arg_type = Int
         default = 500
@@ -95,22 +94,71 @@ end
 
 # abspath is used throughout due to a weird PWD issue on the server.
 abspath_(path::AbstractString) = abspath(expanduser(path))
+readlines_(path::AbstractString) = readlines(abspath_(path))
 loaddlm_(path::Nothing) = nothing
 loaddlm_(path::AbstractString) = begin
 	# empty strings is the same as providing nothing.
     path != "" || return nothing
-    ReadWrite.loaddlm(abspath_(path))
+    ReadWrite.loaddlm(abspath_(path); header=true)
 end
 loaddlm_(path::Nothing, T::Type) = nothing
 loaddlm_(path::AbstractString, T::Type) = begin
 	# empty strings is the same as providing nothing.
     path != "" || return nothing
-    ReadWrite.loaddlm(abspath_(path), T)
+    ReadWrite.loaddlm(abspath_(path), T; header=true)
 end
-savedlm_(path::AbstractString, x::AbstractArray) = begin
-    ReadWrite.savedlm(abspath_(path), x)
+loaddlm_(path::Nothing, colnames::Vector, rownames::Vector) = nothing
+loaddlm_(path, colnames::Vector, rownames::Vector) = DataFrameUtils.subtable(loaddlm_(path), colnames, rownames)
+savedlm_(path::AbstractString, x::AbstractArray; colnames=nothing, rownames=nothing) = begin
+    ReadWrite.savedlm(abspath_(path), x; colnames=colnames, rownames=rownames)
 end
 
+
+"Get names of measured genes, genes mutated in each experiment and unique list of mutated genes."
+function get_logFC_genes(logFC::DataFrame, delim)
+    meas_genes = logFC[!, 1]
+    @assert eltype(meas_genes) <: AbstractString "No row names provided in logFC file."
+    
+    exp_genes = names(logFC)[2:end]
+    exp_genes = delim === nothing ? [[n] for n in exp_genes] : split.(exp_genes, delim)
+    
+    mut_genes = unique(n for ns in exp_genes for n in ns)
+
+    meas_genes, exp_genes, mut_genes
+end
+
+"""
+Match the column to the row names of X to make a logical matrix indicating 
+- meas_genes: List of genes measured. Row names of X. 
+- exp_genes: List of gene name sets that are mutated in each experiment. Corresponds to column names of X.
+"""
+function names2J(meas_genes::Vector{<:AbstractString}, exp_genes::Vector{Vector{T}} where T<:AbstractString)
+    J = zeros(Bool, length(meas_genes), length(exp_genes))
+    for i_exp in 1:length(exp_genes)
+        for mutName in exp_genes[i_exp]
+            J[meas_genes .== mutName, i_exp] .= true
+        end
+    end
+    # There might be a spelling problem if there is no match for an experiment
+    @assert all(sum(J, dims=1) .>= 1)
+    J
+end
+
+
+"""
+Read gene list, or match regex against a full list of genes.
+"""
+read_geneList(fnameORregex::Nothing, fullList::Vector{<:AbstractString}) = fullList
+read_geneList(fnameORregex::String, fullList::Vector{<:AbstractString}) = begin
+    isfile(fnameORregex) || return read_geneList(Regex(fnameORregex))
+    readlines_(fnameORregex)
+end
+read_geneList(rx::Regex, fullList::Vector{<:AbstractString}) = begin
+    matches = fullList[match.(rx, fullList) .!== nothing]
+    @assert length(matches) > 0 "Nothing found for $rx."
+    @info "$(length(matches)) genes matched on pattern $rx."
+    return matches
+end
 
 """
 Get masks M, S for trainable weights and/or restriction to sign of weights.
@@ -128,41 +176,55 @@ function mat2MS(mat::AbstractMatrix)
 end
 mat2MS(::Nothing) = nothing, nothing
 
+"For tables with row names in first column."
+table2mat(df::DataFrame, T::Type=Float64) = Matrix{T}(df[!, 2:end])
 
-function infer(X::String, nₜ::Integer, nₚ::Integer, out_WT::String="WT_infer.mat", out_WP::String="WP_infer.mat"; J=nothing, epochs::Integer=5000, opt="ADAMW", 
+
+function infer(logFC::String, TF=nothing, KP=nothing, out_WT::String="WT_infer.mat", out_WP::String="WP_infer.mat";
+        log::Union{<:IO,<:AbstractString}=stdout, mut_sep=nothing, epochs::Integer=5000, opt="ADAMW", 
         lr::Float64=0.001, decay::Real=0, WT=nothing, WP=nothing, WT_mask=nothing, WP_mask=nothing,
         lambda_Bstar::Real=.1, lambda_absW::Real=0., reg_WT::Bool=true, train_WT::Bool=true)
-    # read matrices that were given
-	X = loaddlm_(X, Float64)
-    J = loaddlm_(J, Float64)
-    initial_Wₜ = loaddlm_(WT)
-    initial_Wₚ = loaddlm_(WP)
-    Mₜ, Sₜ = mat2MS(loaddlm_(WT_mask))
-    Mₚ, Sₚ = mat2MS(loaddlm_(WP_mask))
     
-    J === nothing || @assert(size(J) == size(X))
+	logFC = loaddlm_(logFC)
+    meas_genes, exp_genes, mut_genes = get_logFC_genes(logFC, mut_sep)
+    TFs = read_geneList(TF, mut_genes)
+    KPs = read_geneList(KP, mut_genes)
+    @assert length(intersect(TFs, KPs)) == 0 "Genes as both TF and KP not implemented."
+    TFKPs = [TFs; KPs]
+    Os  = setdiff(meas_genes, TFKPs)
+    TFKPOs = [TFKPs; Os]
+    # W is easier to deal with if the diagonal is self edges so we sort TF, KP, O
+    logFC = DataFrameUtils.rowselect(logFC, TFKPOs)
     
-	nᵥ, K = size(X)
-	nₒ = nᵥ - (nₜ + nₚ)
+    X = table2mat(logFC)
+    J = names2J(TFKPOs, exp_genes)
+    @info "$(size(J, 1)) measured genes in $(size(J, 2)) experiments with a total of $(sum(J)) mutated genes."
+
+    Wₜinit = loaddlm_(WT, TFKPOs, TFs)
+    Wₚinit = loaddlm_(WP, TFKPs, KPs)
+    Mₜ, Sₜ = mat2MS(loaddlm_(WT_mask, TFKPOs, TFs))
+    Mₚ, Sₚ = mat2MS(loaddlm_(WP_mask, TFKPs, KPs))
     
-    mdl = Model.get_model(nₜ, nₚ, nₒ, J === nothing ? K : J; Wₜ=initial_Wₜ, Wₚ=initial_Wₚ, Mₜ=Mₜ, Mₚ=Mₚ, Sₜ=Sₜ, Sₚ=Sₚ)
+    
+    mdl = Model.get_model(length(TFs), length(KPs), length(Os), J; Wₜ=Wₜinit, Wₚ=Wₚinit, Mₜ=Mₜ, Mₚ=Mₚ, Sₜ=Sₜ, Sₚ=Sₚ)
     # test that model works
     @assert size(mdl(X)) == size(X)
     Model.make_trainable(train_WT)
 	
     opt = parse_optimizer(opt, lr, decay)
-    Wₜ, Wₚ = GradientDescent.train(mdl, X; epochs=epochs, opt=opt, λBstar=lambda_Bstar, λabsW=lambda_absW, reg_Wₜ=reg_WT)
+    
+    Wₜ, Wₚ = GradientDescent.train(mdl, X, log; epochs=epochs, opt=opt, λBstar=lambda_Bstar, λabsW=lambda_absW, reg_Wₜ=reg_WT)
 	
 	# assert that code is working. If we don't intend to train WT then assert that no changes has occurred.
-	if !train_WT && any(initial_Wₜ .!= Wₜ)
-		n_changes = sum(initial_Wₜ .!= Wₜ)
-		diff = sum(abs.(initial_Wₜ - Wₜ))
+    if !train_WT && any(table2mat(Wₜinit) .!= Wₜ)
+        n_changes = sum(table2mat(Wₜinit) .!= Wₜ)
+        diff = sum(abs.(table2mat(Wₜinit) - Wₜ))
 		@error("There has been $n_changes changes made to Wₜ even though it was not intented to be trained on (difference=$diff).")
-		savedlm_(out_WT, Wₜ)
+        savedlm_(out_WT, Wₜ; colnames=TFs, rownames=TFKPOs)
 	end
     
-	savedlm_(out_WP, Wₚ)
-	train_WT && savedlm_(out_WT, Wₜ)
+	train_WT && savedlm_(out_WT, Wₜ; colnames=TFs, rownames=TFKPOs)
+	savedlm_(out_WP, Wₚ; colnames=KPs, rownames=TFKPs)
 end
 
 # parse args if run on command line as opposed to being imported

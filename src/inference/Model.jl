@@ -39,12 +39,40 @@ J2U(J)::Matrix = 1 .- J
 "Convenience function used in model constructors to make random weights from a mask of same size."
 masked_W(M) = random_weight(size(M)) .* M
 
+"Smaller helper to convert Wₜ to Wₜ□ (square) and similarly for M, S."
+function adjₜ2□(Wₜ::AbstractMatrix)
+    nᵥ, nₜ = size(Wₜ)
+    Wₜ□ = zeros(eltype(Wₜ), nᵥ, nᵥ)
+    Wₜ□[:, 1:nₜ] .= Wₜ
+    Wₜ□
+end
+function adjₚ2□(Wₚ::AbstractMatrix, nᵥ::Integer)
+    nₜₚ, nₚ = size(Wₚ)
+    nₜ = nₜₚ - nₚ
+    Wₚ□ = zeros(eltype(Wₚ), nᵥ, nᵥ)
+    Wₚ□[1:nₜₚ, nₜ+1:nₜₚ] .= Wₚ
+    Wₚ□
+end
+
+
 struct Mdl
     nₜ::Int # number of TFs
     nₚ::Int # number of KPs
     nₒ::Int # number of non-regulators
-    Wₜ # raw trainable weights for TF->V regularization. Shape nᵥ×nₜ+nₚ due to efficiency of multiplication in model. Real weights are found after applying Mₜ.
-    Wₚ # raw trainable weights for KP->TFKP regularization. Shape nₜ+nₚ×nₜ+nₚ since it has to be square for the inversion. Real weights are found after applying Mₚ.
+    Wₜ□ # raw trainable weights for TF->V regularization. Real weights are found after applying Mₜ. Shape nᵥ×nᵥ.
+    Wₚ□ # raw trainable weights for KP->TFKP regularization. Real weights are found after applying Mₚ. Shape nᵥ×nᵥ.
+    Mₜ□::Matrix{Bool} # mask to restrict which elements of Wₜ that are nonzero 
+    Mₚ□::Matrix{Bool} # mask to restrict which elements of Wₚ that are nonzero
+    U # Matrix holding column vectors of non-KO indexes for each experiment. Has to have same shape as X.
+    I # The identity matrix in B = Wₜ(I - Wₚ)⁻¹
+end
+# try out a more efficient approach with smaller parts of W stored.
+struct MdlE
+    nₜ::Int # number of TFs
+    nₚ::Int # number of KPs
+    nₒ::Int # number of non-regulators
+    Wₜ # size nᵥ×nₜ
+    Wₚ # size nₜ+nₚ×nₚ
     Mₜ::Matrix{Bool} # mask to restrict which elements of Wₜ that are nonzero 
     Mₚ::Matrix{Bool} # mask to restrict which elements of Wₚ that are nonzero
     U # Matrix holding column vectors of non-KO indexes for each experiment. Has to have same shape as X.
@@ -54,12 +82,12 @@ struct MdlS
     nₜ::Int # number of TFs
     nₚ::Int # number of KPs
     nₒ::Int # number of non-regulators
-    Wₜ # raw trainable weights for TF->V regularization. Real weights are found after applying Mₜ and Sₜ.
-    Wₚ # raw trainable weights for KP->TFKP regularization. Real weights are found after applying Mₚ and Sₚ.
-    Mₜ::Matrix{Bool} # nᵥ×nᵥ mask to restrict which elements of Wₜ that are nonzero 
-    Mₚ::Matrix{Bool} # nᵥ×nᵥ mask to restrict which elements of Wₚ that are nonzero
-    Sₜ # sign restriction matrix for Wₜ with 0 to indicating no sign restriction, -1 to enforce negative sign and +1 to enforce positive.
-    Sₚ # sign restriction matrix for Wₚ with 0 to indicating no sign restriction, -1 to enforce negative sign and +1 to enforce positive.
+    Wₜ□ # raw trainable weights for TF->V regularization. Real weights are found after applying Mₜ and Sₜ. Shape nᵥ×nᵥ.
+    Wₚ□ # raw trainable weights for KP->TFKP regularization. Real weights are found after applying Mₚ and Sₚ. Shape nᵥ×nᵥ.
+    Mₜ□::Matrix{Bool} # nᵥ×nᵥ mask to restrict which elements of Wₜ that are nonzero 
+    Mₚ□::Matrix{Bool} # nᵥ×nᵥ mask to restrict which elements of Wₚ that are nonzero
+    Sₜ□ # sign restriction matrix for Wₜ with 0 to indicating no sign restriction, -1 to enforce negative sign and +1 to enforce positive.
+    Sₚ□ # sign restriction matrix for Wₚ with 0 to indicating no sign restriction, -1 to enforce negative sign and +1 to enforce positive.
     U # Matrix holding column vectors of non-KO indexes for each experiment. Has to have same shape as X.
     I # The identity matrix in B = Wₜ(I - Wₚ)⁻¹
 end
@@ -70,19 +98,16 @@ get_model(nₜ::Integer, nₚ::Integer, nₒ::Integer, K::Integer; Wₜ=nothing,
 end
 "- J: Matrix holding column vectors of KO indexes for each experiment. Same shape as X."
 get_model(nₜ::Integer, nₚ::Integer, nₒ::Integer, J::AbstractMatrix; Wₜ=nothing, Wₚ=nothing, Mₜ=nothing, Mₚ=nothing, Sₜ=nothing, Sₚ=nothing) = begin
-    Wₜ !== nothing || (Wₜ = random_weight(nₜ+nₚ+nₒ, nₜ))
+    nᵥ = nₜ+nₚ+nₒ
+    Wₜ !== nothing || (Wₜ = random_weight(nᵥ, nₜ))
     Wₚ !== nothing || (Wₚ = random_weight(nₜ+nₚ, nₚ))
-    Mₜ !== nothing || (Mₜ = _Mₜ(nₜ+nₚ+nₒ, nₜ))
+    Mₜ !== nothing || (Mₜ = _Mₜ(nᵥ, nₜ))
     Mₚ !== nothing || (Mₚ = _Mₚ(nₜ, nₚ))
-    Wₜ = [Wₜ zeros(nₜ+nₚ+nₒ, nₚ)]
-    Wₚ = [zeros(nₜ+nₚ, nₜ) Wₚ]
-    Mₜ = [Mₜ zeros(Bool, nₜ+nₚ+nₒ, nₚ)]
-    Mₚ = [zeros(Bool, nₜ+nₚ, nₜ) Mₚ]
-    _get_model(nₜ, nₚ, nₒ, Wₜ, Wₚ, Mₜ, Mₚ, J, Sₜ, Sₚ)
+    _get_model(nₜ, nₚ, nₒ, adjₜ2□(Wₜ), adjₚ2□(Wₚ, nᵥ), adjₜ2□(Mₜ), adjₚ2□(Mₚ, nᵥ), J, Sₜ, Sₚ)
 end
-_get_model(nₜ, nₚ, nₒ, Wₜ, Wₚ, Mₜ::Matrix{Bool}, Mₚ::Matrix{Bool}, J::AbstractMatrix, Sₜ::AbstractMatrix, Sₚ::AbstractMatrix) = MdlS(nₜ, nₚ, nₒ, Wₜ, Wₚ, Mₜ, Mₚ, Sₜ, Sₚ, J2U(J), eye(Mₚ))
-_get_model(nₜ, nₚ, nₒ, Wₜ, Wₚ, Mₜ::Matrix{Bool}, Mₚ::Matrix{Bool}, J::AbstractMatrix, Sₜ::Nothing, Sₚ::Nothing) = _get_model(nₜ, nₚ, nₒ, Wₜ, Wₚ, Mₜ, Mₚ, J)
-_get_model(nₜ, nₚ, nₒ, Wₜ, Wₚ, Mₜ::Matrix{Bool}, Mₚ::Matrix{Bool}, J::AbstractMatrix) = Mdl(nₜ, nₚ, nₒ, Wₜ, Wₚ, Mₜ, Mₚ, J2U(J), eye(Mₚ))
+_get_model(nₜ, nₚ, nₒ, Wₜ□, Wₚ□, Mₜ□::Matrix{Bool}, Mₚ□::Matrix{Bool}, J::AbstractMatrix, Sₜ::AbstractMatrix, Sₚ::AbstractMatrix) = MdlS(nₜ, nₚ, nₒ, Wₜ□, Wₚ□, Mₜ□, Mₚ□, adjₜ2□(Sₜ), adjₚ2□(Sₚ, nᵥ), J2U(J), eye(Mₚ□))
+_get_model(nₜ, nₚ, nₒ, Wₜ□, Wₚ□, Mₜ□::Matrix{Bool}, Mₚ□::Matrix{Bool}, J::AbstractMatrix, Sₜ::Nothing, Sₚ::Nothing) = _get_model(nₜ, nₚ, nₒ, Wₜ□, Wₚ□, Mₜ□, Mₚ□, J)
+_get_model(nₜ, nₚ, nₒ, Wₜ□, Wₚ□, Mₜ□::Matrix{Bool}, Mₚ□::Matrix{Bool}, J::AbstractMatrix) = Mdl(nₜ, nₚ, nₒ, Wₜ□, Wₚ□, Mₜ□, Mₚ□, J2U(J), eye(Mₚ□))
 
 "Make the struct models trainable either using both Wₜ and Wₚ or only the latter."
 function make_trainable(train_Wₜ::Bool=true)
@@ -90,11 +115,11 @@ function make_trainable(train_Wₜ::Bool=true)
     @functor MdlS
     
     if train_Wₜ
-        @eval Flux.trainable(m::Mdl) = (m.Wₜ, m.Wₚ)
-        @eval Flux.trainable(m::MdlS) = (m.Wₜ, m.Wₚ)
+        @eval Flux.trainable(m::Mdl) = (m.Wₜ□, m.Wₚ□)
+        @eval Flux.trainable(m::MdlS) = (m.Wₜ□, m.Wₚ□)
     else
-        @eval Flux.trainable(m::Mdl) = (m.Wₚ,)
-        @eval Flux.trainable(m::MdlS) = (m.Wₚ,)
+        @eval Flux.trainable(m::Mdl) = (m.Wₚ□,)
+        @eval Flux.trainable(m::MdlS) = (m.Wₚ□,)
     end
 end
 
@@ -103,12 +128,12 @@ end
 apply_S(W, S) = W .* (S .== 0) .+ abs.(W) .* S
 
 "Get weights corrected for masks, etc. Note that Wₜ has shape nᵥ×nₜ+nₚ so dimensions match for internal model multiplication."
-_Wₜ(m::Mdl) = m.Wₜ .* m.Mₜ
-_Wₚ(m::Mdl) = m.Wₚ .* m.Mₚ
-_Wₜ(m::MdlS) = apply_S(m.Wₜ, m.Sₜ) .* m.Mₜ
-_Wₚ(m::MdlS) = apply_S(m.Wₚ, m.Sₚ) .* m.Mₚ
+_Wₜ(m::Mdl) = m.Wₜ□ .* m.Mₜ□
+_Wₚ(m::Mdl) = m.Wₚ□ .* m.Mₚ□
+_Wₜ(m::MdlS) = apply_S(m.Wₜ□, m.Sₜ) .* m.Mₜ□
+_Wₚ(m::MdlS) = apply_S(m.Wₚ□, m.Sₚ) .* m.Mₚ□
 "Get the weights in like above except the shape of Wₜ is nᵥ×nₜ"
-WₜWₚ(m) = _Wₜ(m)[:, 1:m.nₜ], _Wₚ(m)[:, m.nₜ+1:m.nₜ+m.nₚ]
+WₜWₚ(m) = _Wₜ(m)[:, 1:m.nₜ], _Wₚ(m)[1:m.nₜ+m.nₚ, m.nₜ+1:m.nₜ+m.nₚ]
 
 """ "predict" logFC X given itself using the model. x̂ = B x + e, where B = Wₜ(I - Wₚ)⁻¹"""
 (m::Mdl)(x) = _Wₜ(m) * ((I - _Wₚ(m)) \ x)
