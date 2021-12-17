@@ -153,7 +153,7 @@ begin # printing
 	function edge_graphics_repr(e::Edge)
 		out = """<graphics width="$(e.width)" fill="$(e.color)">
 		""" * indent(att_repr(e.graphics))
-		if e.anchor != nothing out *= indent(att_repr("EDGE_BEND", join(e.anchor,','))) end
+		if e.anchor !== nothing out *= indent(att_repr("EDGE_BEND", join(e.anchor,','))) end
 		out *= "</graphics>\n"
 		out
 	end

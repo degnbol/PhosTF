@@ -1,6 +1,6 @@
 #!/usr/bin/env julia
-include("utilities/ReadWrite.jl")
-isdefined(Main, :Model) || include("inference/Model.jl")
+include("../utilities/ReadWrite.jl")
+isdefined(Main, :Model) || include("../inference/Model.jl")
 
 using Fire
 using LinearAlgebra

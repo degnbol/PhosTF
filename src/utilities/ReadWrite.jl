@@ -41,23 +41,26 @@ function load(fname::String, cast)
 	end
 end
 
-function loaddlm(fname::String; header::Bool=false)
+function loaddlm(fname::String, T::Union{Type,Nothing}=nothing; header::Bool=false)
     delim = ext2delim(fname)
     if header
-        df = CSV.read(fname; delim=delim)
+        df = CSV.read(fname, DataFrame; delim=delim)
         hasRownames = df |> names |> first |> lowercase in ["_", "rownames", "row"]
         matFirstCol = hasRownames ? 2 : 1
         # if all elements are numbers then there is no strings to parse.
-        if all(eltype.(eachcol(df[!, matFirstCol:end])) .<: Real)
-            df[!, matFirstCol:end] = parse_matrix(df[!, matFirstCol:end])
+        if !all(eltype.(eachcol(df[!, matFirstCol:end])) .<: Real)
+            df[!, matFirstCol:end] = parse_matrix(Matrix(df[!, matFirstCol:end]))
+        end
+        if T !== nothing
+            df[!, matFirstCol:end] = convert.(T, df[!, matFirstCol:end])
         end
         df
     else
         mat = readdlm(fname, delim)
         eltype(mat) <: Real ? mat : parse_matrix(mat)
+        T === nothing ? mat : convert.(T, mat)
     end
 end
-loaddlm(fname::String, T::Type; header::Bool=false) = convert.(T, loaddlm(fname; header=header))
 
 "Load dlm where we try to parse as int, and if that fails as float (which is does automatically)."
 function loadmat(fname::String)

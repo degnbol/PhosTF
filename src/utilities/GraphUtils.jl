@@ -3,6 +3,7 @@ include("XGMML.jl")
 isdefined(Main, :ColorUtils) || include("ColorUtils.jl")
 include("MathUtils.jl")
 isdefined(Main, :GeneRegulation) || include("../simulation/GeneRegulation.jl")
+isdefined(Main, :Model) || include("../inference/Model.jl")
 
 module GraphUtils
 using Statistics
@@ -13,6 +14,7 @@ import ..XGMML
 using ..ColorUtils: divergent_lerp
 using ..MathUtils
 using ..GeneRegulation: estimate_Wₜ
+using ..Model: nₜnₚnₒ
 
 
 const default_hspace, default_vspace = 45, 80
