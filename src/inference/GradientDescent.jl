@@ -14,6 +14,7 @@ using Dates
 using Flux
 using ..ReadWrite
 using ..Model
+using ..Model: L1, MSE
 
 """
 Get random indexes taken from ∈ [1,K] in portions.
@@ -25,8 +26,6 @@ function batches(K::Integer, batch_size::Integer)
 	n_batches = trunc(Int, K/batch_size)
 	(ks[1+batch_size*(i-1):batch_size*i] for i ∈ 1:n_batches)
 end
-
-L1(x) = sum(abs, x)
 
 # If any of the λs are zero then avoid adding that part to the loss, e.g. using ::Nothing
 get_loss_func(mdl, λBstar::Float64, λabsW::Float64, reg_Wₜ::Bool) = begin
@@ -74,11 +73,10 @@ function train(mdl, X::AbstractMatrix, log::IO=stdout; epochs::Integer=10000, λ
     save_every = save_times == 0 ? 0 : Int(epochs / save_times)
 
 	function cb(epoch::Integer)
-		l = loss(X)
-		e = SSE(mdl, X)
-        lp = L1(Model._Wₚ(mdl))
-        vals = train_Wₜ ? (l, e, L1(Model._Wₜ(mdl)), lp) : (l, e, lp)
-		println(log, @sprintf(join(["%.3f" for _ in vals], '\t'), vals...) * "\t$epoch\t$(Dates.now())")
+        line = @sprintf "%.3f\t%.3f\t%.3f" loss(X) MSE(mdl, X) L1(Model.Wₚ□(mdl))
+        if train_Wₜ line *= @sprintf "\t%.3f" L1(Model.Wₜ□(mdl)) end
+        line *= "\t$epoch\t$(Dates.now())"
+		println(log, line)
 		
 		if save_times > 0 && epoch % save_every == 0
             Wₜ, Wₚ = Model.WₜWₚ(mdl)
@@ -89,7 +87,7 @@ function train(mdl, X::AbstractMatrix, log::IO=stdout; epochs::Integer=10000, λ
 	# throttle callbacks if we are doing a small example.
 	_cb = size(X, 1) > 100 ? cb : Flux.throttle(cb, 5)
 	
-    println(log, train_Wₜ ? "loss\tSSE\tL1(Wt)\tL1(Wp)\tepoch\ttime" : "loss\tSSE\tL1(Wp)\tepoch\ttime")
+    println(log, train_Wₜ ? "loss\tMSE\tL1(Wp)\tL1(Wt)\tepoch\ttime" : "loss\tMSE\tL1(Wp)\tepoch\ttime")
 	_cb(0) # epoch 0 print before we start
     for epoch in 1:epochs
         Flux.train!(loss, params(mdl), ((X,),), opt)
