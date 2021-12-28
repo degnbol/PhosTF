@@ -113,7 +113,7 @@ save_JLD(fname::String, x) = JLD.save(fname, default_identifier, x)
 Deal with string matrices containing '.', '+', '-' to represent 0, 1, -1.
 The DelimitedFiles.readdlm should read string characters as Matrix{Any}
 """
-parse_matrix(mat::Union{Matrix{Any},Matrix{String}}) = begin
+parse_matrix(mat::Union{Matrix{Any},Matrix{<:AbstractString}}) = begin
     try
         return parse_matrix(only.(mat))
     catch e
