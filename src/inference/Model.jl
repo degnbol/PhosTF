@@ -1,6 +1,7 @@
 #!/usr/bin/env julia
-isdefined(Main, :ArrayUtils) || include("../utilities/ArrayUtils.jl")
-isdefined(Main, :FluxUtils) || include("../utilities/FluxUtils.jl")
+SRC = readchomp(`git root`) * "/src/"
+isdefined(Main, :ArrayUtils) || include(SRC * "utilities/ArrayUtils.jl")
+isdefined(Main, :FluxUtils) || include(SRC * "utilities/FluxUtils.jl")
 
 "Core model describing the equations of the model etc."
 module Model
@@ -68,6 +69,7 @@ struct Mdl
 end
 # try out a more efficient approach with smaller parts of W stored.
 struct MdlE
+    nᵥ::Int # number of vertices
     nₜ::Int # number of TFs
     nₚ::Int # number of KPs
     nₒ::Int # number of non-regulators
@@ -103,46 +105,51 @@ get_model(nₜ::Integer, nₚ::Integer, nₒ::Integer, J::AbstractMatrix; Wₜ=n
     Wₚ !== nothing || (Wₚ = random_weight(nₜ+nₚ, nₚ))
     Mₜ !== nothing || (Mₜ = _Mₜ(nᵥ, nₜ))
     Mₚ !== nothing || (Mₚ = _Mₚ(nₜ, nₚ))
-    _get_model(nₜ, nₚ, nₒ, adjₜ2□(Wₜ), adjₚ2□(Wₚ, nᵥ), adjₜ2□(Mₜ), adjₚ2□(Mₚ, nᵥ), J, Sₜ, Sₚ)
+    # _get_model(nₜ, nₚ, nₒ, adjₜ2□(Wₜ), adjₚ2□(Wₚ, nᵥ), adjₜ2□(Mₜ), adjₚ2□(Mₚ, nᵥ), J, Sₜ, Sₚ)
+    MdlE(nᵥ, nₜ, nₚ, nₒ, Wₜ, Wₚ, Mₜ, Mₚ, J2U(J), eye(Wₚ))
 end
 _get_model(nₜ, nₚ, nₒ, Wₜ□, Wₚ□, Mₜ□::Matrix{Bool}, Mₚ□::Matrix{Bool}, J::AbstractMatrix, Sₜ::AbstractMatrix, Sₚ::AbstractMatrix) = MdlS(nₜ, nₚ, nₒ, Wₜ□, Wₚ□, Mₜ□, Mₚ□, adjₜ2□(Sₜ), adjₚ2□(Sₚ, nᵥ), J2U(J), eye(Mₚ□))
 _get_model(nₜ, nₚ, nₒ, Wₜ□, Wₚ□, Mₜ□::Matrix{Bool}, Mₚ□::Matrix{Bool}, J::AbstractMatrix, Sₜ::Nothing, Sₚ::Nothing) = _get_model(nₜ, nₚ, nₒ, Wₜ□, Wₚ□, Mₜ□, Mₚ□, J)
 _get_model(nₜ, nₚ, nₒ, Wₜ□, Wₚ□, Mₜ□::Matrix{Bool}, Mₚ□::Matrix{Bool}, J::AbstractMatrix) = Mdl(nₜ, nₚ, nₒ, Wₜ□, Wₚ□, Mₜ□, Mₚ□, J2U(J), eye(Mₚ□))
 
-"Make the struct models trainable either using both Wₜ and Wₚ or only the latter."
-function make_trainable(train_Wₜ::Bool=true)
-    @functor Mdl
-    @functor MdlS
+@functor Mdl
+@functor MdlE
+@functor MdlS
     
-    if train_Wₜ
-        @eval Flux.trainable(m::Mdl) = (m.Wₜ□, m.Wₚ□)
-        @eval Flux.trainable(m::MdlS) = (m.Wₜ□, m.Wₚ□)
-    else
-        @eval Flux.trainable(m::Mdl) = (m.Wₚ□,)
-        @eval Flux.trainable(m::MdlS) = (m.Wₚ□,)
-    end
-end
+Flux.trainable(m::Mdl) = (m.Wₜ□, m.Wₚ□)
+Flux.trainable(m::MdlE) = (m.Wₜ, m.Wₚ)
+Flux.trainable(m::MdlS) = (m.Wₜ□, m.Wₚ□)
 
+"Make the struct models trainable only using Wₚ."
+function untrainable_Wₜ()
+    @eval Flux.trainable(m::Mdl) = (m.Wₚ□,)
+    @eval Flux.trainable(m::MdlE) = (m.Wₚ,)
+    @eval Flux.trainable(m::MdlS) = (m.Wₚ□,)
+end
 
 "Restrict sign of entries in W with a matrix S where 0 means no restriction, -1 means entry has to have negative sign and +1 for positive."
 apply_S(W, S) = W .* (S .== 0) .+ abs.(W) .* S
 
-"Get weights corrected for masks, etc. Note that Wₜ has shape nᵥ×nₜ+nₚ so dimensions match for internal model multiplication."
-_Wₜ(m::Mdl) = m.Wₜ□ .* m.Mₜ□
-_Wₚ(m::Mdl) = m.Wₚ□ .* m.Mₚ□
-_Wₜ(m::MdlS) = apply_S(m.Wₜ□, m.Sₜ) .* m.Mₜ□
-_Wₚ(m::MdlS) = apply_S(m.Wₚ□, m.Sₚ) .* m.Mₚ□
+"Get square weights corrected for masks, etc."
+Wₜ□(m::Mdl) = m.Wₜ□ .* m.Mₜ□
+Wₚ□(m::Mdl) = m.Wₚ□ .* m.Mₚ□
+# we cannot differentiate copyto (.= and .+=) but we can concat.
+Wₜ□(m::MdlE) = [m.Wₜ .* m.Mₜ zeros(m.nᵥ, m.nₚ+m.nₒ)]
+Wₚ□(m::MdlE) = [zeros(m.nᵥ, m.nₜ) [m.Wₚ .* m.Mₚ; zeros(m.nₒ, m.nₚ)] zeros(m.nᵥ, m.nₒ)]
+Wₜ□(m::MdlS) = apply_S(m.Wₜ□, m.Sₜ) .* m.Mₜ□
+Wₚ□(m::MdlS) = apply_S(m.Wₚ□, m.Sₚ) .* m.Mₚ□
 "Get the weights in like above except the shape of Wₜ is nᵥ×nₜ"
-WₜWₚ(m) = _Wₜ(m)[:, 1:m.nₜ], _Wₚ(m)[1:m.nₜ+m.nₚ, m.nₜ+1:m.nₜ+m.nₚ]
+WₜWₚ(m) = Wₜ□(m)[:, 1:m.nₜ], Wₚ□(m)[1:m.nₜ+m.nₚ, m.nₜ+1:m.nₜ+m.nₚ]
 
 """ "predict" logFC X given itself using the model. x̂ = B x + e, where B = Wₜ(I - Wₚ)⁻¹"""
-(m::Mdl)(x) = _Wₜ(m) * ((I - _Wₚ(m)) \ x)
-(m::MdlS)(x) = _Wₜ(m) * ((I - _Wₚ(m)) \ x)
+(m::Mdl)(x) = Wₜ□(m) * ((I - Wₚ□(m)) \ x)
+(m::MdlE)(x) = Wₜ□(m) * ((I - Wₚ□(m)) \ x)
+(m::MdlS)(x) = Wₜ□(m) * ((I - Wₚ□(m)) \ x)
 
-_B(m) = _Wₜ(m) * inv(I - _Wₚ(m))
+_B(m) = Wₜ□(m) * inv(I - Wₚ□(m))
 
 # B* is B calculated from Wₜ and Wₚ with absolute elements.
-_Bstar(m) = abs.(_Wₜ(m)) * inv(I - abs.(_Wₚ(m)))
+_Bstar(m) = abs.(Wₜ□(m)) * inv(I - abs.(Wₚ□(m)))
 
 """
 - Wₜ: nonsquare weight matrix for TF -> V with dimensions nᵥ×nₜ
@@ -172,6 +179,7 @@ Error/latents. Difference between prediction and truth. xₖ = UₖBxₖ + Uₖe
 E(m, X::Matrix) = m.U .* (m(X) .- X)
 
 SSE(m, X::Matrix) = sum(abs2, E(m, X))
+MSE(m, X::Matrix) = mean(abs2, E(m, X))
 "- ks: If we are using batches, then indicate which batches are used"
 SSE(m, X::Matrix, ks) = sum(abs2, (m.U[:, ks] .* (m(X) .- X)))
 
@@ -183,5 +191,8 @@ SSE_T(m, X::Matrix) = begin
 	n, K = size(X)
 	sum(abs2, ([X2T(X) zeros(n, n-K)] - _T(m)))
 end
+
+L1(x::AbstractMatrix) = sum(abs, x)
+L1(m::Union{Mdl,MdlE,MdlS}) = sum(L1(W) for W in Flux.trainable(m))
 
 end;
