@@ -205,24 +205,15 @@ function infer(logFC::String, TF=nothing, KP=nothing, out_WT::String="WT_infer.m
     Mₜ, Sₜ = mat2MS(loaddlm_(WT_mask, TFKPOs, TFs))
     Mₚ, Sₚ = mat2MS(loaddlm_(WP_mask, TFKPs, KPs))
     
-    
     mdl = Model.get_model(length(TFs), length(KPs), length(Os), J; Wₜ=Wₜinit, Wₚ=Wₚinit, Mₜ=Mₜ, Mₚ=Mₚ, Sₜ=Sₜ, Sₚ=Sₚ)
+    train_WT || Model.untrainable_Wₜ()
     # test that model works
     @assert size(mdl(X)) == size(X)
-    Model.make_trainable(train_WT)
 	
     opt = parse_optimizer(opt, lr, decay)
-    
+
     Wₜ, Wₚ = GradientDescent.train(mdl, X, log; epochs=epochs, opt=opt, λBstar=lambda_Bstar, λabsW=lambda_absW, reg_Wₜ=reg_WT)
 	
-	# assert that code is working. If we don't intend to train WT then assert that no changes has occurred.
-    if !train_WT && any(table2mat(Wₜinit) .!= Wₜ)
-        n_changes = sum(table2mat(Wₜinit) .!= Wₜ)
-        diff = sum(abs.(table2mat(Wₜinit) - Wₜ))
-		@error("There has been $n_changes changes made to Wₜ even though it was not intented to be trained on (difference=$diff).")
-        savedlm_(out_WT, Wₜ; colnames=TFs, rownames=TFKPOs)
-	end
-    
 	train_WT && savedlm_(out_WT, Wₜ; colnames=TFs, rownames=TFKPOs)
 	savedlm_(out_WP, Wₚ; colnames=KPs, rownames=TFKPs)
 end
