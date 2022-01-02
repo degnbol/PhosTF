@@ -1,7 +1,8 @@
 #!/usr/bin/env julia
+SRC = readchomp(`git root`) * "/src/"
 include("GeneRegulation.jl")
-isdefined(Main, :ODEs) || include("ODEs.jl")
-include("../utilities/ReadWrite.jl")
+isdefined(Main, :ODEs) || include(SRC * "simulation/ODEs.jl")
+include(SRC * "utilities/ReadWrite.jl")
 using Fire
 using LinearAlgebra
 using Plots
@@ -10,11 +11,11 @@ using .Threads: @threads
 using .ReadWrite
 
 # defaults
-default_Wₜ, default_Wₚ = "WT.mat", "WP.mat"
+default_Wₜ, default_Wₚ = "WT.adj", "WP.adj"
 default_net = "net.bson"
 
 
-loadnet(i) = load(i, GeneRegulation.Network)
+loadnet(i) = ReadWrite.load(i, GeneRegulation.Network)
 
 """
 Create a random network from Wₜ and Wₚ.
@@ -24,12 +25,25 @@ Create a random network from Wₜ and Wₚ.
     Note that it is not (yet) implemented to store this info in the generated network model.
 """
 @main function network(Wₜfname::String=default_Wₜ, Wₚfname::String=default_Wₚ; header::Bool=false, o::String=default_net)
-	Wₜ = loaddlm(Wₜfname; header=header) |> Matrix
+	Wₜ = loaddlm(Wₜfname; header=header)
 	# make sure to enforce that it is Int which indicates weight presence and sign as opposed to Float that indicates weight magnitude.
-	Wₚ = loaddlm(Wₚfname, Int; header=header) |> Matrix
+	Wₚ = loaddlm(Wₚfname, Int; header=header)
+    if header
+        # then there should also be a column with rownames
+        @assert eltype(Wₜ[!, 1]) <: AbstractString "Wₜ has a header but no row names."
+        @assert eltype(Wₚ[!, 1]) <: AbstractString "Wₚ has a header but no row names."
+        TFs = names(Wₜ)[2:end]
+        KPs = names(Wₚ)[2:end]
+        TFKPs = [TFs; KPs]
+        # assume order is the same in column and row names. Could be changed to reorder.
+        @assert all(Wₜ[1:length(TFKPs), 1] .== TFKPs)
+        @assert all(Wₚ[!, 1] .== TFKPs)
+        Wₜ = Matrix(Wₜ[:, 2:end])
+        Wₚ = Matrix(Wₚ[:, 2:end])
+    end
 	nᵥ, nₜ = size(Wₜ)
 	nₚ = size(Wₚ, 2)
-	@assert nₜ == size(Wₚ, 1) - nₚ
+    @assert nₜ+nₚ == size(Wₚ, 1) "nₜ+nₚ != size(Wₚ, 1). nₜ=$nₜ. nₚ=$nₚ."
 	@assert nᵥ >= nₜ + nₚ
 	save(o, GeneRegulation.Network(Wₜ, Wₚ))
 end
@@ -59,57 +73,70 @@ Simulate a network and return the full time series.
 Make them with either another simulate call, a steaady state call or write them manually.
 """
 @main function timeseries(mut_id=nothing, i=default_net; r=nothing, p=nothing, psi=nothing, t=nothing, duration=nothing, r0=nothing, p0=nothing, psi0=nothing)
-	if   r  === nothing   r  = "sim_r"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
-	if   p  === nothing   p  = "sim_p"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
-	if psi  === nothing psi  = "sim_psi" * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
-	if   t  === nothing   t  = "sim_t"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
-	if   r0 !== nothing   r0 = ReadWrite.loaddlm(  r0)[:,end] end
-	if   p0 !== nothing   p0 = ReadWrite.loaddlm(  p0)[:,end] end
-	if psi0 !== nothing psi0 = ReadWrite.loaddlm(psi0)[:,end] end
-	net = loadnet(i)
+    # default output names
+    mutSuf = mut_id === nothing ? "" : "_$mut_id"
+	if   r  === nothing   r  = "sim_r$mutSuf.mat" end
+	if   p  === nothing   p  = "sim_p$mutSuf.mat" end
+	if psi  === nothing psi  = "sim_psi$mutSuf.mat" end
+	if   t  === nothing   t  = "sim_t$mutSuf.mat" end
+    
+	if   r0 !== nothing   r0 = ReadWrite.loaddlm(  r0)[end, :] end
+	if   p0 !== nothing   p0 = ReadWrite.loaddlm(  p0)[end, :] end
+	if psi0 !== nothing psi0 = ReadWrite.loaddlm(psi0)[end, :] end
+	
+    net = loadnet(i)
 	u₀ = ODEs.get_u₀(net, r0, p0, psi0)
     @assert !any(isnan.(u₀))
 	solution = ODEs.@domainerror ODEs.timeseries(net, mut_id, u₀, duration)
 	solution === nothing && return
 	@info(solution.retcode)
 	if solution.retcode in [:Success, :Terminated]
-		savedlm(r,   solution[:,1,:])
-		savedlm(p,   solution[:,2,:])
-		savedlm(psi, solution[1:net.nₜ+net.nₚ,3,:])
-		savedlm(t,   solution.t)
+        # dimensions are (node, RNA/protein/activation, time)
+        # transpose to have time along first dim.
+		savedlm(r,   solution[:, 1, :]')
+		savedlm(p,   solution[:, 2, :]')
+		savedlm(psi, solution[1:net.nₜ+net.nₚ, 3, :]')
+        savedlm(t,   solution.t)
 	end
 end
 
 """
-Plot simulations.
+Plot time series.
+- nₜ: number of TFs.
 - nₚ: number of KPs.
 - r,p,ψ: fname. matrices with size=(#proteins, #times)
 - t: fname. time vector
 - o: optional file to write plot to
 """
-@main function plot(nₚ::Integer, nₜ::Integer, r="sim_r.mat", p="sim_p.mat", ψ="sim_psi.mat", t="sim_t.mat"; o=stdout)
-    include("../visualization/PlotSimulation.jl") # save startup time by only including it when necessary
+@main function plot(nₜ::Integer, nₚ::Integer, r="sim_r.mat", p="sim_p.mat", ψ="sim_psi.mat", t="sim_t.mat"; o=stdout)
+    include(SRC * "simulation/PlotTimeSeries.jl") # save startup time by only including it when necessary
 
+	# shape is times × nodes for r, p, ψ
     r, p, ψ, t = ReadWrite.loaddlm.([r, p, ψ, t])
 	t = dropdims(t; dims=2)  # should be a column vector in file
-	nᵥ = size(r,1); nₒ = nᵥ-(nₜ+nₚ)
-	# protein along axis=1, mRNA,prot,phos along axis=2 and for measurements: time along axis=3
+    # dimensions should be time points along first dim, nodes along second in all files.
+	nᵥ = size(r, 2)
+    nₒ = nᵥ - (nₜ + nₚ)
+
 	values = zeros(nᵥ, 3, length(t))
-	values[:,1,:], values[:,2,:], values[1:nₜ+nₚ,3,:] = r, p, ψ
-	nodes  = [["P$i" for i ∈ 1:nₚ]; ["T$i" for i ∈ 1:nₜ]; ["O$i" for i ∈ 1:nₒ]]
-	labels = ["$i $l" for i ∈ nodes, l ∈ ["mRNA", "prot", "phos"]]
+	values[:, 1, :], values[:, 2, :], values[1:nₜ+nₚ, 3, :] = r', p', ψ'
+    meass = ["mRNA", "prot", "phos"]
+	nodes  = [["KP$i" for i ∈ 1:nₚ]; ["TF$i" for i ∈ 1:nₜ]; ["O$i" for i ∈ 1:nₒ]]
+	labels = ["$i $l" for i ∈ nodes, l ∈ meass]
 	styles = [s for i ∈ nodes, s ∈ [:solid, :solid, :dash]]
 	widths = [w for i ∈ nodes, w ∈ [1, 2, 1]]
+    colors = [c for c ∈ ["#B663B1", "#6DB845", "#545000"], l ∈ meass]
 	# get [KP, TF, O] collections of data
 	values = [reshape(values[1:nₚ,:,:], 3nₚ, :), reshape(values[nₚ+1:nₚ+nₜ,:,:], 3nₜ, :), values[nₚ+nₜ+1:end,1,:]]
 	labels = [reshape(labels[1:nₚ,:], :), reshape(labels[nₚ+1:nₚ+nₜ,:], :), labels[nₚ+nₜ+1:end,1]]
 	styles = [reshape(styles[1:nₚ,:], :), reshape(styles[nₚ+1:nₚ+nₜ,:], :), styles[nₚ+nₜ+1:end,1]]
 	widths = [reshape(widths[1:nₚ,:], :), reshape(widths[nₚ+1:nₚ+nₜ,:], :), widths[nₚ+nₜ+1:end,1]]
-	p = PlotSimulation.plot_simulation(t, values, labels, styles, widths, ["KP", "TF", "O"])
-	PlotSimulation.save(o, p)
-	if o == stdout
+	p = PlotTimeSeries.plot_timeseries(t, values, labels, styles, widths, ["KP", "TF", "O"]; colors=colors)
+	if o != stdout
+        savefig(p, o)
+    else
 		println("plotting complete")
-		readline()
+        readline() # enter will end program
 	end
 	nothing
 end
@@ -194,7 +221,7 @@ Given an adjacency matrix without KP, TF, O assignment, generate a random networ
 """
 @main function randomNetLogFCs(B::String, dir::String; max_np::Union{Int,Nothing}=nothing, max_attempts::Int=3)
     # suppress Fire output with ;
-    include(readchomp(`git root`) * "/src/simulation/weight.jl");  # random(...) and correct()
+    include(SRC * "/src/simulation/weight.jl");  # random(...) and correct()
     # set max_nₚ to default 30% of nodes if not specified.
     if max_np === nothing
         nᵥ = size(ReadWrite.loaddlm(B), 1)

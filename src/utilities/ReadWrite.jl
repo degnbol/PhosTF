@@ -104,6 +104,8 @@ savedlm(fname::String, x::AbstractMatrix; colnames=nothing, rownames=nothing) = 
         CSV.write(fname, df; delim=ext2delim(fname))
     end
 end
+# a vector will be written as a column vector.
+savedlm(fname, x::AbstractVector) = savedlm(fname, reshape(x, :, 1))
 
 save_JSON(fname::String, x) = open(fname, "w") do io JSON3.write(io, x) end
 save_BSON(fname::String, x) = BSON.bson(fname, Dict(default_identifier => x))
