@@ -46,84 +46,93 @@ edges(matrix::Matrix) = edges(sparse(matrix))
 function xgmml_x(nₜ::Integer, nₚ::Integer, nₒ::Integer, space=default_hspace)
 	width = space * max(nₜ, nₚ, nₒ)
 	[
-		[(i-.5) * width / nₚ for i in 1:nₚ];
 		[(i-.5) * width / nₜ for i in 1:nₜ];
+		[(i-.5) * width / nₚ for i in 1:nₚ];
 		[(i-.5) * width / nₒ for i in 1:nₒ]
 	]
 end
 """
 - space: space that will be given vertically.
 """
-xgmml_y(nₜ::Integer, nₚ::Integer, nₒ::Integer, space=default_vspace) = [[ 0space for i in 1:nₚ]; [ 1space for i in 1:nₜ]; [ 2space for i in 1:nₒ]]
+xgmml_y(nₜ::Integer, nₚ::Integer, nₒ::Integer, space=default_vspace) = [
+    [ 1space for i in 1:nₜ];
+    [ 0space for i in 1:nₚ]; # placing KP above TF
+    [ 2space for i in 1:nₒ]
+]
 
 function xgmml_labels(nₜ::Integer, nₚ::Integer, nₒ::Integer)
 	pad = max(nₜ, nₚ, nₒ) |> string |> length
-	[["KP"*lpad(i,pad,"0") for i in 1:nₚ];
-	 ["TF"*lpad(i,pad,"0") for i in 1:nₜ];
-	 ["O"*lpad(i,pad,"0") for i in 1:nₒ]]
+	[
+	    ["TF"*lpad(i,pad,"0") for i in 1:nₜ];
+	    ["KP"*lpad(i,pad,"0") for i in 1:nₚ];
+	    ["O"*lpad(i,pad,"0") for i in 1:nₒ]
+	]
 end
 
 function xgmml_fills(nₜ::Integer, nₚ::Integer, nₒ::Integer)
-	[["#af6fb6" for _ in 1:nₚ];
-	 ["#86ac32" for _ in 1:nₜ];
-	 ["#e6dd47" for _ in 1:nₒ]]
+	[
+	    ["#86ac32" for _ in 1:nₜ];
+	    ["#af6fb6" for _ in 1:nₚ];
+	    ["#e6dd47" for _ in 1:nₒ]
+	]
 end
 "Get a hex color for each value in X where the color is a divergent color with limits min, max."
 xgmml_fills(X::Matrix, min=minimum(X), max=maximum(X)) = "#" .* hex.(divergent_lerp.(X, min, max))
 
 function xgmml_shapes(nₜ::Integer, nₚ::Integer, nₒ::Integer)
-	[["DIAMOND" for _ in 1:nₚ];
-	 ["ELLIPSE" for _ in 1:nₜ];
-	 ["RECTANGLE" for _ in 1:nₒ]]
+	[
+	    ["ELLIPSE" for _ in 1:nₜ];
+	    ["DIAMOND" for _ in 1:nₚ];
+	    ["RECTANGLE" for _ in 1:nₒ]
+	]
 end
 
 
 function xgmml_nodes(nₜ::Integer, nₚ::Integer, nₒ::Integer; x=xgmml_x(nₜ, nₚ, nₒ), y=xgmml_y(nₜ, nₚ, nₒ), labels=xgmml_labels(nₜ, nₚ, nₒ), fills=xgmml_fills(nₜ, nₚ, nₒ), shapes=xgmml_shapes(nₜ, nₚ, nₒ), extra_atts...)
-	nodes::Vector{XGMML.Node} = []
-	[XGMML.Node(x[i], y[i]; label=labels[i], fill=fills[i], shape=shapes[i], (k=>v[i] for (k,v) in extra_atts)...)
-	for i in 1:nₜ+nₚ+nₒ]
+	[XGMML.Node(x[i], y[i]; label=labels[i], fill=fills[i], shape=shapes[i], (k=>v[i] for (k,v) in extra_atts)...) for i in 1:nₜ+nₚ+nₒ]
 end
 xgmml_nodes(Wₜ, Wₚ; kwargs...) = xgmml_nodes(nₜnₚnₒ(Wₜ, Wₚ)...; kwargs...)
 # allow WₜWₚ tuple so we can use net as either a Network or as (Wₜ, Wₚ) in the function xgmml(net, ...)
 xgmml_nodes(WₜWₚ::Tuple; kwargs...) = xgmml_nodes(WₜWₚ...; kwargs...)
 xgmml_nodes(net; kwargs...) = xgmml_nodes(net.nₜ, net.nₚ, net.nₒ;
     max_transcription=net.max_transcription, max_translation=net.max_translation,
-    λ_mRNA=net.λ_mRNA, λ_prot=net.λ_prot, λ₊=[net.λ₊; zeros(net.nₒ)], λ₋=[net.λ₋; zeros(net.nₒ)],
+    λ_mRNA=net.λ_mRNA, λ_prot=net.λ_prot, λ₊=[net.λ₊; zeros(net.nₒ)], λ₋=[net.λ₋; zeros(net.nₒ)], # assuming O is at the end of node list
     α₀=[g.α[1] for g in net.genes], kwargs...)
 
 edge_color(weight::Real) = "#" * hex(divergent_lerp(weight, -1, 1))
-edge_color_T(weight::Real) = edge_color(weight::Real)
-edge_color_P(weight::Real) = edge_color(weight::Real)
-edge_color_T(weight::AbstractString) = weight == "-" ? "#4B562D" : "#A1CC2B" 
-edge_color_P(weight::AbstractString) = weight == "-" ? "#6D3775" : "#AF70B6"
+edge_color_TF(weight::Real) = edge_color(weight::Real)
+edge_color_KP(weight::Real) = edge_color(weight::Real)
+edge_color_TF(weight::AbstractString) = weight == "-" ? "#4B562D" : "#A1CC2B" 
+edge_color_KP(weight::AbstractString) = weight == "-" ? "#6D3775" : "#AF70B6"
 edge_opacity(weight::Real) = divergent(weight, -.1, .1) |> abs |> to256
-edge_opacity(weight::AbstractString) = 255
-arrow_T(weight::Real) = weight >= 0 ? "DELTA" : "T"
-function arrow_T(weight::AbstractString)
+edge_opacity(weight::AbstractString) = 255;
+arrow_TF(weight::Real) = weight >= 0 ? "DELTA" : "T"
+function arrow_TF(weight::AbstractString)
 	if weight == "+" return "DELTA"
 	elseif weight == "-" return "T"
 	else return "DELTA" end # default value
 end
-arrow_P(weight::Real) = weight >= 0 ? "CIRCLE" : "SQUARE"
-function arrow_P(weight::AbstractString)
+arrow_KP(weight::Real) = weight >= 0 ? "CIRCLE" : "SQUARE"
+function arrow_KP(weight::AbstractString)
 	if weight == "+" return "CIRCLE"
 	elseif weight == "-" return "SQUARE"
 	else return "DELTA" end # default value
 end
 
 function xgmml_edges(Wₜ::Matrix, Wₚ::Matrix)
-	nₚ = size(Wₚ, 2)
+	nₜ = size(Wₜ, 2)
 
-	P_edges = [
-        XGMML.Edge(source, target, bg_color; arrow=arrow_P(weight), color=edge_color_P(weight), opacity=edge_opacity(weight), weight=weight)
-        for (target,source,weight) in zip(findnz(sparse(Wₚ))...)
+	TF_edges = [
+        XGMML.Edge(source, target, bg_color; arrow=arrow_TF(weight), color=edge_color_TF(weight), opacity=edge_opacity(weight), weight=weight)
+        for (target, source, weight) in zip(findnz(sparse(Wₜ))...)
     ]
-	T_edges = [
-        XGMML.Edge(source+nₚ, target, bg_color; arrow=arrow_T(weight), color=edge_color_T(weight), opacity=edge_opacity(weight), weight=weight)
-        for (target,source,weight) in zip(findnz(sparse(Wₜ))...)
+	KP_edges = [
+	    # + nₜ since the order of nodes should be TF, KP, O
+        XGMML.Edge(source + nₜ, target, bg_color; arrow=arrow_KP(weight), color=edge_color_KP(weight), opacity=edge_opacity(weight), weight=weight)
+        for (target, source, weight) in zip(findnz(sparse(Wₚ))...)
     ]
 
-	[P_edges; T_edges]
+	[KP_edges; TF_edges]
 end
 # allow WₜWₚ tuple so we can use net as either a Network or as (Wₜ, Wₚ) in the function xgmml(net, ...)
 xgmml_edges(WₜWₚ::Tuple) = xgmml_edges(WₜWₚ...)
@@ -175,8 +184,8 @@ function xgmml(net, X::Matrix, highlight=nothing; title="net")
 	
 	graphs::Vector{XGMML.Graph} = []
 	for k in 1:K
-		Δy = sum([nₒ,nₜ,nₚ] .> 0) * default_vspace * k
-		nodes = xgmml_nodes(net, y=xgmml_y(nₒ,nₜ,nₚ) .+ Δy, fills=fills[:,k], value=X[:,k])
+		Δy = sum([nₜ,nₚ,nₒ] .> 0) * default_vspace * k
+		nodes = xgmml_nodes(net, y=xgmml_y(nₜ, nₚ, nₒ) .+ Δy, fills=fills[:, k], value=X[:, k])
 		edges = xgmml_edges(net)
         highlight === nothing || (nodes[highlight[k]].stroke_width = 5.)
 		graph = XGMML.Graph(title, nodes, edges)

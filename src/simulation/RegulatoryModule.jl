@@ -7,7 +7,7 @@ Regulatory module struct for gene regulation simulation.
 struct RegulatoryModule
 	n_activators::Int
 	n_repressors::Int
-	inputs::Vector{Int}  # int indexes for activators then repressors among all proteins
+	inputs::Vector{Int}  # int indexes for activators THEN repressors among all proteins
 	ν::Vector{Float64}
 	k::Vector{Float64}
 	complex::Bool

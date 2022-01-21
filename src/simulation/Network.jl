@@ -8,14 +8,16 @@ Network struct containing genes for simulation.
 using .ArrayUtils: TruncNormal
 
 
-function init_genes(Wₜ, nₚ)
+function init_genes(Wₜ)
+    # Each row in Wₜ is edges from each TF to a single node. The nodes in rows should be in order TF, KP, O.
 	# row .== 0 → no edge, row .> 0 → activator, row .< 0 → repressor.
 	# .+ nₚ because the indexes among all proteins referring to TFs starts after KPs
-	[Gene(findall(row .> 0) .+ nₚ, findall(row .< 0) .+ nₚ) for row in eachrow(Wₜ)]
+	[Gene(findall(row .> 0), findall(row .< 0)) for row in eachrow(Wₜ)]
 end
 
 
 struct Network
+    # containing information about how each gene (every node) is bound and regulated by TFs.
 	genes::Vector{Gene}
 	# KP to TF+KP edges. Using Array instead of Matrix so JSON3 can allow a Vector here before reshape.
 	Wₚ₊::Array{Float64}
@@ -66,8 +68,8 @@ struct Network
 		λ₊, λ₋ = random_λ(Wₚ)
 		Network(genes, init_Wₚ₊Wₚ₋(genes, Wₚ, λ₊, λ₋)..., λ₊, λ₋)
 	end
-	Network(Wₜ::Matrix, Wₚ::Matrix) = Network(init_genes(Wₜ, size(Wₚ,2)), Wₚ)
-	Network(W, nₜ::Integer, nₚ::Integer) = Network(WₜWₚ(W,nₜ,nₚ)...)
+	Network(Wₜ::Matrix, Wₚ::Matrix) = Network(init_genes(Wₜ), Wₚ)
+	Network(W, nₜ::Integer, nₚ::Integer) = Network(WₜWₚ(W, nₜ, nₚ)...)
 	function Network(net::Network)
 		new(net.genes, net.Wₚ₊, net.Wₚ₋, net.nᵥ, net.nᵥ-(net.nₜ+net.nₚ), net.nₜ, net.nₚ, net.max_transcription, net.max_translation, net.λ_mRNA, net.λ_prot, net.λ₊, net.λ₋, net.r₀, net.p₀, net.ψ₀)
 	end

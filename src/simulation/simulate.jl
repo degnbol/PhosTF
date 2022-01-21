@@ -1,8 +1,8 @@
 #!/usr/bin/env julia
 SRC = readchomp(`git root`) * "/src/"
-include("GeneRegulation.jl")
+isdefined(Main, :GeneRegulation) || include("GeneRegulation.jl")
 isdefined(Main, :ODEs) || include(SRC * "simulation/ODEs.jl")
-include(SRC * "utilities/ReadWrite.jl")
+isdefined(Main, :ReadWrite) || include(SRC * "utilities/ReadWrite.jl")
 using Fire
 using LinearAlgebra
 using Plots
@@ -48,7 +48,7 @@ Create a random network from Wₜ and Wₚ.
 	save(o, GeneRegulation.Network(Wₜ, Wₚ))
 end
 
-@main function display(i=default_net; v::Integer=0)
+@main function printNet(i=default_net; v::Integer=0)
 	net = loadnet(i)
 	println(net)
 	if v > 0

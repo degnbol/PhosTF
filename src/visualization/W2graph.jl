@@ -1,5 +1,5 @@
 #!/usr/bin/env julia
-include("../simulation/GeneRegulation.jl") # To get Network
+isdefined(Main, :GeneRegulation) || include("../simulation/GeneRegulation.jl") # To get Network
 isdefined(Main, :Model) || include("../inference/Model.jl") 
 isdefined(Main, :ReadWrite) || include("../utilities/ReadWrite.jl")
 isdefined(Main, :ArrayUtils) || include("../utilities/ArrayUtils.jl")

@@ -92,8 +92,11 @@ function estimate_Wₜ(net::Network, i::Integer)
 	mean(estimate_Wₜ(net, i, activation)
 	for activation in [0, noise_activation, weak_activation])
 end
-"Estimate Wₜ by comparing the effect on f when any TF has ψ=weak or ψ=strong."
-estimate_Wₜ(net::Network) = hcat([estimate_Wₜ(net, i) for i in net.nₚ+1:net.nₚ+net.nₜ]...)
+"""
+Estimate Wₜ by comparing the effect on f when any TF has ψ=weak or ψ=strong.
+Assumes nodes are ordered with TFs first.
+"""
+estimate_Wₜ(net::Network) = hcat([estimate_Wₜ(net, i) for i in 1:net.nₜ]...)
 
 end;
 
