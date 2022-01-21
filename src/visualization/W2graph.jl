@@ -1,19 +1,18 @@
 #!/usr/bin/env julia
+include("../simulation/GeneRegulation.jl") # To get Network
 isdefined(Main, :Model) || include("../inference/Model.jl") 
 isdefined(Main, :ReadWrite) || include("../utilities/ReadWrite.jl")
 isdefined(Main, :ArrayUtils) || include("../utilities/ArrayUtils.jl")
 isdefined(Main, :GraphUtils) || include("../utilities/GraphUtils.jl")
 
-
 using Fire
 
 # defaults
 default_Wₜ, default_Wₚ = "WT.mat", "WP.mat"
-default_net = "net.bson"
 
 
 "Load file(s) as a single 2D array regardless if they match in length along axis 1."
-hcatpad_load(fnames::Vector) = ArrayUtils.hcatpad(loaddlm(fname, Float64) for fname in fnames)
+hcatpad_load(fnames::Vector) = ArrayUtils.hcatpad(ReadWrite.loaddlm(fname, Float64) for fname in fnames)
 hcatpad_load(fname::String) = ReadWrite.loaddlm(fname, Float64)
 
 """
@@ -25,8 +24,11 @@ Write a graph defined by weight matrices to xgmml format.
     nₜ, nₚ = size(Wₜ, 2), size(Wₚ, 2)
 	xgmml((Wₜ, Wₚ), o, nₜ, nₚ, title, X)
 end
-@main function xgmml(i=default_net; o=stdout, title=nothing, X=[])
-	net = ReadWrite.load(i, Network)
+"""
+- i: e.g. net.bson
+"""
+@main function xgmml(i::String; o=stdout, title=nothing, X=[])
+	net = ReadWrite.load(i, GeneRegulation.Network)
 	xgmml(net, o, net.nₜ, net.nₚ, title, X)
 end
 

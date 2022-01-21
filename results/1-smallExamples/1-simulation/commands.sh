@@ -1,5 +1,5 @@
 #!/usr/bin/env zsh
-./sim.pdf.jl
+./commands.jl
 for mutnum in {1..4}; do
 `git root`/src/simulation/plot_simulated_mutant.R 3 2 1 $mutnum
 done
