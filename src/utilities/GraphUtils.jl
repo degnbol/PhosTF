@@ -14,6 +14,7 @@ import ..XGMML
 using ..ColorUtils: divergent_lerp
 using ..MathUtils
 using ..GeneRegulation: estimate_Wₜ
+using ..Model # necessary for extending a function
 using ..Model: nₜnₚnₒ
 
 
@@ -28,8 +29,8 @@ Get a matrix containing text in node file format.
 rows are identifiers.
 """
 function nodes(nᵥ::Integer, nₜ::Integer, nₚ::Integer)
-	labels = [["T$i" for i in 1:nₜ]; ["P$i" for i in 1:nₚ]; ["O$i" for i in 1:(nᵥ-(nₜ+nₚ))]]
-	types = [["T" for _ in 1:nₜ]; ["P" for _ in 1:nₚ]; ["O" for _ in 1:(nᵥ-(nₜ+nₚ))]]
+	labels = [["TF$i" for i in 1:nₜ]; ["KP$i" for i in 1:nₚ]; ["O$i" for i in 1:(nᵥ-(nₜ+nₚ))]]
+	types = [["TF" for _ in 1:nₜ]; ["KP" for _ in 1:nₚ]; ["O" for _ in 1:(nᵥ-(nₜ+nₚ))]]
 	DataFrame(label=labels, type=types)
 end
 
@@ -57,8 +58,8 @@ xgmml_y(nₜ::Integer, nₚ::Integer, nₒ::Integer, space=default_vspace) = [[ 
 
 function xgmml_labels(nₜ::Integer, nₚ::Integer, nₒ::Integer)
 	pad = max(nₜ, nₚ, nₒ) |> string |> length
-	[["P"*lpad(i,pad,"0") for i in 1:nₚ];
-	 ["T"*lpad(i,pad,"0") for i in 1:nₜ];
+	[["KP"*lpad(i,pad,"0") for i in 1:nₚ];
+	 ["TF"*lpad(i,pad,"0") for i in 1:nₜ];
 	 ["O"*lpad(i,pad,"0") for i in 1:nₒ]]
 end
 
@@ -143,8 +144,9 @@ function xgmml_bend!(graph::XGMML.Graph, bend=.3; hspace=default_hspace, vspace=
 end
 
 # in order to allow xgmml take either (Wₜ, Wₚ) or Network.
-nₜnₚnₒ(net::Tuple) = nₜnₚnₒ(net...)
-nₜnₚnₒ(net) = net.nₜ, net.nₚ, net.nₒ
+# Has to be explicit with `Model.` to extend.
+Model.nₜnₚnₒ(net::Tuple) = nₜnₚnₒ(net...)
+Model.nₜnₚnₒ(net) = net.nₜ, net.nₚ, net.nₒ
 
 """
 - net: either (Wₜ, Wₚ) or simulation Network
