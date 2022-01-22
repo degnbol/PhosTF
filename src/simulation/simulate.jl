@@ -68,24 +68,40 @@ end
 
 """
 Simulate a network and return the full time series.
-- r,p,psi: fname. output files with time along axis 2 and protein along axis 1
-- r0, p0, psi0: fname. starting values. Use this to let a mutated network start where the wildtype converged. 
-Make them with either another simulate call, a steaady state call or write them manually.
+- i: input filename, e.g. "net.bson"
+- mut_id: index of a node to mutate, i.e. knock out.
+- o: fname. output files with time along axis 2 and protein along axis 1
+- t0: fname. starting values. Use this to let a mutated network start where the wildtype converged. 
+    Columns named r_NODENAME1, r_NODENAME2, ..., p_NODENAME1, ... ψ_NODENAME1, ...
+    Node names are assumed to be in order as the nodes in the input network.
+    Make them with either another simulate call, a steady state call or write them manually.
 """
-@main function timeseries(mut_id=nothing, i=default_net; r=nothing, p=nothing, psi=nothing, t=nothing, duration=nothing, r0=nothing, p0=nothing, psi0=nothing)
-    # default output names
-    mutSuf = mut_id === nothing ? "" : "_$mut_id"
-	if   r  === nothing   r  = "sim_r$mutSuf.mat" end
-	if   p  === nothing   p  = "sim_p$mutSuf.mat" end
-	if psi  === nothing psi  = "sim_psi$mutSuf.mat" end
-	if   t  === nothing   t  = "sim_t$mutSuf.mat" end
-    
-	if   r0 !== nothing   r0 = ReadWrite.loaddlm(  r0)[end, :] end
-	if   p0 !== nothing   p0 = ReadWrite.loaddlm(  p0)[end, :] end
-	if psi0 !== nothing psi0 = ReadWrite.loaddlm(psi0)[end, :] end
-	
+@main function timeseries(i::String, mut_id=nothing; o=nothing, duration=nothing, t0=nothing)
+    # default output name
+    if o === nothing
+        o = mut_id === nothing ? "sim.tsv" : "sim_mut$mut_id.tsv"
+    end
+
     net = loadnet(i)
-	u₀ = ODEs.get_u₀(net, r0, p0, psi0)
+    nₜₚ = net.nₜ+net.nₚ
+    
+	if t0 === nothing
+        r0, p0, ψ0 = nothing, nothing, nothing
+    else
+        t0 = ReadWrite.loaddlm(t0; header=true)[end, :]
+        t0, colnames = collect(t0), names(t0)
+        r0idx = startswith.(colnames, 'r')
+        p0idx = startswith.(colnames, 'p')
+        ψ0idx = startswith.(colnames, 'ψ')
+        r0 = t0[r0idx]
+        p0 = t0[p0idx]
+        ψ0 = t0[ψ0idx]
+        @assert all(chop.(colnames[r0idx], head=2, tail=0) .== net.names) "$([s[3:end] for s in colnames[r0idx]]) != $(net.names)"
+        @assert all(chop.(colnames[p0idx], head=2, tail=0) .== net.names) "$([s[3:end] for s in colnames[p0idx]]) != $(net.names)"
+        @assert all(chop.(colnames[ψ0idx], head=2, tail=0) .== net.names[1:nₜₚ]) "$([s[3:end] for s in colnames[ψ0idx]]) != $(net.names[1:nₜₚ])"
+    end
+	
+	u₀ = ODEs.get_u₀(net, r0, p0, ψ0)
     @assert !any(isnan.(u₀))
 	solution = ODEs.@domainerror ODEs.timeseries(net, mut_id, u₀, duration)
 	solution === nothing && return
@@ -93,10 +109,11 @@ Make them with either another simulate call, a steaady state call or write them 
 	if solution.retcode in [:Success, :Terminated]
         # dimensions are (node, RNA/protein/activation, time)
         # transpose to have time along first dim.
-		savedlm(r,   solution[:, 1, :]')
-		savedlm(p,   solution[:, 2, :]')
-		savedlm(psi, solution[1:net.nₜ+net.nₚ, 3, :]')
-        savedlm(t,   solution.t)
+        r = solution[:, 1, :]'
+        p = solution[:, 2, :]'
+		ψ = solution[1:nₜₚ, 3, :]'
+        t = reshape(solution.t, :, 1) # make it column vector here
+        savedlm(o, hcat(t, r, p, ψ); colnames=[["t"]; "r_" .* net.names; "p_" .* net.names; "ψ_" .* net.names[1:nₜₚ]])
 	end
 end
 
@@ -144,19 +161,22 @@ end
 
 """
 Get the steady state levels for a network optionally mutating it.
+- i: network fname, e.g. "net.bson"
 - mut_id: index indicating which mutation to perform.
 If "mutations" is not provided, it refers to index of the protein to mutate.
-- i: network fname.
 - r: out fname for r values.
 - p: out fname for p values.
 - psi: out fname for ψ values.
 - mut_file: optional fname to provided where "mut_id" will then be the index of a column.
 If "mut" is not provided, the first (and ideally only) column of the file will be used.
 """
-@main function steadystate(mut_id=nothing, i=default_net; r=nothing, p=nothing, psi=nothing, mut_file=nothing)
-	if r   === nothing r   = "steady_r"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
-	if p   === nothing p   = "steady_p"   * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
-	if psi === nothing psi = "steady_psi" * (mut_id === nothing ? "" : "_$mut_id") * ".mat" end
+@main function steadystate(i::String, mut_id=nothing; r=nothing, p=nothing, psi=nothing, mut_file=nothing)
+    # default output names
+    mutSuf = mut_id === nothing ? "" : "_mut$mut_id"
+	if r === nothing r = "steady_r$mutSuf.mat" end
+	if p === nothing p = "steady_p$mutSuf.mat" end
+	if psi === nothing psi = "steady_psi$mutSuf.mat" end
+
 	net = loadnet(i)
 	solution = steady_state(net, mut_id, mut_file)
 	@info(solution.retcode)
@@ -182,10 +202,10 @@ end
 
 """
 Get the log fold-change values comparing mutant transcription levels to wildtype.
-- net: a network
+- net: a network filename, e.g. "net.bson"
 - o: stdout or file to write result to
 """
-@main function logFC(net=default_net; o=stdout)
+@main function logFC(net::String; o=stdout)
     net = loadnet(net)
 	measurements = ODEs.@domainerror(ODEs.logFC(net))
 	if measurements !== nothing

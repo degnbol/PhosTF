@@ -7,6 +7,7 @@ Structs with data defining a gene regulation network and its regulation mechanis
 module GeneRegulation
 using Statistics: mean
 import JSON3
+using ..Model # for nₜnₚnₒ in Network
 
 export Network, Gene
 export drdt, dpdt, dψdt

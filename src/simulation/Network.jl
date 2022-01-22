@@ -1,5 +1,6 @@
 #!/usr/bin/env julia
 isdefined(Main, :ArrayUtils) || include("../utilities/ArrayUtils.jl")
+isdefined(Main, :Model) || include("../inference/Model.jl")
 
 """
 Network struct containing genes for simulation.
@@ -15,8 +16,11 @@ function init_genes(Wₜ)
 	[Gene(findall(row .> 0), findall(row .< 0)) for row in eachrow(Wₜ)]
 end
 
+default_names(nₜ::Integer, nₚ::Integer, nₒ::Integer) = [["TF$i" for i in 1:nₜ]; ["KP$i" for i in 1:nₚ]; ["O$i" for i in 1:nₒ]]
 
 struct Network
+    # name of each gene/node
+    names::Vector{String}
     # containing information about how each gene (every node) is bound and regulated by TFs.
 	genes::Vector{Gene}
 	# KP to TF+KP edges. Using Array instead of Matrix so JSON3 can allow a Vector here before reshape.
@@ -35,20 +39,20 @@ struct Network
 	r₀::Vector{Float64}
 	p₀::Vector{Float64}
 	ψ₀::Vector{Float64}
-	function Network(genes::Vector{Gene}, Wₚ::Matrix{<:AbstractFloat}, nᵥ::Integer, nₜ::Integer, nₚ::Integer, 
+    function Network(names::Vector{String}, genes::Vector{Gene}, Wₚ::Matrix{<:AbstractFloat}, nᵥ::Integer, nₜ::Integer, nₚ::Integer, 
 		max_transcription::Vector{<:AbstractFloat}, max_translation::Vector{<:AbstractFloat}, 
 		λ_mRNA::Vector{<:AbstractFloat}, λ_prot::Vector{<:AbstractFloat}, λ₊::Vector{<:AbstractFloat}, λ₋::Vector{<:AbstractFloat}, 
 		r₀::Vector{<:AbstractFloat}, p₀::Vector{<:AbstractFloat}, ψ₀::Vector{<:AbstractFloat})
-		new(genes, Wₚ₊Wₚ₋(Wₚ)..., nᵥ, nᵥ-(nₜ+nₚ), nₜ, nₚ, max_transcription, max_translation, λ_mRNA, λ_prot, λ₊, λ₋, r₀, p₀, ψ₀)
+		new(names, genes, Wₚ₊Wₚ₋(Wₚ)..., nᵥ, nᵥ-(nₜ+nₚ), nₜ, nₚ, max_transcription, max_translation, λ_mRNA, λ_prot, λ₊, λ₋, r₀, p₀, ψ₀)
 	end
-	function Network(genes::Vector{Gene}, Wₚ::Vector{<:AbstractFloat}, nᵥ::Integer, nₜ::Integer, nₚ::Integer, 
+	function Network(names::Vector{String}, genes::Vector{Gene}, Wₚ::Vector{<:AbstractFloat}, nᵥ::Integer, nₜ::Integer, nₚ::Integer, 
 		max_transcription::Vector{<:AbstractFloat}, max_translation::Vector{<:AbstractFloat}, 
 		λ_mRNA::Vector{<:AbstractFloat}, λ_prot::Vector{<:AbstractFloat}, λ₊::Vector{<:AbstractFloat}, λ₋::Vector{<:AbstractFloat}, 
 		r₀::Vector{<:AbstractFloat}, p₀::Vector{<:AbstractFloat}, ψ₀::Vector{<:AbstractFloat})
 		Wₚ = reshape(Wₚ, (nₚ+nₜ,nₚ))  # un-flatten matrix
-		new(genes, Wₚ₊Wₚ₋(Wₚ)..., nᵥ, nᵥ-(nₜ+nₚ), nₜ, nₚ, max_transcription, max_translation, λ_mRNA, λ_prot, λ₊, λ₋, r₀, p₀, ψ₀)
+		new(names, genes, Wₚ₊Wₚ₋(Wₚ)..., nᵥ, nᵥ-(nₜ+nₚ), nₜ, nₚ, max_transcription, max_translation, λ_mRNA, λ_prot, λ₊, λ₋, r₀, p₀, ψ₀)
 	end
-	function Network(genes::Vector{Gene}, Wₚ₊::Matrix{<:AbstractFloat}, Wₚ₋::Matrix{<:AbstractFloat}, λ₊::Vector, λ₋::Vector)
+	function Network(names::Vector{String}, genes::Vector{Gene}, Wₚ₊::Matrix{<:AbstractFloat}, Wₚ₋::Matrix{<:AbstractFloat}, λ₊::Vector, λ₋::Vector)
 		nᵥ, nₚ = length(genes), size(Wₚ₊,2)
 		nₜ = size(Wₚ₊,1) - nₚ
 		# In the non-dimensionalized model, max_transcription == λ_mRNA and max_translation == λ_prot
@@ -57,21 +61,21 @@ struct Network
 		r₀ = initial_r(max_transcription, λ_mRNA, genes)
 		p₀ = initial_p(max_translation, λ_prot, r₀)
 		ψ₀ = initial_ψ(Wₚ₊, Wₚ₋, p₀[1:nₜ+nₚ])
-		new(genes, Wₚ₊, Wₚ₋, nᵥ, nᵥ-(nₜ+nₚ), nₜ, nₚ, max_transcription, max_translation, λ_mRNA, λ_prot, λ₊, λ₋, r₀, p₀, ψ₀)
+		new(names, genes, Wₚ₊, Wₚ₋, nᵥ, nᵥ-(nₜ+nₚ), nₜ, nₚ, max_transcription, max_translation, λ_mRNA, λ_prot, λ₊, λ₋, r₀, p₀, ψ₀)
 	end
 	"""
 	Make sure to be exact about using either integer or float for Wₚ 
 	since a matrix of floats {-1.,0.,1.} will be seen as the exact edge values and not indication of repression, activation, etc.
 	"""
-	Network(genes::Vector{Gene}, Wₚ::Matrix{<:AbstractFloat}) = Network(genes, Wₚ₊Wₚ₋(Wₚ)..., random_λ(Wₚ)...)
-	function Network(genes::Vector{Gene}, Wₚ::Matrix{<:Integer})
+	Network(names::Vector{String}, genes::Vector{Gene}, Wₚ::Matrix{<:AbstractFloat}) = Network(names, genes, Wₚ₊Wₚ₋(Wₚ)..., random_λ(Wₚ)...)
+	function Network(names, genes::Vector{Gene}, Wₚ::Matrix{<:Integer})
 		λ₊, λ₋ = random_λ(Wₚ)
-		Network(genes, init_Wₚ₊Wₚ₋(genes, Wₚ, λ₊, λ₋)..., λ₊, λ₋)
+		Network(names, genes, init_Wₚ₊Wₚ₋(genes, Wₚ, λ₊, λ₋)..., λ₊, λ₋)
 	end
-	Network(Wₜ::Matrix, Wₚ::Matrix) = Network(init_genes(Wₜ), Wₚ)
-	Network(W, nₜ::Integer, nₚ::Integer) = Network(WₜWₚ(W, nₜ, nₚ)...)
+    Network(Wₜ::Matrix, Wₚ::Matrix; names=default_names(Model.nₜnₚnₒ(Wₜ, Wₚ)...)) = Network(names, init_genes(Wₜ), Wₚ)
+    Network(W, nₜ::Integer, nₚ::Integer; names=default_names(nₜ, nₚ, size(W,1)-(nₜ+nₚ))) = Network(WₜWₚ(W, nₜ, nₚ)...; names=names)
 	function Network(net::Network)
-		new(net.genes, net.Wₚ₊, net.Wₚ₋, net.nᵥ, net.nᵥ-(net.nₜ+net.nₚ), net.nₜ, net.nₚ, net.max_transcription, net.max_translation, net.λ_mRNA, net.λ_prot, net.λ₊, net.λ₋, net.r₀, net.p₀, net.ψ₀)
+		new(net.names, net.genes, net.Wₚ₊, net.Wₚ₋, net.nᵥ, net.nᵥ-(net.nₜ+net.nₚ), net.nₜ, net.nₚ, net.max_transcription, net.max_translation, net.λ_mRNA, net.λ_prot, net.λ₊, net.λ₋, net.r₀, net.p₀, net.ψ₀)
 	end
 	"""
 	Create a mutant by making a copy of a wildtype network and changing the max transcription level of 1 or more genes.
@@ -79,14 +83,14 @@ struct Network
 	function Network(net::Network, mutate::Integer, value=1e-5)
 		max_transcription = copy(net.max_transcription)
 		max_transcription[mutate] = value
-		new(net.genes, net.Wₚ₊, net.Wₚ₋, net.nᵥ, net.nᵥ-(net.nₜ+net.nₚ), net.nₜ, net.nₚ, max_transcription, net.max_translation, 
+		new(net.names, net.genes, net.Wₚ₊, net.Wₚ₋, net.nᵥ, net.nᵥ-(net.nₜ+net.nₚ), net.nₜ, net.nₚ, max_transcription, net.max_translation, 
 			net.λ_mRNA, net.λ_prot, net.λ₊, net.λ₋, net.r₀, net.p₀, net.ψ₀)
 	end
 	function Network(net::Network, mutate::AbstractVector, value=1e-5)
 		max_transcription = copy(net.max_transcription)
 		mutatable = @view max_transcription[1:net.nₚ+net.nₜ]
 		mutatable[mutate] .= value
-		new(net.genes, net.Wₚ₊, net.Wₚ₋, net.nᵥ, net.nᵥ-(net.nₜ+net.nₚ), net.nₜ, net.nₚ, max_transcription, net.max_translation, 
+		new(net.names, net.genes, net.Wₚ₊, net.Wₚ₋, net.nᵥ, net.nᵥ-(net.nₜ+net.nₚ), net.nₜ, net.nₚ, max_transcription, net.max_translation, 
             net.λ_mRNA, net.λ_prot, net.λ₊, net.λ₋, net.r₀, net.p₀, net.ψ₀)
 	end
 	Base.copy(net::Network) = Network(net)
