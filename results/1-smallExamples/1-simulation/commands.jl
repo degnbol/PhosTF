@@ -1,5 +1,8 @@
 #!/usr/bin/env julia
 @src "simulation/simulate";
+incl("src/simulation/simulate")
+incl("src/simulation/PlotTimeSeries")
+incl("src/simulation/ODEs")
 
 network("WT.adj", "WP.adj"; header=true)
 timeseries("net.bson")

@@ -145,17 +145,17 @@ Plot time series.
 	values = zeros(nᵥ, 3, length(t))
 	values[:, 1, :], values[:, 2, :], values[1:nₜ+nₚ, 3, :] = r', p', ψ'
     meass = ["mRNA", "prot", "phos"]
-	nodes  = [["KP$i" for i ∈ 1:nₚ]; ["TF$i" for i ∈ 1:nₜ]; ["O$i" for i ∈ 1:nₒ]]
+	nodes  = [["TF$i" for i ∈ 1:nₜ]; ["KP$i" for i ∈ 1:nₚ]; ["O$i" for i ∈ 1:nₒ]]
 	labels = ["$i $l" for i ∈ nodes, l ∈ meass]
 	styles = [s for i ∈ nodes, s ∈ [:solid, :solid, :dash]]
 	widths = [w for i ∈ nodes, w ∈ [1, 2, 1]]
-    colors = [c for c ∈ ["#B663B1", "#6DB845", "#545000"], l ∈ meass]
-	# get [KP, TF, O] collections of data
-	values = [reshape(values[1:nₚ,:,:], 3nₚ, :), reshape(values[nₚ+1:nₚ+nₜ,:,:], 3nₜ, :), values[nₚ+nₜ+1:end,1,:]]
-	labels = [reshape(labels[1:nₚ,:], :), reshape(labels[nₚ+1:nₚ+nₜ,:], :), labels[nₚ+nₜ+1:end,1]]
-	styles = [reshape(styles[1:nₚ,:], :), reshape(styles[nₚ+1:nₚ+nₜ,:], :), styles[nₚ+nₜ+1:end,1]]
-	widths = [reshape(widths[1:nₚ,:], :), reshape(widths[nₚ+1:nₚ+nₜ,:], :), widths[nₚ+nₜ+1:end,1]]
-	p = PlotTimeSeries.plot_timeseries(t, values, labels, styles, widths, ["KP", "TF", "O"]; colors=colors)
+    #= colors = [c for c ∈ ["#B663B1", "#6DB845", "#545000"], l ∈ meass] =#
+	# get [KP, TF, O] collections of data as 3 sub-plots
+    values = [reshape(values[nₜ+1:nₜ+nₚ,:,:], 3nₚ, :), reshape(values[1:nₜ,:,:], 3nₜ, :), values[nₜ+nₚ+1:end, nₒ, :]]
+	labels = [reshape(labels[nₜ+1:nₜ+nₚ,:], :), reshape(labels[1:nₜ,:], :), labels[nₜ+nₚ+1:end,1]]
+	styles = [reshape(styles[nₜ+1:nₜ+nₚ,:], :), reshape(styles[1:nₜ,:], :), styles[nₜ+nₚ+1:end,1]]
+	widths = [reshape(widths[nₜ+1:nₜ+nₚ,:], :), reshape(widths[1:nₜ,:], :), widths[nₜ+nₚ+1:end,1]]
+	p = PlotTimeSeries.plot_timeseries(t, values, labels, styles, widths, ["KP", "TF", "O"])
 	if o != stdout
         savefig(p, o)
     else

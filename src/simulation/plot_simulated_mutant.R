@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # Plot small examples of mutation.
-# USE: ./plot_single_simulated_mutant.R np nt no mutnum
+# USE: ./plot_simulated_mutant.R np nt no mutnum
 # - np: number of kinases and phosphatases
 # - nt: number of transcription factors
 # - no: number of other genes
