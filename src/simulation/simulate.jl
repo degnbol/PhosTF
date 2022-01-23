@@ -210,9 +210,9 @@ end
 """
 Get the log fold-change values comparing mutant transcription levels to wildtype.
 - net: a network filename, e.g. "net.bson"
-- o: stdout or file to write result to
+- o: file to write result to
 """
-@main function logFC(net::String; o=stdout)
+@main function logFC(net::String, o::String)
     net = loadnet(net)
 	measurements = ODEs.@domainerror(ODEs.logFC(net))
 	if measurements !== nothing
