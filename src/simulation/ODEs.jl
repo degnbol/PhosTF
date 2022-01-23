@@ -1,7 +1,4 @@
 #!/usr/bin/env julia
-# overriding already loaded modules causes problems
-isdefined(Main, :GeneRegulation) || include("GeneRegulation.jl")
-
 """
 Defining and solving ODEs to the point of having the resulting simulated logFC values.
 Used for simulation of gene expression levels.
@@ -11,7 +8,7 @@ using DifferentialEquations: ODEProblem, solve, ODESolution, CallbackSet
 using DiffEqCallbacks: TerminateSteadyState, PositiveDomain
 using Distributions: Uniform
 using LinearAlgebra: I
-using ..GeneRegulation
+Main.@use "simulation/GeneRegulation"
 
 export get_u₀
 export timeseries, steady_state

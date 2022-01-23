@@ -1,8 +1,4 @@
 #!/usr/bin/env julia
-include("StringUtils.jl")
-if !isdefined(Main, :ArrayUtils) include("ArrayUtils.jl") end
-include("ColorUtils.jl")
-
 """
 Module for code to export a network in .xgmml format.
 """
@@ -10,10 +6,11 @@ module XGMML
 using Statistics: mean
 import Base.show
 import Base.merge
-using ..StringUtils, ..ColorUtils
-import ..ArrayUtils
+Main.@use "utilities/StringUtils"
+Main.@use "utilities/ArrayUtils"
+Main.@use "utilities/ColorUtils" # lerp
 
-default_h = 25.
+const default_h = 25.
 
 mutable struct Node
 	atts::Dict{Any,Any}

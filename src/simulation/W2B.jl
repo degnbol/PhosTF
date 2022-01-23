@@ -1,10 +1,8 @@
 #!/usr/bin/env julia
-include("../utilities/ReadWrite.jl")
-isdefined(Main, :Model) || include("../inference/Model.jl")
-
+@use "utilities/ReadWrite"
+@src "inference/Model"
 using Fire
 using LinearAlgebra
-using .ReadWrite, .Model
 
 abspath_(path::AbstractString) = abspath(expanduser(path))
 

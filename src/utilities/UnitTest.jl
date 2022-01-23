@@ -1,8 +1,7 @@
 #!/usr/bin/env julia
 module UnitTest
 using Test
-include("ArrayUtils.jl")
-using .ArrayUtils
+Main.@use "utilities/ArrayUtils.jl"
 
 v = rand(3)
 

@@ -1,10 +1,8 @@
 #!/usr/bin/env julia
-include("../inference/Model.jl")
-
 "Iterating the equations from the model intended for inference until convergence in order to generate naive data."
 module ModelIteration
 using Distributions: Normal, mean
-using ..Model
+Main.@use "inference/Model"
 
 export converge
 

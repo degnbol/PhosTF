@@ -1,12 +1,10 @@
 #!/usr/bin/env julia
-isdefined(Main, :ReadWrite) || include("../utilities/ReadWrite.jl")
-isdefined(Main, :CLI) || include("../utilities/CLI.jl")
-isdefined(Main, :WeightConstruction) || include("WeightConstruction.jl")
-isdefined(Main, :ArrayUtils) || include("../utilities/ArrayUtils.jl")
-isdefined(Main, :Model) || include("../inference/Model.jl")
-
+@use "simulation/WeightConstruction"
+@src "inference/Model"
+@use "utilities/ReadWrite"
+@use "utilities/ArrayUtils"
+@use "utilities/CLI"
 using Fire
-using .ReadWrite, .ArrayUtils, .WeightConstruction, .CLI
 
 """
 Create random W from a adjacency matrix containing B.

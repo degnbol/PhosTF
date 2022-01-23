@@ -1,5 +1,4 @@
 #!/usr/bin/env julia
-
 "Plotting time series."
 module PlotTimeSeries
 using Plots
@@ -33,6 +32,5 @@ function plot_timeseries(time::Vector, values::Vector{Matrix{Float64}}, labels::
 	subplots = [plot_timeseries(time, values[i], labels[i], styles[i], widths[i]; colors=colors) for i ∈ 1:n_subplots]
 	plot(subplots..., layout=(n_subplots, 1))
 end
-
 
 end;

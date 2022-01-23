@@ -1,19 +1,14 @@
 #!/usr/bin/env julia
-isdefined(Main, :ArrayUtils) || include("../utilities/ArrayUtils.jl")
-isdefined(Main, :ReadWrite) || include("../utilities/ReadWrite.jl")
-isdefined(Main, :Model) || include("Model.jl")
-
 "Flux machine learning for gradient descent of errors defined by model loss functions."
 module GradientDescent
 using LinearAlgebra
 using Random
 using Statistics: mean
-#= using Formatting =#
 using Printf
 using Dates
 using Flux
-using ..ReadWrite
-using ..Model
+Main.@use "utilities/ReadWrite"
+Main.@use "inference/Model"
 using ..Model: L1, MSE
 
 """

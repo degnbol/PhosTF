@@ -1,20 +1,16 @@
 #!/usr/bin/env julia
-include("XGMML.jl")
-isdefined(Main, :ColorUtils) || include("ColorUtils.jl")
-include("MathUtils.jl")
-isdefined(Main, :GeneRegulation) || include("../simulation/GeneRegulation.jl")
-isdefined(Main, :Model) || include("../inference/Model.jl")
-
 module GraphUtils
 using Statistics
 using DataFrames
 using SparseArrays
 using Colors: hex  # override hex so we can take hex of color
-import ..XGMML
+Main.@use "utilities/XGMML"
+Main.@src "utilities/ColorUtils"
 using ..ColorUtils: divergent_lerp
-using ..MathUtils
+Main.@use "utilities/MathUtils"
+Main.@src "simulation/GeneRegulation"
 using ..GeneRegulation: estimate_Wₜ
-using ..Model # necessary for extending a function
+Main.@use "inference/Model"
 using ..Model: nₜnₚnₒ
 
 

@@ -1,6 +1,5 @@
 #!/usr/bin/env julia
 module StringUtils
-
 export indent
 
 """
@@ -11,8 +10,6 @@ function indent(text::String)
 	@. lines[lines != ""] = '\t' * lines[lines != ""]
 	join(lines, '\n')
 end
-
-
 
 end;
 

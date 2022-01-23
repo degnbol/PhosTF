@@ -1,10 +1,9 @@
 #!/usr/bin/env julia
-isdefined(Main, :GeneRegulation) || include("../simulation/GeneRegulation.jl") # To get Network
-isdefined(Main, :Model) || include("../inference/Model.jl") 
-isdefined(Main, :ReadWrite) || include("../utilities/ReadWrite.jl")
-isdefined(Main, :ArrayUtils) || include("../utilities/ArrayUtils.jl")
-isdefined(Main, :GraphUtils) || include("../utilities/GraphUtils.jl")
-
+@src "simulation/GeneRegulation" # To get Network
+@src "inference/Model"
+@src "utilities/ReadWrite"
+@src "utilities/ArrayUtils"
+@src "utilities/GraphUtils"
 using Fire
 
 # defaults

@@ -1,4 +1,3 @@
-isdefined(Main, :ArrayUtils) || include("../utilities/ArrayUtils.jl")
 using Distributions: Uniform, truncated, Normal
 
 """
@@ -53,3 +52,21 @@ function Base.show(io::IO, m::RegulatoryModule)
 	if !isempty(repressors) push!(inputs, "repressors=$repressors") end
 	print(io, "RegulatoryModule(", join(inputs, ", "), ")")
 end
+
+
+"""
+Mean regulatory module activation μ given ψ.
+ψ: 1D array. Active nondimensionalized concentrations.
+"""
+function μ(m::RegulatoryModule, ψ::AbstractVector{<:AbstractFloat})
+	χ = (ψ[m.inputs] ./ m.k) .^ m.ν
+	activator_prod = prod(χ[1:m.n_activators])
+	if m.complex
+		denom = 1 + activator_prod
+		if m.n_repressors > 0 denom += prod(χ) end
+	else
+		denom = prod(1 .+ χ)
+	end
+	activator_prod / denom
+end
+

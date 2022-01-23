@@ -1,15 +1,12 @@
 #!/usr/bin/env julia
-SRC = readchomp(`git root`) * "/src/"
-isdefined(Main, :ArrayUtils) || include(SRC * "utilities/ArrayUtils.jl")
-isdefined(Main, :FluxUtils) || include(SRC * "utilities/FluxUtils.jl")
-
 "Core model describing the equations of the model etc."
 module Model
 using LinearAlgebra
 using Statistics: mean
 using Flux
 using Flux: @functor
-using ..ArrayUtils
+Main.@use "utilities/ArrayUtils"
+Main.@src "utilities/FluxUtils"
 import ..FluxUtils: random_weight
 
 export SSE, SSE_B, SSE_T

@@ -1,13 +1,37 @@
 #!/usr/bin/env julia
-isdefined(Main, :ArrayUtils) || include("../utilities/ArrayUtils.jl")
-isdefined(Main, :Model) || include("../inference/Model.jl")
+include("Gene.jl")
+Main.@use "utilities/ArrayUtils"
+Main.@use "inference/Model"
+using Main.Model: nₜnₚnₒ
 
 """
 Network struct containing genes for simulation.
 """
 
-using .ArrayUtils: TruncNormal
+random_t½() = Main.ArrayUtils.TruncNormal(5, 50)
+"""
+We have exponential decay, the half-life and the decay rate are thus related by:
+t½ = ln(2) / λ ⟹
+λ = ln(2) / t½
+"""
+random_λ(n::Int) = log(2) ./ rand(random_t½(), n)
+"""
+For λ₊, λ₋ to have lower values for nodes that are mostly negatively regulated.
+"""
+function random_λ(mat::Matrix)
+    # weigh by the fraction of regulators that regulate positively.
+    positives = sum(mat .> 0; dims=2) |> vec
+    negatives = sum(mat .< 0; dims=2) |> vec
+    λ₊ = random_λ(size(mat,1)) .* negatives ./ (positives .+ negatives)
+    λ₋ = random_λ(size(mat,1)) .* positives ./ (positives .+ negatives)
+    # NaN from div zero which means there are no regulators of a node. In that case it's activation is static.
+    noreg = positives .+ negatives .== 0
+    λ₊[noreg] .= random_λ(sum(noreg))
+    λ₋[noreg] .= 0
+    λ₊, λ₋
+end
 
+include("phos_edges.jl") # provides init_Wₚ₊Wₚ₋ and uses random_λ
 
 function init_genes(Wₜ)
     # Each row in Wₜ is edges from each TF to a single node. The nodes in rows should be in order TF, KP, O.
@@ -17,6 +41,13 @@ function init_genes(Wₜ)
 end
 
 default_names(nₜ::Integer, nₚ::Integer, nₒ::Integer) = [["TF$i" for i in 1:nₜ]; ["KP$i" for i in 1:nₚ]; ["O$i" for i in 1:nₒ]]
+
+function Wₚ₊Wₚ₋(Wₚ::AbstractMatrix)
+	Wₚ₊ = +Wₚ; Wₚ₊[Wₚ₊ .<= 0] .= 0
+	Wₚ₋ = -Wₚ; Wₚ₋[Wₚ₋ .<= 0] .= 0
+	Wₚ₊, Wₚ₋
+end
+
 
 struct Network
     # name of each gene/node
@@ -72,7 +103,7 @@ struct Network
 		λ₊, λ₋ = random_λ(Wₚ)
 		Network(names, genes, init_Wₚ₊Wₚ₋(genes, Wₚ, λ₊, λ₋)..., λ₊, λ₋)
 	end
-    Network(Wₜ::Matrix, Wₚ::Matrix; names=default_names(Model.nₜnₚnₒ(Wₜ, Wₚ)...)) = Network(names, init_genes(Wₜ), Wₚ)
+    Network(Wₜ::Matrix, Wₚ::Matrix; names=default_names(nₜnₚnₒ(Wₜ, Wₚ)...)) = Network(names, init_genes(Wₜ), Wₚ)
     Network(W, nₜ::Integer, nₚ::Integer; names=default_names(nₜ, nₚ, size(W,1)-(nₜ+nₚ))) = Network(WₜWₚ(W, nₜ, nₚ)...; names=names)
 	function Network(net::Network)
 		new(net.names, net.genes, net.Wₚ₊, net.Wₚ₋, net.nᵥ, net.nᵥ-(net.nₜ+net.nₚ), net.nₜ, net.nₚ, net.max_transcription, net.max_translation, net.λ_mRNA, net.λ_prot, net.λ₊, net.λ₋, net.r₀, net.p₀, net.ψ₀)
@@ -101,7 +132,8 @@ struct Network
 	where we use p = 0 ⟹ ψ = 0  
 	"""
 	function initial_r(max_transcription::Vector, λ_mRNA::Vector, genes::Vector{Gene})
-		max_transcription .* f(genes, zeros(length(genes))) ./ λ_mRNA
+        # f(gene, ψ::Vector) is a function from Gene for its fraction of max activation.
+        max_transcription .* f.(genes, Ref(zeros(length(genes)))) ./ λ_mRNA
 	end
 	"""
 	Initial protein concentrations. Estimated as
@@ -130,18 +162,13 @@ end
 
 Base.show(io::IO, net::Network) = print(io, "Network(nᵥ=$(net.nᵥ), nₜ=$(net.nₜ), nₚ=$(net.nₚ))")
 
-function Wₚ₊Wₚ₋(Wₚ::AbstractMatrix)
-	Wₚ₊ = +Wₚ; Wₚ₊[Wₚ₊ .<= 0] .= 0
-	Wₚ₋ = -Wₚ; Wₚ₋[Wₚ₋ .<= 0] .= 0
-	Wₚ₊, Wₚ₋
-end
 
 """
 - r: size nᵥ.
 - p: size nᵥ.
 - ψₜₚ: size nₜ+nₚ.
 """
-drdt(net::Network, r, p, ψₜₚ) = net.max_transcription .* f(net.genes, ψₜₚ) .- net.λ_mRNA .* r
+drdt(net::Network, r, p, ψₜₚ) = net.max_transcription .* f.(net.genes, Ref(ψₜₚ)) .- net.λ_mRNA .* r
 """
 - r: size nᵥ.
 - p: size nᵥ.

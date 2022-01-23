@@ -1,12 +1,10 @@
 #!/usr/bin/env julia
-isdefined(Main, :Model) || include("../inference/Model.jl")
-isdefined(Main, :ArrayUtils) || include("../utilities/ArrayUtils.jl")
-
 "Construction of valid and random weight matrices, detection of silent edges and weight matrix correction."
 module WeightConstruction
 using LinearAlgebra
 using SparseArrays
-using ..Model, ..ArrayUtils
+Main.@use "inference/Model"
+Main.@use "utilities/ArrayUtils"
 using Random
 using Chain: @chain
 

@@ -2,6 +2,9 @@
 using Statistics: mean
 using SparseArrays
 
+# This file supplies init_Wₚ₊Wₚ₋ and uses random_λ. It is used in Network.jl and is just moved here to split up the work a bit.
+
+
 """
 Convert a Wₚ from int to float.
 Choosing the float values are done in a manner that will make it likely 

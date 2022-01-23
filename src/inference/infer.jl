@@ -1,12 +1,11 @@
 #!/usr/bin/env julia
-SRC = readchomp(`git root`) * "/src/"
-include(SRC * "utilities/ReadWrite.jl")
-include(SRC * "utilities/CLI.jl")
-include(SRC * "utilities/ArgParseUtils.jl")
-include(SRC * "inference/GradientDescent.jl")
-isdefined(Main, :Model) || include(SRC * "inference/Model.jl")
-isdefined(Main, :ArrayUtils) || include(SRC * "utilities/ArrayUtils.jl")
-isdefined(Main, :DataFrameUtils) || include(SRC * "utilities/DataFrameUtils.jl")
+@src "inference/GradientDescent"
+@src "inference/Model"
+@src "utilities/ArrayUtils"
+@src "utilities/DataFrameUtils"
+@src "utilities/ReadWrite"
+@src "utilities/CLI"
+@src "utilities/ArgParseUtils"
 using ArgParse
 using LinearAlgebra
 using Flux

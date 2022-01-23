@@ -1,7 +1,12 @@
 #!/usr/bin/env julia
-include("../utilities/ArrayUtils.jl") # different scope, have to re-include
+include("RegulatoryModule.jl")
+Main.@use "utilities/ArrayUtils"
 using Distributions: TruncatedNormal
-using .ArrayUtils: TruncNormal, binary
+using Main.ArrayUtils: TruncNormal, binary
+
+# constants from GNW
+const weak_activation = .25
+const strong_activation = .9
 
 """
 State s is interpreted as a binary number, where bit k indicates whether module k is active (true) or inactive (false) in this state. The first returned value is all falses and the last is all trues.
@@ -104,3 +109,18 @@ function Base.show(io::IO, g::Gene)
 	repressors = isempty(repressors) ? "" : ", repressors=$repressors"
 	print(io, "Gene(n_modules=$n_modules$activators$repressors)")
 end
+
+
+
+"""
+Fraction of max activation for a given gene when active TFs are found at a given concentration.
+"""
+function f(gene::Gene, ψ::AbstractVector{<:AbstractFloat})
+    isempty(gene.modules) && 1
+    # μ is a function from RegulatoryModule that is its mean activation.
+    μs = μ.(gene.modules, Ref(ψ))
+	# get P{state} for all states, each state is a unique combination of modules
+	P = [prod(μs[state]) * prod(1 .- μs[.!state]) for state in states(length(gene.modules))]
+	sum(gene.α .* P)
+end
+

@@ -1,14 +1,12 @@
 #!/usr/bin/env julia
-SRC = readchomp(`git root`) * "/src/"
-isdefined(Main, :GeneRegulation) || include("GeneRegulation.jl")
-isdefined(Main, :ODEs) || include(SRC * "simulation/ODEs.jl")
-isdefined(Main, :ReadWrite) || include(SRC * "utilities/ReadWrite.jl")
+@src "simulation/GeneRegulation"
+@src "simulation/ODEs"
+@use "utilities/ReadWrite"
 using Fire
 using LinearAlgebra
 using Plots
 using Test  # @test_logs used in randomNetLogFCs
 using .Threads: @threads
-using .ReadWrite
 
 # defaults
 default_Wₜ, default_Wₚ = "WT.adj", "WP.adj"
@@ -67,6 +65,27 @@ end
 
 
 """
+Read timeseries from file and optionally assert the names match those in a network.
+"""
+function read_timeseries(i::String, net=nothing)
+    df = ReadWrite.loaddlm(i; header=true)
+    mat, colnames = Matrix(df), names(df)
+    r0idx = startswith.(colnames, 'r')
+    p0idx = startswith.(colnames, 'p')
+    ψ0idx = startswith.(colnames, 'ψ')
+    t = df[:, "t"] 
+    r = mat[:, r0idx]
+    p = mat[:, p0idx]
+    ψ = mat[:, ψ0idx]
+    if net !== nothing
+        @assert all(chop.(colnames[r0idx], head=2, tail=0) .== net.names) "$([s[3:end] for s in colnames[r0idx]]) != $(net.names)"
+        @assert all(chop.(colnames[p0idx], head=2, tail=0) .== net.names) "$([s[3:end] for s in colnames[p0idx]]) != $(net.names)"
+        @assert all(chop.(colnames[ψ0idx], head=2, tail=0) .== net.names[1:net.nₜ+net.nₚ]) "$([s[3:end] for s in colnames[ψ0idx]]) != $(net.names[1:net.nₜ+net.nₚ])"
+    end
+    t, r, p, ψ
+end
+
+"""
 Simulate a network and return the full time series.
 - i: input filename, e.g. "net.bson"
 - mut_id: index of a node to mutate, i.e. knock out.
@@ -88,17 +107,9 @@ Simulate a network and return the full time series.
 	if t0 === nothing
         r0, p0, ψ0 = nothing, nothing, nothing
     else
-        t0 = ReadWrite.loaddlm(t0; header=true)[end, :]
-        t0, colnames = collect(t0), names(t0)
-        r0idx = startswith.(colnames, 'r')
-        p0idx = startswith.(colnames, 'p')
-        ψ0idx = startswith.(colnames, 'ψ')
-        r0 = t0[r0idx]
-        p0 = t0[p0idx]
-        ψ0 = t0[ψ0idx]
-        @assert all(chop.(colnames[r0idx], head=2, tail=0) .== net.names) "$([s[3:end] for s in colnames[r0idx]]) != $(net.names)"
-        @assert all(chop.(colnames[p0idx], head=2, tail=0) .== net.names) "$([s[3:end] for s in colnames[p0idx]]) != $(net.names)"
-        @assert all(chop.(colnames[ψ0idx], head=2, tail=0) .== net.names[1:nₜₚ]) "$([s[3:end] for s in colnames[ψ0idx]]) != $(net.names[1:nₜₚ])"
+        _, r0, p0, ψ0 = read_timeseries(t0, net)
+        # final values
+        r0, p0, ψ0 = r0[end, :], p0[end, :], ψ0[end, :]
     end
 	
 	u₀ = ODEs.get_u₀(net, r0, p0, ψ0)
@@ -119,18 +130,14 @@ end
 
 """
 Plot time series.
+- i: fname e.g. "sim.tsv". size = #times × (mRNA + protein + phos measurements)
 - nₜ: number of TFs.
 - nₚ: number of KPs.
-- r,p,ψ: fname. matrices with size=(#proteins, #times)
-- t: fname. time vector
 - o: optional file to write plot to
 """
-@main function plot(nₜ::Integer, nₚ::Integer, r="sim_r.mat", p="sim_p.mat", ψ="sim_psi.mat", t="sim_t.mat"; o=stdout)
+@main function plot(i::String, nₜ::Integer, nₚ::Integer; o=stdout)
     include(SRC * "simulation/PlotTimeSeries.jl") # save startup time by only including it when necessary
-
-	# shape is times × nodes for r, p, ψ
-    r, p, ψ, t = ReadWrite.loaddlm.([r, p, ψ, t])
-	t = dropdims(t; dims=2)  # should be a column vector in file
+    t, r, p, ψ = read_timeseries(i)
     # dimensions should be time points along first dim, nodes along second in all files.
 	nᵥ = size(r, 2)
     nₒ = nᵥ - (nₜ + nₚ)
