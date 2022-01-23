@@ -45,7 +45,8 @@ Save progression through time for plotting and inspection.
 """
 function timeseries(network::Network; u₀::Matrix=get_u₀(network), duration::Real=default_duration)
 	problem = ODEProblem(ODE!, u₀, (0., duration*60.), network)
-	solve(problem, callback=default_callback(u₀), save_everystep=true, dtmax=dtmax, force_dtmin=true)
+	# it seems the callback is enforcing a save for every iteration so we get duplicate values with save_everystep=true.
+	solve(problem, callback=default_callback(u₀), save_everystep=false, dtmax=dtmax, force_dtmin=true)
 end
 """
 Mutate a wildtype and simulate through time.

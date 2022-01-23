@@ -1,5 +1,5 @@
 #!/usr/bin/env julia
-include(readchomp(`git root`) * "/src/simulation/simulate.jl");
+@src "simulation/simulate";
 
 network("WT.adj", "WP.adj"; header=true)
 timeseries("net.bson")

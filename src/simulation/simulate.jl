@@ -136,7 +136,7 @@ Plot time series.
 - o: optional file to write plot to
 """
 @main function plot(i::String, nₜ::Integer, nₚ::Integer; o=stdout)
-    include(SRC * "simulation/PlotTimeSeries.jl") # save startup time by only including it when necessary
+    @src "simulation/PlotTimeSeries" # save startup time by only including it when necessary
     t, r, p, ψ = read_timeseries(i)
     # dimensions should be time points along first dim, nodes along second in all files.
 	nᵥ = size(r, 2)
