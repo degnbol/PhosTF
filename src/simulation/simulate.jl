@@ -157,7 +157,7 @@ Plot time series.
 - o: optional file to write plot to
 """
 @main function plot_timeseries(i::String, nₜ::Integer, nₚ::Integer; o=stdout)
-    incl("src/simulation/PlotTimeSeries")
+    @src "simulation/PlotTimeSeries"
     t, r, p, ψ, gene_names = read_timeseries(i)
     # dimensions should be time points along first dim, nodes along second in all files.
 
