@@ -93,7 +93,7 @@ xgmml_nodes(WₜWₚ::Tuple; kwargs...) = xgmml_nodes(WₜWₚ...; kwargs...)
 xgmml_nodes(net; kwargs...) = xgmml_nodes(net.nₜ, net.nₚ, net.nₒ;
     max_transcription=net.max_transcription, max_translation=net.max_translation,
     λ_mRNA=net.λ_mRNA, λ_prot=net.λ_prot, λ₊=[net.λ₊; zeros(net.nₒ)], λ₋=[net.λ₋; zeros(net.nₒ)], # assuming O is at the end of node list
-    α₀=[g.α[1] for g in net.genes], kwargs...)
+    α₀=[g.α[1] for g in net.genes], labels=net.names, kwargs...)
 
 edge_color(weight::Real) = "#" * hex(divergent_lerp(weight, -1, 1))
 edge_color_TF(weight::Real) = edge_color(weight::Real)
@@ -171,9 +171,9 @@ xgmml(net; title="net") = XGMML.xgmml(_graph(net; title=title))
 """
 - net: either (Wₜ, Wₚ) or simulation Network
 - X: each column is node values to visualize.
-- highlight: index(es) of node(s) to highlight for each column in X.
+- highlight: index of node to highlight for each column in X.
 """
-function xgmml(net, X::Matrix, highlight=nothing; title="net")
+function xgmml(net, X::Matrix, highlight::Union{Nothing,Vector{Int}}=nothing; title="net")
 	nₜ, nₚ, nₒ = nₜnₚnₒ(net)
 	K = size(X, 2)
 	fills = xgmml_fills(X, -1, 1)
@@ -191,5 +191,6 @@ function xgmml(net, X::Matrix, highlight=nothing; title="net")
 	XGMML.xgmml(graphs)
 end
 xgmml(Wₜ::Matrix, Wₚ::Matrix, X::Matrix, highlight=nothing; title="net") = xgmml((Wₜ,Wₚ), X, highlight; title=title)
+
 
 end;

@@ -4,9 +4,10 @@
 @use "utilities/ReadWrite"
 using Fire
 using LinearAlgebra
-using Plots
 using Test  # @test_logs used in randomNetLogFCs
 using .Threads: @threads
+using DataFrames
+using Plots: savefig
 
 # defaults
 default_Wₜ, default_Wₚ = "WT.adj", "WP.adj"
@@ -81,21 +82,40 @@ function read_timeseries(i::String, net=nothing)
         @assert all(chop.(colnames[r0idx], head=2, tail=0) .== net.names) "$([s[3:end] for s in colnames[r0idx]]) != $(net.names)"
         @assert all(chop.(colnames[p0idx], head=2, tail=0) .== net.names) "$([s[3:end] for s in colnames[p0idx]]) != $(net.names)"
         @assert all(chop.(colnames[ψ0idx], head=2, tail=0) .== net.names[1:net.nₜ+net.nₚ]) "$([s[3:end] for s in colnames[ψ0idx]]) != $(net.names[1:net.nₜ+net.nₚ])"
+    else
+        @assert all(chop.(colnames[r0idx], head=2, tail=0) .== chop.(colnames[p0idx], head=2, tail=0)) "colnames does not match between r_COLNAME and p_COLNAME"
+        @assert all(chop.(colnames[p0idx], head=2, tail=0)[1:sum(ψ0idx)] .== chop.(colnames[ψ0idx], head=2, tail=0)) "colnames does not match between p_COLNAME and ψ_COLNAME"
     end
-    t, r, p, ψ
+    node_names = chop.(colnames[r0idx], head=2, tail=0)
+    t, r, p, ψ, node_names
 end
+
+function read_u₀(fname::String, net=nothing)
+    _, r0, p0, ψ0, _ = read_timeseries(fname, net)
+    # final values
+    r0, p0, ψ0 = r0[end, :], p0[end, :], ψ0[end, :]
+	u₀ = ODEs.get_u₀(net, r0, p0, ψ0)
+    @assert !any(isnan.(u₀))
+    u₀
+end
+function read_u₀(::Nothing, net=nothing)
+	u₀ = ODEs.get_u₀(net)
+    @assert !any(isnan.(u₀))
+    u₀
+end
+
 
 """
 Simulate a network and return the full time series.
 - i: input filename, e.g. "net.bson"
 - mut_id: index of a node to mutate, i.e. knock out.
 - o: fname. output files with time along axis 2 and protein along axis 1
-- t0: fname. starting values. Use this to let a mutated network start where the wildtype converged. 
+- u0: fname. starting values. Use this to let a mutated network start where the wildtype converged. 
     Columns named r_NODENAME1, r_NODENAME2, ..., p_NODENAME1, ... ψ_NODENAME1, ...
     Node names are assumed to be in order as the nodes in the input network.
     Make them with either another simulate call, a steady state call or write them manually.
 """
-@main function timeseries(i::String, mut_id=nothing; o=nothing, duration=nothing, t0=nothing)
+@main function timeseries(i::String, mut_id=nothing; o=nothing, duration=nothing, u0=nothing)
     # default output name
     if o === nothing
         o = mut_id === nothing ? "sim.tsv" : "sim_mut$mut_id.tsv"
@@ -103,17 +123,8 @@ Simulate a network and return the full time series.
 
     net = loadnet(i)
     nₜₚ = net.nₜ+net.nₚ
-    
-	if t0 === nothing
-        r0, p0, ψ0 = nothing, nothing, nothing
-    else
-        _, r0, p0, ψ0 = read_timeseries(t0, net)
-        # final values
-        r0, p0, ψ0 = r0[end, :], p0[end, :], ψ0[end, :]
-    end
-	
-	u₀ = ODEs.get_u₀(net, r0, p0, ψ0)
-    @assert !any(isnan.(u₀))
+    u₀ = read_u₀(u0, net)
+
 	solution = ODEs.@domainerror ODEs.timeseries(net, mut_id, u₀, duration)
 	solution === nothing && return
 	@info(solution.retcode)
@@ -128,6 +139,16 @@ Simulate a network and return the full time series.
 	end
 end
 
+# create a color hex that is the same as "initial" except two characters are randomly changed.
+function color_variant(initial::String)
+    valid = ['0':'9'; 'a':'f']
+    chars = collect(initial)
+    for replace_ind in [3, 5, 7]
+        chars[replace_ind] = rand(setdiff(valid, chars[replace_ind]))
+    end
+    join(chars)
+end
+
 """
 Plot time series.
 - i: fname e.g. "sim.tsv". size = #times × (mRNA + protein + phos measurements)
@@ -135,62 +156,72 @@ Plot time series.
 - nₚ: number of KPs.
 - o: optional file to write plot to
 """
-@main function plot(i::String, nₜ::Integer, nₚ::Integer; o=stdout)
-    @src "simulation/PlotTimeSeries" # save startup time by only including it when necessary
-    t, r, p, ψ = read_timeseries(i)
+@main function plot_timeseries(i::String, nₜ::Integer, nₚ::Integer; o=stdout)
+    incl("src/simulation/PlotTimeSeries")
+    t, r, p, ψ, gene_names = read_timeseries(i)
     # dimensions should be time points along first dim, nodes along second in all files.
-	nᵥ = size(r, 2)
-    nₒ = nᵥ - (nₜ + nₚ)
 
-	values = zeros(nᵥ, 3, length(t))
-	values[:, 1, :], values[:, 2, :], values[1:nₜ+nₚ, 3, :] = r', p', ψ'
-    meass = ["mRNA", "prot", "phos"]
-	nodes  = [["TF$i" for i ∈ 1:nₜ]; ["KP$i" for i ∈ 1:nₚ]; ["O$i" for i ∈ 1:nₒ]]
-	labels = ["$i $l" for i ∈ nodes, l ∈ meass]
-	styles = [s for i ∈ nodes, s ∈ [:solid, :solid, :dash]]
-	widths = [w for i ∈ nodes, w ∈ [1, 2, 1]]
-    #= colors = [c for c ∈ ["#B663B1", "#6DB845", "#545000"], l ∈ meass] =#
-	# get [KP, TF, O] collections of data as 3 sub-plots
-    values = [reshape(values[nₜ+1:nₜ+nₚ,:,:], 3nₚ, :), reshape(values[1:nₜ,:,:], 3nₜ, :), values[nₜ+nₚ+1:end, nₒ, :]]
-	labels = [reshape(labels[nₜ+1:nₜ+nₚ,:], :), reshape(labels[1:nₜ,:], :), labels[nₜ+nₚ+1:end,1]]
-	styles = [reshape(styles[nₜ+1:nₜ+nₚ,:], :), reshape(styles[1:nₜ,:], :), styles[nₜ+nₚ+1:end,1]]
-	widths = [reshape(widths[nₜ+1:nₜ+nₚ,:], :), reshape(widths[1:nₜ,:], :), widths[nₜ+nₚ+1:end,1]]
-	p = PlotTimeSeries.plot_timeseries(t, values, labels, styles, widths, ["KP", "TF", "O"])
+    dfs = []
+    for (i, name) ∈ enumerate(gene_names)
+        type = i <= nₜ ? "TF" : (i <= nₜ+nₚ ? "KP" : "O")
+        push!(dfs, DataFrame("value"=>r[:, i], "time"=>t, "type"=>type, "name"=>name, "measure"=>"mRNA"))
+        push!(dfs, DataFrame("value"=>p[:, i], "time"=>t, "type"=>type, "name"=>name, "measure"=>"prot"))
+        i > nₜ+nₚ || push!(dfs, DataFrame("value"=>ψ[:, i], "time"=>t, "type"=>type, "name"=>name, "measure"=>"phos"))
+    end
+    for i in 1:length(dfs) dfs[i][!, "series"] .= i end
+
+    df = vcat(dfs...)
+    df[!, "label"] = df[!, "name"] .* " " .* df[!, "measure"]
+    df[!, "style"] .= :solid; df[df[!, "measure"] .== "phos", "style"] .= :dash
+    df[!, "width"] .= 1; df[df[!, "measure"] .== "mRNA", "width"] .= 3
+    df[!, "subplot"] = df[!, "type"]
+    df[!, "color"] .= "#000000"
+    # choose colors
+    type2color = Dict("KP"=>"#B663B1", "TF"=>"#6DB845", "O"=>"#545000")
+    colors_TF = Dict(n=>type2color["TF"] for n ∈ gene_names[1:nₜ])
+    colors_KP = Dict(n=>type2color["KP"] for n ∈ gene_names[nₜ+1:nₜ+nₚ])
+    colors_O  = Dict(n=>type2color["O"]  for n ∈ gene_names[nₜ+nₚ+1:end])
+    name2color = Dict(colors_TF..., colors_KP..., colors_O...)
+    # add variation
+    name2color = Dict(n=>color_variant(c) for (n, c) ∈ name2color)
+    # add to table
+    df[!, "color"] .= [name2color[n] for n ∈ df[!, "name"]]
+
+	p = PlotTimeSeries.plot_timeseries(df)
+
 	if o != stdout
         savefig(p, o)
     else
+        display(p)
 		println("plotting complete")
         readline() # enter will end program
 	end
 	nothing
 end
 
-
 """
 Get the steady state levels for a network optionally mutating it.
 - i: network fname, e.g. "net.bson"
 - mut_id: index indicating which mutation to perform.
 If "mutations" is not provided, it refers to index of the protein to mutate.
-- r: out fname for r values.
-- p: out fname for p values.
-- psi: out fname for ψ values.
+- o: out tab-separated file with columns r, p, ψ and node names as rownames. Default "steady.tsv" or "steady_mut#.tsv".
 - mut_file: optional fname to provided where "mut_id" will then be the index of a column.
 If "mut" is not provided, the first (and ideally only) column of the file will be used.
 """
-@main function steadystate(i::String, mut_id=nothing; r=nothing, p=nothing, psi=nothing, mut_file=nothing)
+@main function steadystate(i::String, mut_id=nothing; o=nothing, mut_file=nothing, u0=nothing)
     # default output names
-    mutSuf = mut_id === nothing ? "" : "_mut$mut_id"
-	if r === nothing r = "steady_r$mutSuf.mat" end
-	if p === nothing p = "steady_p$mutSuf.mat" end
-	if psi === nothing psi = "steady_psi$mutSuf.mat" end
+	if o === nothing
+	    o = mut_id === nothing ? "steady.tsv" : "steady_mut$mut_id.tsv"
+	end
 
 	net = loadnet(i)
 	solution = steady_state(net, mut_id, mut_file)
 	@info(solution.retcode)
 	if solution.retcode in [:Success, :Terminated]
-		savedlm(r,   solution[:, 1, end])
-		savedlm(p,   solution[:, 2, end])
-		savedlm(psi, solution[1:net.nₜ+net.nₚ, 3, end])
+		r = solution[:, 1, end]
+		p = solution[:, 2, end]
+		ψ = solution[:, 3, end] # including entries for O that are always zero so the written table will be rectangular.
+        savedlm(o, hcat(r, p, ψ); colnames=["r", "p", "ψ"], rownames=net.names)
 	end
 end
 steady_state(net, ::Nothing, ::Nothing) = ODEs.steady_state(net)
@@ -217,9 +248,7 @@ Get the log fold-change values comparing mutant transcription levels to wildtype
 	measurements = ODEs.@domainerror(ODEs.logFC(net))
 	if measurements !== nothing
 		@info("logFC values simulated")
-        # add some default names to the logFC table, custom names not implemented (yet).
-        names = vcat(["TF$i" for i in 1:net.nₜ], ["KP$i" for i in 1:net.nₚ], ["O$i" for i in 1:net.nₒ])
-        savedlm(o, measurements; colnames=names[1:net.nₜ+net.nₚ], rownames=names)
+        savedlm(o, measurements; colnames=net.names[1:net.nₜ+net.nₚ], rownames=net.names)
 	end
 end
 """
@@ -248,7 +277,7 @@ Given an adjacency matrix without KP, TF, O assignment, generate a random networ
 """
 @main function randomNetLogFCs(B::String, dir::String; max_np::Union{Int,Nothing}=nothing, max_attempts::Int=3)
     # suppress Fire output with ;
-    include(SRC * "/src/simulation/weight.jl");  # random(...) and correct()
+    incl("src/simulation/weight");  # random(...) and correct()
     # set max_nₚ to default 30% of nodes if not specified.
     if max_np === nothing
         nᵥ = size(ReadWrite.loaddlm(B), 1)

@@ -1,37 +1,37 @@
 #!/usr/bin/env julia
-"Plotting time series."
 module PlotTimeSeries
-using Plots
 using DifferentialEquations: ODESolution
+using DataFrames
+using Plots
+plotlyjs()
+
 
 """
 Plot timeseries for multiple nodes.
-- time: vector of time points for measurements.
-- values: node values along axis 1, time along axis 2.
-- labels for each column in "values".
+Time along x-axis.
+kwargs just there to (silently) throw away keyword args that aren't recognized.
 """
-function plot_timeseries(time::Vector, values::Matrix, labels::Vector, styles::Vector, widths::Vector; colors=nothing)
-	p = plot()
-    if colors === nothing colors = ["black" for l in labels] end
-    for (i, col) ∈ enumerate(colors)
-		series = values[i, :]
-		any(series .!= 0) || continue
-		plot!(time, series, color=col, label=labels[i], style=styles[i], width=widths[i])
-	end
-	ylabel!("value/max")
-	p
+function plot_timeseries(df::DataFrame)
+    if "subplot" ∉ names(df)
+        subplots = [_plot_timeseries(df)]
+    else
+        subplots = [_plot_timeseries(df[df[!, "subplot"] .== v, :]) for v ∈ unique(df[!, "subplot"])]
+    end
+    xlabel!(subplots[end], "time [min]")
+    plot(subplots..., layout=(length(subplots), 1))
 end
 
-
-"""
-Plot subplots each with their own set of curves all with a shared time axis. 
-i-th subplot uses i-th element of values, labels, styles, widths and names.
-- values: Vector{Matrix{Float}} but using that in the declaration seems to be too specific.
-"""
-function plot_timeseries(time::Vector, values::Vector, labels::Vector{Vector{String}}, styles::Vector{Vector{Symbol}}, widths::Vector{Vector{Int}}, names::Vector{String}; colors=nothing)
-	n_subplots = length(names)
-	subplots = [plot_timeseries(time, values[i], labels[i], styles[i], widths[i]; colors=colors) for i ∈ 1:n_subplots]
-	plot(subplots..., layout=(n_subplots, 1))
+function _plot_timeseries(df::DataFrame)
+    p = plot()
+    for i ∈ unique(df[!, "series"])
+        series = df[df[!, "series"] .== i, :]
+        # for a series all color, label, style, width should be the same so we use "first"
+        kwargs = (Symbol(k)=>first(series[!, k]) for k ∈ ["color", "label", "style", "width"] if k ∈ names(series))
+        plot!(series[!, "time"], series[!, "value"]; kwargs...)
+	end
+	ylabel!("value/max")
+    ylims!(0, 1)
+	p
 end
 
 end;

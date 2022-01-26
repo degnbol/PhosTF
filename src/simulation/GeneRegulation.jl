@@ -23,7 +23,7 @@ JSON3.StructType(::Type{Network}) = JSON3.Struct()
 function estimate_Wₜ(net::Network, i::Integer, basal_activation::AbstractFloat)
 	basal = fill(basal_activation, net.nᵥ)
 	ψ = copy(basal); ψ[i] = 1
-	f(net.genes, ψ) - f(net.genes, basal)
+    f.(net.genes, Ref(ψ)) .- f.(net.genes, Ref(basal))
 end
 function estimate_Wₜ(net::Network, i::Integer)
     noise_activation = .25weak_activation
