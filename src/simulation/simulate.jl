@@ -8,6 +8,7 @@ using Test  # @test_logs used in randomNetLogFCs
 using .Threads: @threads
 using DataFrames
 using Plots: savefig
+using Random: seed!
 
 # defaults
 default_Wₜ, default_Wₚ = "WT.adj", "WP.adj"
@@ -140,10 +141,11 @@ Simulate a network and return the full time series.
 end
 
 # create a color hex that is the same as "initial" except two characters are randomly changed.
-function color_variant(initial::String)
+function color_variant(initial::String, seed::AbstractString)
+    seed!(hash(seed))
     valid = ['0':'9'; 'a':'f']
     chars = collect(initial)
-    for replace_ind in [3, 5, 7]
+    for replace_ind in [[3, 5, 7]; rand([2, 4, 6])]
         chars[replace_ind] = rand(setdiff(valid, chars[replace_ind]))
     end
     join(chars)
@@ -183,7 +185,7 @@ Plot time series.
     colors_O  = Dict(n=>type2color["O"]  for n ∈ gene_names[nₜ+nₚ+1:end])
     name2color = Dict(colors_TF..., colors_KP..., colors_O...)
     # add variation
-    name2color = Dict(n=>color_variant(c) for (n, c) ∈ name2color)
+    name2color = Dict(n=>color_variant(c, n) for (n, c) ∈ name2color)
     # add to table
     df[!, "color"] .= [name2color[n] for n ∈ df[!, "name"]]
 
