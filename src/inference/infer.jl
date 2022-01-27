@@ -16,7 +16,7 @@ using DataFrames
 argument_parser = ArgParseSettings(description="Infer a weight matrix from logFC data.", autofix_names=true)
 @add_arg_table! argument_parser begin
     "logFC"
-        help = "Filename for LogFC values in a matrix. Column names are mutated gene(s) in an experiment, first column has row names which are measured genes."
+        help = "Filename for LogFC values in a whitespace delimited matrix. Column names are mutated gene(s) in an experiment, first column has row names which are measured genes."
         required = true
     "TF"
         help = "Filename with a gene name per line that are (potential) TF. Alternatively supply a regex pattern to match against mutated genes. If nothing is provided, then all mutated genes are considered potential."
@@ -107,7 +107,7 @@ loaddlm_(path::AbstractString, T::Type) = begin
     ReadWrite.loaddlm(abspath_(path), T; header=true)
 end
 loaddlm_(path::Nothing, colnames::Vector, rownames::Vector) = nothing
-loaddlm_(path, colnames::Vector, rownames::Vector) = DataFrameUtils.subtable(loaddlm_(path), colnames, rownames)
+loaddlm_(path, colnames::Vector, rownames::Vector) = Matrix(subtable(loaddlm_(path), colnames, rownames)[!, 2:end])
 savedlm_(path::AbstractString, x::AbstractArray; colnames=nothing, rownames=nothing) = begin
     ReadWrite.savedlm(abspath_(path), x; colnames=colnames, rownames=rownames)
 end
@@ -175,9 +175,6 @@ function mat2MS(mat::AbstractMatrix)
 end
 mat2MS(::Nothing) = nothing, nothing
 
-"For tables with row names in first column."
-table2mat(df::DataFrame, T::Type=Float64) = Matrix{T}(df[!, 2:end])
-
 
 function infer(logFC::String, TF=nothing, KP=nothing, out_WT::String="WT_infer.mat", out_WP::String="WP_infer.mat";
         log::Union{<:IO,<:AbstractString}=stdout, mut_sep=nothing, epochs::Integer=5000, opt="ADAMW", 
@@ -193,9 +190,7 @@ function infer(logFC::String, TF=nothing, KP=nothing, out_WT::String="WT_infer.m
     Os  = setdiff(meas_genes, TFKPs)
     TFKPOs = [TFKPs; Os]
     # W is easier to deal with if the diagonal is self edges so we sort TF, KP, O
-    logFC = DataFrameUtils.rowselect(logFC, TFKPOs)
-    
-    X = table2mat(logFC)
+    X = Matrix{Float64}(rowselect(logFC, TFKPOs)[!, 2:end])
     J = names2J(TFKPOs, exp_genes)
     @info "$(size(J, 1)) measured genes in $(size(J, 2)) experiments with a total of $(sum(J)) mutated genes."
 
