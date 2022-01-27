@@ -6,8 +6,8 @@ SRC = readchomp(`git root`) * "/src/"
 include(SRC * "utilities/ReadWrite.jl")
 
 readvecs(fname1, fname2) = begin
-    df1 = CSV.read(fname1, DataFrame)
-    df2 = CSV.read(fname2, DataFrame)
+    df1 = CSV.read(fname1, DataFrame; delim=' ')
+    df2 = CSV.read(fname2, DataFrame; delim=' ')
     @assert all(names(df1) == names(df2))
     @assert all(df1[!, 1] .== df2[!, 1])
     vec1 = ReadWrite.parse_matrix(Matrix(df1[!, 2:end])) |> vec
@@ -18,10 +18,7 @@ corr(fname1::AbstractString, fname2::AbstractString) = cor(readvecs(fname1, fnam
 avg(fnames1, dir) = [corr(f, dir * split(f, '/')[end]) for f in fnames1] |> mean
 
 
-avg(Glob.glob("../1-*/adjacencies/WT*.adj"), "inferredWeights/") |> println
-avg(Glob.glob("../1-*/adjacencies/WP*.adj"), "inferredWeights/") |> println
-
-#= avg(Glob.glob("../1-*/adjacencies/WT*.adj"), "inef/inferredWeights/") |> println =#
-#= avg(Glob.glob("../1-*/adjacencies/WP*.adj"), "inef/inferredWeights/") |> println =#
+avg(Glob.glob("../*-insilicoNetworkSimulation/adjacencies/WT*.adj"), "inferredWeights/") |> println
+avg(Glob.glob("../*-insilicoNetworkSimulation/adjacencies/WP*.adj"), "inferredWeights/") |> println
 
 
