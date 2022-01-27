@@ -14,4 +14,3 @@ for mut_id in 1:5
 end
 logFC("net.bson", "sim_logFC.tsv")
 
-

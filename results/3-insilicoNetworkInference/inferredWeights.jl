@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 # Run from `git root`/results/*-insilicoNetworkInference
 ROOT=readchomp(`git root`)
-include(ROOT * "/src/inference/infer.jl");
+include("$ROOT/src/inference/infer.jl");
 using .Threads: @threads
 using .Iterators: product # since @threads does not support nested loops yet
 using Glob
@@ -9,7 +9,7 @@ using Glob
 mkpath("inferredWeights")
 mkpath("logs")
 
-cd(ROOT * "/results/2-insilicoNetworkInference")
+cd("$ROOT/results/2-insilicoNetworkInference")
 logFC_dir = glob("../*-insilicoNetworkSimulation/sim_logFCs/") |> only
 #= logFC_fname = logFC_dir * "sim_logFC_100_1-rep1.mat" =#
 WT = nothing
