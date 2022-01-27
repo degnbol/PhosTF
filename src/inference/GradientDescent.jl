@@ -68,8 +68,9 @@ function train(mdl, X::AbstractMatrix, log::IO=stdout; epochs::Integer=10000, λ
     save_every = save_times == 0 ? 0 : Int(epochs / save_times)
 
 	function cb(epoch::Integer)
-        line = @sprintf "%.3f\t%.3f\t%.3f" loss(X) MSE(mdl, X) L1(Model.Wₚ□(mdl))
-        if train_Wₜ line *= @sprintf "\t%.3f" L1(Model.Wₜ□(mdl)) end
+        _MSE = MSE(mdl, X)
+        line = @sprintf "%.3f\t%.3f\t%.3f" loss(X) _MSE L1(Model.Wₚ□(mdl))
+        if train_Wₜ line *= @sprintf("\t%.3f", L1(Model.Wₜ□(mdl))) end
         line *= "\t$epoch\t$(Dates.now())"
 		println(log, line)
 		
@@ -78,6 +79,8 @@ function train(mdl, X::AbstractMatrix, log::IO=stdout; epochs::Integer=10000, λ
 			train_Wₜ && savedlm("WT.tmp.mat", Wₜ)
 			savedlm("WP.tmp.mat", Wₚ)
 		end
+
+		_MSE > 0.01
 	end
 	# throttle callbacks if we are doing a small example.
 	_cb = size(X, 1) > 100 ? cb : Flux.throttle(cb, 5)
@@ -86,7 +89,7 @@ function train(mdl, X::AbstractMatrix, log::IO=stdout; epochs::Integer=10000, λ
 	_cb(0) # epoch 0 print before we start
     for epoch in 1:epochs
         Flux.train!(loss, params(mdl), ((X,),), opt)
-        _cb(epoch)
+        _cb(epoch) || break
     end
     cb(epochs) # last epoch print after finish
     Model.WₜWₚ(mdl)
