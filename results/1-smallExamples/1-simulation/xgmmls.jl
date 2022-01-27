@@ -7,6 +7,6 @@ for mut_id in 1:5
     xgmml("net.bson"; o="steady_mut$mut_id.xgmml", X="steady_mut$mut_id.tsv", highlight=mut_id)
 end
 xgmml("net.bson"; o="ko.xgmml", X="sim_logFC.tsv")
-xgmml("WT_infer.mat", "WP_infer.mat"; o="infer.xgmml")
+xgmml("WT_infer.tsv", "WP_infer.tsv"; o="infer.xgmml")
 
 

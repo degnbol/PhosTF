@@ -6,18 +6,21 @@
 @src "utilities/GraphUtils"
 using Fire
 
-# defaults
-default_Wₜ, default_Wₚ = "WT.mat", "WP.mat"
-
-
 """
 Write a graph defined by weight matrices to xgmml format.
 See lower level function xgmml for arguments.
+- Wₜ, Wₚ: fnames of tab-separated matrices with column and row names to indicate source and target, respectively.
 """
-@main function xgmml(Wₜ, Wₚ::String; o=stdout, title=nothing, X=nothing, highlight=nothing)
-	Wₜ, Wₚ = ReadWrite.loaddlm(Wₜ), ReadWrite.loaddlm(Wₚ)
-    nₜ, nₚ = size(Wₜ, 2), size(Wₚ, 2)
-	xgmml((Wₜ, Wₚ), o, nₜ, nₚ, title, X, highlight)
+@main function xgmml(Wₜ::String, Wₚ::String; o=stdout, title=nothing, X=nothing, highlight=nothing)
+	Wₜ, Wₚ = ReadWrite.loaddlm(Wₜ; header=true), ReadWrite.loaddlm(Wₚ; header=true)
+    gene_names = Wₜ[!, 1]
+    # minus one due to rownames
+    nₜ, nₚ = ncol(Wₜ)-1, ncol(Wₚ)-1
+    # check name order correspondence
+    @assert all(gene_names[1:nₜ+nₚ] .== Wₚ[!, 1] .== [names(Wₜ)[2:end]; names(Wₚ)[2:end]])
+    Wₜ = Matrix(Wₜ[:, 2:end])
+    Wₚ = Matrix(Wₚ[:, 2:end])
+	xgmml((Wₜ, Wₚ), gene_names, o, nₜ, nₚ, title, X, highlight)
 end
 """
 - i: e.g. net.bson
@@ -25,7 +28,7 @@ See lower level function xgmml for arguments.
 """
 @main function xgmml(i::String; o=stdout, title=nothing, X=nothing, highlight=nothing)
 	net = ReadWrite.load(i, GeneRegulation.Network)
-	xgmml(net, o, net.nₜ, net.nₚ, title, X, highlight)
+	xgmml(net, net.names, o, net.nₜ, net.nₚ, title, X, highlight)
 end
 
 """
@@ -36,7 +39,7 @@ Called by the two @main top-level functions.
     Optionally the first column can contain row names, which should be node names. The rownames column name can be e.g. "_", "row", or "rownames"
 - highlight: optional String name of node to highlight.
 """
-function xgmml(net, o, nₜ, nₚ, title=nothing, X=nothing, highlight=nothing)
+function xgmml(net, gene_names, o, nₜ, nₚ, title=nothing, X=nothing, highlight=nothing)
     if title === nothing
         title = o == stdout ? "PhosTF" : splitext(basename(o))[1]
     end
@@ -47,7 +50,7 @@ function xgmml(net, o, nₜ, nₚ, title=nothing, X=nothing, highlight=nothing)
         if eltype(X[!, 1]) <: AbstractString
             rownames = X[!, 1]
             colnames = names(X)[2:end]
-            typeof(net) == Tuple || @assert(all(rownames .== net.names))
+            typeof(net) == Tuple || @assert(all(rownames .== gene_names))
             # highlight a node for each column of X if they are referred to in the column names
             if highlight === nothing && colnames ⊆ rownames
                 highlight = colnames
