@@ -4,7 +4,6 @@
 @src "utilities/ArrayUtils"
 @src "utilities/DataFrameUtils"
 @src "utilities/ReadWrite"
-@src "utilities/CLI"
 @src "utilities/ArgParseUtils"
 using ArgParse
 using LinearAlgebra
@@ -149,7 +148,7 @@ Read gene list, or match regex against a full list of genes.
 """
 read_geneList(fnameORregex::Nothing, fullList::Vector{<:AbstractString}) = fullList
 read_geneList(fnameORregex::String, fullList::Vector{<:AbstractString}) = begin
-    isfile(fnameORregex) || return read_geneList(Regex(fnameORregex))
+    isfile(fnameORregex) || return read_geneList(Regex(fnameORregex), fullList)
     readlines_(fnameORregex)
 end
 read_geneList(rx::Regex, fullList::Vector{<:AbstractString}) = begin
