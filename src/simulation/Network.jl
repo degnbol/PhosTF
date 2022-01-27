@@ -80,12 +80,12 @@ struct Network
 		max_transcription::Vector{<:AbstractFloat}, max_translation::Vector{<:AbstractFloat}, 
 		λ_mRNA::Vector{<:AbstractFloat}, λ_prot::Vector{<:AbstractFloat}, λ₊::Vector{<:AbstractFloat}, λ₋::Vector{<:AbstractFloat}, 
 		r₀::Vector{<:AbstractFloat}, p₀::Vector{<:AbstractFloat}, ψ₀::Vector{<:AbstractFloat})
-		Wₚ = reshape(Wₚ, (nₚ+nₜ,nₚ))  # un-flatten matrix
+		Wₚ = reshape(Wₚ, (nₜ+nₚ, nₚ))  # un-flatten matrix
 		new(names, genes, Wₚ₊Wₚ₋(Wₚ)..., nᵥ, nᵥ-(nₜ+nₚ), nₜ, nₚ, max_transcription, max_translation, λ_mRNA, λ_prot, λ₊, λ₋, r₀, p₀, ψ₀)
 	end
 	function Network(names::Vector{String}, genes::Vector{Gene}, Wₚ₊::Matrix{<:AbstractFloat}, Wₚ₋::Matrix{<:AbstractFloat}, λ₊::Vector, λ₋::Vector)
-		nᵥ, nₚ = length(genes), size(Wₚ₊,2)
-		nₜ = size(Wₚ₊,1) - nₚ
+		nᵥ, nₚ = length(genes), size(Wₚ₊, 2)
+		nₜ = size(Wₚ₊, 1) - nₚ
 		# In the non-dimensionalized model, max_transcription == λ_mRNA and max_translation == λ_prot
 		max_transcription = λ_mRNA = random_λ(nᵥ)
 		max_translation = λ_prot = random_λ(nᵥ)
@@ -119,7 +119,7 @@ struct Network
 	end
 	function Network(net::Network, mutate::AbstractVector, value=1e-5)
 		max_transcription = copy(net.max_transcription)
-		mutatable = @view max_transcription[1:net.nₚ+net.nₜ]
+		mutatable = @view max_transcription[1:net.nₜ+net.nₚ]
 		mutatable[mutate] .= value
 		new(net.names, net.genes, net.Wₚ₊, net.Wₚ₋, net.nᵥ, net.nᵥ-(net.nₜ+net.nₚ), net.nₜ, net.nₚ, max_transcription, net.max_translation, 
             net.λ_mRNA, net.λ_prot, net.λ₊, net.λ₋, net.r₀, net.p₀, net.ψ₀)
@@ -145,12 +145,13 @@ struct Network
 	- p: protein concentrations of TFs+PKs
 	"""
 	function initial_ψ(Wₚ₊::Matrix, Wₚ₋::Matrix, p::Vector)
-		nₚ = size(Wₚ₊,2)
+		nₚ = size(Wₚ₊, 2)
+        nₜ = size(Wₚ₊, 1) - nₚ
         nₚ₊= sum(Wₚ₊ .> 0; dims=2) |> vec
         nₚ₋= sum(Wₚ₋ .> 0; dims=2) |> vec
 		# Sum the effects from regulators when using ψ = p from the KPs, which is fully active KPs.
-		Wₚ₊p = Wₚ₊ * p[1:nₚ]
-		Wₚ₋p = Wₚ₋ * p[1:nₚ]
+		Wₚ₊p = Wₚ₊ * p[nₜ+1:nₜ+nₚ]
+		Wₚ₋p = Wₚ₋ * p[nₜ+1:nₜ+nₚ]
         # Fraction of proteins that are activated on a scale [0,1] as weighted average.
         # We subtract deactivations from max activity level, and add activations to min activity level.
         a = @. (Wₚ₊p * nₚ₊ + (1 - Wₚ₋p) * nₚ₋) / (nₚ₊ + nₚ₋)
@@ -178,7 +179,7 @@ dpdt(net::Network, r, p) = net.max_translation .* r .- net.λ_prot .* p
 - pₜₚ: size nₜ+nₚ.
 - ψₜₚ: size nₜ+nₚ.
 """
-dψdt(net::Network, pₜₚ, ψₜₚ) = dψdt(net, pₜₚ, ψₜₚ, view(ψₜₚ, 1:net.nₚ))
+dψdt(net::Network, pₜₚ, ψₜₚ) = dψdt(net, pₜₚ, ψₜₚ, view(ψₜₚ, net.nₜ+1:net.nₜ+net.nₚ))
 """
 - pₜₚ: size nₜ+nₚ. Protein concentrations.
 - ψₜₚ: size nₜ+nₚ. Active protein concentrations.

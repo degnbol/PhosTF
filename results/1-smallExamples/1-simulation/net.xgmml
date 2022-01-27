@@ -10,11 +10,11 @@
 	<node id="1" label="TF1">
 		<att name="λ₊" value="0.0" type="string" cy:type="String"/>
 		<att name="name" value="TF1" type="string" cy:type="String"/>
-		<att name="max_transcription" value="0.0372210045330263" type="string" cy:type="String"/>
-		<att name="λ_mRNA" value="0.0372210045330263" type="string" cy:type="String"/>
-		<att name="max_translation" value="0.02223672894029719" type="string" cy:type="String"/>
-		<att name="λ_prot" value="0.02223672894029719" type="string" cy:type="String"/>
-		<att name="λ₋" value="0.02137418996156377" type="string" cy:type="String"/>
+		<att name="max_transcription" value="0.02702331891979056" type="string" cy:type="String"/>
+		<att name="λ_mRNA" value="0.02702331891979056" type="string" cy:type="String"/>
+		<att name="max_translation" value="0.040387850832219456" type="string" cy:type="String"/>
+		<att name="λ_prot" value="0.040387850832219456" type="string" cy:type="String"/>
+		<att name="λ₋" value="0.04024402850307563" type="string" cy:type="String"/>
 		<att name="shared name" value="1" type="string" cy:type="String"/>
 		<att name="α₀" value="1.0" type="string" cy:type="String"/>
 		<graphics fill="#86ac32" x="33.75" y="80" w="25.0" h="25.0" type="ELLIPSE" width="0.0" outline="#000000">
@@ -33,11 +33,11 @@
 	<node id="2" label="TF2">
 		<att name="λ₊" value="0.0" type="string" cy:type="String"/>
 		<att name="name" value="TF2" type="string" cy:type="String"/>
-		<att name="max_transcription" value="0.02133327205369798" type="string" cy:type="String"/>
-		<att name="λ_mRNA" value="0.02133327205369798" type="string" cy:type="String"/>
-		<att name="max_translation" value="0.018068192451706096" type="string" cy:type="String"/>
-		<att name="λ_prot" value="0.018068192451706096" type="string" cy:type="String"/>
-		<att name="λ₋" value="0.026964741185795615" type="string" cy:type="String"/>
+		<att name="max_transcription" value="0.04479573140667877" type="string" cy:type="String"/>
+		<att name="λ_mRNA" value="0.04479573140667877" type="string" cy:type="String"/>
+		<att name="max_translation" value="0.029229219967575645" type="string" cy:type="String"/>
+		<att name="λ_prot" value="0.029229219967575645" type="string" cy:type="String"/>
+		<att name="λ₋" value="0.027503409069311844" type="string" cy:type="String"/>
 		<att name="shared name" value="2" type="string" cy:type="String"/>
 		<att name="α₀" value="1.0" type="string" cy:type="String"/>
 		<graphics fill="#86ac32" x="101.25" y="80" w="25.0" h="25.0" type="ELLIPSE" width="0.0" outline="#000000">
@@ -54,12 +54,12 @@
 		</graphics>
 	</node>
 	<node id="3" label="KP1">
-		<att name="λ₊" value="0.030452956497542514" type="string" cy:type="String"/>
+		<att name="λ₊" value="0.01896175476414663" type="string" cy:type="String"/>
 		<att name="name" value="KP1" type="string" cy:type="String"/>
-		<att name="max_transcription" value="0.03347283043436643" type="string" cy:type="String"/>
-		<att name="λ_mRNA" value="0.03347283043436643" type="string" cy:type="String"/>
-		<att name="max_translation" value="0.019654354186393743" type="string" cy:type="String"/>
-		<att name="λ_prot" value="0.019654354186393743" type="string" cy:type="String"/>
+		<att name="max_transcription" value="0.02206736545734313" type="string" cy:type="String"/>
+		<att name="λ_mRNA" value="0.02206736545734313" type="string" cy:type="String"/>
+		<att name="max_translation" value="0.021483946931077004" type="string" cy:type="String"/>
+		<att name="λ_prot" value="0.021483946931077004" type="string" cy:type="String"/>
 		<att name="λ₋" value="0.0" type="string" cy:type="String"/>
 		<att name="shared name" value="3" type="string" cy:type="String"/>
 		<att name="α₀" value="1.0" type="string" cy:type="String"/>
@@ -79,11 +79,11 @@
 	<node id="4" label="KP2">
 		<att name="λ₊" value="0.0" type="string" cy:type="String"/>
 		<att name="name" value="KP2" type="string" cy:type="String"/>
-		<att name="max_transcription" value="0.04175704688660619" type="string" cy:type="String"/>
-		<att name="λ_mRNA" value="0.04175704688660619" type="string" cy:type="String"/>
-		<att name="max_translation" value="0.030646220089740984" type="string" cy:type="String"/>
-		<att name="λ_prot" value="0.030646220089740984" type="string" cy:type="String"/>
-		<att name="λ₋" value="0.016992056759989688" type="string" cy:type="String"/>
+		<att name="max_transcription" value="0.03008421682958728" type="string" cy:type="String"/>
+		<att name="λ_mRNA" value="0.03008421682958728" type="string" cy:type="String"/>
+		<att name="max_translation" value="0.01805064940845582" type="string" cy:type="String"/>
+		<att name="λ_prot" value="0.01805064940845582" type="string" cy:type="String"/>
+		<att name="λ₋" value="0.033181998888053295" type="string" cy:type="String"/>
 		<att name="shared name" value="4" type="string" cy:type="String"/>
 		<att name="α₀" value="1.0" type="string" cy:type="String"/>
 		<graphics fill="#af6fb6" x="67.5" y="0" w="25.0" h="25.0" type="DIAMOND" width="0.0" outline="#000000">
@@ -100,15 +100,15 @@
 		</graphics>
 	</node>
 	<node id="5" label="KP3">
-		<att name="λ₊" value="0.02220846729544019" type="string" cy:type="String"/>
+		<att name="λ₊" value="0.02525535219413288" type="string" cy:type="String"/>
 		<att name="name" value="KP3" type="string" cy:type="String"/>
-		<att name="max_transcription" value="0.020469028018575627" type="string" cy:type="String"/>
-		<att name="λ_mRNA" value="0.020469028018575627" type="string" cy:type="String"/>
-		<att name="max_translation" value="0.02550832465592442" type="string" cy:type="String"/>
-		<att name="λ_prot" value="0.02550832465592442" type="string" cy:type="String"/>
+		<att name="max_transcription" value="0.027129516926785235" type="string" cy:type="String"/>
+		<att name="λ_mRNA" value="0.027129516926785235" type="string" cy:type="String"/>
+		<att name="max_translation" value="0.022323378579767125" type="string" cy:type="String"/>
+		<att name="λ_prot" value="0.022323378579767125" type="string" cy:type="String"/>
 		<att name="λ₋" value="0.0" type="string" cy:type="String"/>
 		<att name="shared name" value="5" type="string" cy:type="String"/>
-		<att name="α₀" value="0.04271072119851656" type="string" cy:type="String"/>
+		<att name="α₀" value="0.08864573413150395" type="string" cy:type="String"/>
 		<graphics fill="#af6fb6" x="112.5" y="0" w="25.0" h="25.0" type="DIAMOND" width="0.0" outline="#000000">
 			<att name="NODE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="NODE_TRANSPARENCY" value="255" type="string" cy:type="String"/>
@@ -125,13 +125,13 @@
 	<node id="6" label="O1">
 		<att name="λ₊" value="0.0" type="string" cy:type="String"/>
 		<att name="name" value="O1" type="string" cy:type="String"/>
-		<att name="max_transcription" value="0.03650518786809632" type="string" cy:type="String"/>
-		<att name="λ_mRNA" value="0.03650518786809632" type="string" cy:type="String"/>
-		<att name="max_translation" value="0.026376541875213835" type="string" cy:type="String"/>
-		<att name="λ_prot" value="0.026376541875213835" type="string" cy:type="String"/>
+		<att name="max_transcription" value="0.02398990400756375" type="string" cy:type="String"/>
+		<att name="λ_mRNA" value="0.02398990400756375" type="string" cy:type="String"/>
+		<att name="max_translation" value="0.031438913327570414" type="string" cy:type="String"/>
+		<att name="λ_prot" value="0.031438913327570414" type="string" cy:type="String"/>
 		<att name="λ₋" value="0.0" type="string" cy:type="String"/>
 		<att name="shared name" value="6" type="string" cy:type="String"/>
-		<att name="α₀" value="0.08769000611826838" type="string" cy:type="String"/>
+		<att name="α₀" value="1.0" type="string" cy:type="String"/>
 		<graphics fill="#e6dd47" x="67.5" y="160" w="25.0" h="25.0" type="RECTANGLE" width="0.0" outline="#000000">
 			<att name="NODE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="NODE_TRANSPARENCY" value="255" type="string" cy:type="String"/>
@@ -148,11 +148,11 @@
 	<edge id="1" label="" source="3" target="4" cy:directed="1">
 		<att name="name" value="" type="string" cy:type="String"/>
 		<att name="shared interaction" value="" type="string" cy:type="String"/>
-		<att name="weight" value="0.016992056759989688" type="string" cy:type="String"/>
+		<att name="weight" value="0.033181998888053295" type="string" cy:type="String"/>
 		<att name="interaction" value="" type="string" cy:type="String"/>
 		<att name="shared name" value="1" type="string" cy:type="String"/>
-		<graphics width="2.0" fill="#93928F">
-			<att name="EDGE_TARGET_ARROW_UNSELECTED_PAINT" value="#EDEDEC" type="string" cy:type="String"/>
+		<graphics width="2.0" fill="#95938E">
+			<att name="EDGE_TARGET_ARROW_UNSELECTED_PAINT" value="#DCDBD9" type="string" cy:type="String"/>
 			<att name="EDGE_CURVED" value="true" type="string" cy:type="String"/>
 			<att name="EDGE_LABEL_FONT_FACE" value="Dialog,plain" type="string" cy:type="String"/>
 			<att name="EDGE_VISIBLE" value="true" type="string" cy:type="String"/>
@@ -163,24 +163,24 @@
 			<att name="EDGE_SOURCE_ARROW_SIZE" value="6.0" type="string" cy:type="String"/>
 			<att name="EDGE_TARGET_ARROW_SELECTED_PAINT" value="#00FFFF" type="string" cy:type="String"/>
 			<att name="EDGE_STROKE_SELECTED_PAINT" value="#00FFFF" type="string" cy:type="String"/>
-			<att name="EDGE_TRANSPARENCY" value="43" type="string" cy:type="String"/>
+			<att name="EDGE_TRANSPARENCY" value="85" type="string" cy:type="String"/>
 			<att name="EDGE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="EDGE_TARGET_ARROW_SIZE" value="6.0" type="string" cy:type="String"/>
 			<att name="EDGE_LABEL_FONT_SIZE" value="10" type="string" cy:type="String"/>
 			<att name="EDGE_LABEL" value="" type="string" cy:type="String"/>
 			<att name="EDGE_LINE_TYPE" value="SOLID" type="string" cy:type="String"/>
-			<att name="EDGE_SOURCE_ARROW_UNSELECTED_PAINT" value="#EDEDEC" type="string" cy:type="String"/>
+			<att name="EDGE_SOURCE_ARROW_UNSELECTED_PAINT" value="#DCDBD9" type="string" cy:type="String"/>
 			<att name="EDGE_LABEL_COLOR" value="#000000" type="string" cy:type="String"/>
 		</graphics>
 	</edge>
 	<edge id="2" label="" source="4" target="1" cy:directed="1">
 		<att name="name" value="" type="string" cy:type="String"/>
 		<att name="shared interaction" value="" type="string" cy:type="String"/>
-		<att name="weight" value="0.04052961840382763" type="string" cy:type="String"/>
+		<att name="weight" value="0.06326395265512047" type="string" cy:type="String"/>
 		<att name="interaction" value="" type="string" cy:type="String"/>
 		<att name="shared name" value="2" type="string" cy:type="String"/>
-		<graphics width="2.0" fill="#96948D">
-			<att name="EDGE_TARGET_ARROW_UNSELECTED_PAINT" value="#D5D4D1" type="string" cy:type="String"/>
+		<graphics width="2.0" fill="#99968B">
+			<att name="EDGE_TARGET_ARROW_UNSELECTED_PAINT" value="#BFBDB6" type="string" cy:type="String"/>
 			<att name="EDGE_CURVED" value="true" type="string" cy:type="String"/>
 			<att name="EDGE_LABEL_FONT_FACE" value="Dialog,plain" type="string" cy:type="String"/>
 			<att name="EDGE_VISIBLE" value="true" type="string" cy:type="String"/>
@@ -191,24 +191,24 @@
 			<att name="EDGE_SOURCE_ARROW_SIZE" value="6.0" type="string" cy:type="String"/>
 			<att name="EDGE_TARGET_ARROW_SELECTED_PAINT" value="#00FFFF" type="string" cy:type="String"/>
 			<att name="EDGE_STROKE_SELECTED_PAINT" value="#00FFFF" type="string" cy:type="String"/>
-			<att name="EDGE_TRANSPARENCY" value="103" type="string" cy:type="String"/>
+			<att name="EDGE_TRANSPARENCY" value="161" type="string" cy:type="String"/>
 			<att name="EDGE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="EDGE_TARGET_ARROW_SIZE" value="6.0" type="string" cy:type="String"/>
 			<att name="EDGE_LABEL_FONT_SIZE" value="10" type="string" cy:type="String"/>
 			<att name="EDGE_LABEL" value="" type="string" cy:type="String"/>
 			<att name="EDGE_LINE_TYPE" value="SOLID" type="string" cy:type="String"/>
-			<att name="EDGE_SOURCE_ARROW_UNSELECTED_PAINT" value="#D5D4D1" type="string" cy:type="String"/>
+			<att name="EDGE_SOURCE_ARROW_UNSELECTED_PAINT" value="#BFBDB6" type="string" cy:type="String"/>
 			<att name="EDGE_LABEL_COLOR" value="#000000" type="string" cy:type="String"/>
 		</graphics>
 	</edge>
 	<edge id="3" label="" source="5" target="2" cy:directed="1">
 		<att name="name" value="" type="string" cy:type="String"/>
 		<att name="shared interaction" value="" type="string" cy:type="String"/>
-		<att name="weight" value="0.048391909217465806" type="string" cy:type="String"/>
+		<att name="weight" value="0.06712136172913909" type="string" cy:type="String"/>
 		<att name="interaction" value="" type="string" cy:type="String"/>
 		<att name="shared name" value="3" type="string" cy:type="String"/>
-		<graphics width="2.0" fill="#97958D">
-			<att name="EDGE_TARGET_ARROW_UNSELECTED_PAINT" value="#CDCCC8" type="string" cy:type="String"/>
+		<graphics width="2.0" fill="#99968B">
+			<att name="EDGE_TARGET_ARROW_UNSELECTED_PAINT" value="#BBB9B1" type="string" cy:type="String"/>
 			<att name="EDGE_CURVED" value="true" type="string" cy:type="String"/>
 			<att name="EDGE_LABEL_FONT_FACE" value="Dialog,plain" type="string" cy:type="String"/>
 			<att name="EDGE_VISIBLE" value="true" type="string" cy:type="String"/>
@@ -219,24 +219,24 @@
 			<att name="EDGE_SOURCE_ARROW_SIZE" value="6.0" type="string" cy:type="String"/>
 			<att name="EDGE_TARGET_ARROW_SELECTED_PAINT" value="#00FFFF" type="string" cy:type="String"/>
 			<att name="EDGE_STROKE_SELECTED_PAINT" value="#00FFFF" type="string" cy:type="String"/>
-			<att name="EDGE_TRANSPARENCY" value="123" type="string" cy:type="String"/>
+			<att name="EDGE_TRANSPARENCY" value="171" type="string" cy:type="String"/>
 			<att name="EDGE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="EDGE_TARGET_ARROW_SIZE" value="6.0" type="string" cy:type="String"/>
 			<att name="EDGE_LABEL_FONT_SIZE" value="10" type="string" cy:type="String"/>
 			<att name="EDGE_LABEL" value="" type="string" cy:type="String"/>
 			<att name="EDGE_LINE_TYPE" value="SOLID" type="string" cy:type="String"/>
-			<att name="EDGE_SOURCE_ARROW_UNSELECTED_PAINT" value="#CDCCC8" type="string" cy:type="String"/>
+			<att name="EDGE_SOURCE_ARROW_UNSELECTED_PAINT" value="#BBB9B1" type="string" cy:type="String"/>
 			<att name="EDGE_LABEL_COLOR" value="#000000" type="string" cy:type="String"/>
 		</graphics>
 	</edge>
 	<edge id="4" label="" source="1" target="5" cy:directed="1">
 		<att name="name" value="" type="string" cy:type="String"/>
 		<att name="shared interaction" value="" type="string" cy:type="String"/>
-		<att name="weight" value="0.6659624644025356" type="string" cy:type="String"/>
+		<att name="weight" value="0.7781530797746875" type="string" cy:type="String"/>
 		<att name="interaction" value="" type="string" cy:type="String"/>
 		<att name="shared name" value="4" type="string" cy:type="String"/>
-		<graphics width="2.0" fill="#DCC754">
-			<att name="EDGE_TARGET_ARROW_UNSELECTED_PAINT" value="#DCC754" type="string" cy:type="String"/>
+		<graphics width="2.0" fill="#E7D144">
+			<att name="EDGE_TARGET_ARROW_UNSELECTED_PAINT" value="#E7D144" type="string" cy:type="String"/>
 			<att name="EDGE_CURVED" value="true" type="string" cy:type="String"/>
 			<att name="EDGE_LABEL_FONT_FACE" value="Dialog,plain" type="string" cy:type="String"/>
 			<att name="EDGE_VISIBLE" value="true" type="string" cy:type="String"/>
@@ -253,18 +253,18 @@
 			<att name="EDGE_LABEL_FONT_SIZE" value="10" type="string" cy:type="String"/>
 			<att name="EDGE_LABEL" value="" type="string" cy:type="String"/>
 			<att name="EDGE_LINE_TYPE" value="SOLID" type="string" cy:type="String"/>
-			<att name="EDGE_SOURCE_ARROW_UNSELECTED_PAINT" value="#DCC754" type="string" cy:type="String"/>
+			<att name="EDGE_SOURCE_ARROW_UNSELECTED_PAINT" value="#E7D144" type="string" cy:type="String"/>
 			<att name="EDGE_LABEL_COLOR" value="#000000" type="string" cy:type="String"/>
 		</graphics>
 	</edge>
 	<edge id="5" label="" source="1" target="6" cy:directed="1">
 		<att name="name" value="" type="string" cy:type="String"/>
 		<att name="shared interaction" value="" type="string" cy:type="String"/>
-		<att name="weight" value="-0.006090206397099447" type="string" cy:type="String"/>
+		<att name="weight" value="-0.6113965180163923" type="string" cy:type="String"/>
 		<att name="interaction" value="" type="string" cy:type="String"/>
 		<att name="shared name" value="5" type="string" cy:type="String"/>
-		<graphics width="2.0" fill="#909091">
-			<att name="EDGE_TARGET_ARROW_UNSELECTED_PAINT" value="#F8F8F8" type="string" cy:type="String"/>
+		<graphics width="2.0" fill="#6256AF">
+			<att name="EDGE_TARGET_ARROW_UNSELECTED_PAINT" value="#6256AF" type="string" cy:type="String"/>
 			<att name="EDGE_CURVED" value="true" type="string" cy:type="String"/>
 			<att name="EDGE_LABEL_FONT_FACE" value="Dialog,plain" type="string" cy:type="String"/>
 			<att name="EDGE_VISIBLE" value="true" type="string" cy:type="String"/>
@@ -275,24 +275,24 @@
 			<att name="EDGE_SOURCE_ARROW_SIZE" value="6.0" type="string" cy:type="String"/>
 			<att name="EDGE_TARGET_ARROW_SELECTED_PAINT" value="#00FFFF" type="string" cy:type="String"/>
 			<att name="EDGE_STROKE_SELECTED_PAINT" value="#00FFFF" type="string" cy:type="String"/>
-			<att name="EDGE_TRANSPARENCY" value="16" type="string" cy:type="String"/>
+			<att name="EDGE_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="EDGE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="EDGE_TARGET_ARROW_SIZE" value="6.0" type="string" cy:type="String"/>
 			<att name="EDGE_LABEL_FONT_SIZE" value="10" type="string" cy:type="String"/>
 			<att name="EDGE_LABEL" value="" type="string" cy:type="String"/>
 			<att name="EDGE_LINE_TYPE" value="SOLID" type="string" cy:type="String"/>
-			<att name="EDGE_SOURCE_ARROW_UNSELECTED_PAINT" value="#F8F8F8" type="string" cy:type="String"/>
+			<att name="EDGE_SOURCE_ARROW_UNSELECTED_PAINT" value="#6256AF" type="string" cy:type="String"/>
 			<att name="EDGE_LABEL_COLOR" value="#000000" type="string" cy:type="String"/>
 		</graphics>
 	</edge>
 	<edge id="6" label="" source="2" target="6" cy:directed="1">
 		<att name="name" value="" type="string" cy:type="String"/>
 		<att name="shared interaction" value="" type="string" cy:type="String"/>
-		<att name="weight" value="0.7323130953267842" type="string" cy:type="String"/>
+		<att name="weight" value="0.15973128329776629" type="string" cy:type="String"/>
 		<att name="interaction" value="" type="string" cy:type="String"/>
 		<att name="shared name" value="6" type="string" cy:type="String"/>
-		<graphics width="2.0" fill="#E3CD4B">
-			<att name="EDGE_TARGET_ARROW_UNSELECTED_PAINT" value="#E3CD4B" type="string" cy:type="String"/>
+		<graphics width="2.0" fill="#A59D84">
+			<att name="EDGE_TARGET_ARROW_UNSELECTED_PAINT" value="#A59D84" type="string" cy:type="String"/>
 			<att name="EDGE_CURVED" value="true" type="string" cy:type="String"/>
 			<att name="EDGE_LABEL_FONT_FACE" value="Dialog,plain" type="string" cy:type="String"/>
 			<att name="EDGE_VISIBLE" value="true" type="string" cy:type="String"/>
@@ -309,7 +309,7 @@
 			<att name="EDGE_LABEL_FONT_SIZE" value="10" type="string" cy:type="String"/>
 			<att name="EDGE_LABEL" value="" type="string" cy:type="String"/>
 			<att name="EDGE_LINE_TYPE" value="SOLID" type="string" cy:type="String"/>
-			<att name="EDGE_SOURCE_ARROW_UNSELECTED_PAINT" value="#E3CD4B" type="string" cy:type="String"/>
+			<att name="EDGE_SOURCE_ARROW_UNSELECTED_PAINT" value="#A59D84" type="string" cy:type="String"/>
 			<att name="EDGE_LABEL_COLOR" value="#000000" type="string" cy:type="String"/>
 		</graphics>
 	</edge>

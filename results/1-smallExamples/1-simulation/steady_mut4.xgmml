@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<graph label="steady" directed="1" cy:documentVersion="3.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:cy="http://www.cytoscape.org" xmlns="http://www.cs.rpi.edu/XGMML">
-	<att name="name" value="steady" type="string" cy:type="String"/>
+<graph label="steady_mut4" directed="1" cy:documentVersion="3.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:cy="http://www.cytoscape.org" xmlns="http://www.cs.rpi.edu/XGMML">
+	<att name="name" value="steady_mut4" type="string" cy:type="String"/>
 	<att name="__Annotations" value="[]" type="list" cy:type="List" cy:elementType="String"/>
-	<att name="shared name" value="steady" type="string" cy:type="String"/>
+	<att name="shared name" value="steady_mut4" type="string" cy:type="String"/>
 	<graphics>
-		<att name="NETWORK_TITLE" value="steady" type="string" cy:type="String"/>
+		<att name="NETWORK_TITLE" value="steady_mut4" type="string" cy:type="String"/>
 		<att name="NETWORK_BACKGROUND_PAINT" value="#FFFFFF" type="string" cy:type="String"/>
 	</graphics>
 	<node id="1" label="TF1">
@@ -84,13 +84,13 @@
 		<att name="name" value="KP2" type="string" cy:type="String"/>
 		<att name="max_transcription" value="0.03008421682958728" type="string" cy:type="String"/>
 		<att name="λ_mRNA" value="0.03008421682958728" type="string" cy:type="String"/>
-		<att name="value" value="1.0" type="string" cy:type="String"/>
+		<att name="value" value="0.0003327500499652889" type="string" cy:type="String"/>
 		<att name="max_translation" value="0.01805064940845582" type="string" cy:type="String"/>
 		<att name="λ_prot" value="0.01805064940845582" type="string" cy:type="String"/>
 		<att name="λ₋" value="0.033181998888053295" type="string" cy:type="String"/>
 		<att name="shared name" value="4" type="string" cy:type="String"/>
 		<att name="α₀" value="1.0" type="string" cy:type="String"/>
-		<graphics fill="#FDE409" x="67.5" y="240" w="25.0" h="25.0" type="DIAMOND" width="0.0" outline="#000000">
+		<graphics fill="#919190" x="67.5" y="240" w="25.0" h="25.0" type="DIAMOND" width="5.0" outline="#000000">
 			<att name="NODE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="NODE_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="NODE_SELECTED_PAINT" value="#00FFFF" type="string" cy:type="String"/>
@@ -108,13 +108,13 @@
 		<att name="name" value="KP3" type="string" cy:type="String"/>
 		<att name="max_transcription" value="0.027129516926785235" type="string" cy:type="String"/>
 		<att name="λ_mRNA" value="0.027129516926785235" type="string" cy:type="String"/>
-		<att name="value" value="0.5532401049478649" type="string" cy:type="String"/>
+		<att name="value" value="0.08866241942308946" type="string" cy:type="String"/>
 		<att name="max_translation" value="0.022323378579767125" type="string" cy:type="String"/>
 		<att name="λ_prot" value="0.022323378579767125" type="string" cy:type="String"/>
 		<att name="λ₋" value="0.0" type="string" cy:type="String"/>
 		<att name="shared name" value="5" type="string" cy:type="String"/>
 		<att name="α₀" value="0.08864573413150395" type="string" cy:type="String"/>
-		<graphics fill="#D0BD60" x="112.5" y="240" w="25.0" h="25.0" type="DIAMOND" width="0.0" outline="#000000">
+		<graphics fill="#9C988A" x="112.5" y="240" w="25.0" h="25.0" type="DIAMOND" width="0.0" outline="#000000">
 			<att name="NODE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="NODE_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="NODE_SELECTED_PAINT" value="#00FFFF" type="string" cy:type="String"/>
@@ -132,13 +132,13 @@
 		<att name="name" value="O1" type="string" cy:type="String"/>
 		<att name="max_transcription" value="0.02398990400756375" type="string" cy:type="String"/>
 		<att name="λ_mRNA" value="0.02398990400756375" type="string" cy:type="String"/>
-		<att name="value" value="0.7614051688711246" type="string" cy:type="String"/>
+		<att name="value" value="0.9995216185959779" type="string" cy:type="String"/>
 		<att name="max_translation" value="0.031438913327570414" type="string" cy:type="String"/>
 		<att name="λ_prot" value="0.031438913327570414" type="string" cy:type="String"/>
 		<att name="λ₋" value="0.0" type="string" cy:type="String"/>
 		<att name="shared name" value="6" type="string" cy:type="String"/>
 		<att name="α₀" value="1.0" type="string" cy:type="String"/>
-		<graphics fill="#E6CF46" x="67.5" y="400" w="25.0" h="25.0" type="RECTANGLE" width="0.0" outline="#000000">
+		<graphics fill="#FDE409" x="67.5" y="400" w="25.0" h="25.0" type="RECTANGLE" width="0.0" outline="#000000">
 			<att name="NODE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="NODE_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="NODE_SELECTED_PAINT" value="#00FFFF" type="string" cy:type="String"/>
@@ -228,13 +228,13 @@
 		<att name="name" value="KP2" type="string" cy:type="String"/>
 		<att name="max_transcription" value="0.03008421682958728" type="string" cy:type="String"/>
 		<att name="λ_mRNA" value="0.03008421682958728" type="string" cy:type="String"/>
-		<att name="value" value="1.0" type="string" cy:type="String"/>
+		<att name="value" value="0.0006662108769292061" type="string" cy:type="String"/>
 		<att name="max_translation" value="0.01805064940845582" type="string" cy:type="String"/>
 		<att name="λ_prot" value="0.01805064940845582" type="string" cy:type="String"/>
 		<att name="λ₋" value="0.033181998888053295" type="string" cy:type="String"/>
 		<att name="shared name" value="4" type="string" cy:type="String"/>
 		<att name="α₀" value="1.0" type="string" cy:type="String"/>
-		<graphics fill="#FDE409" x="67.5" y="480" w="25.0" h="25.0" type="DIAMOND" width="0.0" outline="#000000">
+		<graphics fill="#919190" x="67.5" y="480" w="25.0" h="25.0" type="DIAMOND" width="5.0" outline="#000000">
 			<att name="NODE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="NODE_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="NODE_SELECTED_PAINT" value="#00FFFF" type="string" cy:type="String"/>
@@ -252,13 +252,13 @@
 		<att name="name" value="KP3" type="string" cy:type="String"/>
 		<att name="max_transcription" value="0.027129516926785235" type="string" cy:type="String"/>
 		<att name="λ_mRNA" value="0.027129516926785235" type="string" cy:type="String"/>
-		<att name="value" value="0.5528343627420871" type="string" cy:type="String"/>
+		<att name="value" value="0.08902859649435937" type="string" cy:type="String"/>
 		<att name="max_translation" value="0.022323378579767125" type="string" cy:type="String"/>
 		<att name="λ_prot" value="0.022323378579767125" type="string" cy:type="String"/>
 		<att name="λ₋" value="0.0" type="string" cy:type="String"/>
 		<att name="shared name" value="5" type="string" cy:type="String"/>
 		<att name="α₀" value="0.08864573413150395" type="string" cy:type="String"/>
-		<graphics fill="#D0BD60" x="112.5" y="480" w="25.0" h="25.0" type="DIAMOND" width="0.0" outline="#000000">
+		<graphics fill="#9C988A" x="112.5" y="480" w="25.0" h="25.0" type="DIAMOND" width="0.0" outline="#000000">
 			<att name="NODE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="NODE_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="NODE_SELECTED_PAINT" value="#00FFFF" type="string" cy:type="String"/>
@@ -276,13 +276,13 @@
 		<att name="name" value="O1" type="string" cy:type="String"/>
 		<att name="max_transcription" value="0.02398990400756375" type="string" cy:type="String"/>
 		<att name="λ_mRNA" value="0.02398990400756375" type="string" cy:type="String"/>
-		<att name="value" value="0.7582493105922207" type="string" cy:type="String"/>
+		<att name="value" value="0.9982675469765685" type="string" cy:type="String"/>
 		<att name="max_translation" value="0.031438913327570414" type="string" cy:type="String"/>
 		<att name="λ_prot" value="0.031438913327570414" type="string" cy:type="String"/>
 		<att name="λ₋" value="0.0" type="string" cy:type="String"/>
 		<att name="shared name" value="6" type="string" cy:type="String"/>
 		<att name="α₀" value="1.0" type="string" cy:type="String"/>
-		<graphics fill="#E5CF47" x="67.5" y="640" w="25.0" h="25.0" type="RECTANGLE" width="0.0" outline="#000000">
+		<graphics fill="#FDE409" x="67.5" y="640" w="25.0" h="25.0" type="RECTANGLE" width="0.0" outline="#000000">
 			<att name="NODE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="NODE_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="NODE_SELECTED_PAINT" value="#00FFFF" type="string" cy:type="String"/>
@@ -300,13 +300,13 @@
 		<att name="name" value="TF1" type="string" cy:type="String"/>
 		<att name="max_transcription" value="0.02702331891979056" type="string" cy:type="String"/>
 		<att name="λ_mRNA" value="0.02702331891979056" type="string" cy:type="String"/>
-		<att name="value" value="0.4400909093651513" type="string" cy:type="String"/>
+		<att name="value" value="0.0009106740405881096" type="string" cy:type="String"/>
 		<att name="max_translation" value="0.040387850832219456" type="string" cy:type="String"/>
 		<att name="λ_prot" value="0.040387850832219456" type="string" cy:type="String"/>
 		<att name="λ₋" value="0.04024402850307563" type="string" cy:type="String"/>
 		<att name="shared name" value="1" type="string" cy:type="String"/>
 		<att name="α₀" value="1.0" type="string" cy:type="String"/>
-		<graphics fill="#C5B46B" x="33.75" y="800" w="25.0" h="25.0" type="ELLIPSE" width="0.0" outline="#000000">
+		<graphics fill="#919190" x="33.75" y="800" w="25.0" h="25.0" type="ELLIPSE" width="0.0" outline="#000000">
 			<att name="NODE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="NODE_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="NODE_SELECTED_PAINT" value="#00FFFF" type="string" cy:type="String"/>
@@ -324,13 +324,13 @@
 		<att name="name" value="TF2" type="string" cy:type="String"/>
 		<att name="max_transcription" value="0.04479573140667877" type="string" cy:type="String"/>
 		<att name="λ_mRNA" value="0.04479573140667877" type="string" cy:type="String"/>
-		<att name="value" value="0.573278841773373" type="string" cy:type="String"/>
+		<att name="value" value="0.18347535884264066" type="string" cy:type="String"/>
 		<att name="max_translation" value="0.029229219967575645" type="string" cy:type="String"/>
 		<att name="λ_prot" value="0.029229219967575645" type="string" cy:type="String"/>
 		<att name="λ₋" value="0.027503409069311844" type="string" cy:type="String"/>
 		<att name="shared name" value="2" type="string" cy:type="String"/>
 		<att name="α₀" value="1.0" type="string" cy:type="String"/>
-		<graphics fill="#D3BF5E" x="101.25" y="800" w="25.0" h="25.0" type="ELLIPSE" width="0.0" outline="#000000">
+		<graphics fill="#A89F82" x="101.25" y="800" w="25.0" h="25.0" type="ELLIPSE" width="0.0" outline="#000000">
 			<att name="NODE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="NODE_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="NODE_SELECTED_PAINT" value="#00FFFF" type="string" cy:type="String"/>
@@ -372,13 +372,13 @@
 		<att name="name" value="KP2" type="string" cy:type="String"/>
 		<att name="max_transcription" value="0.03008421682958728" type="string" cy:type="String"/>
 		<att name="λ_mRNA" value="0.03008421682958728" type="string" cy:type="String"/>
-		<att name="value" value="0.49999999999973915" type="string" cy:type="String"/>
+		<att name="value" value="0.0003953444287638836" type="string" cy:type="String"/>
 		<att name="max_translation" value="0.01805064940845582" type="string" cy:type="String"/>
 		<att name="λ_prot" value="0.01805064940845582" type="string" cy:type="String"/>
 		<att name="λ₋" value="0.033181998888053295" type="string" cy:type="String"/>
 		<att name="shared name" value="4" type="string" cy:type="String"/>
 		<att name="α₀" value="1.0" type="string" cy:type="String"/>
-		<graphics fill="#CBB966" x="67.5" y="720" w="25.0" h="25.0" type="DIAMOND" width="0.0" outline="#000000">
+		<graphics fill="#919190" x="67.5" y="720" w="25.0" h="25.0" type="DIAMOND" width="5.0" outline="#000000">
 			<att name="NODE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="NODE_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="NODE_SELECTED_PAINT" value="#00FFFF" type="string" cy:type="String"/>
@@ -396,13 +396,13 @@
 		<att name="name" value="KP3" type="string" cy:type="String"/>
 		<att name="max_transcription" value="0.027129516926785235" type="string" cy:type="String"/>
 		<att name="λ_mRNA" value="0.027129516926785235" type="string" cy:type="String"/>
-		<att name="value" value="0.5513264674778038" type="string" cy:type="String"/>
+		<att name="value" value="0.09025212578241466" type="string" cy:type="String"/>
 		<att name="max_translation" value="0.022323378579767125" type="string" cy:type="String"/>
 		<att name="λ_prot" value="0.022323378579767125" type="string" cy:type="String"/>
 		<att name="λ₋" value="0.0" type="string" cy:type="String"/>
 		<att name="shared name" value="5" type="string" cy:type="String"/>
 		<att name="α₀" value="0.08864573413150395" type="string" cy:type="String"/>
-		<graphics fill="#D0BD60" x="112.5" y="720" w="25.0" h="25.0" type="DIAMOND" width="0.0" outline="#000000">
+		<graphics fill="#9C988A" x="112.5" y="720" w="25.0" h="25.0" type="DIAMOND" width="0.0" outline="#000000">
 			<att name="NODE_LABEL_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="NODE_TRANSPARENCY" value="255" type="string" cy:type="String"/>
 			<att name="NODE_SELECTED_PAINT" value="#00FFFF" type="string" cy:type="String"/>
