@@ -12,8 +12,8 @@ fnames_score = fnames[len(fnames)//2:]
 
 for fname_true, fname_score in zip(fnames_true, fnames_score):
     print("# ", fname_true, "\t", fname_score)
-    trues = pd.read_table(fname_true, sep=' ', header=0)
-    scores = pd.read_table(fname_score, sep=' ', header=0)
+    trues = pd.read_table(fname_true, sep="\s", header=0, engine="python")
+    scores = pd.read_table(fname_score, sep="\s", header=0, engine="python")
 
     trues = np.asarray(trues.drop(columns="_"))
     scores = np.asarray(scores.drop(columns="_"))
@@ -21,7 +21,9 @@ for fname_true, fname_score in zip(fnames_true, fnames_score):
     trues[trues == '.'] = 0
     trues[trues == '+'] = +1
     trues[trues == '-'] = -1
+
     trues = np.asarray(abs(trues), dtype=bool)
+    scores = abs(scores)
 
     trues = trues.flatten()
     scores = scores.flatten()
