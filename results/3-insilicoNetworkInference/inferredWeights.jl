@@ -21,7 +21,7 @@ logFC_dir = glob("../*-insilicoNetworkSimulation/sim_logFCs/") |> only
 #= infer(logFC_fname, TF, KP) =#
 
 for n in [10, 100]
-    for (i, rep) in collect(product(1:5, 1:5))
+    @threads for (i, rep) in collect(product(1:5, 1:5))
         SUF="_$(n)_$(i)-rep$(rep)"
         logFC_fname = logFC_dir * "sim_logFC$SUF.tsv"
         infer(logFC_fname, TF, KP, "inferredWeights/WT$SUF.adj", "inferredWeights/WP$SUF.adj"; log="logs/log$SUF.tsv", lambda_Bstar=0., lambda_absW=1.)
