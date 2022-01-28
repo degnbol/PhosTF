@@ -26,25 +26,9 @@ Create random W from a adjacency matrix containing B.
 end
 
 """
-- np: mandatory arg to set nₚ
-- save: should we save files if no corrections are made?
-"""
-@main function correct(io=nothing, o=nothing; np=nothing, save::Bool=false)
-	if np === nothing @error("supply --np"); return end
-	i, o = inout(io, o)
-	W = loaddlm(i)
-	if WeightConstruction.correct!(W, np)
-		@info("Corrections made.")
-		savedlm(o, W)
-	else
-		@info("NO corrections made.")
-		save && savedlm(o, W)
-	end
-end
-"""
 This version of the function is run when no arguments are supplied.
 """
-@main function correct(Wₜfname::String="WT.mat", Wₚfname::String="WP.mat", op="WP_cor.mat", save::Bool=false)
+@main function correct(Wₜfname::String="WT.adj", Wₚfname::String="WP.adj", ot="WT_cor.adj", op="WP_cor.adj", save::Bool=false)
 	Wₜ, Wₚ = loadmat(Wₜfname), loadmat(Wₚfname)
     
 	if WeightConstruction.correct!(Wₜ, Wₚ)

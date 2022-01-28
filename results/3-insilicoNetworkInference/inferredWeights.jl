@@ -8,8 +8,6 @@ using Glob
 mkpath("inferredWeights")
 mkpath("logs")
 
-logFC_dir = glob("../*-insilicoNetworkSimulation/sim_logFCs/") |> only
-logFC_fname = logFC_dir * "sim_logFC_100_1-rep1.tsv"
 WT = nothing
 WP = nothing
 WT_mask = nothing
@@ -17,7 +15,10 @@ WP_mask = nothing
 TF = r"^TF[0-9]+$"
 KP = r"^KP[0-9]+$"
 mut_sep = nothing
-infer(logFC_fname, TF, KP)
+
+logFC_dir = glob("../*-insilicoNetworkSimulation/sim_logFCs/") |> only
+#= logFC_fname = logFC_dir * "sim_logFC_100_1-rep1.tsv" =#
+#= infer(logFC_fname, TF, KP) =#
 
 for n in [10, 100]
     for (i, rep) in collect(product(1:5, 1:5))

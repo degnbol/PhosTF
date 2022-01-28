@@ -13,18 +13,18 @@ that presence or absence of regulation should make a difference to down-stream g
 function init_Wₚ₊Wₚ₋(genes::Vector, Wₚ::Matrix{<:Integer}, λ₊::Vector, λ₋::Vector)
     nₚ = size(Wₚ,2)
     nₜ = size(Wₚ,1) - nₚ
-    Wₚ = 1.0Wₚ # convert int to float
+    Wₚ = Float64.(Wₚ)
     
     Wₚ₊, Wₚ₋ = Wₚ₊Wₚ₋(Wₚ)
 
     # Each edge is given the value that would make sense if we imagined it was the only regulator of its target, 
     # which would be higher than the passive decay of a similar magnitude, so we use the same random distribution here.
     # KP->KP
-    Wₚ₊[1:nₚ,:]       .*= λ₋[1:nₚ]       .+ random_λ(nₚ) 
-    Wₚ₋[1:nₚ,:]       .*= λ₊[1:nₚ]       .+ random_λ(nₚ) 
+    Wₚ₊[nₜ+1:nₜ+nₚ, :]       .*= λ₋[nₜ+1:nₜ+nₚ]       .+ random_λ(nₚ) 
+    Wₚ₋[nₜ+1:nₜ+nₚ, :]       .*= λ₊[nₜ+1:nₜ+nₚ]       .+ random_λ(nₚ) 
     # KP->TF. Take into accont how well each target TF binds to their regulon.
-    Wₚ₊[nₚ.+(1:nₜ),:] .*= λ₋[nₚ.+(1:nₜ)] .+ random_λ(nₜ) .* mean_k(genes, nₜ, nₚ)
-    Wₚ₋[nₚ.+(1:nₜ),:] .*= λ₊[nₚ.+(1:nₜ)] .+ random_λ(nₜ) .* mean_k(genes, nₜ, nₚ)
+    Wₚ₊[1:nₜ, :] .*= λ₋[1:nₜ] .+ random_λ(nₜ) .* mean_k(genes, nₜ, nₚ)
+    Wₚ₋[1:nₜ, :] .*= λ₊[1:nₜ] .+ random_λ(nₜ) .* mean_k(genes, nₜ, nₚ)
     
     # Reduce effects so they are of similar total magnitude onto each target.
     # Uses max(1,x) to avoid nan div.
@@ -51,7 +51,7 @@ end
 avg. dissociation constant k for the outgoing edges of each TF.
 """
 function mean_k(genes::Vector, nₜ::Integer, nₚ::Integer)
-    ks = edge_ks(genes)[:,nₚ+1:nₚ+nₜ]
+    ks = edge_ks(genes)[:, 1:nₜ]
     # average the nonzero entries in each row
     nk = sum(ks .!= 0, dims=1) |> vec
     ks = sum(ks, dims=1) |> vec
