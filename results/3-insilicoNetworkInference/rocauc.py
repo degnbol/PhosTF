@@ -3,15 +3,17 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import roc_auc_score
 import sys
+from os.path import basename
 
 fnames_true = ["../2-insilicoNetworkSimulation/adjacencies/WP_10_1-rep1.adj"]
 fnames_score = ["inferredWeights/WP_10_1-rep1.adj"]
 fnames = sys.argv[1:]
 fnames_true = fnames[:len(fnames)//2]
 fnames_score = fnames[len(fnames)//2:]
+assert len(fnames_true) == len(fnames_score), (len(fnames_true), len(fnames_score))
 
 for fname_true, fname_score in zip(fnames_true, fnames_score):
-    print("# ", fname_true, "\t", fname_score)
+    assert(basename(fname_true) == basename(fname_score))
     trues = pd.read_table(fname_true, sep="\s", header=0, engine="python")
     scores = pd.read_table(fname_score, sep="\s", header=0, engine="python")
 

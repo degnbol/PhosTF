@@ -24,7 +24,8 @@ for n in [10, 100]
     @threads for (i, rep) in collect(product(1:5, 1:5))
         SUF="_$(n)_$(i)-rep$(rep)"
         logFC_fname = logFC_dir * "sim_logFC$SUF.tsv"
-        infer(logFC_fname, TF, KP, "inferredWeights/WT$SUF.adj", "inferredWeights/WP$SUF.adj"; log="logs/log$SUF.tsv", lambda_Bstar=0., lambda_absW=1.)
+        log_fname = "logs/log$SUF.tsv"
+        isfile(log_fname) || infer(logFC_fname, TF, KP, "inferredWeights/WT$SUF.adj", "inferredWeights/WP$SUF.adj"; log=log_fname, lambda_Bstar=1., lambda_absW=0.)
     end
 end
 
