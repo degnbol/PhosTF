@@ -180,7 +180,7 @@ function infer(logFC::String, TF=nothing, KP=nothing, out_WT::String="WT_infer.t
         lr::Float64=0.001, decay::Real=0, WT=nothing, WP=nothing, WT_mask=nothing, WP_mask=nothing,
         lambda_Bstar::Real=0., lambda_absW::Real=1., reg_WT::Bool=true, train_WT::Bool=true)
     
-	logFC = loaddlm_(logFC)
+	logFC = loaddlm_(logFC, Float64)
     meas_genes, exp_genes, mut_genes = get_logFC_genes(logFC, mut_sep)
     TFs = read_geneList(TF, mut_genes)
     KPs = read_geneList(KP, mut_genes)
