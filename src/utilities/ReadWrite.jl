@@ -41,6 +41,10 @@ function load(fname::String, cast)
 	end
 end
 
+
+convertORparse(T::Type, val::AbstractString) = parse(T, v)
+convertORparse(T::Type, val) = convert(T, v)
+
 function loaddlm(fname::String, T::Union{Type,Nothing}=nothing; header::Bool=false)
     delim = ext2delim(fname)
     if header
@@ -52,7 +56,7 @@ function loaddlm(fname::String, T::Union{Type,Nothing}=nothing; header::Bool=fal
             df[!, matFirstCol:end] = parse_matrix(Matrix(df[!, matFirstCol:end]))
         end
         if T !== nothing
-            df[!, matFirstCol:end] = convert.(T, df[!, matFirstCol:end])
+            df[!, matFirstCol:end] = convertORparse.(T, df[!, matFirstCol:end])
         end
         df
     else
