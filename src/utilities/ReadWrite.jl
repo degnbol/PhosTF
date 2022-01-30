@@ -42,8 +42,8 @@ function load(fname::String, cast)
 end
 
 
-convertORparse(T::Type, val::AbstractString) = parse(T, v)
-convertORparse(T::Type, val) = convert(T, v)
+convertORparse(T::Type, val::AbstractString) = parse(T, val)
+convertORparse(T::Type, val) = convert(T, val)
 
 function loaddlm(fname::String, T::Union{Type,Nothing}=nothing; header::Bool=false)
     delim = ext2delim(fname)
