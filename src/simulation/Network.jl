@@ -34,13 +34,13 @@ end
 include("phos_edges.jl") # provides init_Wₚ₊Wₚ₋ and uses random_λ
 
 function init_genes(Wₜ)
-    # Each row in Wₜ is edges from each TF to a single node. The nodes in rows should be in order TF, KP, O.
+    # Each row in Wₜ is edges from each T to a single node. The nodes in rows should be in order T, P, O.
 	# row .== 0 → no edge, row .> 0 → activator, row .< 0 → repressor.
-	# .+ nₚ because the indexes among all proteins referring to TFs starts after KPs
+	# .+ nₚ because the indexes among all proteins referring to Ts starts after Ps
 	[Gene(findall(row .> 0), findall(row .< 0)) for row in eachrow(Wₜ)]
 end
 
-default_names(nₜ::Integer, nₚ::Integer, nₒ::Integer) = [["TF$i" for i in 1:nₜ]; ["KP$i" for i in 1:nₚ]; ["O$i" for i in 1:nₒ]]
+default_names(nₜ::Integer, nₚ::Integer, nₒ::Integer) = [["T$i" for i in 1:nₜ]; ["P$i" for i in 1:nₚ]; ["O$i" for i in 1:nₒ]]
 
 function Wₚ₊Wₚ₋(Wₚ::AbstractMatrix)
 	Wₚ₊ = +Wₚ; Wₚ₊[Wₚ₊ .<= 0] .= 0
@@ -52,9 +52,9 @@ end
 struct Network
     # name of each gene/node
     names::Vector{String}
-    # containing information about how each gene (every node) is bound and regulated by TFs.
+    # containing information about how each gene (every node) is bound and regulated by Fs.
 	genes::Vector{Gene}
-	# KP to TF+KP edges. Using Array instead of Matrix so JSON3 can allow a Vector here before reshape.
+	# P to R edges. Using Array instead of Matrix so JSON3 can allow a Vector here before reshape.
 	Wₚ₊::Array{Float64}
 	Wₚ₋::Array{Float64}
 	nᵥ::Int  # number of genes
@@ -142,14 +142,14 @@ struct Network
 	initial_p(max_translation::Vector, λ_prot::Vector, r::Vector) = max_translation .* r ./ λ_prot
 	"""
 	Initial active protein concentrations.
-	- p: protein concentrations of TFs+PKs
+	- p: protein concentrations of R
 	"""
 	function initial_ψ(Wₚ₊::Matrix, Wₚ₋::Matrix, p::Vector)
 		nₚ = size(Wₚ₊, 2)
         nₜ = size(Wₚ₊, 1) - nₚ
         nₚ₊= sum(Wₚ₊ .> 0; dims=2) |> vec
         nₚ₋= sum(Wₚ₋ .> 0; dims=2) |> vec
-		# Sum the effects from regulators when using ψ = p from the KPs, which is fully active KPs.
+		# Sum the effects from regulators when using ψ = p from the Ps, which is fully active Ps.
 		Wₚ₊p = Wₚ₊ * p[nₜ+1:nₜ+nₚ]
 		Wₚ₋p = Wₚ₋ * p[nₜ+1:nₜ+nₚ]
         # Fraction of proteins that are activated on a scale [0,1] as weighted average.
