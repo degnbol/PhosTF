@@ -91,6 +91,18 @@ function correct!(Wₜ::AbstractMatrix, Wₚ::AbstractMatrix)
 	while correct_silent_edges!(Wₜ, Wₚ) corrected = true end
 	corrected
 end
+function correct!(Wₜ::DataFrame, Wₚ::DataFrame)
+    @assert eltype(Wₜ[!,1]) <: AbstractString
+    @assert eltype(Wₚ[!,1]) <: AbstractString
+    R_names = [names(Wₜ)[2:end]; names(Wₚ)[2:end]]
+    @assert all(R_names .== Wₚ[:,1] .== Wₜ[1:length(R_names),1])
+    Wₜmat = Matrix(Wₜ[:, 2:end])
+    Wₚmat = Matrix(Wₚ[:, 2:end])
+    corrected = correct!(Wₜmat, Wₚmat)
+    Wₜ[:, 2:end] .= Wₜmat
+    Wₚ[:, 2:end] .= Wₚmat
+    corrected
+end
 
 threshold!(W::AbstractMatrix, thres::AbstractFloat=0.001,) = W[abs.(W) .< thres] .= 0
 threshold!(W::DataFrame, thres::AbstractFloat=0.001,) = begin
