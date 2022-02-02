@@ -7,6 +7,7 @@ Main.@use "inference/Model"
 Main.@use "utilities/ArrayUtils"
 using Random
 using Chain: @chain
+using DataFrames
 
 """
 Get Wₜ, Wₚ from square W with nodes sorted in order TF, KP, O.
@@ -92,6 +93,13 @@ function correct!(Wₜ::AbstractMatrix, Wₚ::AbstractMatrix)
 end
 
 threshold!(W::AbstractMatrix, thres::AbstractFloat=0.001,) = W[abs.(W) .< thres] .= 0
+threshold!(W::DataFrame, thres::AbstractFloat=0.001,) = begin
+    for col ∈ eachcol(W)
+        if eltype(col) <: Real
+            col[col .< thres] .= 0
+        end
+    end
+end
 
 
 """

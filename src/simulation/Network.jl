@@ -128,7 +128,7 @@ struct Network
 	
 	"""
 	Initial mRNA. Estimated as
-	0 = dr/dt = max_transcription*f(ψ) -λ_mRNA*r ⟹ r = m*f(ψ) / λ_mRNA  
+	0 = dr/dt = max_transcription*f(ψ) -λ_mRNA*r ⟹  r = m*f(ψ) / λ_mRNA  
 	where we use p = 0 ⟹ ψ = 0  
 	"""
 	function initial_r(max_transcription::Vector, λ_mRNA::Vector, genes::Vector{Gene})
@@ -137,7 +137,7 @@ struct Network
 	end
 	"""
 	Initial protein concentrations. Estimated as
-	0 = dp/dt = max_translation*r - λ_prot*p ⟹ p = max_translation*r / λ_prot  
+	0 = dp/dt = max_translation*r - λ_prot*p ⟹  p = max_translation*r / λ_prot  
 	"""
 	initial_p(max_translation::Vector, λ_prot::Vector, r::Vector) = max_translation .* r ./ λ_prot
 	"""

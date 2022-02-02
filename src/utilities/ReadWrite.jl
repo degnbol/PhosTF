@@ -66,10 +66,10 @@ function loaddlm(fname::String, T::Union{Type,Nothing}=nothing; header::Bool=fal
     end
 end
 
-"Load dlm where we try to parse as int, and if that fails as float (which is does automatically)."
-function loadmat(fname::String)
-	try return loaddlm(fname, Int)
-	catch; return loaddlm(fname) end
+"Load dlm where we try to parse as int, and if that fails as float."
+function loadmat(fname::String; header::Bool=false)
+	try return loaddlm(fname, Int; header=header)
+	catch; return loaddlm(fname, Float64; header=header) end
 end
 
 """
@@ -110,6 +110,7 @@ savedlm(fname::String, x::AbstractMatrix; colnames=nothing, rownames=nothing) = 
 end
 # a vector will be written as a column vector.
 savedlm(fname, x::AbstractVector) = savedlm(fname, reshape(x, :, 1))
+savedlm(fname, x::DataFrame) = CSV.write(fname, x; delim=ext2delim(fname))
 
 save_JSON(fname::String, x) = open(fname, "w") do io JSON3.write(io, x) end
 save_BSON(fname::String, x) = BSON.bson(fname, Dict(default_identifier => x))

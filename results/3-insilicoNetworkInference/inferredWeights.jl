@@ -20,7 +20,8 @@ logFC_dir = glob("../*-insilicoNetworkSimulation/sim_logFCs/") |> only
 #= logFC_fname = logFC_dir * "sim_logFC_100_1-rep1.tsv" =#
 #= infer(logFC_fname, TF, KP) =#
 
-for n in [10, 100]
+for n in [10]
+#= for n in [10, 100] =#
     @threads for (i, rep) in collect(product(1:5, 1:5))
         SUF="_$(n)_$(i)-rep$(rep)"
         logFC_fname = logFC_dir * "sim_logFC$SUF.tsv"
