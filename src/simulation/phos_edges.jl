@@ -9,6 +9,7 @@ using SparseArrays
 Convert a Wₚ from int to float.
 Choosing the float values are done in a manner that will make it likely 
 that presence or absence of regulation should make a difference to down-stream gene expression levels.
+- Wₚ: Matrix of 1, -1, and 0
 """
 function init_Wₚ₊Wₚ₋(genes::Vector, Wₚ::Matrix{<:Integer}, λ₊::Vector, λ₋::Vector)
     nₚ = size(Wₚ,2)
@@ -19,15 +20,17 @@ function init_Wₚ₊Wₚ₋(genes::Vector, Wₚ::Matrix{<:Integer}, λ₊::Vect
 
     # Each edge is given the value that would make sense if we imagined it was the only regulator of its target, 
     # which would be higher than the passive decay of a similar magnitude, so we use the same random distribution here.
-    # KP->KP
-    Wₚ₊[nₜ+1:nₜ+nₚ, :]       .*= λ₋[nₜ+1:nₜ+nₚ]       .+ random_λ(nₚ) 
-    Wₚ₋[nₜ+1:nₜ+nₚ, :]       .*= λ₊[nₜ+1:nₜ+nₚ]       .+ random_λ(nₚ) 
+    # Positive edges onto a node has to work against negative decay and vice versa.
+      
     # KP->TF. Take into accont how well each target TF binds to their regulon.
-    Wₚ₊[1:nₜ, :] .*= λ₋[1:nₜ] .+ random_λ(nₜ) .* mean_k(genes, nₜ, nₚ)
-    Wₚ₋[1:nₜ, :] .*= λ₊[1:nₜ] .+ random_λ(nₜ) .* mean_k(genes, nₜ, nₚ)
+    Wₚ₊[1:nₜ, :]       .*= λ₋[1:nₜ]       .+ random_λ(nₜ) .* mean_k(genes, nₜ)
+    Wₚ₋[1:nₜ, :]       .*= λ₊[1:nₜ]       .+ random_λ(nₜ) .* mean_k(genes, nₜ)
+    # KP->KP
+    Wₚ₊[nₜ+1:nₜ+nₚ, :] .*= λ₋[nₜ+1:nₜ+nₚ] .+ random_λ(nₚ) 
+    Wₚ₋[nₜ+1:nₜ+nₚ, :] .*= λ₊[nₜ+1:nₜ+nₚ] .+ random_λ(nₚ) 
     
     # Reduce effects so they are of similar total magnitude onto each target.
-    # Uses max(1,x) to avoid nan div.
+    # max(1,x) to avoid nan div.
     Wₚ₋ ./= max.(1., sum(Wₚ₋ .> 0, dims=2))
     Wₚ₊ ./= max.(1., sum(Wₚ₊ .> 0, dims=2))
     
@@ -50,7 +53,7 @@ end
 """
 avg. dissociation constant k for the outgoing edges of each TF.
 """
-function mean_k(genes::Vector, nₜ::Integer, nₚ::Integer)
+function mean_k(genes::Vector, nₜ::Integer)
     ks = edge_ks(genes)[:, 1:nₜ]
     # average the nonzero entries in each row
     nk = sum(ks .!= 0, dims=1) |> vec
