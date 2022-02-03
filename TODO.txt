@@ -1,1 +1,0 @@
-Check that silent edges does not exist with the weight.jl correct function but first fix the function since it uses the KP TF O sorting and so on.
