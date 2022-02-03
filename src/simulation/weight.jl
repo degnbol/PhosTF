@@ -25,6 +25,12 @@ Create random W from a adjacency matrix containing B.
     savedlm(WP, Wₚ; colnames=names[nₜ+1:nₜ+nₚ], rownames=names[1:nₜ+nₚ])
 end
 
+@main function validate(Wₜfname::String="WT.adj", Wₚfname::String="WP.adj")
+    Wₜ = loadmat(Wₜfname; header=true)
+    Wₚ = loadmat(Wₚfname; header=true)
+    WeightConstruction.validate_weights(Wₜ, Wₚ)
+end
+
 """
 This version of the function is run when no arguments are supplied.
 """
