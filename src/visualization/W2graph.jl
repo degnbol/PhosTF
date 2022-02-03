@@ -5,6 +5,7 @@
 @src "utilities/ArrayUtils"
 @src "utilities/GraphUtils"
 using Fire
+using DataFrames
 
 """
 Write a graph defined by weight matrices to xgmml format.
@@ -64,7 +65,7 @@ function xgmml(net, gene_names, o, nₜ, nₚ, title=nothing, X=nothing, highlig
             X = Matrix(X)
         end
         highlight = get_highlight(highlight, size(X, 2), rownames)
-        write(o, GraphUtils.xgmml(net, X, highlight; title=title))
+        write(o, GraphUtils.xgmml(net, X, highlight; title=title, labels=gene_names))
 	end
 end
 

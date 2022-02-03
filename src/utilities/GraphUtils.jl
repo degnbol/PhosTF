@@ -18,25 +18,6 @@ const default_hspace, default_vspace = 45, 80
 const bg_color = "#FFFFFF"
 
 """
-Get a matrix containing text in node file format.
-- nᵥ: total number of proteins
-- nₜ: number of TFs
-- nₚ: number of KPs
-rows are identifiers.
-"""
-function nodes(nᵥ::Integer, nₜ::Integer, nₚ::Integer)
-	labels = [["TF$i" for i in 1:nₜ]; ["KP$i" for i in 1:nₚ]; ["O$i" for i in 1:(nᵥ-(nₜ+nₚ))]]
-	types = [["TF" for _ in 1:nₜ]; ["KP" for _ in 1:nₚ]; ["O" for _ in 1:(nᵥ-(nₜ+nₚ))]]
-	DataFrame(label=labels, type=types)
-end
-
-function edges(matrix::SparseMatrixCSC)
-	i,j,v = findnz(matrix)
-	DataFrame(source=j, target=i, weight=v)
-end
-edges(matrix::Matrix) = edges(sparse(matrix))
-
-"""
 - space: minimum space that will be given horizontally.
 """
 function xgmml_x(nₜ::Integer, nₚ::Integer, nₒ::Integer, space=default_hspace)
@@ -59,8 +40,8 @@ xgmml_y(nₜ::Integer, nₚ::Integer, nₒ::Integer, space=default_vspace) = [
 function xgmml_labels(nₜ::Integer, nₚ::Integer, nₒ::Integer)
 	pad = max(nₜ, nₚ, nₒ) |> string |> length
 	[
-	    ["TF"*lpad(i,pad,"0") for i in 1:nₜ];
-	    ["KP"*lpad(i,pad,"0") for i in 1:nₚ];
+	    ["T"*lpad(i,pad,"0") for i in 1:nₜ];
+	    ["P"*lpad(i,pad,"0") for i in 1:nₚ];
 	    ["O"*lpad(i,pad,"0") for i in 1:nₒ]
 	]
 end
@@ -84,7 +65,8 @@ function xgmml_shapes(nₜ::Integer, nₚ::Integer, nₒ::Integer)
 end
 
 
-function xgmml_nodes(nₜ::Integer, nₚ::Integer, nₒ::Integer; x=xgmml_x(nₜ, nₚ, nₒ), y=xgmml_y(nₜ, nₚ, nₒ), labels=xgmml_labels(nₜ, nₚ, nₒ), fills=xgmml_fills(nₜ, nₚ, nₒ), shapes=xgmml_shapes(nₜ, nₚ, nₒ), extra_atts...)
+function xgmml_nodes(nₜ::Integer, nₚ::Integer, nₒ::Integer; x=xgmml_x(nₜ, nₚ, nₒ), y=xgmml_y(nₜ, nₚ, nₒ), labels=nothing, fills=xgmml_fills(nₜ, nₚ, nₒ), shapes=xgmml_shapes(nₜ, nₚ, nₒ), extra_atts...)
+    if labels === nothing labels = xgmml_labels(nₜ, nₚ, nₒ) end
 	[XGMML.Node(x[i], y[i]; label=labels[i], fill=fills[i], shape=shapes[i], (k=>v[i] for (k,v) in extra_atts)...) for i in 1:nₜ+nₚ+nₒ]
 end
 xgmml_nodes(Wₜ, Wₚ; kwargs...) = xgmml_nodes(nₜnₚnₒ(Wₜ, Wₚ)...; kwargs...)
@@ -173,7 +155,7 @@ xgmml(net; title="net") = XGMML.xgmml(_graph(net; title=title))
 - X: each column is node values to visualize.
 - highlight: index of node to highlight for each column in X.
 """
-function xgmml(net, X::Matrix, highlight::Union{Nothing,Vector{Int}}=nothing; title="net")
+function xgmml(net, X::Matrix, highlight::Union{Nothing,Vector{Int}}=nothing; title="net", labels=nothing)
 	nₜ, nₚ, nₒ = nₜnₚnₒ(net)
 	K = size(X, 2)
 	fills = xgmml_fills(X, -1, 1)
@@ -181,7 +163,7 @@ function xgmml(net, X::Matrix, highlight::Union{Nothing,Vector{Int}}=nothing; ti
 	graphs::Vector{XGMML.Graph} = []
 	for k in 1:K
 		Δy = sum([nₜ,nₚ,nₒ] .> 0) * default_vspace * k
-		nodes = xgmml_nodes(net, y=xgmml_y(nₜ, nₚ, nₒ) .+ Δy, fills=fills[:, k], value=X[:, k])
+		nodes = xgmml_nodes(net; y=xgmml_y(nₜ, nₚ, nₒ) .+ Δy, fills=fills[:, k], value=X[:, k], labels=labels)
 		edges = xgmml_edges(net)
         highlight === nothing || (nodes[highlight[k]].stroke_width = 5.)
 		graph = XGMML.Graph(title, nodes, edges)
