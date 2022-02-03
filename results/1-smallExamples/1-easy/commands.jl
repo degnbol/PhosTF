@@ -17,3 +17,18 @@ for mut_id in 1:nₜ+nₚ
 end
 logFC("net.bson", "sim_logFC.tsv")
 
+@src "inference/infer"
+infer("sim_logFC.tsv", "T.*" "P.*", "WT_infer.tsv", "WP_infer.tsv"; epochs=30000)
+
+@src "visualization/W2graph"
+xgmml("net.bson"; o="net.xgmml")
+xgmml("net.bson"; o="steady.xgmml", X="steady.tsv")
+for mut_id in 1:nₜ+nₚ
+    xgmml("net.bson"; o="steady_mut$mut_id.xgmml", X="steady_mut$mut_id.tsv", highlight=mut_id)
+end
+xgmml("net.bson"; o="ko.xgmml", X="sim_logFC.tsv")
+xgmml("WT_infer.tsv", "WP_infer.tsv"; o="infer.xgmml")
+
+
+
+
