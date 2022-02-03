@@ -36,7 +36,7 @@ Create a random network from Wₜ and Wₚ.
         KPs = names(Wₚ)[2:end]
         TFKPs = [TFs; KPs]
         # assume order is the same in column and row names. Could be changed to reorder.
-        @assert all(Wₜ[1:length(TFKPs), 1] .== TFKPs)
+        @assert all(Wₜ[1:length(TFKPs), 1] .== TFKPs) "$(Wₜ[1:length(TFKPs), 1]) != $(TFKPs)"
         @assert all(Wₚ[!, 1] .== TFKPs)
         Wₜ = Matrix(Wₜ[:, 2:end])
         Wₚ = Matrix(Wₚ[:, 2:end])
