@@ -32,26 +32,6 @@ end
 end
 
 """
-This version of the function is run when no arguments are supplied.
-"""
-@main function correct(Wₜfname::String="WT.adj", Wₚfname::String="WP.adj", ot="WT_cor.adj", op="WP_cor.adj", save::Bool=false)
-    Wₜ = loadmat(Wₜfname; header=true)
-    Wₚ = loadmat(Wₚfname; header=true)
-    
-	if WeightConstruction.correct!(Wₜ, Wₚ)
-		@info("Corrections made.")
-		savedlm(ot, Wₜ)
-		savedlm(op, Wₚ)
-	else
-		@info("NO corrections made.")
-		if save
-			savedlm(ot, Wₜ)
-			savedlm(op, Wₚ)
-		end
-	end
-end
-
-"""
 Remove edges less than a given threshold.
 - header: does the matrix have a header (and potentially row names)
 - thres: optional threshold
