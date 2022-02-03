@@ -14,7 +14,7 @@ We have exponential decay, the half-life and the decay rate are thus related by:
 t½ = ln(2) / λ ⟹
 λ = ln(2) / t½
 """
-random_λ(n::Int) = log(2) ./ rand(random_t½(), n)
+random_λ(ns::Int...) = log(2) ./ rand(random_t½(), ns...)
 """
 For λ₊, λ₋ to have lower values for nodes that are mostly negatively regulated.
 """
