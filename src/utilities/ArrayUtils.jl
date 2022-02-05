@@ -30,9 +30,9 @@ function binary(num, size)
 end
 
 """
-Adding some default values to μ and σ.
+Adding default values μ=center(l, u) and σ=range/6.
 """
-TruncNormal(l, u) = truncated(Normal((l+u)/2, (u-l)/6), l, u)
+TruncNormal(l, u) = TruncatedNormal((l+u)/2, (u-l)/6, l, u)
 
 "Create non-square identity matrices using sparse matrix type with ones in the default diagonal."
 LinearAlgebra.I(n::Integer, m::Integer) = I(max(n, m))[1:n, 1:m]
