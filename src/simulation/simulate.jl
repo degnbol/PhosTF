@@ -1,5 +1,5 @@
 #!/usr/bin/env julia
-@src "simulation/GeneRegulation"
+incl("src/simulation/GeneRegulation")
 @src "simulation/ODEs"
 @use "utilities/ReadWrite"
 using Fire
@@ -15,7 +15,7 @@ default_Wₜ, default_Wₚ = "WT.adj", "WP.adj"
 default_net = "net.bson"
 
 
-loadnet(i) = ReadWrite.load(i, GeneRegulation.Network)
+loadnet(i) = ReadWrite.load(i, Main.GeneRegulation.Network)
 
 """
 Create a random network from Wₜ and Wₚ.
@@ -24,7 +24,7 @@ Create a random network from Wₜ and Wₚ.
 - header: bool indicating if weight matrices contains headers (and then possibly row names).
     Note that it is not (yet) implemented to store this info in the generated network model.
 """
-@main function network(Wₜfname::String=default_Wₜ, Wₚfname::String=default_Wₚ; header::Bool=false, o::String=default_net)
+@main function network(Wₜfname::String=default_Wₜ, Wₚfname::String=default_Wₚ; header::Bool=false, o::String=default_net, hyper=Dict())
 	Wₜ = loaddlm(Wₜfname; header=header)
 	# make sure to enforce that it is Int which indicates weight presence and sign as opposed to Float that indicates weight magnitude.
 	Wₚ = loaddlm(Wₚfname, Int; header=header)
@@ -45,7 +45,7 @@ Create a random network from Wₜ and Wₚ.
 	nₚ = size(Wₚ, 2)
     @assert nₜ+nₚ == size(Wₚ, 1) "nₜ+nₚ != size(Wₚ, 1). nₜ=$nₜ. nₚ=$nₚ."
 	@assert nᵥ >= nₜ + nₚ
-	save(o, GeneRegulation.Network(Wₜ, Wₚ))
+	save(o, Main.GeneRegulation.Network(Wₜ, Wₚ; hyper=hyper))
 end
 
 @main function printNet(i=default_net; v::Integer=0)
@@ -61,7 +61,7 @@ end
 end
 
 @main function estimateWt(i=default_net; o=stdout)
-	Wₜ = GeneRegulation.estimate_Wₜ(loadnet(i))
+	Wₜ = Main.GeneRegulation.estimate_Wₜ(loadnet(i))
 	savedlm(o, Wₜ)
 end
 
