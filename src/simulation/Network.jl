@@ -8,7 +8,7 @@ using Main.Model: nₜnₚnₒ
 Network struct containing genes for simulation.
 """
 
-random_t½() = Main.ArrayUtils.TruncNormal(5, 50)
+random_t½() = TruncNormal(5, 50)
 """
 We have exponential decay, the half-life and the decay rate are thus related by:
 t½ = ln(2) / λ ⟹
@@ -16,16 +16,18 @@ t½ = ln(2) / λ ⟹
 """
 random_λ(ns::Int...) = log(2) ./ rand(random_t½(), ns...)
 """
-For λ₊, λ₋ to have lower values for nodes that are mostly negatively regulated.
+A protein could be activated by phosphorylation but could just as well be activated by dephosphorylation. 
+For this reason we model phosphorylation decay with two values  λ₊, λ₋, for decay proportional to inactive concentration and active concentration, respectively. 
+Set randomly like λ but adjusted so nodes that are only positively regulated has negative decay (λ₋), nodes only negatively regulated has positive decay (λ₊),
+and nodes with both has both but scaled accorrding to the balance of positive vs negative regulation onto them.
 """
-function random_λ(mat::Matrix)
-    # weigh by the fraction of regulators that regulate positively.
-    positives = sum(mat .> 0; dims=2) |> vec
-    negatives = sum(mat .< 0; dims=2) |> vec
-    λ₊ = random_λ(size(mat,1)) .* negatives ./ (positives .+ negatives)
-    λ₋ = random_λ(size(mat,1)) .* positives ./ (positives .+ negatives)
-    # NaN from div zero which means there are no regulators of a node. In that case it's activation is static.
-    noreg = positives .+ negatives .== 0
+function random_λ₊λ₋(Wₚ::Matrix)
+    ns₊ = sum(Wₚ .> 0; dims=2) |> vec
+    ns₋ = sum(Wₚ .< 0; dims=2) |> vec
+    λ₊ = random_λ(size(Wₚ,1)) .* ns₋ ./ (ns₊ .+ ns₋)
+    λ₋ = random_λ(size(Wₚ,1)) .* ns₊ ./ (ns₊ .+ ns₋)
+    # NaN from div zero which means there are no regulators of a node. In that case it's fully active.
+    noreg = ns₊ .+ ns₋ .== 0
     λ₊[noreg] .= random_λ(sum(noreg))
     λ₋[noreg] .= 0
     λ₊, λ₋
@@ -98,13 +100,15 @@ struct Network
 	Make sure to be exact about using either integer or float for Wₚ 
 	since a matrix of floats {-1.,0.,1.} will be seen as the exact edge values and not indication of repression, activation, etc.
 	"""
-	Network(names::Vector{String}, genes::Vector{Gene}, Wₚ::Matrix{<:AbstractFloat}) = Network(names, genes, Wₚ₊Wₚ₋(Wₚ)..., random_λ(Wₚ)...)
-	function Network(names, genes::Vector{Gene}, Wₚ::Matrix{<:Integer})
-		λ₊, λ₋ = random_λ(Wₚ)
-		Network(names, genes, init_Wₚ₊Wₚ₋(genes, Wₚ, λ₊, λ₋)..., λ₊, λ₋)
+    Network(names::Vector{String}, genes::Vector{Gene}, Wₚ::Matrix{<:AbstractFloat}; hyper::Dict=Dict()) = begin
+        @assert length(hyper) == 0 # not meant for the float Wₚ, temp solution
+        Network(names, genes, Wₚ₊Wₚ₋(Wₚ)..., random_λ₊λ₋(Wₚ)...)
+    end
+    function Network(names, genes::Vector{Gene}, Wₚ::Matrix{<:Integer}; hyper::Dict=Dict())
+		λ₊, λ₋ = random_λ₊λ₋(Wₚ)
+		Network(names, genes, init_Wₚ₊Wₚ₋(genes, Wₚ, λ₊, λ₋; hyper=hyper)..., λ₊, λ₋)
 	end
-    Network(Wₜ::Matrix, Wₚ::Matrix; names=default_names(nₜnₚnₒ(Wₜ, Wₚ)...)) = Network(names, init_genes(Wₜ), Wₚ)
-    Network(W, nₜ::Integer, nₚ::Integer; names=default_names(nₜ, nₚ, size(W,1)-(nₜ+nₚ))) = Network(WₜWₚ(W, nₜ, nₚ)...; names=names)
+    Network(Wₜ::Matrix, Wₚ::Matrix; names=default_names(nₜnₚnₒ(Wₜ, Wₚ)...), hyper::Dict=Dict()) = Network(names, init_genes(Wₜ), Wₚ; hyper=hyper)
 	function Network(net::Network)
 		new(net.names, net.genes, net.Wₚ₊, net.Wₚ₋, net.nᵥ, net.nᵥ-(net.nₜ+net.nₚ), net.nₜ, net.nₚ, net.max_transcription, net.max_translation, net.λ_mRNA, net.λ_prot, net.λ₊, net.λ₋, net.r₀, net.p₀, net.ψ₀)
 	end
