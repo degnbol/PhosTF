@@ -1,4 +1,4 @@
-Code to simulate, infer and visualize small toy examples.
+Code to simulate, infer and visualize small toy examples in commands.jl which can be run with PWD in one of the folders:
 
 - 1-easy: simple example that can easily be inferred with the method.
 - 2-ambiguity: regulation that cannot be inferred merely from perturbation data
