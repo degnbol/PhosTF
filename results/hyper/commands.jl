@@ -13,14 +13,17 @@ mkpath("inferredWeights")
 mkpath("logs")
 mkpath("aucs")
 
-@threads for (n, i, rep, _cancel, _mean_k, _vec, _norm) in collect(product([10, 100], 1:5, 1:5, [false, true], [false, true], [false, true], 0:2))
-    hyper = "$_cancel-$_mean_k-$_vec-$_norm"
+n = 10
+rep = 1
+@threads for (i, _cancel, _mean_k, _vec, _norm, _lam) in collect(product(1:5, [false, true], [true, false], [true, false], 0:2, 0:4))
+    hyper = "$_cancel-$_mean_k-$_vec-$_norm-$_lam"
+    hyperD = Dict("cancel"=>_cancel, "mean_k"=>_mean_k, "vec"=>_vec, "norm"=>_norm, "lam"=>_lam)
     SUF="_$(n)_$(i)-rep$(rep)"
     println("net $n $i $rep $hyper")
     netdir = "GNWPhosNets/$hyper" 
     mkpath(netdir)
     fnames = ["../2-insilicoNetworkSimulation/adjacencies/W$(s)$SUF.adj" for s in "TP"]
-    nzfile("$netdir/net$SUF.bson") || network(fnames...; header=true, o="$netdir/net$SUF.bson")
+        nzfile("$netdir/net$SUF.bson") || network(fnames...; header=true, o="$netdir/net$SUF.bson", hyper=hyperD)
 
     println("sim $n $i $rep $hyper")
     simdir = "sim_logFCs/$hyper" 
