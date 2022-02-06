@@ -45,8 +45,10 @@ with open("aucs.tsv", 'w') as fh:
 
                 try:
                     auc = roc_auc_score(trues[ind, :].flatten(), scores[ind, :].flatten())
-                except ValueError:
-                    pass # if there is only one class present TODO: there shouldn't be??
+                except:
+                    # if there is only one class present TODO: there shouldn't be??
+                    # indexerror from having dim 42 != 41, idk
+                    pass 
                 else:
                     fh.write("\t".join([str(v) for v in [n, i, rep, _cancel, _mean_k, _vec, _norm, Bstar, absW, s, target, auc]]) + "\n")
 
