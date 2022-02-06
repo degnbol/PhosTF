@@ -116,11 +116,11 @@ end
 Fraction of max activation for a given gene when active TFs are found at a given concentration.
 """
 function f(gene::Gene, ψ::AbstractVector{<:AbstractFloat})
-    isempty(gene.modules) && 1
-    # μ is a function from RegulatoryModule that is its mean activation.
+    isempty(gene.modules) && 1.
+    # μ is a function from RegulatoryModule that is its mean binding.
     μs = μ.(gene.modules, Ref(ψ))
 	# get P{state} for all states, each state is a unique combination of modules
-	P = [prod(μs[state]) * prod(1 .- μs[.!state]) for state in states(length(gene.modules))]
+	P = [prod(μs[state]) * prod(1. .- μs[.!state]) for state in states(length(gene.modules))]
 	sum(gene.α .* P)
 end
 
