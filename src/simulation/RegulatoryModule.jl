@@ -29,16 +29,21 @@ struct RegulatoryModule
 		end
 		RegulatoryModule(activators, repressors, ν, k, complex, inhibitor)
 	end
+	# copy another module
+    function RegulatoryModule(mod::RegulatoryModule; n_activators::Int=mod.n_activators, n_repressors::Int=mod.n_repressors, 
+                              inputs::Vector{Int}=mod.inputs, ν::Vector{Float64}=mod.ν, k::Vector{Float64}=mod.k,
+                              complex::Bool=mod.complex, inhibitor::Bool=mod.inhibitor)
+		new(n_activators, n_repressors, inputs, ν, k, complex, inhibitor)
+    end
 	
 	"""
 	Hill coeficient ν for each input protein.
-	GNW defaults are μ=2, σ=2, min=1, max=10
 	"""
-    random_ν(n::Integer) = rand(truncated(Normal(2., 2.), .5, 8.), n)
+    random_ν(n::Integer) = rand(TruncatedNormal(2, 2, 1, 10), n)
 	"""
 	Dissociation constant k for each input protein.
 	"""
-	random_k(n::Integer) = rand(Uniform(.05, .7), n) # GNW uses (.01, 1.)
+	random_k(n::Integer) = rand(Uniform(.01, 1.), n)
 	function random_inhibitor(n_activators, n_repressors)
 		n_activators == n_repressors ? rand([true, false]) : n_activators < n_repressors
 	end
