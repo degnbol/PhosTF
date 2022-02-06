@@ -1,0 +1,1 @@
+cp logs/false-true-false-2/log_10_5-rep2-0.1-0.5.tsv inferredWeights/false-true-false-2/WP_10_5-rep2-0.1-0.5.adj inferredWeights/false-true-false-2/WT_10_5-rep2-0.1-0.5.adj ../2-insilicoNetworkSimulation/adjacencies/W?_10_5-rep2.adj sim_logFCs/false-true-false-2/sim_logFC_10_5-rep2.tsv GNWPhosNets/false-true-false-2/net_10_5-rep2.bson TO
