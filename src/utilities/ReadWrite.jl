@@ -45,12 +45,17 @@ end
 convertORparse(T::Type, val::AbstractString) = parse(T, val)
 convertORparse(T::Type, val) = convert(T, val)
 
+
+function hasRownames(df::DataFrame)
+    # when empty column name it will be renamed to "Column1" by CSV.read(path, DataFrame)
+    df |> names |> first |> lowercase in ["_", "rownames", "row", " ", "column1"] 
+end
+
 function loaddlm(fname::String, T::Union{Type,Nothing}=nothing; header::Bool=false)
     delim = ext2delim(fname)
     if header
         df = CSV.read(fname, DataFrame; delim=delim)
-        hasRownames = df |> names |> first |> lowercase in ["_", "rownames", "row"]
-        matFirstCol = hasRownames ? 2 : 1
+        matFirstCol = hasRownames(df) ? 2 : 1
         # if all elements are numbers then there is no strings to parse.
         if !all(eltype.(eachcol(df[!, matFirstCol:end])) .<: Real)
             df[!, matFirstCol:end] = parse_matrix(Matrix(df[!, matFirstCol:end]))
