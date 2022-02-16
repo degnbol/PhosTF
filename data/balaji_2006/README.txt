@@ -2,6 +2,3 @@ All supplementary material from "Comprehensive Analysis of Combinatorial Regulat
 The paper and its TF network was used for the DREAM challenge for creating the insilico nets.
 The interesting file is probably only tnet.txt with ~12000 TF regulations.
 The edges have p-value < 0.001 acording to materials and methods. Data collected from many papers, including harbison, lee 2002, horak, and an old paper from 1995.
-
-# insert - to correct systematic names
-sed 1d ../../raw/balaji_2006/tnet.txt | tr -d '\r' | sed -E 's/(Y[A-Z]{2}[0-9]{3}[A-Z])([A-Z])/\1-\2/' | awk '{print $0 "\t<0.001"}' | cat <(echo $'TF\tTarget\tPval') - > TF_edges.tsv
