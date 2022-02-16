@@ -4,5 +4,3 @@ The edges are collected from a P-value threshold of ChIP-chip data. Threshold<=.
 TRNCC are chip chip.
 TRNGRD are gene deletion with data from Hu 2007.
 TRNGROE are overexpression from Chua 2006.
-
-echo $'TF\tTarget' | cat - ../../raw/balaji_2008/TRNCC.tnet > TF_edges.tsv
