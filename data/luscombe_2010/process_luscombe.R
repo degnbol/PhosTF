@@ -10,7 +10,7 @@ dim(KO); dim(KO_pval)
 all(colnames(KO) == colnames(KO_pval))
 
 # convert name
-gene2ORF_table = read.table("../../name_conversion/gene2ORF.tsv", header=F, sep="\t", quote="", stringsAsFactors=F)
+gene2ORF_table = read.table("../gene2ORF/gene2ORF.tsv", header=F, sep="\t", quote="", stringsAsFactors=F)
 gene2ORF = function(x) gene2ORF_table[match(x,gene2ORF_table[,2]),1]
 
 names = toupper(colnames(KO))

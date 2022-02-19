@@ -1,5 +1,8 @@
 #!/usr/bin/env zsh
-raw="../../raw/holstege_2014/deleteome_all_mutants_controls.txt"
+# REQUIRES: raw/deleteome_all_mutants_controls.txt, ../gene2ORF/gene2ORF.{R,tsv}
+# OUTPUTS: gene2ORF.tsv, M.tsv
+
+raw="raw/deleteome_all_mutants_controls.txt"
 cat $raw | cut -f2-3 | sed '2d' > gene2ORF.tsv
 cat $raw | cut -f2 | sed '2d' | sed 's/systematicName/ORF/' > ORF.col
 # number of columns
