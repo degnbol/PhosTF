@@ -1,6 +1,8 @@
 #!/usr/bin/env Rscript
 library(tidyverse)
 library(readxl)
+suppressPackageStartupMessages(library(here))
+setwd(paste0(here(), "/data/ptacek_2005"))
 
 filename = "raw/41586_2005_BFnature04187_MOESM4_ESM.xls"
 

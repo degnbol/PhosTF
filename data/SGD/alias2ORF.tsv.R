@@ -1,4 +1,6 @@
 #!/usr/bin/env Rscript
+suppressPackageStartupMessages(library(here))
+setwd(paste0(here(), "/data/SGD"))
 
 ORF_gene_aliases = read.table("ORF_gene_aliases.tsv", sep="\t", check.names=F, quote="", col.names=c("ORF", "Gene", "Aliases"), stringsAsFactors=F)
 

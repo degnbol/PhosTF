@@ -1,5 +1,7 @@
 #!/usr/bin/env Rscript
 library(reshape2)
+suppressPackageStartupMessages(library(here))
+setwd(paste0(here(), "/data/zelezniak_2018"))
 
 dataset = read.table("proteins_dataset.data_prep.tsv", header=T, sep="\t")
 WT = aggregate(value ~ KO_ORF + ORF, data=dataset[dataset$KO_ORF == "WT",], mean)
