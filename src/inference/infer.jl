@@ -33,8 +33,8 @@ argument_parser = ArgParseSettings(description="Infer a weight matrix from logFC
     "--delim-mut", "-s"
         arg_type = Char
         help = "Character that separate gene names given in a column name when multiple genes are mutated in an experiment. By default all column names are assumed to be a single gene."
-    "--ignore"
-        help = "Ignore text in column names after this string. Useful to have the first part indicate which gene is mutated, and have some extra text afterwards, e.g. a number for repeated experiment."
+    "--col-match"
+        help = "Column names are used for matching against row names to find which gene is mutated. Set this to a regex to only match part of column name."
     "--epochs", "-e"
         arg_type = Int
         default = 500
@@ -114,16 +114,19 @@ savedlm_(path::AbstractString, x::AbstractArray; colnames=nothing, rownames=noth
 end
 
 
-"Get names of measured genes, genes mutated in each experiment and unique list of mutated genes."
-function get_logFC_genes(logFC::DataFrame, delim, ignore)
+"""
+Get names of measured genes, 
+genes mutated in each experiment and unique list of mutated genes.
+"""
+function get_logFC_genes(logFC::DataFrame, delim, col_match)
     meas_genes = logFC[!, 1]
     @assert eltype(meas_genes) <: AbstractString "No row names provided in logFC file."
     
     exp_genes = names(logFC)[2:end]
     exp_genes = delim === nothing ? [[n] for n in exp_genes] : split.(exp_genes, delim)
     
-    if ignore !== nothing
-        exp_genes = [[split(n, ignore)[1] for n in ns] for ns in exp_genes]
+    if col_match !== nothing
+        exp_genes = [[match(col_match, n).match for n in ns] for ns in exp_genes]
     end
     
     mut_genes = unique(n for ns in exp_genes for n in ns)
@@ -182,12 +185,12 @@ mat2MS(::Nothing) = nothing, nothing
 
 
 function infer(logFC::String, TF=nothing, KP=nothing, out_WT::String="WT_infer.tsv", out_WP::String="WP_infer.tsv";
-        log::Union{<:IO,<:AbstractString}=stdout, delim_mut=nothing, ignore=nothing, epochs::Integer=5000, opt="ADAMW", 
+        log::Union{<:IO,<:AbstractString}=stdout, delim_mut=nothing, col_match=nothing, epochs::Integer=5000, opt="ADAMW", 
         lr::Float64=0.001, decay::Real=0, WT=nothing, WP=nothing, WT_mask=nothing, WP_mask=nothing,
         lambda_Bstar::Real=0.1, lambda_absW::Real=1.0, reg_WT::Bool=true, train_WT::Bool=true)
     
 	logFC = loaddlm_(logFC, Float64)
-    meas_genes, exp_genes, mut_genes = get_logFC_genes(logFC, delim_mut, ignore)
+    meas_genes, exp_genes, mut_genes = get_logFC_genes(logFC, delim_mut, col_match)
     TFs = read_geneList(TF, mut_genes)
     KPs = read_geneList(KP, mut_genes)
     @assert length(intersect(TFs, KPs)) == 0 "Genes as both TF and KP not implemented."
