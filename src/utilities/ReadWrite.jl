@@ -122,23 +122,27 @@ save_BSON(fname::String, x) = BSON.bson(fname, Dict(default_identifier => x))
 save_JLD(fname::String, x) = JLD.save(fname, default_identifier, x)
 
 """
-Deal with string matrices containing '.', '+', '-' to represent 0, 1, -1.
+Deal with string matrices containing ".", "+", "-" to represent 0, 1, -1.
 The DelimitedFiles.readdlm should read string characters as Matrix{Any}
+Matrix{Char} will also be found with ::Matrix and converted to strings.
 """
-parse_matrix(mat::Union{Matrix{Any},Matrix{<:AbstractString}}) = begin
-    try
-        return parse_matrix(only.(mat))
-    catch e
-        isa(e, ArgumentError) || rethrow(e)
-    end
-    mat
+parse_matrix(mat::Matrix) = begin
+    out = parse_matrix(string.(mat))
+    # if strings weren't parsed to numbers then return the input unchanged.
+    eltype(out) <: AbstractString ? mat : out
 end
-parse_matrix(mat::Matrix{Char}) = begin
-    # all elements has to be '.', '+' or '-'
-    all((mat .== '+') .| (mat .== '-') .| (mat .== '.')) || return mat
-    out = (mat .== '+') .- (mat .== '-')
+parse_matrix(mat::Matrix{<:AbstractString}) = begin
+    # all elements has to be ".", "+" or "-", or maybe "0", "+1", "1", "-1"
+    m = copy(mat)
+    m[m .==  "0"] .= "."
+    m[m .==  "1"] .= "+"
+    m[m .== "+1"] .= "+"
+    m[m .== "-1"] .= "-"
+    all((m .== "+") .| (m .== "-") .| (m .== ".")) || return mat
+    (m .== "+") .- (m .== "-")
 end
 parse_matrix(mat::Union{BitMatrix,Matrix{<:Real}}) = mat
+
 function pretty_matrix(mat::Matrix{<:Real})
     out = fill('.', size(mat))
     out[mat .== +1] .= '+'
