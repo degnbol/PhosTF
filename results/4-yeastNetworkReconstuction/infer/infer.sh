@@ -1,5 +1,5 @@
 #!/usr/bin/env zsh
-# USAGE: ./infer.sh 'inner_-strict_0.0_0.1'
+# USAGE: ./infer.sh 'inner+-strict+0.0+0.1'
 OUT=logs/$@.log
 {
     echo "### cmdline:"
@@ -10,4 +10,4 @@ OUT=logs/$@.log
     cat ./infer.jl
     echo "\n### stdout:"
 } > $OUT
-./infer.jl $@ | tee -a $OUT
+./infer.jl $@ |& cat >> $OUT
