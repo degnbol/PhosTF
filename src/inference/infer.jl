@@ -130,7 +130,7 @@ function get_logFC_genes(logFC::DataFrame, delim, col_match)
     end
     
     mut_genes = unique(n for ns in exp_genes for n in ns)
-
+    
     meas_genes, exp_genes, mut_genes
 end
 
@@ -201,11 +201,11 @@ function infer(logFC::String, TF=nothing, KP=nothing, out_WT::String="WT_infer.t
     X = Matrix{Float64}(rowselect(logFC, TFKPOs)[!, 2:end])
     J = names2J(TFKPOs, exp_genes)
     @info "$(size(J, 1)) measured genes in $(size(J, 2)) experiments with a total of $(sum(J)) mutated genes."
-
-    Wₜinit = loaddlm_(WT, TFKPOs, TFs)
-    Wₚinit = loaddlm_(WP, TFKPs, KPs)
-    Mₜ, Sₜ = mat2MS(loaddlm_(WT_mask, TFKPOs, TFs))
-    Mₚ, Sₚ = mat2MS(loaddlm_(WP_mask, TFKPs, KPs))
+    
+    Wₜinit = loaddlm_(WT, TFs, TFKPOs)
+    Wₚinit = loaddlm_(WP, KPs, TFKPs)
+    Mₜ, Sₜ = mat2MS(loaddlm_(WT_mask, TFs, TFKPOs))
+    Mₚ, Sₚ = mat2MS(loaddlm_(WP_mask, KPs, TFKPs))
     
     mdl = Model.get_model(length(TFs), length(KPs), length(Os), J; Wₜ=Wₜinit, Wₚ=Wₚinit, Mₜ=Mₜ, Mₚ=Mₚ, Sₜ=Sₜ, Sₚ=Sₚ)
     train_WT || Model.untrainable_Wₜ()
@@ -213,7 +213,7 @@ function infer(logFC::String, TF=nothing, KP=nothing, out_WT::String="WT_infer.t
     @assert size(mdl(X)) == size(X)
 	
     opt = parse_optimizer(opt, lr, decay)
-
+    
     Wₜ, Wₚ = GradientDescent.train(mdl, X, log; epochs=epochs, opt=opt, λBstar=lambda_Bstar, λabsW=lambda_absW, reg_Wₜ=reg_WT)
 	
 	train_WT && savedlm_(out_WT, Wₜ; colnames=TFs, rownames=TFKPOs)
