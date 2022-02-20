@@ -80,18 +80,20 @@ function train(mdl, X::AbstractMatrix, log::IO=stdout; epochs::Integer=10000, λ
 			savedlm("WP.tmp.mat", Wₚ)
 		end
 
-		_MSE > 0.01
+        # finish early if logFC values if error is small
+		_MSE > 0.001
 	end
 	# throttle callbacks if we are doing a small example.
 	_cb = size(X, 1) > 100 ? cb : Flux.throttle(cb, 5)
 	
     println(log, train_Wₜ ? "loss\tMSE\tL1(Wp)\tL1(Wt)\tepoch\ttime" : "loss\tMSE\tL1(Wp)\tepoch\ttime")
-	_cb(0) # epoch 0 print before we start
-    for epoch in 1:epochs
+    epoch = 0
+	_cb(epoch) # epoch 0 print before we start
+    for outer epoch in 1:epochs
         Flux.train!(loss, params(mdl), ((X,),), opt)
         _cb(epoch) || break
     end
-    cb(epochs) # last epoch print after finish
+    cb(epoch) # last epoch print after finish
     Model.WₜWₚ(mdl)
 end
 # if a log file name is provided
