@@ -99,15 +99,15 @@ masking_KP = TRUE
 
 
 # read evaluation files
-KP = fread(cwd("data/network/KP_protein.tsv"))$ORF
-TF = read.vector("data/network/TF.txt")
-V  = read.vector("data/network/V_protein.txt")
+KP = fread(cwd("results/4-yeastNetworkReconstuction/KP_protein.tsv"))$ORF
+TF = read.vector("results/4-yeastNetworkReconstuction/TF.txt")
+V  = read.vector("results/4-yeastNetworkReconstuction/V_protein.txt")
 KPTF = c(KP,TF)
 nKP = length(KP)
 nV = length(V)
 nTF = length(TF)
 nO = nV-length(KPTF)
-KP_eval = fread(cwd("data/evaluation/P_eval.tsv"), 
+KP_eval = fread(cwd("results/5-inferencePerformance/P_eval.tsv"), 
                 select=c("Source", "Target", "biogrid", "fasolo", "parca", "fiedler", "yeastkid", "ptmod", "ptacek"))
 # remove diagonals
 KP_eval = KP_eval[Source!=Target,]
@@ -122,7 +122,7 @@ KP_eval[,yeastkid:=!is.na(yeastkid) & yeastkid>4.52]
 # string DB scores are confidence from 0 to 1 written as e.g. 800 to mean 0.8.
 # higher confidence score is better. 0.5 means that there is 50% prob for false positive. https://string-db.org/cgi/info.pl
 # if we use False Discovery Rate = .2 it only gives us a meager 4 edges, all of which are already in other datasets.
-# # so we use a dangerous FDR = .4, which gives us 7 edges not already found in another evaluation set.
+# so we use a dangerous FDR = .4, which gives us 7 edges not already found in another evaluation set.
 KP_eval[,ptmod:=!is.na(ptmod) & ptmod>600]
 KP_eval[,literature:=biogrid|fasolo|parca|fiedler]
 KP_eval[,curated:=yeastkid|ptmod]
