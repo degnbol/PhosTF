@@ -1,5 +1,5 @@
 #!/usr/bin/env Rscript
-# USE: gene2ORF.R INFILE OUTFILE CONVERTER_FILE
+# USAGE: gene2ORF.R INFILE OUTFILE CONVERTER_FILE
 # All files should be tab-separated. It doesn't matter if any of the three files has a header or not.
 # - CONVERTER_FILE: columns ORF, then Gene
 args = commandArgs(trailingOnly=TRUE)
