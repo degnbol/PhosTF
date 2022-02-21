@@ -1,6 +1,8 @@
 #!/usr/bin/env zsh
-# REQUIRES: raw/BIOGRID-PTM.ptmtab.txt.gz raw/BIOGRID-PTM-RELATIONSHIPS.ptmrel.txt.gz
+# download the necessary files from biogrid
+./raw.sh
 
+# only use yeast entries
 mlr --tsvlite --from raw/BIOGRID-PTM.ptmtab.txt.gz filter '${Organism Name} == "Saccharomyces cerevisiae (S288c)"' then \
     cut -x -f 'Organism ID,Organism Name' > yeast_PTM.tsv
 mlr --tsvlite --from raw/BIOGRID-PTM-RELATIONSHIPS.ptmrel.txt.gz filter '${Organism Name} == "Saccharomyces cerevisiae (S288c)"' then \
@@ -9,6 +11,7 @@ mlr --tsvlite --from raw/BIOGRID-PTM-RELATIONSHIPS.ptmrel.txt.gz filter '${Organ
 # make P_edges.tsv and regulatory_edges.tsv
 ./PTM2edges.R
 
+# extract other parts of the tables
 mlr --tsvlite --from yeast_PTM.tsv filter '${Post Translational Modification} == "Phosphorylation"' then \
     uniq -f 'Systematic Name' | sed 1d | sort > targets.txt
 mlr --tsvlite --from yeast_PTM.tsv uniq -f "Systematic Name,Position,Residue" then sort -f "Systematic Name" > PTM.res
