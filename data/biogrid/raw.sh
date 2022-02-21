@@ -8,4 +8,5 @@ unzip *.zip
 mv BIOGRID-PTM-RELATIONSHIPS{-*,}.ptmrel.txt
 mv BIOGRID-PTM{-*,}.ptmtab.txt
 rm *.zip
+gzip BIOGRID*.txt
 cd -
