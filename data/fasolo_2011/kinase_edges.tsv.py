@@ -5,7 +5,7 @@
 kinases = []
 targets = []
 
-with open("raw/FasoloSuppTableS1.pdf.tsv") as fh:
+with open("raw/FasoloSuppTableS1.pdf.docx.tsv") as fh:
     # first line contains kinases
     ks = next(fh).strip().split('\t')
     print("kinases:", ks)
