@@ -1,0 +1,484 @@
+ORF,Gene,"SGD annotation",Function,Subgroup
+YAL040C,CLN3,"G1 cyclin involved in cell cycle progression; activates Cdc28p kinase to promote the G1 to S phase transition; plays a role in regulating transcription of the other G1 cyclins, CLN1 and CLN2; regulated by phosphorylation and proteolysis ","kinase regulatory protein",
+YBR128C,ATG14,"Subunit of an autophagy-specific phosphatidylinositol 3-kinase complex (with Vps34p, Vps15p, and Vps30p) required for organization of a pre-autophagosomal structure; ATG14 transcription is activated by Gln3p during nitrogen starvation","kinase regulatory protein",
+YBR135W,CKS1,"Subunit of the Cdc28 protein kinase, required for mitotic proteolysis, may also be involved in the proteolysis of the G1 cyclins","kinase regulatory protein",
+YCL032W,STE50,"Protein involved in mating response, invasive/filamentous growth, and osmotolerance, acts as an adaptor that links G protein-associated Cdc42p-Ste20p complex to the effector Ste11p to modulate signal transduction","kinase regulatory protein",
+YDL127W,PCL2,"G1 cyclin, associates with Pho85p cyclin-dependent kinase (Cdk) to contribute to entry into the mitotic cell cycle, essential for cell morphogenesis; localizes to sites of polarized cell growth ","kinase regulatory protein",
+YDL155W,CLB3,"B-type cyclin involved in cell cycle progression; activates Cdc28p to promote the G2/M transition; may be involved in DNA replication and spindle assembly; accumulates during S phase and G2, then targeted for ubiquitin-mediated degradation ","kinase regulatory protein",
+YDL179W,PCL9,"Cyclin, forms a functional kinase complex with Pho85p cyclin-dependent kinase (Cdk), expressed in late M/early G1 phase, activated by Swi5p ","kinase regulatory protein",
+YDR052C,DBF4,"Regulatory subunit of Cdc7p-Dbf4p kinase complex, required for Cdc7p kinase activity and initiation of DNA replication","kinase regulatory protein",
+YDR162C,NBP2,"Protein involved in the HOG (high osmolarity glycerol) pathway, negatively regulates Hog1p by recruitment of phosphatase Ptc1p the Pbs2p-Hog1p complex, found in the nucleus and cytoplasm, contains an SH3 domain that binds Pbs2p ","kinase regulatory protein",
+YDR373W,FRQ1,"N-myristoylated calcium-binding protein that may have a role in intracellular signaling through its regulation of the phosphatidylinositol 4-kinase Pik1p; member of the recoverin/frequenin branch of the EF-hand superfamily","kinase regulatory protein",
+YDR422C,SIP1,"Alternate beta-subunit of the Snf1p kinase complex, may confer substrate specificity","kinase regulatory protein",
+YER027C,GAL83,"One of three possible beta-subunits of the Snf1 kinase complex, allows nuclear localization of the Snf1 kinase complex in the presence of a nonfermentable carbon source","kinase regulatory protein",
+YER059W,PCL6,"Pho85p cyclin of the Pho80p subfamily; forms the major Glc8p kinase together with Pcl7p and Pho85p; involved in the control of glycogen storage by Pho85p; stabilized by Elongin C binding ","kinase regulatory protein",
+YER093C,TSC11,"Subunit of TORC2 (Tor2p-Lst8p-Avo1-Avo2-Tsc11p-Bit61p), a membrane-associated complex that regulates actin cytoskeletal dynamics during polarized growth and cell wall integrity; involved in sphingolipid metabolism; contains a RasGEFN domain","kinase regulatory protein",
+YGL019W,CKB1,"Beta regulatory subunit of casein kinase 2, a Ser/Thr protein kinase with roles in cell growth and proliferation; the holoenzyme also contains CKA1, CKA2 and CKB2, the many substrates include transcription factors and all RNA polymerases","kinase regulatory protein",
+YGL115W,SNF4,"Activating gamma subunit of the AMP-activated Snf1p kinase complex (contains Snf1p and a Sip1p/Sip2p/Gal83p family member); activates glucose-repressed genes, represses glucose-induced genes; role in sporulation, and peroxisome biogenesis ","kinase regulatory protein",
+YGL134W,PCL10,"Pho85p cyclin; recruits, activates, and targets Pho85p cyclin-dependent protein kinase to its substrate ","kinase regulatory protein",
+YGL208W,SIP2,"One of three beta subunits of the Snf1 serine/threonine protein kinase complex involved in the response to glucose starvation","kinase regulatory protein",
+YGL215W,CLG1,"Cyclin-like protein that interacts with Pho85p; has sequence similarity to G1 cyclins PCL1 and PCL2 ","kinase regulatory protein",
+YGR109C,CLB6,"B-type cyclin involved in DNA replication during S phase; activates Cdc28p to promote initiation of DNA synthesis; functions in formation of mitotic spindles along with Clb3p and Clb4p; most abundant during late G1 ","kinase regulatory protein",
+YHR071W,PCL5,"Cyclin, interacts with Pho85p cyclin-dependent kinase (Cdk), induced by Gcn4p at level of transcription, specifically required for Gcn4p degradation, may be sensor of cellular protein biosynthetic capacity ","kinase regulatory protein",
+YHR186C,KOG1,"Subunit of TORC1, a rapamycin-sensitive complex involved in growth control that contains Tor1p or Tor2p, Lst8p and Tco89p; contains four HEAT repeats and seven WD-40 repeats; may act as a scaffold protein to couple TOR and its effectors","kinase regulatory protein",
+YIL050W,PCL7,"Pho85p cyclin of the Pho80p subfamily, forms a functional kinase complex with Pho85p which phosphorylates Mmr1p and is regulated by Pho81p; involved in glycogen metabolism, expression is cell-cycle regulated ","kinase regulatory protein",
+YJL006C,CTK2,"Beta subunit of C-terminal domain kinase I (CTDK-I), which phosphorylates the C-terminal repeated domain of the RNA polymerase II large subunit (Rpo21p) to affect both transcription and pre-mRNA 3' end processing; has similarity to cyclins","kinase regulatory protein",
+YJL058C,BIT61,"Subunit of TORC2 (Tor2p-Lst8p-Avo1-Avo2-Tsc11p-Bit61p-Slm1p-Slm2p), a membrane-associated complex that regulates cell cycle-dependent actin cytoskeletal dynamics during polarized growth and cell wall integrity","kinase regulatory protein",
+YJL157C,FAR1,"Cyclin-dependent kinase inhibitor that mediates cell cycle arrest in response to pheromone; also forms a complex with Cdc24p, Ste4p, and Ste18p that may specify the direction of polarized growth during mating; potential Cdc28p substrate","kinase regulatory protein",
+YLL021W,SPA2,"Component of the polarisome, which functions in actin cytoskeletal organization during polarized growth; acts as a scaffold for Mkk1p and Mpk1p cell wall integrity signaling components; potential Cdc28p substrate ","kinase regulatory protein",
+YLR079W,SIC1,"Inhibitor of Cdc28-Clb kinase complexes that controls G1/S phase transition, preventing premature S phase and ensuring genomic integrity; phosphorylation targets Sic1p for SCF(CDC4)-dependent turnover; functional homolog of mammalian Kip1 ","kinase regulatory protein",
+YLR210W,CLB4,"B-type cyclin involved in cell cycle progression; activates Cdc28p to promote the G2/M transition; may be involved in DNA replication and spindle assembly; accumulates during S phase and G2, then targeted for ubiquitin-mediated degradation","kinase regulatory protein",
+YLR253W,,"Putative protein of unknown function; green fluorescent protein (GFP)-fusion protein localizes to the mitochondria; transcription is periodic during the metabolic cycle; YLR253W is not an essential gene","kinase regulatory protein",
+YLR423C,ATG17,"Protein that interacts with and is required for activation of Apg1p protein kinase; involved in autophagy but not in the Cvt (cytoplasm to vacuole targeting) pathway","kinase regulatory protein",
+YML112W,CTK3,"Gamma subunit of C-terminal domain kinase I (CTDK-I), which phosphorylates the C-terminal repeated domain of the RNA polymerase II large subunit (Rpo21p) to affect both transcription and pre-mRNA 3' end processing","kinase regulatory protein",
+YMR068W,AVO2,"Component of a complex containing the Tor2p kinase and other proteins, which may have a role in regulation of cell growth","kinase regulatory protein",
+YMR199W,CLN1,"G1 cyclin involved in regulation of the cell cycle; activates Cdc28p kinase to promote the G1 to S phase transition; late G1 specific expression depends on transcription factor complexes, MBF (Swi6p-Mbp1p) and SBF (Swi6p-Swi4p)","kinase regulatory protein",
+YNL289W,PCL1,"Pho85 cyclin of the Pcl1,2-like subfamily, involved in entry into the mitotic cell cycle and regulation of morphogenesis, localizes to sites of polarized cell growth ","kinase regulatory protein",
+YOL001W,PHO80,"Cyclin, negatively regulates phosphate metabolism; Pho80p-Pho85p (cyclin-CDK complex) phosphorylates Pho4p and Swi5p; deletion of PHO80 leads to aminoglycoside supersensitivity; truncated form of PHO80 affects vacuole inheritance ","kinase regulatory protein",
+YOL078W,AVO1,"Component of a membrane-bound complex containing the Tor2p kinase and other proteins, which may have a role in regulation of cell growth","kinase regulatory protein",
+YOR039W,CKB2,"Beta' regulatory subunit of casein kinase 2, a Ser/Thr protein kinase with roles in cell growth and proliferation; the holoenzyme also contains CKA1, CKA2 and CKB1, the many substrates include transcription factors and all RNA polymerases","kinase regulatory protein",
+YPL120W,VPS30,"Protein that forms a membrane-associated complex with Apg14p that is essential for autophagy; involved in a retrieval step of the carboxypeptidase Y receptor, Vps10p, to the late Golgi from the endosome; involved in vacuolar protein sorting","kinase regulatory protein",
+YPL180W,TCO89,"Subunit of TORC1 (Tor1p or Tor2p-Kog1p-Lst8p-Tco89p), a complex that regulates growth in response to nutrient availability; cooperates with Ssd1p in the maintenance of cellular integrity; deletion strains are hypersensitive to rapamycin","kinase regulatory protein",
+YPL219W,PCL8,"Cyclin, interacts with Pho85p cyclin-dependent kinase (Cdk) to phosphorylate and regulate glycogen synthase, also activates Pho85p for Glc8p phosphorylation ","kinase regulatory protein",
+YPL256C,CLN2,"G1 cyclin involved in regulation of the cell cycle; activates Cdc28p kinase to promote the G1 to S phase transition; late G1 specific expression depends on transcription factor complexes, MBF (Swi6p-Mbp1p) and SBF (Swi6p-Swi4p)","kinase regulatory protein",
+YPR025C,CCL1,"Cyclin associated with protein kinase Kin28p, which is the TFIIH-associated carboxy-terminal domain (CTD) kinase involved in transcription initiation at RNA polymerase II promoters ","kinase regulatory protein",
+YPR119W,CLB2,"B-type cyclin involved in cell cycle progression; activates Cdc28p to promote the transition from G2 to M phase; accumulates during G2 and M, then targeted via a destruction box motif for ubiquitin-mediated degradation by the proteasome ","kinase regulatory protein",
+YPR120C,CLB5,"B-type cyclin involved in DNA replication during S phase; activates Cdc28p to promote initiation of DNA synthesis; functions in formation of mitotic spindles along with Clb3p and Clb4p; most abundant during late G1 phase ","kinase regulatory protein",
+YAL038W,CDC19,"Pyruvate kinase, functions as a homotetramer in glycolysis to convert phosphoenolpyruvate to pyruvate, the input for aerobic (TCA cycle) or anaerobic (glucose fermentation) respiration","non-protein kinase",
+YBL068W,PRS4,"5-phospho-ribosyl-1(alpha)-pyrophosphate synthetase, involved in nucleotide, histidine, and tryptophan biosynthesis; one of a five related enzymes, which are active as heteromultimeric complexes","non-protein kinase",
+YBR020W,GAL1,"Galactokinase, phosphorylates alpha-D-galactose to alpha-D-galactose-1-phosphate in the first step of galactose catabolism; expression regulated by Gal4p","non-protein kinase",
+YCL040W,GLK1,"Glucokinase, catalyzes the phosphorylation of glucose at C6 in the first irreversible step of glucose metabolism; one of three glucose phosphorylating enzymes; expression regulated by non-fermentable carbon sources","non-protein kinase",
+YCR012W,PGK1,"3-phosphoglycerate kinase, catalyzes transfer of high-energy phosphoryl groups from the acyl phosphate of 1,3-bisphosphoglycerate to ADP to produce ATP; key enzyme in glycolysis and gluconeogenesis","non-protein kinase",
+YDR017C,KCS1,"Inositol hexaphosphate kinase, phosphorylates inositol hexakisphosphate (InsP6) to diphosphoinositol polyphosphates, required for proper vacuole morphology and involved in salt stress response, contains two leucine heptad repeats","non-protein kinase",
+YDR147W,EKI1,"Ethanolamine kinase I; has similarity to Cki1p choline kinase","non-protein kinase",
+YDR208W,MSS4,"Phosphatidylinositol-4-phosphate 5-kinase; required for proper organization of the actin cytoskeleton","non-protein kinase",
+YDR236C,FMN1,"Riboflavin kinase, phosphorylates riboflavin to form riboflavin monophosphate (FMN), which is a necessary cofactor for many enzymes; localizes to microsomes and to the mitochondrial inner membrane","non-protein kinase",
+YDR315C,IPK1,"Inositol 1,3,4,5,6-pentakisphosphate 2-kinase, nuclear protein required for synthesis of 1,2,3,4,5,6-hexakisphosphate (phytate), which is integral to cell function; has 2 motifs conserved in other fungi; ipk1 gle1 double mutant is inviable","non-protein kinase",
+YDR454C,GUK1,"Guanylate kinase.","non-protein kinase",
+YER052C,HOM3,"Aspartate kinase (L-aspartate 4-P-transferase); cytoplasmic enzyme that catalyzes the first step in the common pathway for methionine and threonine biosynthesis; expression regulated by Gcn4p and the general control of amino acid synthesis","non-protein kinase",
+YER099C,PRS2,"5-phospho-ribosyl-1(alpha)-pyrophosphate synthetase, involved in nucleotide, histidine, and tryptophan biosynthesis; one of a five related enzymes, which are active as heteromultimeric complexes","non-protein kinase",
+YER170W,ADK2,"Mitochondrial adenylate kinase, catalyzes the reversible synthesis of GTP and AMP from GDP and ADP; may serve as a back-up for synthesizing GTP or ADP depending on metabolic conditions; 3' sequence of ADK2 varies with strain background","non-protein kinase",
+YFL053W,DAK2,"Dihydroxyacetone kinase, required for detoxification of dihydroxyacetone (DHA); involved in stress adaptation","non-protein kinase",
+YFR019W,FAB1,"Phosphatidylinositol-3-phosphate 5-kinase involved in orientation or separation of mitotic chromosomes","non-protein kinase",
+YFR053C,HXK1,"Hexokinase isoenzyme 1, a cytosolic protein that catalyzes phosphorylation of glucose during glucose metabolism; expression is highest during growth on non-glucose carbon sources; glucose-induced repression involves the hexokinase Hxk2p","non-protein kinase",
+YGL253W,HXK2,"Hexokinase isoenzyme 2 that catalyzes phosphorylation of glucose in the cytosol; predominant hexokinase during growth on glucose; functions in the nucleus to repress expression of HXK1 and GLK1 and to induce expression of its own gene","non-protein kinase",
+YGR194C,XKS1,"Xylulokinase, converts D-xylulose and ATP to xylulose 5-phosphate and ADP; rate limiting step in fermentation of xylulose; required for xylose fermentation by recombinant S. cerevisiae strains","non-protein kinase",
+YGR240C,PFK1,"Alpha subunit of heterooctameric phosphofructokinase involved in glycolysis, indispensable for anaerobic growth, activated by fructose-2,6-bisphosphate and AMP, mutation inhibits glucose induction of cell cycle-related genes","non-protein kinase",
+YHL032C,GUT1,"Glycerol kinase, converts glycerol to glycerol-3-phosphate; glucose repression of expression is mediated by Adr1p and Ino2p-Ino4p; derepression of expression on non-fermentable carbon sources is mediated by Opi1p and Rsf1p","non-protein kinase",
+YHR025W,THR1,"Homoserine kinase, conserved protein required for threonine biosynthesis; expression is regulated by the GCN4-mediated general amino acid control pathway","non-protein kinase",
+YIL107C,PFK26,"6-phosphofructo-2-kinase, inhibited by phosphoenolpyruvate and sn-glycerol 3-phosphate, has negligible fructose-2,6-bisphosphatase activity, transcriptional regulation involves protein kinase A","non-protein kinase",
+YJL100W,LSB6,"Phosphatidylinositol 4-kinase that binds Las17p, which is a homolog of human Wiskott-Aldrich Syndrome protein involved in actin patch assembly and actin polymerization","non-protein kinase",
+YJR057W,CDC8,"Thymidylate and uridylate kinase, functions in de novo biosynthesis of pyrimidine deoxyribonucleotides; converts dTMP to dTDP and dUMP to dUTP; essential for mitotic and meiotic DNA replication; homologous to S. pombe Tmp1p","non-protein kinase",
+YJR105W,ADO1,"Adenosine kinase, required for the utilization of S-adenosylmethionine (AdoMet); may be involved in recycling adenosine produced through the methyl cycle","non-protein kinase",
+YKL001C,MET14,"Adenylylsulfate kinase, required for sulfate assimilation and involved in methionine metabolism","non-protein kinase",
+YKL024C,URA6,"Uridylate kinase, catalyzes the seventh enzymatic step in the de novo biosynthesis of pyrimidines, converting uridine monophosphate (UMP) into uridine-5'-diphosphate (UDP)","non-protein kinase",
+YKL067W,YNK1,"Nucleoside diphosphate kinase, catalyzes the transfer of gamma phosphates from nucleoside triphosphates, usually ATP, to nucleoside diphosphates by a mechanism that involves formation of an autophosphorylated enzyme intermediate","non-protein kinase",
+YKR097W,PCK1,"Phosphoenolpyruvate carboxykinase, key enzyme in gluconeogenesis, catalyzes early reaction in carbohydrate biosynthesis, glucose represses transcription and accelerates mRNA degradation, regulated by Mcm1p and Cat8p, located in the cytosol","non-protein kinase",
+YLR133W,CKI1,"Choline kinase, first step in CDP-choline biosynthesis pathway","non-protein kinase",
+YLR240W,VPS34,"Phosphatidylinositol 3-kinase responsible for the synthesis of phosphatidylinositol 3-phosphate","non-protein kinase",
+YLR260W,LCB5,"Long chain base kinase, involved in biosynthesis of sphingolipid","non-protein kinase",
+YLR410W,VIP1,"Inositol hexakisphosphate (IP6) and inositol heptakisphosphate (IP7) kinase; generation of IP7 by Vip1p is important for phosphate signaling; likely involved in cortical actin cytoskeleton function, by analogy with S. pombe ortholog asp1 ","non-protein kinase",
+YML070W,DAK1,"Dihydroxyacetone kinase, required for detoxification of dihydroxyacetone (DHA); involved in stress adaptation","non-protein kinase",
+YMR205C,PFK2,"Beta subunit of heterooctameric phosphofructokinase involved in glycolysis, indispensable for anaerobic growth, activated by fructose-2,6-bisphosphate and AMP, mutation inhibits glucose induction of cell cycle-related genes","non-protein kinase",
+YMR208W,ERG12,"Mevalonate kinase, acts in the biosynthesis of isoprenoids and sterols, including ergosterol, from mevalonate","non-protein kinase",
+YMR220W,ERG8,"Phosphomevalonate kinase, an essential cytosolic enzyme that acts in the biosynthesis of isoprenoids and sterols, including ergosterol, from mevalonate","non-protein kinase",
+YNL129W,NRK1,"Nicotinamide riboside kinase, catalyzes the synthesis of nicotinamide nucleotide (NMN) from nicotinamide riboside; involved in a salvage pathway for NAD+ biosynthesis","non-protein kinase",
+YNL267W,PIK1,"Phosphatidylinositol 4-kinase, generates PtdIns 4-P","non-protein kinase",
+YNR012W,URK1,"Uridine/cytidine kinase, component of the pyrimidine ribonucleotide salvage pathway that converts uridine into UMP and cytidine into CMP; involved in the pyrimidine deoxyribonucleotide salvage pathway, converting deoxycytidine into dCMP","non-protein kinase",
+YOL061W,PRS5,"5-phospho-ribosyl-1(alpha)-pyrophosphate synthetase, involved in nucleotide, histidine, and tryptophan biosynthesis; one of a five related enzymes, which are active as heteromultimeric complexes","non-protein kinase",
+YOL136C,PFK27,"6-phosphofructo-2-kinase, catalyzes synthesis of fructose-2,6-bisphosphate; inhibited by phosphoenolpyruvate and sn-glycerol 3-phosphate, expression induced by glucose and sucrose, transcriptional regulation involves protein kinase A","non-protein kinase",
+YOR143C,THI80,"Thiamine pyrophosphokinase, phosphorylates thiamine to produce the coenzyme thiamine pyrophosphate (thiamine diphosphate)","non-protein kinase",
+YOR171C,LCB4,"Long chain base kinase, involved in biosynthesis of sphingolipid","non-protein kinase",
+YPL214C,THI6,"Bifunctional enzyme with thiamine-phosphate pyrophosphorylase and 4-methyl-5-beta-hydroxyethylthiazole kinase activities, required for thiamine biosynthesis; GFP-fusion protein localizes to the cytoplasm in a punctate pattern","non-protein kinase",
+YDR321W,ASP1,"Cytosolic L-asparaginase, involved in asparagine catabolism ","non-protein kinase",
+YBR011C,"IPP1 (PPA1)","Cytoplasmic inorganic pyrophosphatase (PPase), catalyzes the rapid exchange of oxygens from Pi with water, highly expressed and essential for viability, active-site residues show identity to those from E. coli PPase","non-protein phosphatase",
+YBR022W,POA1,"Phosphatase that is highly specific for ADP-ribose 1''-phosphate, a tRNA splicing metabolite; may have a role in regulation of tRNA splicing","non-protein phosphatase",
+YBR092C,PHO3,"Constitutively expressed acid phosphatase similar to Pho5p; brought to the cell surface by transport vesicles; hydrolyzes thiamin phosphates in the periplasmic space, increasing cellular thiamin uptake; expression is repressed by thiamin","non-protein phosphatase",
+YBR093C,PHO5,"Repressible acid phosphatase (1 of 3) that also mediates extracellular nucleotide-derived phosphate hydrolysis; secretory pathway derived cell surface glycoprotein; induced by phosphate starvation and coordinately regulated by PHO4 and PHO2","non-protein phosphatase",
+YBR252W,DUT1,"dUTPase, catalyzes the hydrolysis of dUTP to dUMP and PPi and thereby prevents the incorporation of uracil into DNA during replication","non-protein phosphatase",
+YCR026C,NPP1,"Nucleotide pyrophosphatase/phosphodiesterase family member; mediates extracellular nucleotide phosphate hydrolysis along with Npp2p and Pho5p; activity and expression enhanced during conditions of phosphate starvation","non-protein phosphatase",
+YDL236W,PHO13,"Alkaline phosphatase specific for p-nitrophenyl phosphate, involved in dephosphorylation of histone II-A and casein","non-protein phosphatase",
+YDR074W,TPS2,"Phosphatase subunit of the trehalose-6-phosphate synthase/phosphatase complex, which synthesizes the storage carbohydrate trehalose; expression is induced by stress conditions and repressed by the Ras-cAMP pathway","non-protein phosphatase",
+YDR284C,DPP1,"Diacylglycerol pyrophosphate (DGPP) phosphatase, zinc-regulated vacuolar membrane-associated lipid phosphatase, dephosphorylates DGPP to phosphatidate (PA) and Pi, then PA to diacylglycerol; involved in lipid signaling and cell metabolism","non-protein phosphatase",
+YDR287W,,"inositol monophosphatase","non-protein phosphatase",
+YDR481C,PHO8,"Repressible alkaline phosphatase, a glycoprotein localized to the vacuole; regulated by levels of inorganic phosphate and by a system consisting of Pho4p, Pho9p, Pho80p, Pho81p and Pho85p; dephosphorylates phosphotyrosyl peptides","non-protein phosphatase",
+YDR503C,LPP1,"Lipid phosphate phosphatase, catalyzes Mg(2+)-independent dephosphorylation of phosphatidic acid (PA), lysophosphatidic acid, and diacylglycerol pyrophosphate; involved in control of the cellular levels of phosphatidylinositol and PA","non-protein phosphatase",
+YEL016C,NPP2,"Nucleotide pyrophosphatase/phosphodiesterase family member; mediates extracellular nucleotide phosphate hydrolysis along with Npp1p and Pho5p; activity and expression enhanced during conditions of phosphate starvation","non-protein phosphatase",
+YEL042W,GDA1,"Guanosine diphosphatase located in the Golgi, involved in the transport of GDP-mannose into the Golgi lumen by converting GDP to GMP after mannose is transferred its substrate","non-protein phosphatase",
+YER062C,"HOR2 (GPP2)","One of two redundant DL-glycerol-3-phosphatases (RHR2/GPP1 encodes the other) involved in glycerol biosynthesis; induced in response to hyperosmotic stress and oxidative stress, and during the diauxic transition","non-protein phosphatase",
+YGL067W,NPY1,"NADH diphosphatase (pyrophosphatase), hydrolyzes the pyrophosphate linkage in NADH and related nucleotides; localizes to peroxisomes","non-protein phosphatase",
+YGR036C,"CAX4 (CWH8)","Dolichyl pyrophosphate (Dol-P-P) phosphatase with a luminally oriented active site in the ER, cleaves the anhydride linkage in Dol-P-P, required for Dol-P-P-linked oligosaccharide intermediate synthesis and protein N-glycosylation","non-protein phosphatase",
+YGR208W,SER2,"Phosphoserine phosphatase of the phosphoglycerate pathway, involved in serine and glycine biosynthesis, expression is regulated by the available nitrogen source","non-protein phosphatase",
+YHR043C,DOG2,"2-deoxyglucose-6-phosphate phosphatase, member of a family of low molecular weight phosphatases, similar to Dog1p, induced by oxidative and osmotic stress, confers 2-deoxyglucose resistance when overexpressed","non-protein phosphatase",
+YHR044C,DOG1,"2-deoxyglucose-6-phosphate phosphatase, similar to Dog2p, member of a family of low molecular weight phosphatases; confers 2-deoxyglucose resistance when overexpressed, in vivo substrate has not yet been identified","non-protein phosphatase",
+YHR046C,INM1,"Inositol monophosphatase, involved in biosynthesis of inositol and in phosphoinositide second messenger signaling; INM1 expression increases in the presence of inositol and decreases upon exposure to antibipolar drugs lithium and valproate","non-protein phosphatase",
+YHR201C,PPX1,"Exopolyphosphatase, hydrolyzes inorganic polyphosphate (poly P) into Pi residues; located in the cytosol, plasma membrane, and mitochondrial matrix","non-protein phosphatase",
+YHR215W,PHO12,"One of three repressible acid phosphatases, a glycoprotein that is transported to the cell surface by the secretory pathway; nearly identical to Pho11p; upregulated by phosphate starvation","non-protein phosphatase",
+YIL002C,INP51,"Phosphatidylinositol 4,5-bisphosphate 5-phosphatase, synaptojanin-like protein with an N-terminal Sac1 domain, plays a role in phosphatidylinositol 4,5-bisphosphate homeostasis and in endocytosis; null mutation confers cold-tolerant growth","non-protein phosphatase",
+YJL155C,FBP26,"Fructose-2,6-bisphosphatase, required for glucose metabolism","non-protein phosphatase",
+YJR110W,YMR1,"Phosphatidylinositol 3-phosphate [PI(3)P] phosphatase, regulates the localization and levels of PI(3)P; involved in cytoplasm to vacuole (CVT) transport; has similarity to the conserved myotubularin dual specificity phosphatase family","non-protein phosphatase",
+YKL212W,SAC1,"Lipid phosphoinositide phosphatase of the ER and Golgi, involved in protein trafficking and secretion","non-protein phosphatase",
+YKR053C,YSR3,"Dihydrosphingosine 1-phosphate phosphatase, membrane protein involved in sphingolipid metabolism; has similarity to Lcb3p","non-protein phosphatase",
+YLR151C,PCD1,"Peroxisomal nudix pyrophosphatase with specificity for coenzyme A and CoA derivatives, may function to remove potentially toxic oxidized CoA disulfide from peroxisomes to maintain the capacity for beta-oxidation of fatty acids","non-protein phosphatase",
+YLR377C,FBP1,"Fructose-1,6-bisphosphatase, key regulatory enzyme in the gluconeogenesis pathway, required for glucose metabolism","non-protein phosphatase",
+YMR156C,TPP1,"DNA 3'-phosphatase that functions in repair of endogenous damage of double-stranded DNA, activity is specific for removal of 3' phosphates at strand breaks; has similarity to the l-2-haloacid dehalogenase superfamily","non-protein phosphatase",
+YMR180C,CTL1,"RNA 5'-triphosphatase, localizes to both the nucleus and cytoplasm","non-protein phosphatase",
+YMR267W,PPA2,"Mitochondrial inorganic pyrophosphatase, required for mitochondrial function and possibly involved in energy generation from inorganic pyrophosphate","non-protein phosphatase",
+YNL106C,INP52,"Phosphatidylinositol 4,5-bisphosphate 5-phosphatase, synaptojanin-like protein with an N-terminal Sac1 domain, plays a role in endocytosis; hyperosmotic stress causes translocation to actin patches","non-protein phosphatase",
+YNL128W,TEP1,"Homolog of human tumor suppressor gene PTEN/MMAC1/TEP1 that has lipid phosphatase activity and is linked to the phosphatidylinositol signaling pathway; plays a role in normal sporulation","non-protein phosphatase",
+YNL325C,FIG4,"Protein required for efficient mating, member of a family of eukaryotic proteins that contain a domain homologous to Sac1p","non-protein phosphatase",
+YOL065C,INP54,"Phosphatidylinositol 4,5-bisphosphate 5-phosphatase with a role in secretion, localizes to the endoplasmic reticulum via the C-terminal tail; lacks the Sac1 domain and proline-rich region found in the other 3 INP proteins","non-protein phosphatase",
+YOR109W,INP53,"Phosphatidylinositol 4,5-bisphosphate 5-phosphatase, synaptojanin-like protein with an N-terminal Sac1 domain, plays a role in a TGN (trans Golgi network)-to-early endosome pathway; hyperosmotic stress causes translocation to actin patches","non-protein phosphatase",
+YDR245W,MNN10,"Subunit of a Golgi mannosyltransferase complex also containing Anp1p, Mnn9p, Mnn11p, and Hoc1p that mediates elongation of the polysaccharide mannan backbone; membrane protein of the mannosyltransferase family ",other,"cell wall organization"
+YJL183W,MNN11,"Subunit of a Golgi mannosyltransferase complex that also contains Anp1p, Mnn9p, Mnn10p, and Hoc1p, and mediates elongation of the polysaccharide mannan backbone; has homology to Mnn10p",other,"cell wall organization"
+YAR003W,SWD1,"Subunit of the COMPASS (Set1C) complex, which methylates histone H3 on lysine 4 and is required in transcriptional silencing near telomeres; WD40 beta propeller superfamily member with similarity to mammalian Rbbp7 ",other,"chromatin binding and remodeling"
+YBR095C,RXT2,"Subunit of the histone deacetylase Rpd3L complex; possibly involved in cell fusion and invasive growth",other,"chromatin binding and remodeling"
+YBR175W,SWD3,"Essential subunit of the COMPASS (Set1C) complex, which methylates histone H3 on lysine 4 and is required in transcriptional silencing near telomeres; WD40 beta propeller superfamily member and ortholog of mammalian WDR5 ",other,"chromatin binding and remodeling"
+YDR334W,SWR1,"Swi2/Snf2-related ATPase that is the structural component of the SWR1 complex, which exchanges histone variant H2AZ (Htz1p) for chromatin-bound histone H2A ",other,"chromatin binding and remodeling"
+YDR485C,VPS72,"Htz1p-binding component of the SWR1 complex, which exchanges histone variant H2AZ (Htz1p) for chromatin-bound histone H2A; required for vacuolar protein sorting ",other,"chromatin binding and remodeling"
+YER092W,IES5,"Protein that associates with the INO80 chromatin remodeling complex under low-salt conditions ",other,"chromatin binding and remodeling"
+YJL115W,ASF1,"Nucleosome assembly factor, involved in chromatin assembly and disassembly, anti-silencing protein that causes derepression of silent loci when overexpressed ",other,"chromatin binding and remodeling"
+YLR052W,IES3,"Subunit of the INO80 chromatin remodeling complex ",other,"chromatin binding and remodeling"
+YML041C,VPS71,"Nucleosome-binding component of the SWR1 complex, which exchanges histone variant H2AZ (Htz1p) for chromatin-bound histone H2A; required for vacuolar protein sorting ",other,"chromatin binding and remodeling"
+YMR219W,ESC1,"Protein localized to the nuclear periphery, involved in telomeric silencing; interacts with PAD4-domain of Sir4p ",other,"chromatin binding and remodeling"
+YNL135C,FPR1,"Peptidyl-prolyl cis-trans isomerase (PPIase), binds to the drugs FK506 and rapamycin; also binds to the nonhistone chromatin binding protein Hmo1p and may regulate its assembly or function",other,"chromatin binding and remodeling"
+YOL012C,HTZ1,"Histone variant H2AZ, exchanged for histone H2A in nucleosomes by the SWR1 complex; involved in transcriptional regulation through prevention of the spread of silent heterochromatin ",other,"chromatin binding and remodeling"
+YPL181W,CTI6,"Protein that relieves transcriptional repression by binding to the Cyc8p-Tup1p corepressor and recruiting the SAGA complex to the repressed promoter; contains a PHD finger domain ",other,"chromatin binding and remodeling"
+YCL016C,DCC1,"Subunit of a complex with Ctf8p and Ctf18p that shares some components with Replication Factor C, required for sister chromatid cohesion and telomere length maintenance ",other,"chromosome segregation"
+YDR318W,MCM21,"Protein involved in minichromosome maintenance; component of the COMA complex (Ctf19p, Okp1p, Mcm21p, Ame1p) that bridges kinetochore subunits that are in contact with centromeric DNA and the subunits bound to microtubules ",other,"chromosome segregation"
+YHR191C,CTF8,"Subunit of a complex with Ctf18p that shares some subunits with Replication Factor C and is required for sister chromatid cohesion ",other,"chromosome segregation"
+YLR190W,MMR1,"Phosphorylated protein of the mitochondrial outer membrane, localizes only to mitochondria of the bud; interacts with Myo2p to mediate mitochondrial distribution to buds; mRNA is targeted to the bud via the transport system involving She2p ",other,"chromosome segregation"
+YMR048W,CSM3,"Protein required for accurate chromosome segregation during meiosis ",other,"chromosome segregation"
+YOR349W,CIN1,"Tubulin folding factor D involved in beta-tubulin (Tub2p) folding; isolated as mutant with increased chromosome loss and sensitivity to benomyl ",other,"chromosome segregation"
+YPL241C,CIN2,"Tubulin folding factor C (putative) involved in beta-tubulin (Tub2p) folding; isolated as mutant with increased chromosome loss and sensitivity to benomyl ",other,"chromosome segregation"
+YPR046W,MCM16,"Protein involved in kinetochore-microtubule mediated chromosome segregation; binds to centromere DNA",other,"chromosome segregation"
+YML124C,TUB3,"Alpha-tubulin; associates with beta-tubulin (Tub2p) to form tubulin dimer, which polymerizes to form microtubules; expressed at lower level than Tub1p ",other,"chromosome segregation"
+YNL312W,RFA2,"Subunit of heterotrimeric Replication Protein A (RPA), which is a highly conserved single-stranded DNA binding protein involved in DNA replication, repair, and recombination ",other,"DNA replication/repair"
+YOL006C,TOP1,"Topoisomerase I, nuclear enzyme that relieves torsional strain in DNA by cleaving and re-sealing the phosphodiester backbone; relaxes both positively and negatively supercoiled DNA; functions in replication, transcription, and recombination ",other,"DNA replication/repair"
+YER095W,RAD51,"Strand exchange protein, forms a helical filament with DNA that searches for homology; involved in the recombinational repair of double-strand breaks in DNA during vegetative growth and meiosis; homolog of Dmc1p and bacterial RecA protein ",other,"DNA replication/repair"
+YGL127C,SOH1,"Subunit of the RNA polymerase II mediator complex; associates with core polymerase subunits to form the RNA polymerase II holoenzyme; involved in telomere maintenance; conserved with other metazoan MED31 subunits ",other,"DNA replication/repair"
+YKL113C,RAD27,"5' to 3' exonuclease, 5' flap endonuclease, required for Okazaki fragment processing and maturation as well as for long-patch base-excision repair; member of the S. pombe RAD2/FEN1 family ",other,"DNA replication/repair"
+YML032C,RAD52,"Protein that stimulates strand exchange by facilitating Rad51p binding to single-stranded DNA; anneals complementary single-stranded DNA; involved in the repair of double-strand breaks in DNA during vegetative growth and meiosis ",other,"DNA replication/repair"
+YCL061C,MRC1,"S-phase checkpoint protein found at replication forks, required for DNA replication; also required for Rad53p activation during DNA replication stress, where it forms a replication-pausing complex with Tof1p and is phosphorylated by Mec1p; protein involved in replication checkpoint ",other,"DNA replication/repair"
+YHR031C,RRM3,"DNA helicase involved in rDNA replication and Ty1 transposition; relieves replication fork pauses at telomeric regions; structurally and functionally related to Pif1p ",other,"DNA replication/repair"
+YGR130C,,"Putative protein of unknown function; green fluorescent protein (GFP)-fusion protein localizes to the cytoplasm; specifically phosphorylated in vitro by mammalian diphosphoinositol pentakisphosphate (IP7)",other,"DNA replication/repair"
+YMR207C,HFA1,"Mitochondrial acetyl-coenzyme A carboxylase, catalyzes the production of malonyl-CoA in mitochondrial fatty acid biosynthesis",other,"fatty acid biosynthesis"
+YNR016C,ACC1,"Acetyl-CoA carboxylase, biotin containing enzyme that catalyzes the carboxylation of acetyl-CoA to form malonyl-CoA; required for de novo biosynthesis of long-chain fatty acids",other,"fatty acid biosynthesis"
+YBR129C,OPY1,"Protein of unknown function, overproduction blocks cell cycle arrest in the presence of mating pheromone; the authentic, non-tagged protein is detected in highly purified mitochondria in high-throughput studies ",other,"pheromone response"
+YDL090C,RAM1,"Beta subunit of the CAAX farnesyltransferase (FTase) that prenylates the a-factor mating pheromone and Ras proteins; required for the membrane localization of Ras proteins and a-factor; homolog of the mammalian FTase beta subunit",other,"pheromone response"
+YER019W,ISC1,"Inositol phosphosphingolipid phospholipase C, hydrolyzes inositolphosphosphingolipids, activated by phosphatidylserine, cardiolipin, and phosphatidylglycerol, mediates Na+ and Li+ halotolerance, contains a P loop-like domain",other,"phospholipid metabolism"
+YKR031C,SPO14,"Phospholipase D, catalyzes the hydrolysis of phosphatidylcholine, producing choline and phosphatidic acid; involved in Sec14p-independent secretion; required for meiosis and spore formation; differently regulated in secretion and meiosis",other,"phospholipid metabolism"
+YML059C,NTE1,"Serine esterase that deacylates exogenous lysophospholipids, homolog of human neuropathy target esterase (NTE); mammalian NTE1 deacylates phosphatidylcholine to glycerophosphocholine",other,"phospholipid metabolism"
+YMR006C,PLB2,"Phospholipase B (lysophospholipase) involved in phospholipid metabolism; displays transacylase activity in vitro; overproduction confers resistance to lysophosphatidylcholine",other,"phospholipid metabolism"
+YMR008C,PLB1,"Phospholipase B (lysophospholipase) involved in lipid metabolism, required for deacylation of phosphatidylcholine and phosphatidylethanolamine but not phosphatidylinositol",other,"phospholipid metabolism"
+YOL011W,PLB3,"Phospholipase B (lysophospholipase) involved in phospholipid metabolism; hydrolyzes phosphatidylinositol and phosphatidylserine and displays transacylase activity in vitro",other,"phospholipid metabolism"
+YPL268W,PLC1,"Phosphoinositide-specific phospholipase C, hydrolyzes phosphatidylinositol 4,5-biphosphate (PIP2) to generate inositol 1,4,5-triphosphate (IP3) and 1,2-diacylglycerol (DAG); involved in kinetochore function and pseudohyphal differentiation",other,"phospholipid metabolism"
+YBR030W,,"Hypothetical protein, contains FKH and INO binding sites",other,"phospholipid metabolism"
+YDR096W,GIS1,"Transcriptional factor, involved in the expression of genes during nutrient limitation; also involved in the negative regulation of DPP1 and PHR1",other,"phospholipid metabolism"
+YGL126W,SCS3,"Protein required for inositol prototrophy, appears to be involved in the synthesis of inositol phospholipids from inositol but not in the control of inositol synthesis",other,"phospholipid metabolism"
+YHL020C,OPI1,"Transcriptional regulator of a variety of genes; phosphorylation by protein kinase A stimulates Opi1p function in negative regulation of phospholipid biosynthetic genes; involved in telomere maintenance",other,"phospholipid metabolism"
+YJR073C,OPI3,"Phospholipid methyltransferase (methylene-fatty-acyl-phospholipid synthase), catalyzes the last two steps in phosphatidylcholine biosynthesis ",other,"phospholipid metabolism"
+YKL051W,SFK1,"Plasma membrane protein that may act together with or upstream of Stt4p to generate normal levels of the essential phospholipid PI4P, at least partially mediates proper localization of Stt4p to the plasma membrane",other,"phospholipid metabolism"
+YLR386W,VAC14,"Protein involved in regulated synthesis of PtdIns(3,5)P(2), in control of trafficking of some proteins to the vacuole lumen via the MVB, and in maintenance of vacuole size and acidity; activator of Fab1p",other,"phospholipid metabolism"
+YNL054W,VAC7,"Integral vacuolar membrane protein involved in vacuole inheritance and morphology; may function to regulate Fab1p kinase activity",other,"phospholipid metabolism"
+YER151C,UBP3,"Ubiquitin-specific protease that interacts with Bre5p to co-regulate anterograde and retrograde transport between endoplasmic reticulum and Golgi compartments; inhibitor of gene silencing; cleaves ubiquitin fusions but not polyubiquitin",other,"protein degradation"
+YDR363W-A,SEM1,"Component of the lid subcomplex of the regulatory subunit of the 26S proteasome; ortholog of human DSS1 ",other,"protein degradation"
+YHR200W,RPN10,"Non-ATPase base subunit of the 19S regulatory particle (RP) of the 26S proteasome; N-terminus plays a role in maintaining the structural integrity of the RP; binds selectively to polyubiquitin chains; homolog of the mammalian S5a protein ",other,"protein degradation"
+YJL047C,RTT101,"Cullin subunit of a Roc1p-dependent E3 ubiquitin ligase complex; deletion phenotype suggests a role in anaphase progression; interacts with Mms22p and implicated in Mms22-dependent DNA repair; modified by the ubiquitin-like protein, Rub1p ",other,"protein degradation"
+YKL213C,DOA1,"WD repeat protein required for ubiquitin-mediated protein degradation, forms complex with Cdc48p, plays a role in controlling cellular ubiquitin concentration; also promotes efficient NHEJ in postdiauxic/stationary phase ",other,"protein degradation"
+YNR051C,BRE5,"Ubiquitin protease cofactor, forms deubiquitination complex with Ubp3p that coregulates anterograde and retrograde transport between the endoplasmic reticulum and Golgi compartments; null is sensitive to brefeldin A",other,"protein degradation"
+YEL003W,GIM4,"Subunit of the heterohexameric cochaperone prefoldin complex which binds specifically to cytosolic chaperonin and transfers target proteins to it ",other,"protein trafficking"
+YML094W,GIM5,"Subunit of the heterohexameric cochaperone prefoldin complex which binds specifically to cytosolic chaperonin and transfers target proteins to it ",other,"protein trafficking"
+YNL153C,GIM3,"Subunit of the heterohexameric cochaperone prefoldin complex which binds specifically to cytosolic chaperonin and transfers target proteins to it ",other,"protein trafficking"
+YGR086C,PIL1,"Primary component of eisosomes, which are large immobile cell cortex structures associated with endocytosis; null mutants show activation of Pkc1p/Ypk1p stress resistance pathways; detected in phosphorylated state in mitochondria ",other,"protein trafficking"
+YPL004C,LSP1,"Primary component of eisosomes, which are large immobile patch structures at the cell cortex associated with endocytosis, along with Pil1p and Sur7p; null mutants show activation of Pkc1p/Ypk1p stress resistance pathways ",other,"protein trafficking"
+YBR164C,ARL1,"Soluble GTPase with a role in regulation of membrane traffic; regulates potassium influx; G protein of the Ras superfamily, similar to ADP-ribosylation factor ",other,"protein trafficking"
+YJL004C,SYS1,"Integral membrane protein of the Golgi required for targeting of the Arf-like GTPase Arl3p to the Golgi; multicopy suppressor of ypt6 null mutation ",other,"protein trafficking"
+YLR262C,YPT6,"GTPase, Ras-like GTP binding protein involved in the secretory pathway, required for fusion of endosome-derived vesicles with the late Golgi, maturation of the vacuolar carboxypeptidase Y; has similarity to the human GTPase, Rab6 ",other,"protein trafficking"
+YAR002W,NUP60,"Subunit of the nuclear pore complex (NPC), functions to anchor Nup2p to the NPC in a process controlled by the nucleoplasmic concentration of Gsp1p-GTP; potential Cdc28p substrate; involved in telomere maintenance ",other,"protein trafficking"
+YDL116W,NUP84,"Subunit of the nuclear pore complex (NPC), forms a subcomplex with Nup85p, Nup120p, Nup145p-C, Sec13p, and Seh1p that plays a role in nuclear mRNA export and NPC biogenesis ",other,"protein trafficking"
+YER083C,GET2,"Subunit of the GET complex; required for meiotic nuclear division and for the retrieval of HDEL proteins from the Golgi to the ER in an ERD2 dependent fashion; may be involved in cell wall function",other,"protein trafficking"
+YGL020C,GET1,"Subunit of the GET complex; required for the retrieval of HDEL proteins from the Golgi to the ER in an ERD2 dependent fashion and for normal mitochondrial morphology and inheritance ",other,"protein trafficking"
+YGL124C,MON1,"Protein required for fusion of cvt-vesicles and autophagosomes with the vacuole; associates, as a complex with Ccz1p, with a perivacuolar compartment; potential Cdc28p substrate ",other,"protein trafficking"
+YLR039C,RIC1,"Protein involved in retrograde transport to the cis-Golgi network; forms heterodimer with Rgp1p that acts as a GTP exchange factor for Ypt6p; involved in transcription of rRNA and ribosomal protein genes ",other,"protein trafficking"
+YLR268W,SEC22,"R-SNARE protein; assembles into SNARE complex with Bet1p, Bos1p and Sed5p; cycles between the ER and Golgi complex; involved in anterograde and retrograde transport between the ER and Golgi; synaptobrevin homolog",other,"protein trafficking"
+YNL041C,COG6,"Component of the conserved oligomeric Golgi complex (Cog1p through Cog8p), a cytosolic tethering complex that functions in protein trafficking to mediate fusion of transport vesicles to Golgi compartments ",other,"protein trafficking"
+YNL051W,COG5,"Component of the conserved oligomeric Golgi complex (Cog1p through Cog8p), a cytosolic tethering complex that functions in protein trafficking to mediate fusion of transport vesicles to Golgi compartments ",other,"protein trafficking"
+YGL174W,BUD13,"Subunit of the RES complex, which is required for nuclear pre-mRNA retention and splicing; involved in bud-site selection; diploid mutants display a unipolar budding pattern instead of the wild-type bipolar pattern ",other,"RNA processing"
+YIR005W,IST3,"Component of the U2 snRNP, required for the first catalytic step of splicing and for spliceosomal assembly; interacts with Rds3p and is required for Mer1p-activated splicing",other,"RNA processing"
+YKL074C,MUD2,"Protein involved in early pre-mRNA splicing; component of the pre-mRNA-U1 snRNP complex, the commitment complex; interacts with Msl5p/BBP splicing factor and Sub2p; similar to metazoan splicing factor U2AF65 ",other,"RNA processing"
+YKL208W,CBT1,"Protein involved in 5' end processing of mitochondrial COB, 15S_rRNA, and RPM1 transcripts; may also have a role in 3' end processing of the COB pre-mRNA; displays genetic interaction with cell cycle-regulated kinase Dbf2p ",other,"RNA processing"
+YPL213W,LEA1,"Component of U2 snRNP; disruption causes reduced U2 snRNP levels; physically interacts with Msl1p; invovled in telomere maintenance; putative homolog of human U2A' snRNP protein ",other,"RNA processing"
+YDR378C,LSM6,"Lsm (Like Sm) protein; part of heteroheptameric complexes (Lsm2p-7p and either Lsm1p or 8p): cytoplasmic Lsm1p complex involved in mRNA decay; nuclear Lsm8p complex part of U6 snRNP and possibly involved in processing tRNA, snoRNA, and rRNA ",other,"RNA processing"
+YGL213C,SKI8,"Protein involved in exosome mediated 3' to 5' mRNA degradation and translation inhibition of non-poly(A) mRNAs as well as double-strand break formation during meiotic recombination; required for repressing propagation of dsRNA viruses ",other,"RNA processing"
+YJL124C,LSM1,"Lsm (Like Sm) protein; forms heteroheptameric complex (with Lsm2p, Lsm3p, Lsm4p, Lsm5p, Lsm6p, and Lsm7p) involved in degradation of cytoplasmic mRNAs ",other,"RNA processing"
+YNL147W,LSM7,"Lsm (Like Sm) protein; part of heteroheptameric complexes (Lsm2p-7p and either Lsm1p or 8p): cytoplasmic Lsm1p complex involved in mRNA decay; nuclear Lsm8p complex part of U6 snRNP and possibly involved in processing tRNA, snoRNA, and rRNA ",other,"RNA processing"
+YOR076C,SKI7,"Antiviral adaptor protein that mediates interactions via its N-terminus between the exosome and Ski complex (Ski2p, Ski3p, Ski8p) which operate in the 3'-to-5' mRNA-decay pathway; cytoplasmic protein required for degrading nonstop mRNAs ",other,"RNA processing"
+YPR189W,SKI3,"Protein involved in exosome mediated 3' to 5' mRNA degradation and translation inhibition of non-poly(A) mRNAs; forms complex with Ski2p and Ski8p; required for repressing propagation of dsRNA viruses ",other,"RNA processing"
+YGR081C,SLX9,"Protein required for pre-rRNA processing; associated with the 90S pre-ribosome and 43S small ribosomal subunit precursor; interacts with U3 snoRNA; deletion mutant has synthetic fitness defect with an sgs1 deletion mutant",other,"RNA processing"
+YHR081W,LRP1,"Substrate-specific nuclear cofactor for exosome activity in the processing of stable RNAs; required for telomere length maintenance; homolog of mammalian nuclear matrix protein C1D involved in regulation of DNA repair and recombination ",other,"RNA processing"
+YIL040W,APQ12,"Protein involved in nucleocytoplasmic transport of mRNA ",other,"RNA processing"
+YMR287C,MSU1,"3'-5' exoribonuclease, component of the mitochondrial degradosome along with the ATP-dependent RNA helicase Suv3p; the degradosome associates with the ribosome and mediates turnover of aberrant or unprocessed RNAs",other,"RNA processing"
+YNL098C,RAS2,"GTP-binding protein that regulates the nitrogen starvation response, sporulation, and filamentous growth; farnesylation and palmitoylation required for activity and localization to plasma membrane; homolog of mammalian Ras proto-oncogenes",other,"signal transduction"
+YCR027C,RHB1,"Putative Rheb-related GTPase involved in regulating canavanine resistance and arginine uptake; member of the Ras superfamily of G-proteins",other,"signal transduction"
+YOR101W,RAS1,"GTPase involved in G-protein signaling in the adenylate cyclase activating pathway, plays a role in cell proliferation; localized to the plasma membrane; homolog of mammalian RAS proto-oncogenes",other,"signal transduction"
+YPL115C,BEM3,"Rho GTPase activating protein (RhoGAP) involved in control of the cytoskeleton organization; targets the essential Rho-GTPase Cdc42p, which controls establishment and maintenance of cell polarity, including bud-site assembly ",other,"signal transduction"
+YDL235C,YPD1,"Phosphorelay intermediate protein, phosphorylated by the plasma membrane sensor Sln1p in response to osmotic stress and then in turn phosphorylates the response regulators Ssk1p in the cytosol and Skn7p in the nucleus",other,"signal transduction"
+YDR072C,IPT1,"Inositolphosphotransferase 1, involved in synthesis of mannose-(inositol-P)2-ceramide (M(IP)2C), which is the most abundant sphingolipid in cells, mutation confers resistance to the antifungals syringomycin E and DmAMP1 in some growth media",other,"signal transduction"
+YER118C,SHO1,"Transmembrane osmosensor, participates in activation of both the Cdc42p- and MAP kinase-dependent filamentous growth pathway and the high-osmolarity glycerol response pathway ",other,"signal transduction"
+YLR006C,SSK1,"Cytoplasmic response regulator, part of a two-component signal transducer that mediates osmosensing via a phosphorelay mechanism; dephosphorylated form is degraded by the ubiquitin-proteasome system; potential Cdc28p substrate",other,"signal transduction"
+YNL309W,STB1,"Protein with a role in regulation of MBF-specific transcription at Start, phosphorylated by Cln-Cdc28p kinases in vitro; unphosphorylated form binds Swi6p and binding is required for Stb1p function; expression is cell-cycle regulated ",other,transcription
+YDR156W,RPA14,"RNA polymerase I subunit A14 ",other,transcription
+YGR200C,ELP2,"Subunit of Elongator complex, which is required for modification of wobble nucleosides in tRNA; target of Kluyveromyces lactis zymocin ",other,transcription
+YGR274C,TAF1,"TFIID subunit (145 kDa), involved in RNA polymerase II transcription initiation, has histone acetyltransferase activity, involved in promoter binding and G1/S progression",other,transcription
+YJL148W,RPA34,"RNA polymerase I subunit A34.5",other,transcription
+YJL168C,SET2,"Histone methyltransferase with a role in transcriptional elongation, methylates a lysine residue of histone H3; associates with the C-terminal domain of Rpo21p; histone methylation activity is regulated by phosphorylation status of Rpo21p ",other,transcription
+YPR023C,EAF3,"Esa1p-associated factor, nonessential component of the NuA4 acetyltransferase complex, homologous to Drosophila dosage compensation protein MSL3 ",other,transcription
+YAL051W,OAF1,"Oleate-activated transcription factor, acts alone and as a heterodimer with Pip2p; activates genes involved in beta-oxidation of fatty acids and peroxisome organization and biogenesis ",other,transcription
+YBL005W,PDR3,"Transcriptional activator of the pleiotropic drug resistance network, regulates expression of ATP-binding cassette (ABC) transporters through binding to cis-acting sites known as PDREs (PDR responsive elements)",other,transcription
+YBL103C,RTG3,"Basic helix-loop-helix-leucine zipper (bHLH/Zip) transcription factor that forms a complex with another bHLH/Zip protein, Rtg1p, to activate the retrograde (RTG) and TOR pathways ",other,transcription
+YBR083W,TEC1,"Transcription factor required for full Ty1 epxression, Ty1-mediated gene activation, and haploid invasive and diploid pseudohyphal growth; TEA/ATTS DNA-binding domain family member ",other,transcription
+YBR112C,CYC8,"General transcriptional co-repressor, acts together with Tup1p; also acts as part of a transcriptional co-activator complex that recruits the SWI/SNF and SAGA complexes to promoters ",other,transcription
+YBR182C,SMP1,"Putative transcription factor involved in regulating the response to osmotic stress; member of the MADS-box family of transcription factors ",other,transcription
+YCL055W,KAR4,"Transcription factor required for gene regulation in repsonse to pheromones; also required during meiosis; exists in two forms, a slower-migrating form more abundant during vegetative growth and a faster-migrating form induced by pheromone ",other,transcription
+YDL056W,MBP1,"Transcription factor involved in regulation of cell cycle progression from G1 to S phase, forms a complex with Swi6p that binds to MluI cell cycle box regulatory element in promoters of DNA synthesis genes ",other,transcription
+YDR146C,SWI5,"Transcription factor that activates transcription of genes expressed at the M/G1 phase boundary and in G1 phase; localization to the nucleus occurs during G1 and appears to be regulated by phosphorylation by Cdc28p kinase ",other,transcription
+YER111C,SWI4,"DNA binding component of the SBF complex (Swi4p-Swi6p), a transcriptional activator that in concert with MBF (Mbp1-Swi6p) regulates late G1-specific transcription of targets including cyclins and genes required for DNA synthesis and repair ",other,transcription
+YFL031W,HAC1,"bZIP transcription factor (ATF/CREB1 homolog) that regulates the unfolded protein response, via UPRE binding, and membrane biogenesis; ER stress-induced splicing pathway utilizing Ire1p, Trl1p and Ada5p facilitates efficient Hac1p synthesis ",other,transcription
+YFR034C,PHO4,"Basic helix-loop-helix (bHLH) transcription factor of the myc-family; binds cooperatively with Pho2p to the PHO5 promoter; function is regulated by phosphorylation at multiple sites and by phosphate availability",other,transcription
+YGL013C,PDR1,"Zinc cluster protein that is a master regulator involved in recruiting other zinc cluster proteins to pleiotropic drug response elements (PDREs) to fine tune the regulation of multidrug resistance genes",other,transcription
+YGL035C,MIG1,"Transcription factor involved in glucose repression; sequence specific DNA binding protein containing two Cys2His2 zinc finger motifs; regulated by the SNF1 kinase and the GLC7 phosphatase ",other,transcription
+YGL166W,CUP2,"Copper-binding transcription factor; activates transcription of the metallothionein genes CUP1-1 and CUP1-2 in response to elevated copper concentrations ",other,transcription
+YHR124W,NDT80,"Meiosis-specific transcription factor required for exit from pachytene and for full meiotic recombination; activates middle sporulation genes; competes with Sum1p for binding to promoters containing middle sporulation elements (MSE)",other,transcription
+YHR206W,SKN7,"Nuclear response regulator and transcription factor, part of a branched two-component signaling system; required for optimal induction of heat-shock genes in response to oxidative stress; involved in osmoregulation",other,transcription
+YJL089W,SIP4,"C6 zinc cluster transcriptional activator that binds to the carbon source-responsive element (CSRE) of gluconeogenic genes; involved in the positive regulation of gluconeogenesis; regulated by Snf1p protein kinase; localized to the nucleus ",other,transcription
+YJR094C,IME1,"Master regulator of meiosis that is active only during meiotic events, activates transcription of early meiotic genes through interaction with Ume6p, degraded by the 26S proteasome following phosphorylation by Ime2p ",other,transcription
+YKR099W,BAS1,"Myb-related transcription factor involved in regulating basal and induced expression of genes of the purine and histidine biosynthesis pathways; also involved in regulation of meiotic recombination at specific genes ",other,transcription
+YLR182W,SWI6,"Transcription cofactor, forms complexes with DNA-binding proteins Swi4p and Mbp1p to regulate transcription at the G1/S transition; involved in meiotic gene expression; localization regulated by phosphorylation; potential Cdc28p substrate ",other,transcription
+YML007W,YAP1,"Basic leucine zipper (bZIP) transcription factor required for oxidative stress tolerance; activated by H2O2 through the multistep formation of disulfide bonds and transit from the cytoplasm to the nucleus; mediates resistance to cadmium ",other,transcription
+YNL027W,CRZ1,"Transcription factor that activates transcription of genes involved in stress response; nuclear localization is positively regulated by calcineurin-mediated dephosphorylation ",other,transcription
+YNR009W,NRM1,"Transcriptional co-repressor of MBF (MCB binding factor)-regulated gene expression; Nrm1p associates stably with promoters via MBF to repress transcription upon exit from G1 phase ",other,transcription
+YOL067C,RTG1,"Transcription factor (bHLH) involved in interorganelle communication between mitochondria, peroxisomes, and nucleus ",other,transcription
+YOR028C,CIN5,"Basic leucine zipper transcriptional factor of the yAP-1 family that mediates pleiotropic drug resistance and salt tolerance; localizes constitutively to the nucleus ",other,transcription
+YOR083W,WHI5,"Repressor of G1 transcription that binds to SCB binding factor (SBF) at SCB target promoters in early G1; phosphorylation of Whi5p by the CDK, Cln3p/Cdc28p relieves repression and promoter binding by Whi5; periodically expressed in G1 ",other,transcription
+YOR140W,SFL1,"Transcriptional repressor and activator; involved in repression of flocculation-related genes, and activation of stress responsive genes; negatively regulated by cAMP-dependent protein kinase A subunit Tpk2p ",other,transcription
+YPL086C,ELP3,"Subunit of Elongator complex, which is required for modification of wobble nucleosides in tRNA; exhibits histone acetyltransferase activity that is directed to histones H3 and H4; disruption confers resistance to K. lactis zymotoxin ",other,transcription
+YDR216W,ADR1,"Carbon source-responsive zinc-finger transcription factor, required for transcription of the glucose-repressed gene ADH2, of peroxisomal protein genes, and of genes required for ethanol, glycerol, and fatty acid utilization",other,transcription
+YDR435C,PPM1,"Carboxyl methyl transferase, methylates the C terminus of the protein phosphatase 2A catalytic subunit (Pph21p or Pph22p), which is important for complex formation with regulatory subunits","phosphatase regulatory protein",
+YAR014C,BUD14,"Protein involved in bud-site selection, Bud14p-Glc7p complex functions as a cortical regulator of dynein; diploid mutants display a random budding pattern instead of the wild-type bipolar pattern","phosphatase regulatory protein",
+YBL046W,PSY4,"Putative protein of unknown function; green fluorescent protein (GFP)-fusion protein localizes to the nucleus","phosphatase regulatory protein",
+YBR126C,TPS1,"Synthase subunit of trehalose-6-phosphate synthase/phosphatase complex, which synthesizes the storage carbohydrate trehalose; also found in a monomeric form; expression is induced by the stress response and repressed by the Ras-cAMP pathway","phosphatase regulatory protein",
+YCR073W-A,SOL2,"Protein with a possible role in tRNA export; shows similarity to 6-phosphogluconolactonase non-catalytic domains but does not exhibit this enzymatic activity; homologous to Sol1p, Sol3p, and Sol4p","phosphatase regulatory protein",
+YDR028C,"REG1 (HEX2, PZF240, SPP43, SRN1)","Regulatory subunit of type 1 protein phosphatase Glc7p, involved in negative regulation of glucose-repressible genes","phosphatase regulatory protein",
+YDR067C,OCA6,"Cytoplasmic protein required for replication of Brome mosaic virus in S. cerevisiae, which is a model system for studying replication of positive-strand RNA viruses in their natural hosts","phosphatase regulatory protein",
+YDR293C,"SSD1 (CLA1, MCS1, RLT1, SRK1) ","Protein with a role in maintenance of cellular integrity, interacts with components of the TOR pathway; ssd1 mutant of a clinical S. cerevisiae strain displays elevated virulence","phosphatase regulatory protein",
+YDR475C,"JIP4 (YDR474C)","Protein of unknown function; previously annotated as two separate ORFs, YDR474C and YDR475C, which were merged as a result of corrections to the systematic reference sequence","phosphatase regulatory protein",
+YFR040W,SAP155,"Protein that forms a complex with the Sit4p protein phosphatase and is required for its function","phosphatase regulatory protein",
+YGL190C,CDC55,"Non-essential regulatory subunit B of protein phosphatase 2A","phosphatase regulatory protein",
+YGL229C,SAP4,"Protein required for function of the Sit4p protein phosphatase, member of a family of similar proteins that form complexes with Sit4p, including Sap155p, Sap185p, and Sap190p","phosphatase regulatory protein",
+YGR161C,RTS3,"Putative component of the protein phosphatase type 2A complex","phosphatase regulatory protein",
+YHL029C,OCA5,"Cytoplasmic protein required for replication of Brome mosaic virus in S. cerevisiae, which is a model system for studying replication of positive-strand RNA viruses in their natural hosts","phosphatase regulatory protein",
+YHR075C,PPE1,"Protein with carboxyl methyl esterase activity that may have a role in demethylation of the phosphoprotein phosphatase catalytic subunit; also identified as a small subunit mitochondrial ribosomal protein","phosphatase regulatory protein",
+YIL045W,PIG2,"Putative type-1 protein phosphatase targeting subunit that tethers Glc7p type-1 protein phosphatase to Gsy2p glycogen synthase","phosphatase regulatory protein",
+YIL153W,"RRD1 (YPA1)","Activator of the phosphotyrosyl phosphatase activity of PP2A; regulates G1 phase progression, the G2/M phase transition, microtubule dynamics, the osmoresponse, bud morphogenesis and DNA repair; subunit of the Tap42p-Sit4p-Rrd1p complex","phosphatase regulatory protein",
+YJL083W,TAX4,"Protein involved in regulation of phosphatidylinositol 4,5-bisphosphate concentrations; Irs4p and Tax4p bind and activate the phosphatase Inp51p","phosphatase regulatory protein",
+YJL098W,SAP185,"Protein that forms a complex with the Sit4p protein phosphatase and is required for its function","phosphatase regulatory protein",
+YKL190W,CNB1,"Calcineurin B","phosphatase regulatory protein",
+YKL193C,"SDS22 (EGP1)","Conserved nuclear regulatory subunit of Glc7p type 1 protein serine-threonine phosphatase (PP1), functions positively with Glc7p to promote dephosphorylation of nuclear substrates required for chromosome transmission during mitosis","phosphatase regulatory protein",
+YKR019C,IRS4,"Protein involved in regulation of phosphatidylinositol 4,5-bisphosphate concentrations; Irs4p and Tax4p bind and activate the phosphatase Inp51p; mutation confers an increase in rDNA silencing","phosphatase regulatory protein",
+YKR028W,SAP190,"Protein that forms a complex with the Sit4p protein phosphatase and is required for its function","phosphatase regulatory protein",
+YLL011W,SOF1,"Essential subunit of the U3 (box C+D) snRNP complex required for 2' O-methylation of pre-RNA; has similarity to the beta subunit of trimeric G-proteins and the splicing factor Prp4p","phosphatase regulatory protein",
+YLR273C,PIG1,"Putative targeting subunit for the type-1 protein phosphatase Glc7p that tethers it to the Gsy2p glycogen synthase","phosphatase regulatory protein",
+YML100W,TSL1,"Large subunit of trehalose 6-phosphate synthase (Tps1p)/phosphatase (Tps2p) complex, which converts uridine-5'-diphosphoglucose and glucose 6-phosphate to trehalose, homologous to Tps3p and may share function","phosphatase regulatory protein",
+YML109W,"ZDS2 (CES4)","Protein that interacts with silencing proteins at the telomere, involved in transcriptional silencing; paralog of Zds1p","phosphatase regulatory protein",
+YMR120C,ADE17,"Enzyme of 'de novo' purine biosynthesis containing both 5-aminoimidazole-4-carboxamide ribonucleotide transformylase and inosine monophosphate cyclohydrolase activities, isozyme of Ade16p; ade16 ade17 mutants require adenine and histidine","phosphatase regulatory protein",
+YMR261C,TPS3,"Regulatory subunit of trehalose-6-phosphate synthase/phosphatase complex, which synthesizes the storage carbohydrate trehalose; expression is induced by stress conditions and repressed by the Ras-cAMP pathway","phosphatase regulatory protein",
+YMR273C,"ZDS1 (CES1, CKM1, NRC1, OSS1)","Protein that interacts with silencing proteins at the telomere, involved in transcriptional silencing; has a role in localization of Bcy1p, a regulatory subunit of protein kinase A; implicated in mRNA nuclear export","phosphatase regulatory protein",
+YMR311C,GLC8,"Regulatory subunit of protein phosphatase 1 (Glc7p), involved in glycogen metabolism and chromosome segregation; proposed to regulate Glc7p activity via conformational alteration; ortholog of the mammalian protein phosphatase inhibitor 2","phosphatase regulatory protein",
+YNL201C,PSY2,"Nuclear protein of unknown function; deletion results in sensitivity to anticancer drugs oxaliplatin and cisplatin, but not mitomycin C; deletion is synthetically lethal with a chitin synthase (CHS1) null mutant","phosphatase regulatory protein",
+YNL233W,BNI4,"Targeting subunit for Glc7p protein phosphatase, localized to the bud neck, required for localization of chitin synthase III to the bud neck via interaction with the chitin synthase III regulatory subunit Skt5p","phosphatase regulatory protein",
+YNR034W,SOL1,"Protein with a possible role in tRNA export; shows similarity to 6-phosphogluconolactonase non-catalytic domains but does not exhibit this enzymatic activity; homologous to Sol2p, Sol3p, and Sol4p","phosphatase regulatory protein",
+YOR014W,RTS1,"B-type regulatory subunit of protein phosphatase 2A (PP2A)","phosphatase regulatory protein",
+YOR227W,,"Hypothetical protein","phosphatase regulatory protein",
+YPL137C,GIP3,"Glc7-interacting protein whose overexpression relocalizes Glc7p from the nucleus and prevents chromosome segregation","phosphatase regulatory protein",
+YPL152W,"RRD2 (YPA2)","Activator of the phosphotyrosyl phosphatase activity of PP2A; regulates G1 phase progression, the osmoresponse and microtubule dynamics; implicated in the spindle assembly check; subunit of the Tap42p-Pph21p-Rrd2p complex","phosphatase regulatory protein",
+YPL228W,CET1,"Beta (RNA 5'-triphosphatase) subunit of the mRNA capping enzyme, a heterodimer (the other subunit is CEG1, a guanylyltransferase) involved in adding the 5' cap to mRNA; the mammalian enzyme is a single bifunctional polypeptide","phosphatase regulatory protein",
+YBL085W,BOI1,"Protein implicated in polar growth, functionally redundant with Boi2p; interacts with bud-emergence protein Bem1p; contains an SH3 (src homology 3) domain and a PH (pleckstrin homology) domain","phosphoprotein binding",
+YBR200W,BEM1,"Protein containing SH3-domains, involved in establishing cell polarity and morphogenesis; functions as a scaffold protein for complexes that include Cdc24p, Ste5p, Ste20p, and Rsr1p ","phosphoprotein binding",
+YCR065W,HCM1,"Forkhead transcription factor involved in cell cycle specific transcription of SPC110; dosage-dependent suppressor of calmodulin mutants with specific defects in SPB assembly; involved in telomere maintenance","phosphoprotein binding",
+YDR099W,BMH2,"14-3-3 protein, minor isoform; binds proteins and DNA, involved in regulation of many processes including exocytosis and vesicle transport, Ras/MAPK signaling during pseudohyphal development, rapamycin-sensitive signaling, and others","phosphoprotein binding",
+YDR501W,PLM2,"Protein required for partitioning of the 2-micron plasmid","phosphoprotein binding",
+YER114C,BOI2,"Protein implicated in polar growth, functionally redundant with Boi1p; interacts with bud-emergence protein Bem1p; contains an SH3 (src homology 3) domain and a PH (pleckstrin homology) domain","phosphoprotein binding",
+YER177W,BMH1,"14-3-3 protein, major isoform; binds proteins and DNA, involved in regulation of many processes including exocytosis and vesicle transport, Ras/MAPK signaling during pseudohyphal development, rapamycin-sensitive signaling, and others","phosphoprotein binding",
+YFL010C,WWM1,"WW domain containing protein of unknown function; binds to Mca1p, a caspase-related protease that regulates H2O2-induced apoptosis; overexpression causes Gi phase growth arrest and clonal death that is suppressed by overexpression of MCA1","phosphoprotein binding",
+YGL227W,VID30,"Protein involved in proteasome-dependent catabolite degradation of fructose-1,6-bisphosphatase (FBPase); shifts the balance of nitrogen metabolism toward the production of glutamate; localized to the nucleus and the cytoplasm","phosphoprotein binding",
+YGR116W,SPT6,"Essential protein that interacts with histones and is involved in nucleosome disassembly and reassembly during transcription elongation","phosphoprotein binding",
+YHR115C,DMA1,"Protein involved in regulating spindle position and orientation, functionally redundant with Dma2p; homolog of S. pombe Dma1 and H. sapiens Chfr","phosphoprotein binding",
+YIL131C,FKH1,"Transcription factor of the forkhead family that regulates the cell cycle and pseudohyphal growth; also involved in chromatin silencing at HML and HMR","phosphoprotein binding",
+YJR017C,ESS1,"Peptidylprolyl-cis/trans-isomerase (PPIase) specific for phosphorylated serine and threonine residues N-terminal to proline; regulates phosphorylation of the RNA polymerase II large subunit (Rpo21p) C-terminal domain","phosphoprotein binding",
+YLR016C,PML1,"Subunit of the RES complex, which is required for nuclear retention of unspliced pre-mRNAs; acts in the same pathway as Pml39p and Mlp1p","phosphoprotein binding",
+YLR183C,TOS4,"Transcription factor that binds to a number of promoter regions, particularly promoters of some genes involved in pheromone response and cell cycle; potential Cdc28p substrate; expression is induced in G1 by bound SBF","phosphoprotein binding",
+YLR238W,FAR10,"Protein involved in G1 cell cycle arrest in response to pheromone, in a pathway different from the Far1p-dependent pathway; interacts with Far3p, Far7p, Far8p, Far9p, and Far11p; potential Cdc28p substrate","phosphoprotein binding",
+YNL068C,FKH2,"Transcription factor of the forkhead family that regulates the cell cycle and pseudohyphal growth; also involved in chromatin silencing at HML and HMR; potential Cdc28p substrate","phosphoprotein binding",
+YNL116W,DMA2,"Protein involved in regulating spindle position and orientation, functionally redundant with Dma1p; homolog of S. pombe Dma1 and H. sapiens Chfr","phosphoprotein binding",
+YPR104C,FHL1,"Putative transcriptional regulator with similarity to DNA-binding domain of Drosophila forkhead; required for rRNA processing","phosphoprotein binding",
+YPR152C,URN1,"Pre-mRNA splicing factor that is associated with the U2-U5-U6 snRNPs, the RES complex, and the Prp19-associated complex (NTC); null mutation displays synthetic genetic interactions with mutations affecting U2 snRNA and pre-mRNA splicing factors","phosphoprotein binding",
+YAL017W,PSK1,"One of two (see also PSK2) PAS domain containing S/T protein kinases","protein kinase",
+YAR018C,KIN3,"Nonessential protein kinase with unknown cellular role","protein kinase",
+YBL009W,,haspin,"protein kinase",
+YBL016W,FUS3,"Mitogen-activated protein kinase involved in mating pheromone response","protein kinase",
+YBL088C,TEL1,"Protein kinase, primarily involved in telomere length regulation","protein kinase",
+YBL105C,PKC1,"Protein serine/threonine kinase essential for cell wall remodeling during growth","protein kinase",
+YBR028C,,"Hypothetical protein","protein kinase",
+YBR059C,AKL1,"Ser-Thr protein kinase, member (with Ark1p and Prk1p) of the Ark kinase family; involved in endocytosis and actin cytoskeleton organization ","protein kinase",
+YBR136W,MEC1,"Genome integrity checkpoint protein and PI kinase superfamily member","protein kinase",
+YBR160W,CDC28,"Catalytic subunit of the main cell cycle cyclin-dependent kinase (CDK)","protein kinase",
+YBR274W,CHK1,"DNA damage checkpoint effector kinase, mediates mitotic cell cycle arrest via phosphorylation of Pds1p","protein kinase",
+YCL024W,KCC4,"Protein kinase of the bud neck involved in the septin checkpoint, associates with septin proteins, negatively regulates Swe1p by phosphorylation, shows structural homology to bud neck kinases Gin4p and Hsl1p","protein kinase",
+YCR008W,SAT4,"Ser/Thr protein kinase involved in salt tolerance","protein kinase",
+YCR073C,SSK22,"MAP kinase kinase kinase of the HOG1 mitogen-activated signaling pathway","protein kinase",
+YCR091W,KIN82,"Putative serine/threonine protein kinase, most similar to cyclic nucleotide-dependent protein kinase subfamily and the protein kinase C subfamily","protein kinase",
+YDL017W,CDC7,"DDK (Dbf4-dependent kinase) catalytic subunit required for firing origins and replication fork progression in mitosis through phosphorylation of Mcm2-7p complexes and Cdc45p","protein kinase",
+YDL025C,,"Protein of unknown function, potentially phosphorylated by Cdc28p","protein kinase",
+YDL079C,MRK1,"Glycogen synthase kinase 3 (GSK-3) homolog","protein kinase",
+YDL101C,DUN1,"Cell-cycle checkpoint serine-threonine kinase required for DNA damage-induced transcription of certain target genes, phosphorylation of Rad55p and Sml1p, and transient G2/M arrest after DNA damage","protein kinase",
+YDL108W,KIN28,"Serine/threonine protein kinase, subunit of the transcription factor TFIIH","protein kinase",
+YDL214C,PRR2,"Protein kinase with a possible role in MAP kinase signaling in the pheromone response pathway","protein kinase",
+YDR122W,KIN1,"Serine/threonine protein kinase involved in regulation of exocytosis","protein kinase",
+YDR247W,VHS1,"Cytoplasmic serine/threonine protein kinase","protein kinase",
+YDR283C,GCN2,"Protein kinase, phosphorylates the alpha-subunit of translation initiation factor eIF2 (Sui2p) in response to starvation","protein kinase",
+YDR466W,PKH3,"Protein kinase with similarity to mammalian phosphoinositide-dependent kinase 1 (PDK1) and yeast Pkh1p and Pkh2p, two redundant upstream activators of Pkc1p","protein kinase",
+YDR477W,SNF1,"AMP-activated serine/threonine protein kinase found in a complex containing Snf4p and members of the Sip1p/Sip2p/Gal83p family","protein kinase",
+YDR490C,PKH1,"Serine/threonine protein kinase involved in sphingolipid-mediated signaling pathway that controls endocytosis, PKA-related","protein kinase",
+YDR507C,GIN4,"Protein kinase involved in bud growth and assembly of the septin ring, proposed to have kinase-dependent and kinase-independent activities","protein kinase",
+YDR523C,SPS1,"Putative protein serine/threonine kinase expressed at the end of meiosis and localized to the prospore membrane, required for correct localization of enzymes involved in spore wall synthesis","protein kinase",
+YER123W,YCK3,"Palmitoylated, vacuolar membrane-localized casein kinase I isoform","protein kinase",
+YER129W,SAK1,"Upstream kinase for the SNF1 complex","protein kinase",
+YFL029C,CAK1,"Cyclin-dependent kinase-activating kinase required for passage through the cell cycle, phosphorylates and activates Cdc28p","protein kinase",
+YFL033C,RIM15,"Glucose-repressible protein kinase involved in signal transduction during cell proliferation in response to nutrients, specifically the establishment of stationary phase","protein kinase",
+YFR014C,CMK1,"Calmodulin-dependent protein kinase","protein kinase",
+YGL021W,ALK1,"Protein kinase; accumulation and phosphorylation are periodic during the cell cycle; phosphorylated in response to DNA damage; contains characteristic motifs for degradation via the APC pathway; similar to Alk2p and to mammalian haspins","protein kinase",
+YGL059W,,"Hypothetical protein","protein kinase",
+YGL083W,SCY1,"Protein involved in suppression of a GTPase mutant","protein kinase",
+YGL158W,RCK1,"Protein kinase involved in the response to oxidative stress","protein kinase",
+YGL179C,TOS3,"Protein kinase, related to and functionally redundant with Elm1p and Sak1p for the phosphorylation and activation of Snf1p","protein kinase",
+YGL180W,ATG1,"Protein serine/threonine kinase, required for autophagy and for the cytoplasm-to-vacuole targeting (Cvt) pathway","protein kinase",
+YGR040W,KSS1,"Mitogen-activated protein kinase (MAPK) involved in signal transduction pathways that control filamentous growth and pheromone response ","protein kinase",
+YGR052W,FMP48,"The authentic, non-tagged protein was localized to the mitochondria","protein kinase",
+YGR080W,TWF1,"Protein with similarity to human tyrosine kinase A6. Not in alignment.","protein kinase",
+YGR092W,DBF2,"Ser/Thr kinase involved in transcription and stress response","protein kinase",
+YGR188C,BUB1,"Protein kinase that forms a complex with Mad1p and Bub3p that is crucial in the checkpoint mechanism required to prevent cell cycle progression into anaphase in the presence of spindle damage, associates with centromere DNA via Skp1p","protein kinase",
+YHL007C,STE20,"Signal transducing kinase of the PAK (p21-activated kinase) family, involved in pheromone response and pseudohyphal/invasive growth pathways, activated by Cdc42p","protein kinase",
+YHR030C,SLT2,"Serine/threonine MAP kinase involved in regulating the maintenance of cell wall integrity and progression through the cell cycle","protein kinase",
+YHR079C,IRE1,"Serine-threonine kinase and endoribonuclease","protein kinase",
+YHR082C,KSP1,"Nonessential putative serine/threonine protein kinase of unknown cellular role","protein kinase",
+YHR135C,YCK1,"Palmitoylated, plasma membrane-bound casein kinase I isoform","protein kinase",
+YHR205W,SCH9,"Protein kinase that regulates signal transduction activity and G1 progression, controls cAPK activity, required for nitrogen activation of the FGM pathway, involved in life span regulation, homologous to mammalian Akt/PKB","protein kinase",
+YIL035C,CKA1,"Alpha catalytic subunit of casein kinase 2, a Ser/Thr protein kinase with roles in cell growth and proliferation","protein kinase",
+YIL042C,PKP1,"Mitochondrial kinase, phosphorylates pyruvate dehydrogenase alpha subunit Pda1p","protein kinase",
+YIL095W,PRK1,"Protein serine/threonine kinase","protein kinase",
+YIL147C,SLN1,"Histidine kinase osmosensor that regulates a MAP kinase cascade, transmembrane protein with an intracellular kinase domain that signals to Ypd1p and Ssk1p, thereby forming a phosphorelay system similar to bacterial two-component regulators","protein kinase",
+YJL057C,IKS1,"Probable serine/threonine protein kinase, yeast specific","protein kinase",
+YJL095W,BCK1,"Mitogen-activated protein (MAP) kinase kinase kinase acting in the protein kinase C signaling pathway, which controls cell integrity","protein kinase",
+YJL106W,IME2,"Serine/threonine protein kinase involved in activation of meiosis, associates with Ime1p and mediates its stability, activates Ndt80p","protein kinase",
+YJL141C,YAK1,"Serine-threonine protein kinase that is part of a glucose-sensing system involved in growth control in response to glucose availability","protein kinase",
+YJL164C,TPK1,"Subunit of cytoplasmic cAMP-dependent protein kinase, which contains redundant catalytic subunits Tpk1p, Tpk2p, and Tpk3p and regulatory subunit Bcy1p","protein kinase",
+YJL165C,HAL5,"Putative protein kinase","protein kinase",
+YJL187C,"SWE1 (WEE1)","Protein kinase that regulates the G2/M transition by inhibition of Cdc28p kinase activity","protein kinase",
+YJR059W,PTK2,"Putative serine/threonine protein kinase involved in regulation of ion transport across plasma membrane","protein kinase",
+YJR066W,TOR1,"PIK-related protein kinase and rapamycin target","protein kinase",
+YKL048C,ELM1,"Serine/threonine protein kinase that regulates cellular morphogenesis, septin behavior, and cytokinesis","protein kinase",
+YKL101W,HSL1,"Nim1p-related protein kinase that regulates the morphogenesis and septin checkpoints","protein kinase",
+YKL116C,PRR1,"Protein kinase with a possible role in MAP kinase signaling in the pheromone response pathway","protein kinase",
+YKL126W,YPK1,"Serine/threonine protein kinase required for receptor-mediated endocytosis","protein kinase",
+YKL139W,CTK1,"Catalytic (alpha) subunit of C-terminal domain kinase I (CTDK-I), which phosphorylates the C-terminal repeated domain of the RNA polymerase II large subunit (Rpo21p) to affect both transcription and pre-mRNA 3' end processing","protein kinase",
+YKL161C,,"Protein kinase implicated in the Slt2p mitogen-activated (MAP) kinase signaling pathway","protein kinase",
+YKL166C,TPK3,"Subunit of cytoplasmic cAMP-dependent protein kinase, which contains redundant catalytic subunits Tpk1p, Tpk2p, and Tpk3p and regulatory subunit Bcy1p","protein kinase",
+YKL168C,KKQ8,"Putative serine/threonine protein kinase with unknown cellular role","protein kinase",
+YKL171W,,"Putative protein of unknown function","protein kinase",
+YKL198C,PTK1,"Putative serine/threonine protein kinase that regulates spermine uptake","protein kinase",
+YKL203C,TOR2,"PIK-related protein kinase and rapamycin target","protein kinase",
+YLR096W,KIN2,"Serine/threonine protein kinase involved in regulation of exocytosis","protein kinase",
+YLR113W,HOG1,"Mitogen-activated protein kinase involved in osmoregulation via three independent osmosensors","protein kinase",
+YLR248W,RCK2,"Protein kinase involved in the response to oxidative and osmotic stress","protein kinase",
+YMR001C,CDC5,"Polo-like kinase with similarity to Xenopus Plx1 and S. pombe Plo1p","protein kinase",
+YMR104C,YPK2,"Protein kinase with similarityto serine/threonine protein kinase Ypk1p","protein kinase",
+YMR139W,RIM11,"Protein kinase required for signal transduction during entry into meiosis","protein kinase",
+YMR216C,SKY1,"SR protein kinase (SRPK) involved in regulating proteins involved in mRNA metabolism and cation homeostasis","protein kinase",
+YMR291W,,"Hypothetical protein","protein kinase",
+YNL020C,ARK1,"Serine/threonine protein kinase involved in regulation of the cortical actin cytoskeleton","protein kinase",
+YNL154C,YCK2,"Palmitoylated, plasma membrane-bound casein kinase I isoform","protein kinase",
+YNL183C,NPR1,"Serine/threonine protein kinase involved in regulating transport systems for nitrogen nutrients under conditions of nitrogen catabolite derepression, yeast specific","protein kinase",
+YNL207W,RIO2,"Essential serine kinase involved in the processing of the 20S pre-rRNA into mature 18S rRNA","protein kinase",
+YNL298W,CLA4,"Cdc42p activated signal transducing kinase of the PAK (p21-activated kinase) family, involved in septin ring assembly and cytokinesis","protein kinase",
+YNR031C,SSK2,"MAP kinase kinase kinase of the HOG1 mitogen-activated signaling pathway","protein kinase",
+YNR047W,,"Putative protein kinase that, when overexpressed, interferes with pheromone-induced growth arrest","protein kinase",
+YOL016C,CMK2,"Calmodulin-dependent protein kinase","protein kinase",
+YOL045W,PSK2,"One of two (see also PSK1) PAS domain containing S/T protein kinases","protein kinase",
+YOL100W,PKH2,"Serine/threonine protein kinase involved in sphingolipid-mediated signaling pathway that controls endocytosis, PKA-related","protein kinase",
+YOL113W,SKM1,"Member of the PAK family of serine/threonine protein kinases with similarity to Ste20p and Cla4p","protein kinase",
+YOL128C,YGK3,"Protein kinase related to mammalian glycogen synthase kinases of the GSK-3 family","protein kinase",
+YOR061W,CKA2,"Alpha' catalytic subunit of casein kinase 2, a Ser/Thr protein kinase with roles in cell growth and proliferation","protein kinase",
+YOR119C,RIO1,"Essential serine kinase involved in cell cycle progression and processing of the 20S pre-rRNA into mature 18S rRNA","protein kinase",
+YOR233W,KIN4,"Kinase that acts by inhibiting the mitotic exit network (MEN) when the spindle position checkpoint is activated","protein kinase",
+YOR267C,HRK1,"Protein kinase implicated in activation of the plasma membrane H(+)-ATPase Pma1p in response to glucose metabolism","protein kinase",
+YOR351C,MEK1,"Meiosis-specific serine/threonine protein kinase, functions in meiotic checkpoint, phosphorylates Red1p, interacts with Hop1p","protein kinase",
+YPL026C,SKS1,"Putative serine/threonine protein kinase","protein kinase",
+YPL031C,PHO85,"Cyclin-dependent kinase, with ten cyclin partners","protein kinase",
+YPL042C,SSN3,"Cyclin-dependent protein kinase, component of RNA polymerase II holoenzyme","protein kinase",
+YPL109C,,"Protein with unknown function, microbial protein kinase","protein kinase",
+YPL141C,,"Serine/threonine protein kinase with similarity to Kin4p","protein kinase",
+YPL150W,,"Hypothetical protein","protein kinase",
+YPL153C,RAD53,"Protein kinase, required for cell-cycle arrest in response to DNA damage","protein kinase",
+YPL203W,TPK2,"Subunit of cytoplasmic cAMP-dependent protein kinase, which contains redundant catalytic subunits Tpk1p, Tpk2p, and Tpk3p and regulatory subunit Bcy1p","protein kinase",
+YPL204W,HRR25,"Protein kinase involved in regulating diverse events including vesicular trafficking, gene expression, DNA repair, and chromosome segregation","protein kinase",
+YPL209C,IPL1,"Aurora kinase involved in regulating kinetochore-microtubule attachments, associates with Sli15p, which stimulates Ipl1p kinase activity and promotes its association with the mitotic spindle, potential Cdc28p substrate","protein kinase",
+YPL236C,,"Hypothetical protein","protein kinase",
+YPR054W,SMK1,"Middle sporulation-specific mitogen-activated protein kinase (MAPK) required for spore morphogenesis","protein kinase",
+YPR106W,ISR1,"Predicted protein kinase, overexpression causes sensitivity to staurosporine, which is a potent inhibitor of protein kinase C","protein kinase",
+YPR111W,DBF20,"Ser/Thr kinase involved in late nuclear division, one of the mitotic exit network (MEN) proteins","protein kinase",
+YPR161C,SGV1,"Cyclin (Bur2p)-dependent protein kinase that functions in transcriptional regulation","protein kinase",
+YDL028C,MPS1,"Dual-specificity kinase required for spindle pole body (SPB) duplication and spindle checkpoint function","protein kinase",
+YJL128C,PBS2,"MAP kinase kinase that plays a pivotal role in the osmosensing signal-transduction pathway, activated under severe osmotic stress","protein kinase",
+YLL019C,KNS1,"Nonessential putative protein kinase of unknown cellular role","protein kinase",
+YNL307C,MCK1,"Protein serine/threonine/tyrosine (dual-specificity) kinase involved in control of chromosome segregation and in regulating entry into meiosis","protein kinase",
+YOR231W,MKK1,"Mitogen-activated kinase kinase involved in protein kinase C signaling pathway that controls cell integrity","protein kinase",
+YPL140C,MKK2,"Mitogen-activated kinase kinase involved in protein kinase C signaling pathway that controls cell integrity","protein kinase",
+YBL056W,PTC3,"Type 2C protein phosphatase","protein phosphatase",
+YBR125C,PTC4,"Cytoplasmic type 2C protein phosphatase","protein phosphatase",
+YBR276C,PPS1,"Protein phosphatase with specificity for serine, threonine, and tyrosine residues","protein phosphatase",
+YCR079W,PTC6,"Hypothetical protein","protein phosphatase",
+YCR095C,OCA4,"Cytoplasmic protein required for replication of Brome mosaic virus in S. cerevisiae, which is a model system for studying replication of positive-strand RNA viruses in their natural hosts","protein phosphatase",
+YDL006W,PTC1,"Type 2C protein phosphatase (PP2C)","protein phosphatase",
+YDL047W,SIT4,"Type 2A-related serine-threonine phosphatase that functions in the G1/S transition of the mitotic cycle","protein phosphatase",
+YDL134C,PPH21,"Catalytic subunit of protein phosphatase 2A, functionally redundant with Pph22p","protein phosphatase",
+YDL188C,PPH22,"Catalytic subunit of protein phosphatase 2A, functionally redundant with Pph21p","protein phosphatase",
+YDL230W,PTP1,"Phosphotyrosine-specific protein phosphatase that dephosphorylates a broad range of substrates in vivo, including Fpr3p","protein phosphatase",
+YDR075W,PPH3,"Catalytic subunit of protein phosphatase","protein phosphatase",
+YDR436W,PPZ2,"Serine/threonine protein phosphatase Z, isoform of Ppz1p","protein phosphatase",
+YER075C,PTP3,"Phosphotyrosine-specific protein phosphatase involved in the inactivation of mitogen-activated protein kinase (MAPK) during osmolarity sensing","protein phosphatase",
+YER089C,PTC2,"Type 2C protein phosphatase","protein phosphatase",
+YER134C,,"Hypothetical protein","protein phosphatase",
+YGR123C,PPT1,"Protein serine/threonine phosphatase with similarity to human phosphatase PP5","protein phosphatase",
+YGR203W,,"Putative protein with sequence similarity to protein tyrosine phosphatases of the CDC25-like phosphatase family","protein phosphatase",
+YHR076W,PTC7,"Mitochondrially localized type 2C protein phosphatase","protein phosphatase",
+YIL113W,SDP1,"Stress-inducible dual-specificity MAP kinase phosphatase, negatively regulates Slt2p MAP kinase by direct dephosphorylation, diffuse localization under normal conditions shifts to punctate localization after heat shock","protein phosphatase",
+YIR026C,YVH1,"Protein phosphatase involved in vegetative growth at low temperatures, sporulation, and glycogen accumulation","protein phosphatase",
+YLL010C,PSR1,"Plasma membrane associated protein phosphatase involved in the general stress response","protein phosphatase",
+YLR019W,PSR2,"Functionally redundant Psr1p homolog, a plasma membrane phosphatase involved in the general stress response","protein phosphatase",
+YLR433C,CNA1,"Calcineurin A","protein phosphatase",
+YML016C,PPZ1,"Serine/threonine protein phosphatase Z, isoform of Ppz2p","protein phosphatase",
+YML057W,CMP2,"Calcineurin A","protein phosphatase",
+YMR036C,MIH1,"Protein tyrosine phosphatase involved in cell cycle control","protein phosphatase",
+YMR277W,FCP1,"Carboxy-terminal domain (CTD) phosphatase, essential for dephosphorylation of the repeated C-terminal domain of the RNA polymerase II large subunit (Rpo21p)","protein phosphatase",
+YNL032W,"SIW14 (OCA3)","Tyrosine phosphatase that plays a role in actin filament organization and endocytosis","protein phosphatase",
+YNL053W,MSG5,"Dual-specificity protein phosphatase required for maintenance of a low level of signaling through the cell integrity pathway","protein phosphatase",
+YNL056W,OCA2,"Putative protein with similarity to predicted tyrosine phosphatases Oca1p and Siw14p; green fluorescent protein (GFP)-fusion protein localizes to the cytoplasm; YNL056W is not an essential gene","protein phosphatase",
+YNL099C,OCA1,"Putative protein tyrosine phosphatase, required for cell cycle arrest in response to oxidative damage of DNA","protein phosphatase",
+YNL217W,,"Protein of unknown function, similarity to PP2A family","protein phosphatase",
+YNL222W,SSU72,"Transcription/RNA-processing factor that associates with TFIIB and cleavage/polyadenylation factor Pta1p","protein phosphatase",
+YNR032W,PPG1,"Putative serine/threonine protein phosphatase, required for glycogen accumulation","protein phosphatase",
+YOR090C,PTC5,"Mitochondrially localized type 2C protein phosphatase","protein phosphatase",
+YOR208W,PTP2,"Phosphotyrosine-specific protein phosphatase involved in the inactivation of mitogen-activated protein kinase (MAPK) during osmolarity sensing","protein phosphatase",
+YPL179W,"PPQ1 (SAL6)","Putative protein serine/threonine phosphatase","protein phosphatase",
+YPR073C,LTP1,"Protein phosphotyrosine phosphatase of unknown cellular role","protein phosphatase",

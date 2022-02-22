@@ -1,0 +1,484 @@
+ORF	Gene	Function	Subgroup
+YAL040C	CLN3	kinase regulatory protein	
+YBR128C	ATG14	kinase regulatory protein	
+YBR135W	CKS1	kinase regulatory protein	
+YCL032W	STE50	kinase regulatory protein	
+YDL127W	PCL2	kinase regulatory protein	
+YDL155W	CLB3	kinase regulatory protein	
+YDL179W	PCL9	kinase regulatory protein	
+YDR052C	DBF4	kinase regulatory protein	
+YDR162C	NBP2	kinase regulatory protein	
+YDR373W	FRQ1	kinase regulatory protein	
+YDR422C	SIP1	kinase regulatory protein	
+YER027C	GAL83	kinase regulatory protein	
+YER059W	PCL6	kinase regulatory protein	
+YER093C	TSC11	kinase regulatory protein	
+YGL019W	CKB1	kinase regulatory protein	
+YGL115W	SNF4	kinase regulatory protein	
+YGL134W	PCL10	kinase regulatory protein	
+YGL208W	SIP2	kinase regulatory protein	
+YGL215W	CLG1	kinase regulatory protein	
+YGR109C	CLB6	kinase regulatory protein	
+YHR071W	PCL5	kinase regulatory protein	
+YHR186C	KOG1	kinase regulatory protein	
+YIL050W	PCL7	kinase regulatory protein	
+YJL006C	CTK2	kinase regulatory protein	
+YJL058C	BIT61	kinase regulatory protein	
+YJL157C	FAR1	kinase regulatory protein	
+YLL021W	SPA2	kinase regulatory protein	
+YLR079W	SIC1	kinase regulatory protein	
+YLR210W	CLB4	kinase regulatory protein	
+YLR253W		kinase regulatory protein	
+YLR423C	ATG17	kinase regulatory protein	
+YML112W	CTK3	kinase regulatory protein	
+YMR068W	AVO2	kinase regulatory protein	
+YMR199W	CLN1	kinase regulatory protein	
+YNL289W	PCL1	kinase regulatory protein	
+YOL001W	PHO80	kinase regulatory protein	
+YOL078W	AVO1	kinase regulatory protein	
+YOR039W	CKB2	kinase regulatory protein	
+YPL120W	VPS30	kinase regulatory protein	
+YPL180W	TCO89	kinase regulatory protein	
+YPL219W	PCL8	kinase regulatory protein	
+YPL256C	CLN2	kinase regulatory protein	
+YPR025C	CCL1	kinase regulatory protein	
+YPR119W	CLB2	kinase regulatory protein	
+YPR120C	CLB5	kinase regulatory protein	
+YAL038W	CDC19	non-protein kinase	
+YBL068W	PRS4	non-protein kinase	
+YBR020W	GAL1	non-protein kinase	
+YCL040W	GLK1	non-protein kinase	
+YCR012W	PGK1	non-protein kinase	
+YDR017C	KCS1	non-protein kinase	
+YDR147W	EKI1	non-protein kinase	
+YDR208W	MSS4	non-protein kinase	
+YDR236C	FMN1	non-protein kinase	
+YDR315C	IPK1	non-protein kinase	
+YDR454C	GUK1	non-protein kinase	
+YER052C	HOM3	non-protein kinase	
+YER099C	PRS2	non-protein kinase	
+YER170W	ADK2	non-protein kinase	
+YFL053W	DAK2	non-protein kinase	
+YFR019W	FAB1	non-protein kinase	
+YFR053C	HXK1	non-protein kinase	
+YGL253W	HXK2	non-protein kinase	
+YGR194C	XKS1	non-protein kinase	
+YGR240C	PFK1	non-protein kinase	
+YHL032C	GUT1	non-protein kinase	
+YHR025W	THR1	non-protein kinase	
+YIL107C	PFK26	non-protein kinase	
+YJL100W	LSB6	non-protein kinase	
+YJR057W	CDC8	non-protein kinase	
+YJR105W	ADO1	non-protein kinase	
+YKL001C	MET14	non-protein kinase	
+YKL024C	URA6	non-protein kinase	
+YKL067W	YNK1	non-protein kinase	
+YKR097W	PCK1	non-protein kinase	
+YLR133W	CKI1	non-protein kinase	
+YLR240W	VPS34	non-protein kinase	
+YLR260W	LCB5	non-protein kinase	
+YLR410W	VIP1	non-protein kinase	
+YML070W	DAK1	non-protein kinase	
+YMR205C	PFK2	non-protein kinase	
+YMR208W	ERG12	non-protein kinase	
+YMR220W	ERG8	non-protein kinase	
+YNL129W	NRK1	non-protein kinase	
+YNL267W	PIK1	non-protein kinase	
+YNR012W	URK1	non-protein kinase	
+YOL061W	PRS5	non-protein kinase	
+YOL136C	PFK27	non-protein kinase	
+YOR143C	THI80	non-protein kinase	
+YOR171C	LCB4	non-protein kinase	
+YPL214C	THI6	non-protein kinase	
+YDR321W	ASP1	non-protein kinase	
+YBR011C	IPP1 (PPA1)	non-protein phosphatase	
+YBR022W	POA1	non-protein phosphatase	
+YBR092C	PHO3	non-protein phosphatase	
+YBR093C	PHO5	non-protein phosphatase	
+YBR252W	DUT1	non-protein phosphatase	
+YCR026C	NPP1	non-protein phosphatase	
+YDL236W	PHO13	non-protein phosphatase	
+YDR074W	TPS2	non-protein phosphatase	
+YDR284C	DPP1	non-protein phosphatase	
+YDR287W		non-protein phosphatase	
+YDR481C	PHO8	non-protein phosphatase	
+YDR503C	LPP1	non-protein phosphatase	
+YEL016C	NPP2	non-protein phosphatase	
+YEL042W	GDA1	non-protein phosphatase	
+YER062C	HOR2 (GPP2)	non-protein phosphatase	
+YGL067W	NPY1	non-protein phosphatase	
+YGR036C	CAX4 (CWH8)	non-protein phosphatase	
+YGR208W	SER2	non-protein phosphatase	
+YHR043C	DOG2	non-protein phosphatase	
+YHR044C	DOG1	non-protein phosphatase	
+YHR046C	INM1	non-protein phosphatase	
+YHR201C	PPX1	non-protein phosphatase	
+YHR215W	PHO12	non-protein phosphatase	
+YIL002C	INP51	non-protein phosphatase	
+YJL155C	FBP26	non-protein phosphatase	
+YJR110W	YMR1	non-protein phosphatase	
+YKL212W	SAC1	non-protein phosphatase	
+YKR053C	YSR3	non-protein phosphatase	
+YLR151C	PCD1	non-protein phosphatase	
+YLR377C	FBP1	non-protein phosphatase	
+YMR156C	TPP1	non-protein phosphatase	
+YMR180C	CTL1	non-protein phosphatase	
+YMR267W	PPA2	non-protein phosphatase	
+YNL106C	INP52	non-protein phosphatase	
+YNL128W	TEP1	non-protein phosphatase	
+YNL325C	FIG4	non-protein phosphatase	
+YOL065C	INP54	non-protein phosphatase	
+YOR109W	INP53	non-protein phosphatase	
+YDR245W	MNN10	other	cell wall organization
+YJL183W	MNN11	other	cell wall organization
+YAR003W	SWD1	other	chromatin binding and remodeling
+YBR095C	RXT2	other	chromatin binding and remodeling
+YBR175W	SWD3	other	chromatin binding and remodeling
+YDR334W	SWR1	other	chromatin binding and remodeling
+YDR485C	VPS72	other	chromatin binding and remodeling
+YER092W	IES5	other	chromatin binding and remodeling
+YJL115W	ASF1	other	chromatin binding and remodeling
+YLR052W	IES3	other	chromatin binding and remodeling
+YML041C	VPS71	other	chromatin binding and remodeling
+YMR219W	ESC1	other	chromatin binding and remodeling
+YNL135C	FPR1	other	chromatin binding and remodeling
+YOL012C	HTZ1	other	chromatin binding and remodeling
+YPL181W	CTI6	other	chromatin binding and remodeling
+YCL016C	DCC1	other	chromosome segregation
+YDR318W	MCM21	other	chromosome segregation
+YHR191C	CTF8	other	chromosome segregation
+YLR190W	MMR1	other	chromosome segregation
+YMR048W	CSM3	other	chromosome segregation
+YOR349W	CIN1	other	chromosome segregation
+YPL241C	CIN2	other	chromosome segregation
+YPR046W	MCM16	other	chromosome segregation
+YML124C	TUB3	other	chromosome segregation
+YNL312W	RFA2	other	DNA replication/repair
+YOL006C	TOP1	other	DNA replication/repair
+YER095W	RAD51	other	DNA replication/repair
+YGL127C	SOH1	other	DNA replication/repair
+YKL113C	RAD27	other	DNA replication/repair
+YML032C	RAD52	other	DNA replication/repair
+YCL061C	MRC1	other	DNA replication/repair
+YHR031C	RRM3	other	DNA replication/repair
+YGR130C		other	DNA replication/repair
+YMR207C	HFA1	other	fatty acid biosynthesis
+YNR016C	ACC1	other	fatty acid biosynthesis
+YBR129C	OPY1	other	pheromone response
+YDL090C	RAM1	other	pheromone response
+YER019W	ISC1	other	phospholipid metabolism
+YKR031C	SPO14	other	phospholipid metabolism
+YML059C	NTE1	other	phospholipid metabolism
+YMR006C	PLB2	other	phospholipid metabolism
+YMR008C	PLB1	other	phospholipid metabolism
+YOL011W	PLB3	other	phospholipid metabolism
+YPL268W	PLC1	other	phospholipid metabolism
+YBR030W		other	phospholipid metabolism
+YDR096W	GIS1	other	phospholipid metabolism
+YGL126W	SCS3	other	phospholipid metabolism
+YHL020C	OPI1	other	phospholipid metabolism
+YJR073C	OPI3	other	phospholipid metabolism
+YKL051W	SFK1	other	phospholipid metabolism
+YLR386W	VAC14	other	phospholipid metabolism
+YNL054W	VAC7	other	phospholipid metabolism
+YER151C	UBP3	other	protein degradation
+YDR363W-A	SEM1	other	protein degradation
+YHR200W	RPN10	other	protein degradation
+YJL047C	RTT101	other	protein degradation
+YKL213C	DOA1	other	protein degradation
+YNR051C	BRE5	other	protein degradation
+YEL003W	GIM4	other	protein trafficking
+YML094W	GIM5	other	protein trafficking
+YNL153C	GIM3	other	protein trafficking
+YGR086C	PIL1	other	protein trafficking
+YPL004C	LSP1	other	protein trafficking
+YBR164C	ARL1	other	protein trafficking
+YJL004C	SYS1	other	protein trafficking
+YLR262C	YPT6	other	protein trafficking
+YAR002W	NUP60	other	protein trafficking
+YDL116W	NUP84	other	protein trafficking
+YER083C	GET2	other	protein trafficking
+YGL020C	GET1	other	protein trafficking
+YGL124C	MON1	other	protein trafficking
+YLR039C	RIC1	other	protein trafficking
+YLR268W	SEC22	other	protein trafficking
+YNL041C	COG6	other	protein trafficking
+YNL051W	COG5	other	protein trafficking
+YGL174W	BUD13	other	RNA processing
+YIR005W	IST3	other	RNA processing
+YKL074C	MUD2	other	RNA processing
+YKL208W	CBT1	other	RNA processing
+YPL213W	LEA1	other	RNA processing
+YDR378C	LSM6	other	RNA processing
+YGL213C	SKI8	other	RNA processing
+YJL124C	LSM1	other	RNA processing
+YNL147W	LSM7	other	RNA processing
+YOR076C	SKI7	other	RNA processing
+YPR189W	SKI3	other	RNA processing
+YGR081C	SLX9	other	RNA processing
+YHR081W	LRP1	other	RNA processing
+YIL040W	APQ12	other	RNA processing
+YMR287C	MSU1	other	RNA processing
+YNL098C	RAS2	other	signal transduction
+YCR027C	RHB1	other	signal transduction
+YOR101W	RAS1	other	signal transduction
+YPL115C	BEM3	other	signal transduction
+YDL235C	YPD1	other	signal transduction
+YDR072C	IPT1	other	signal transduction
+YER118C	SHO1	other	signal transduction
+YLR006C	SSK1	other	signal transduction
+YNL309W	STB1	other	transcription
+YDR156W	RPA14	other	transcription
+YGR200C	ELP2	other	transcription
+YGR274C	TAF1	other	transcription
+YJL148W	RPA34	other	transcription
+YJL168C	SET2	other	transcription
+YPR023C	EAF3	other	transcription
+YAL051W	OAF1	other	transcription
+YBL005W	PDR3	other	transcription
+YBL103C	RTG3	other	transcription
+YBR083W	TEC1	other	transcription
+YBR112C	CYC8	other	transcription
+YBR182C	SMP1	other	transcription
+YCL055W	KAR4	other	transcription
+YDL056W	MBP1	other	transcription
+YDR146C	SWI5	other	transcription
+YER111C	SWI4	other	transcription
+YFL031W	HAC1	other	transcription
+YFR034C	PHO4	other	transcription
+YGL013C	PDR1	other	transcription
+YGL035C	MIG1	other	transcription
+YGL166W	CUP2	other	transcription
+YHR124W	NDT80	other	transcription
+YHR206W	SKN7	other	transcription
+YJL089W	SIP4	other	transcription
+YJR094C	IME1	other	transcription
+YKR099W	BAS1	other	transcription
+YLR182W	SWI6	other	transcription
+YML007W	YAP1	other	transcription
+YNL027W	CRZ1	other	transcription
+YNR009W	NRM1	other	transcription
+YOL067C	RTG1	other	transcription
+YOR028C	CIN5	other	transcription
+YOR083W	WHI5	other	transcription
+YOR140W	SFL1	other	transcription
+YPL086C	ELP3	other	transcription
+YDR216W	ADR1	other	transcription
+YDR435C	PPM1	phosphatase regulatory protein	
+YAR014C	BUD14	phosphatase regulatory protein	
+YBL046W	PSY4	phosphatase regulatory protein	
+YBR126C	TPS1	phosphatase regulatory protein	
+YCR073W-A	SOL2	phosphatase regulatory protein	
+YDR028C	REG1 (HEX2, PZF240, SPP43, SRN1)	phosphatase regulatory protein	
+YDR067C	OCA6	phosphatase regulatory protein	
+YDR293C	SSD1 (CLA1, MCS1, RLT1, SRK1) 	phosphatase regulatory protein	
+YDR475C	JIP4 (YDR474C)	phosphatase regulatory protein	
+YFR040W	SAP155	phosphatase regulatory protein	
+YGL190C	CDC55	phosphatase regulatory protein	
+YGL229C	SAP4	phosphatase regulatory protein	
+YGR161C	RTS3	phosphatase regulatory protein	
+YHL029C	OCA5	phosphatase regulatory protein	
+YHR075C	PPE1	phosphatase regulatory protein	
+YIL045W	PIG2	phosphatase regulatory protein	
+YIL153W	RRD1 (YPA1)	phosphatase regulatory protein	
+YJL083W	TAX4	phosphatase regulatory protein	
+YJL098W	SAP185	phosphatase regulatory protein	
+YKL190W	CNB1	phosphatase regulatory protein	
+YKL193C	SDS22 (EGP1)	phosphatase regulatory protein	
+YKR019C	IRS4	phosphatase regulatory protein	
+YKR028W	SAP190	phosphatase regulatory protein	
+YLL011W	SOF1	phosphatase regulatory protein	
+YLR273C	PIG1	phosphatase regulatory protein	
+YML100W	TSL1	phosphatase regulatory protein	
+YML109W	ZDS2 (CES4)	phosphatase regulatory protein	
+YMR120C	ADE17	phosphatase regulatory protein	
+YMR261C	TPS3	phosphatase regulatory protein	
+YMR273C	ZDS1 (CES1, CKM1, NRC1, OSS1)	phosphatase regulatory protein	
+YMR311C	GLC8	phosphatase regulatory protein	
+YNL201C	PSY2	phosphatase regulatory protein	
+YNL233W	BNI4	phosphatase regulatory protein	
+YNR034W	SOL1	phosphatase regulatory protein	
+YOR014W	RTS1	phosphatase regulatory protein	
+YOR227W		phosphatase regulatory protein	
+YPL137C	GIP3	phosphatase regulatory protein	
+YPL152W	RRD2 (YPA2)	phosphatase regulatory protein	
+YPL228W	CET1	phosphatase regulatory protein	
+YBL085W	BOI1	phosphoprotein binding	
+YBR200W	BEM1	phosphoprotein binding	
+YCR065W	HCM1	phosphoprotein binding	
+YDR099W	BMH2	phosphoprotein binding	
+YDR501W	PLM2	phosphoprotein binding	
+YER114C	BOI2	phosphoprotein binding	
+YER177W	BMH1	phosphoprotein binding	
+YFL010C	WWM1	phosphoprotein binding	
+YGL227W	VID30	phosphoprotein binding	
+YGR116W	SPT6	phosphoprotein binding	
+YHR115C	DMA1	phosphoprotein binding	
+YIL131C	FKH1	phosphoprotein binding	
+YJR017C	ESS1	phosphoprotein binding	
+YLR016C	PML1	phosphoprotein binding	
+YLR183C	TOS4	phosphoprotein binding	
+YLR238W	FAR10	phosphoprotein binding	
+YNL068C	FKH2	phosphoprotein binding	
+YNL116W	DMA2	phosphoprotein binding	
+YPR104C	FHL1	phosphoprotein binding	
+YPR152C	URN1	phosphoprotein binding	
+YAL017W	PSK1	protein kinase	
+YAR018C	KIN3	protein kinase	
+YBL009W		protein kinase	
+YBL016W	FUS3	protein kinase	
+YBL088C	TEL1	protein kinase	
+YBL105C	PKC1	protein kinase	
+YBR028C		protein kinase	
+YBR059C	AKL1	protein kinase	
+YBR136W	MEC1	protein kinase	
+YBR160W	CDC28	protein kinase	
+YBR274W	CHK1	protein kinase	
+YCL024W	KCC4	protein kinase	
+YCR008W	SAT4	protein kinase	
+YCR073C	SSK22	protein kinase	
+YCR091W	KIN82	protein kinase	
+YDL017W	CDC7	protein kinase	
+YDL025C		protein kinase	
+YDL079C	MRK1	protein kinase	
+YDL101C	DUN1	protein kinase	
+YDL108W	KIN28	protein kinase	
+YDL214C	PRR2	protein kinase	
+YDR122W	KIN1	protein kinase	
+YDR247W	VHS1	protein kinase	
+YDR283C	GCN2	protein kinase	
+YDR466W	PKH3	protein kinase	
+YDR477W	SNF1	protein kinase	
+YDR490C	PKH1	protein kinase	
+YDR507C	GIN4	protein kinase	
+YDR523C	SPS1	protein kinase	
+YER123W	YCK3	protein kinase	
+YER129W	SAK1	protein kinase	
+YFL029C	CAK1	protein kinase	
+YFL033C	RIM15	protein kinase	
+YFR014C	CMK1	protein kinase	
+YGL021W	ALK1	protein kinase	
+YGL059W		protein kinase	
+YGL083W	SCY1	protein kinase	
+YGL158W	RCK1	protein kinase	
+YGL179C	TOS3	protein kinase	
+YGL180W	ATG1	protein kinase	
+YGR040W	KSS1	protein kinase	
+YGR052W	FMP48	protein kinase	
+YGR080W	TWF1	protein kinase	
+YGR092W	DBF2	protein kinase	
+YGR188C	BUB1	protein kinase	
+YHL007C	STE20	protein kinase	
+YHR030C	SLT2	protein kinase	
+YHR079C	IRE1	protein kinase	
+YHR082C	KSP1	protein kinase	
+YHR135C	YCK1	protein kinase	
+YHR205W	SCH9	protein kinase	
+YIL035C	CKA1	protein kinase	
+YIL042C	PKP1	protein kinase	
+YIL095W	PRK1	protein kinase	
+YIL147C	SLN1	protein kinase	
+YJL057C	IKS1	protein kinase	
+YJL095W	BCK1	protein kinase	
+YJL106W	IME2	protein kinase	
+YJL141C	YAK1	protein kinase	
+YJL164C	TPK1	protein kinase	
+YJL165C	HAL5	protein kinase	
+YJL187C	SWE1 (WEE1)	protein kinase	
+YJR059W	PTK2	protein kinase	
+YJR066W	TOR1	protein kinase	
+YKL048C	ELM1	protein kinase	
+YKL101W	HSL1	protein kinase	
+YKL116C	PRR1	protein kinase	
+YKL126W	YPK1	protein kinase	
+YKL139W	CTK1	protein kinase	
+YKL161C		protein kinase	
+YKL166C	TPK3	protein kinase	
+YKL168C	KKQ8	protein kinase	
+YKL171W		protein kinase	
+YKL198C	PTK1	protein kinase	
+YKL203C	TOR2	protein kinase	
+YLR096W	KIN2	protein kinase	
+YLR113W	HOG1	protein kinase	
+YLR248W	RCK2	protein kinase	
+YMR001C	CDC5	protein kinase	
+YMR104C	YPK2	protein kinase	
+YMR139W	RIM11	protein kinase	
+YMR216C	SKY1	protein kinase	
+YMR291W		protein kinase	
+YNL020C	ARK1	protein kinase	
+YNL154C	YCK2	protein kinase	
+YNL183C	NPR1	protein kinase	
+YNL207W	RIO2	protein kinase	
+YNL298W	CLA4	protein kinase	
+YNR031C	SSK2	protein kinase	
+YNR047W		protein kinase	
+YOL016C	CMK2	protein kinase	
+YOL045W	PSK2	protein kinase	
+YOL100W	PKH2	protein kinase	
+YOL113W	SKM1	protein kinase	
+YOL128C	YGK3	protein kinase	
+YOR061W	CKA2	protein kinase	
+YOR119C	RIO1	protein kinase	
+YOR233W	KIN4	protein kinase	
+YOR267C	HRK1	protein kinase	
+YOR351C	MEK1	protein kinase	
+YPL026C	SKS1	protein kinase	
+YPL031C	PHO85	protein kinase	
+YPL042C	SSN3	protein kinase	
+YPL109C		protein kinase	
+YPL141C		protein kinase	
+YPL150W		protein kinase	
+YPL153C	RAD53	protein kinase	
+YPL203W	TPK2	protein kinase	
+YPL204W	HRR25	protein kinase	
+YPL209C	IPL1	protein kinase	
+YPL236C		protein kinase	
+YPR054W	SMK1	protein kinase	
+YPR106W	ISR1	protein kinase	
+YPR111W	DBF20	protein kinase	
+YPR161C	SGV1	protein kinase	
+YDL028C	MPS1	protein kinase	
+YJL128C	PBS2	protein kinase	
+YLL019C	KNS1	protein kinase	
+YNL307C	MCK1	protein kinase	
+YOR231W	MKK1	protein kinase	
+YPL140C	MKK2	protein kinase	
+YBL056W	PTC3	protein phosphatase	
+YBR125C	PTC4	protein phosphatase	
+YBR276C	PPS1	protein phosphatase	
+YCR079W	PTC6	protein phosphatase	
+YCR095C	OCA4	protein phosphatase	
+YDL006W	PTC1	protein phosphatase	
+YDL047W	SIT4	protein phosphatase	
+YDL134C	PPH21	protein phosphatase	
+YDL188C	PPH22	protein phosphatase	
+YDL230W	PTP1	protein phosphatase	
+YDR075W	PPH3	protein phosphatase	
+YDR436W	PPZ2	protein phosphatase	
+YER075C	PTP3	protein phosphatase	
+YER089C	PTC2	protein phosphatase	
+YER134C		protein phosphatase	
+YGR123C	PPT1	protein phosphatase	
+YGR203W		protein phosphatase	
+YHR076W	PTC7	protein phosphatase	
+YIL113W	SDP1	protein phosphatase	
+YIR026C	YVH1	protein phosphatase	
+YLL010C	PSR1	protein phosphatase	
+YLR019W	PSR2	protein phosphatase	
+YLR433C	CNA1	protein phosphatase	
+YML016C	PPZ1	protein phosphatase	
+YML057W	CMP2	protein phosphatase	
+YMR036C	MIH1	protein phosphatase	
+YMR277W	FCP1	protein phosphatase	
+YNL032W	SIW14 (OCA3)	protein phosphatase	
+YNL053W	MSG5	protein phosphatase	
+YNL056W	OCA2	protein phosphatase	
+YNL099C	OCA1	protein phosphatase	
+YNL217W		protein phosphatase	
+YNL222W	SSU72	protein phosphatase	
+YNR032W	PPG1	protein phosphatase	
+YOR090C	PTC5	protein phosphatase	
+YOR208W	PTP2	protein phosphatase	
+YPL179W	PPQ1 (SAL6)	protein phosphatase	
+YPR073C	LTP1	protein phosphatase	
