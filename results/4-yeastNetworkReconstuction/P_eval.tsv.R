@@ -23,12 +23,12 @@ P_biogrid = read.table(cwd("data/biogrid/P_edges.tsv"), sep="\t", header=T, quot
 P_fasolo = read.table(cwd("data/fasolo_2011/P_edges_ORF.tsv"), sep="\t", header=T, quote="")
 P_fiedler = read.table(cwd("data/fiedler_2009/P_edges_EMAP.tsv"), sep="\t", header=T, check.names=F, quote="")[,-c(2,4)]
 P_parca = read.table(cwd("data/parca_2019/P_edges.tsv"), sep="\t", header=T, quote="")
-# P_workman = read.table(cwd("data/workman_2006/PK_edges.tsv"), sep="\t", header=T, quote="")
 P_yeastkid = read.table(cwd("data/yeastkid/P_edges.tsv"), sep="\t", header=T, quote="", check.names=F)[,-c(2,4)]
 P_netphorest = read.table(cwd("data/NetPhorest/scores.tsv"), sep="\t", header=T, quote="")
 P_networkin = read.table(cwd("data/NetworKIN/scores.tsv"), sep="\t", header=T, quote="")[,c(1,2,3,5)] # there is a PCC=.9999 for netphorest so we don't need it
 P_networkin_biogrid = read.table(cwd("data/NetworKIN/scores_biogrid.tsv"), sep="\t", header=T, quote="")[,1:3]
 P_ptacek = read.table(cwd("data/ptacek_2005/KP_edges.tsv"), sep="\t", header=T, quote="", check.names=F)
+
 # T_balaji = read.table(cwd("data/balaji_2006/TF_edges.tsv"), sep="\t", header=T, quote="")
 # T_workman = read.table(cwd("data/workman_2006/TF_edges.tsv"), sep="\t", header=T, quote="")[,c(1,2,4)]
 # T_yeastract_binding = read.table(cwd("data/yeastract/binding_ORF.tsv"), sep="\t", col.names=c("TF", "Target"), quote="")
@@ -36,6 +36,7 @@ P_ptacek = read.table(cwd("data/ptacek_2005/KP_edges.tsv"), sep="\t", header=T, 
 # T_harbison_YPD = read.table(cwd("data/harbison_2004/TF_edges_YPD.tsv"), header=T, sep="\t", quote="")
 # T_harbison_conds = read.table(cwd("data/harbison_2004/TF_edges_conds.tsv"), header=T, sep="\t", quote="")
 # T_horak = read.table(cwd("data/horak_2002/TF_edges.tsv"), header=T, sep="\t", quote="", check.names=F)[,1:3]
+
 # rename columns to indicate data source or add columns indicating such
 colnames(STRING_undirected) = c("Source", "Target", "undirected")
 colnames(P_biogrid) = c("Source", "Target", "biogrid")
@@ -48,6 +49,7 @@ colnames(P_netphorest) = c("Source", "Target", "netphorest")
 colnames(P_networkin) = c("Source", "Target", "networkin", "networkin STRING")
 colnames(P_networkin_biogrid) = c("Source", "Target", "networkin_biogrid")
 colnames(P_ptacek) = c("Source", "Target"); P_ptacek$ptacek = 1
+
 # colnames(T_balaji) = c("Source", "Target", "balaji")
 # colnames(T_workman) = c("Source", "Target", "workman")
 # T_yeastract_binding$"yeastract binding" = 1; colnames(T_yeastract_binding) = c("Source", "Target", "yeastract binding")
