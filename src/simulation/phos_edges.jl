@@ -12,10 +12,11 @@ that presence or absence of regulation should make a difference to down-stream g
 - Wₚ: Matrix of 1, -1, and 0
 """
 function init_Wₚ₊Wₚ₋(genes::Vector, Wₚ::Matrix{<:Integer}, λ₊::Vector, λ₋::Vector; hyper::Dict=Dict())
-    if length(hyper) == 0
-        hyper = Dict("cancel"=>true, "mean_k"=>true, "vec"=>false, "norm"=>0)
-    end
-
+    if "cancel" ∉ keys(hyper) hyper["cancel"] = true end
+    if "mean_k" ∉ keys(hyper) hyper["mean_k"] = true end
+    if "vec" ∉ keys(hyper) hyper["vec"] = false end
+    if "norm" ∉ keys(hyper) hyper["norm"] = 0 end
+    
     nₚ = size(Wₚ,2)
     nₜ = size(Wₚ,1) - nₚ
     Wₚ = Float64.(Wₚ)

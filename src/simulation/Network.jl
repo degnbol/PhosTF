@@ -196,14 +196,12 @@ drdt(net::Network, r, p, ψₜₚ) = net.max_transcription .* f.(net.genes, Ref(
 """
 dpdt(net::Network, r, p) = net.max_translation .* r .- net.λ_prot .* p
 """
-- pₜₚ: size nₜ+nₚ.
-- ψₜₚ: size nₜ+nₚ.
-"""
-dψdt(net::Network, pₜₚ, ψₜₚ) = dψdt(net, pₜₚ, ψₜₚ, view(ψₜₚ, net.nₜ+1:net.nₜ+net.nₚ))
-"""
 - pₜₚ: size nₜ+nₚ. Protein concentrations.
 - ψₜₚ: size nₜ+nₚ. Active protein concentrations.
-- ψₚ: size nₚ. Active protein concentrations.
 """
-dψdt(net::Network, pₜₚ, ψₜₚ, ψₚ) = (net.Wₚ₊ * ψₚ .+ net.λ₊) .* (pₜₚ .- ψₜₚ) .- (net.Wₚ₋ * ψₚ .+ net.λ₋) .* ψₜₚ
+dψdt(net::Network, pₜₚ, ψₜₚ) = begin
+    # size nₚ. Active protein concentrations.
+    ψₚ = view(ψₜₚ, net.nₜ+1:net.nₜ+net.nₚ)
+    (net.Wₚ₊ * ψₚ .+ net.λ₊) .* (pₜₚ .- ψₜₚ) .- (net.Wₚ₋ * ψₚ .+ net.λ₋) .* ψₜₚ
+end
 
