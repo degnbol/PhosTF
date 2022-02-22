@@ -29,13 +29,16 @@ get_u₀(net::Network, r₀, p₀, ψ₀) = [_dflt(r₀,net.r₀) _dflt(p₀,net
 
 function ODE!(du, u, net, t)
 	u .= clamp.(u, 0., 1.) # can be used against dt <= dtmin warnings and domain errors.
-	r = @view u[:,1]
-	p = @view u[:,2]
-	ψ = @view u[:,3]
-	ψₜₚ = @view ψ[1:net.nₜ+net.nₚ]
-	du[:,1] .= drdt(net, r, p, ψₜₚ)
-	du[:,2] .= dpdt(net, r, p)
-	du[1:net.nₚ+net.nₜ,3] .= dψdt(net, view(p,1:net.nₚ+net.nₜ), ψₜₚ)
+    # Phos concentration cannot go above total concentration. 
+    # It will naturally be enforced by dψdt except for certain values of λ₊, Wₚ₋, etc. 
+    # so it is not guaranteed unless enforced here.
+    u[:, 3] .= min.(u[:, 3], u[:, 2])
+	r   = @view u[:, 1]
+	p   = @view u[:, 2]
+	ψₜₚ = @view u[1:net.nₜ+net.nₚ, 3]
+	du[:, 1] .= drdt(net, r, p, ψₜₚ)
+	du[:, 2] .= dpdt(net, r, p)
+	du[1:net.nₜ+net.nₚ, 3] .= dψdt(net, view(p, 1:net.nₜ+net.nₚ), ψₜₚ)
 end
 
 default_callback(u₀) = CallbackSet(steady_state_callback, PositiveDomain(u₀))
