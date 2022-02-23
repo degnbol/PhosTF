@@ -10,5 +10,6 @@ mlr --tsv --from P_data.tsv filter \
    '($Variable == "Score" && $Value > 4.52) || 
     ($Variable == "ptmod" && $Value > 800)  || 
     ($Variable != "Score" && $Variable != "ptmod")' then \
-    uniq -f P,Target > P_edges.tsv
+    uniq -f P,Target then filter '$P != $Target' > P_edges.tsv
+# no self edges allowed
 
