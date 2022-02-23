@@ -9,8 +9,6 @@ suppressPackageStartupMessages(library(here))
 # args
 # USE: ./square_euler.R WP_infer*.tsv
 WP_fnames = commandArgs(trailingOnly=T)
-rundir = getwd()
-
 
 # functions
 cwd = function(s) paste0(here(), "/", s)
@@ -90,31 +88,16 @@ plot_square_euler = function(DT, ps) {
         scale_x_discrete(labels=c("d(KP,KP)", "d(KP,TF)"))
 }
 
-
-
-## settings
-# assuming we are masking KP edges based on known phos site from BioGrid
-masking_KP = TRUE
-
-
 # read evaluation files
 KP_eval = fread(cwd("results/4-yeastNetworkReconstruction/P_edges/P_edges.tsv"))
-# not evaluating on uninferrable edges
-KP_eval$possible = T
-if(masking_KP) {
-    KP_targets_noknownsite = read.vector("data/network/KP_targets_noknownsite.txt")
-    KP_eval[Target%in%KP_targets_noknownsite,possible:=F]
-}
 
-evalnames = c("known", "literature", "invitro")
 plts = list()
-for(evalname in evalnames) {plts[[evalname]] = list()}
-
-for (i_file in 1:length(KP_edge_fnames)) {
-    KP_edge_fname = KP_edge_fnames[i_file]
-    cat(KP_edge_fname, "\n")
-    setwd(dirname(KP_edge_fname))
-    KP_edges = fread(basename(KP_edge_fname))
+for (i_file in 1:length(WP_fnames)) {
+    cat(WP_fnames[i_file], "\n")
+    WP = fread(WP_fnames[i_file])
+    # melt
+    KP_edges = melt(WP)
+    
     #KP_edges$infer = KP_edges$q < .05  # replaced further down
     KP_edges[,q:=NULL]
     
@@ -123,28 +106,22 @@ for (i_file in 1:length(KP_edge_fnames)) {
     # filter for possible edges and remove then redundant column
     KP_edges = KP_edges[possible==T,][,possible:=NULL]
     
-    KP_edges[Target%in%KP,Target:="KP"]
-    KP_edges[Target%in%TF,Target:="TF"]
-    KP_edges[,KP:=NULL]
-    KP_edges[,infer:=abs(marker) > quantile(abs(marker), .8),by=Target]  # top 20%
+    KP_edges[Target%in%KP, Target:="KP"]
+    KP_edges[Target%in%TF, Target:="TF"]
+    KP_edges[, KP:=NULL]
+    KP_edges[, infer:=abs(marker) > quantile(abs(marker), .8), by=Target]  # top 20%
     
-    ps = list()
-    for (evalname in evalnames) {
-        DT = KP_edges[, c("Target", "infer", evalname), with=F]
-        ps[[evalname]] = c(get_p(DT[Target=="KP"][[evalname]], DT[Target=="KP"][["infer"]]), 
-                           get_p(DT[Target=="TF"][[evalname]], DT[Target=="TF"][["infer"]]))
-        
-        setnames(DT, "Target", "substrate")
-        setnames(DT, evalname, "eval")
-        plts[[evalname]][[i_file]] = plot_square_euler(DT, ps[[evalname]])
-    }
+    DT = KP_edges[, c("Target", "infer", evalname), with=F]
+    ps = c(get_p(DT[Target=="KP"], DT[Target=="KP"][["infer"]]), 
+                       get_p(DT[Target=="TF"], DT[Target=="TF"][["infer"]]))
+    
+    setnames(DT, "Target", "substrate")
+    setnames(DT, evalname, "eval")
+    plts[[i_file]] = plot_square_euler(DT, ps)
     write(-sum(log10(unlist(ps))), "score.txt")
-        
-    setwd(rundir)  # go back to so relative dirs for other files still work
 }
 
-for(evalname in evalnames) {
-    plt = ggarrange(plotlist=plts[[evalname]], ncol=1, labels=KP_edge_fnames)
-    ggsave(paste0("square_euler_", evalname, ".pdf"), plot=plt, width=6.5, height=1.35*length(plts[[evalname]]))
-}
+plt = ggarrange(plotlist=plts, ncol=1, labels=WP_fnames)
+outfname = paste0(dirname(WP_fnames[i_file]), "/square_euler.pdf")
+ggsave(outfname, plot=plt, width=6.5, height=1.35*length(plts))
 
