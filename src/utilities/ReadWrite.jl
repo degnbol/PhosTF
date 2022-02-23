@@ -48,7 +48,7 @@ convertORparse(T::Type, val) = convert(T, val)
 
 function hasRownames(df::DataFrame)
     # when empty column name it will be renamed to "Column1" by CSV.read(path, DataFrame)
-    df |> names |> first |> lowercase in ["_", "rownames", "row", " ", "column1"] 
+    df |> names |> first |> lowercase in ["_", "rownames", "row", "", " ", "column1"] 
 end
 
 function loaddlm(fname::String, T::Union{Type,Nothing}=nothing; header::Bool=false)
@@ -109,7 +109,7 @@ savedlm(fname::String, x::AbstractMatrix; colnames=nothing, rownames=nothing) = 
         writedlm(fname, x, ext2delim(fname))
     else
         df = DataFrame(x, colnames)
-        rownames === nothing || insertcols!(df, 1, "_"=>rownames)
+        rownames === nothing || insertcols!(df, 1, ""=>rownames)
         CSV.write(fname, df; delim=ext2delim(fname))
     end
 end
