@@ -25,7 +25,7 @@ Create a random network from Wₜ and Wₚ.
     Note that it is not (yet) implemented to store this info in the generated network model.
 """
 @main function network(Wₜfname::String=default_Wₜ, Wₚfname::String=default_Wₚ; 
-        header::Bool=false, o::String=default_net, hyper=Dict())
+        header::Bool=true, o::String=default_net, hyper=Dict())
 	Wₜ = loaddlm(Wₜfname; header=header)
 	# make sure to enforce that it is Int which indicates weight presence and sign as opposed to Float that indicates weight magnitude.
 	Wₚ = loaddlm(Wₚfname, Int; header=header)
@@ -253,6 +253,7 @@ Get the log fold-change values comparing mutant transcription levels to wildtype
 		@info("logFC values simulated")
         savedlm(o, measurements; colnames=net.names[1:net.nₜ+net.nₚ], rownames=net.names)
 	end
+	measurements !== nothing
 end
 """
 Get the log fold-change values comparing mutant transcription levels to wildtype.
@@ -269,6 +270,7 @@ Get the log fold-change values comparing mutant transcription levels to wildtype
 		@info("logFC values simulated")
 		savedlm(o, measurements)
 	end
+	measurements !== nothing
 end
 
 """

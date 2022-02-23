@@ -15,7 +15,7 @@ function init_Wₚ₊Wₚ₋(genes::Vector, Wₚ::Matrix{<:Integer}, λ₊::Vect
     if "cancel" ∉ keys(hyper) hyper["cancel"] = true end
     if "mean_k" ∉ keys(hyper) hyper["mean_k"] = false end
     if "vec" ∉ keys(hyper) hyper["vec"] = false end
-    if "norm" ∉ keys(hyper) hyper["norm"] = 1 end
+    if "norm" ∉ keys(hyper) hyper["norm"] = 2 end
     
     nₚ = size(Wₚ,2)
     nₜ = size(Wₚ,1) - nₚ
