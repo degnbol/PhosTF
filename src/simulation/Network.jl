@@ -22,7 +22,7 @@ Set randomly like λ but adjusted so nodes that are only positively regulated ha
 and nodes with both has both but scaled accorrding to the balance of positive vs negative regulation onto them.
 """
 function random_λ₊λ₋(Wₚ::Matrix; hyper::Dict=Dict())
-    if length(hyper) == 0 hyper["lam"] = 1 end
+    if length(hyper) == 0 hyper["lam"] = 0 end
     ns₊ = sum(Wₚ .> 0; dims=2) |> vec
     ns₋ = sum(Wₚ .< 0; dims=2) |> vec
     λ₊ = random_λ(size(Wₚ,1)) 
