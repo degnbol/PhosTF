@@ -7,9 +7,8 @@ suppressPackageStartupMessages(library(data.table))
 suppressPackageStartupMessages(library(here))
 
 # args
-# USE: ./square_euler.R KP_edge_fnames*
-#KP_edge_fname = cwd("data/inference/03/KP_edges.tsv")
-KP_edge_fnames = commandArgs(trailingOnly=T)
+# USE: ./square_euler.R WP_infer*.tsv
+WP_fnames = commandArgs(trailingOnly=T)
 rundir = getwd()
 
 
@@ -99,35 +98,7 @@ masking_KP = TRUE
 
 
 # read evaluation files
-KP = fread(cwd("results/4-yeastNetworkReconstuction/KP_protein.tsv"))$ORF
-TF = read.vector("results/4-yeastNetworkReconstuction/TF.txt")
-V  = read.vector("results/4-yeastNetworkReconstuction/V_protein.txt")
-KPTF = c(KP,TF)
-nKP = length(KP)
-nV = length(V)
-nTF = length(TF)
-nO = nV-length(KPTF)
-KP_eval = fread(cwd("results/5-inferencePerformance/P_eval.tsv"), 
-                select=c("Source", "Target", "biogrid", "fasolo", "parca", "fiedler", "yeastkid", "ptmod", "ptacek"))
-# remove diagonals
-KP_eval = KP_eval[Source!=Target,]
-# make evaluations Boolean
-KP_eval[,biogrid:=biogrid!=""]
-KP_eval[,fiedler:=fiedler!=""]
-KP_eval[,fasolo:=!is.na(fasolo)]
-KP_eval[,parca:=!is.na(parca)]
-KP_eval[,ptacek:=!is.na(ptacek)]
-# 4.52 corresponds to p<0.05 according to yeastKID
-KP_eval[,yeastkid:=!is.na(yeastkid) & yeastkid>4.52]
-# string DB scores are confidence from 0 to 1 written as e.g. 800 to mean 0.8.
-# higher confidence score is better. 0.5 means that there is 50% prob for false positive. https://string-db.org/cgi/info.pl
-# if we use False Discovery Rate = .2 it only gives us a meager 4 edges, all of which are already in other datasets.
-# so we use a dangerous FDR = .4, which gives us 7 edges not already found in another evaluation set.
-KP_eval[,ptmod:=!is.na(ptmod) & ptmod>600]
-KP_eval[,literature:=biogrid|fasolo|parca|fiedler]
-KP_eval[,curated:=yeastkid|ptmod]
-KP_eval[,known:=literature|curated]
-KP_eval[,invitro:=known|ptacek]
+KP_eval = fread(cwd("results/4-yeastNetworkReconstruction/P_edges/P_edges.tsv"))
 # not evaluating on uninferrable edges
 KP_eval$possible = T
 if(masking_KP) {
@@ -147,14 +118,6 @@ for (i_file in 1:length(KP_edge_fnames)) {
     #KP_edges$infer = KP_edges$q < .05  # replaced further down
     KP_edges[,q:=NULL]
     
-    # all targets should be protein KP or TF
-    stopifnot(all(KP_edges$KP%in%KP))
-    stopifnot(all(KP_edges$Target%in%KPTF))
-    stopifnot(all(KP_eval$Source%in%KP))
-    stopifnot(all(KP_eval$Target%in%KPTF))
-    # sanity check
-    stopifnot(all(KP_edges$KP == KP_eval$Source))
-    stopifnot(all(KP_edges$Target == KP_eval$Target))
     # add eval data
     KP_edges = cbind(KP_edges, KP_eval[,!c("Source", "Target")])
     # filter for possible edges and remove then redundant column
