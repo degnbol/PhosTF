@@ -16,16 +16,16 @@ for (sheet_name in sheet_names) {
     edges = rbind(edges, sheet)
 }
 
-edges$KP2 = ""
+edges$cyclin = ""
 for (paired in c("CDC28", "PHO85")) {
-    regex = paste0("^",paired)
+    regex = paste0("^", paired)
     idx = grepl(regex, edges$KP)
-    edges$KP2[idx] = gsub(regex, "", edges$KP[idx])
+    edges$cyclin[idx] = gsub(regex, "", edges$KP[idx])
     edges$KP[idx] = paired
 }
-edges$KP2[edges$KP2 == "alone"] = ""
+edges$cyclin[edges$cyclin == "alone"] = ""
 
-edges = edges[,c("KP", "KP2", "Target")]
+edges = edges[,c("KP", "cyclin", "Target")]
 
 write.table(edges, "edges_pop.tsv", sep="\t", quote=F, row.names=F)
 
