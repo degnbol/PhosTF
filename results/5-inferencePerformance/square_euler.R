@@ -9,7 +9,7 @@ cwd = function(s) paste0(here(), "/", s)
 
 # args
 # USE: ./square_euler.R WP_infer*.tsv
-WP_fnames = cwd("results/4-yeastNetworkReconstruction/infer/WP_infer-inner-strict-0.0-0.1.tsv")
+# WP_fnames = cwd("results/4-yeastNetworkReconstruction/infer/WP_infer-inner-strict-0.0-0.1.tsv")
 WP_fnames = commandArgs(trailingOnly=T)
 
 # functions
@@ -94,7 +94,7 @@ KP_eval = fread(cwd("results/4-yeastNetworkReconstruction/P_edges/P_edges.tsv"))
 
 plts = list()
 for (i_file in 1:length(WP_fnames)) {
-    cat(WP_fnames[i_file], "\n")
+    cat(basename(WP_fnames[i_file]), "\t")
     WP = fread(WP_fnames[i_file])
     KPs = names(WP)[2:ncol(WP)]
     # melt
@@ -109,17 +109,23 @@ for (i_file in 1:length(WP_fnames)) {
     DT = KP_eval[KP_edges, on=c("P", "Target")]
     DT[is.na(eval), eval:=FALSE]
     
-    for t 
-    DT[, infer:=abs(pred) > quantile(abs(pred), .8), by=substrate]  # top 20%
+    ps = c(1, 1)
+    for (thres in c(.95, .9, .8)) {
+        DT[, infer:=abs(pred) > quantile(abs(pred), thres), by=substrate]
+        ps = pmin(ps, c(get_p(DT[substrate=="KP", eval], DT[substrate=="KP", infer]), 
+                        get_p(DT[substrate=="TF", eval], DT[substrate=="TF", infer])))
+        DT[, infer:=abs(pred) > quantile(abs(pred), thres)]
+        ps = pmin(ps, c(get_p(DT[substrate=="KP", eval], DT[substrate=="KP", infer]), 
+                        get_p(DT[substrate=="TF", eval], DT[substrate=="TF", infer])))
+    }
+        
     
-    ps = c(get_p(DT[substrate=="KP", eval], DT[substrate=="KP", infer]), 
-           get_p(DT[substrate=="TF", eval], DT[substrate=="TF", infer]))
+    # plts[[i_file]] = plot_square_euler(DT, ps)
+    cat(paste(sprintf("%.3f", -log10(ps)), collapse=" "), "\n")
     
-    plts[[i_file]] = plot_square_euler(DT, ps)
-    write(-sum(log10(unlist(ps))), "score.txt")
 }
 
-plt = ggarrange(plotlist=plts, ncol=1, labels=WP_fnames)
-outfname = paste0(dirname(WP_fnames[i_file]), "/square_euler.pdf")
-ggsave(outfname, plot=plt, width=6.5, height=1.35*length(plts))
+# plt = ggarrange(plotlist=plts, ncol=1, labels=WP_fnames)
+# outfname = paste0(dirname(WP_fnames[i_file]), "/square_euler.pdf")
+# ggsave(outfname, plot=plt, width=6.5, height=1.35*length(plts))
 
