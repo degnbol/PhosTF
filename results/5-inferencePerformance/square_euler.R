@@ -5,13 +5,14 @@ library(ggplot2)
 library(ggpubr)
 suppressPackageStartupMessages(library(data.table))
 suppressPackageStartupMessages(library(here))
+cwd = function(s) paste0(here(), "/", s)
 
 # args
 # USE: ./square_euler.R WP_infer*.tsv
+WP_fnames = cwd("results/4-yeastNetworkReconstruction/infer/WP_infer-inner-strict-0.0-0.1.tsv")
 WP_fnames = commandArgs(trailingOnly=T)
 
 # functions
-cwd = function(s) paste0(here(), "/", s)
 flatten = function(x) as.vector(as.matrix(x))
 read.vector = function(x) flatten(read.table(cwd(x)))
 read.matrix = function(x) as.matrix(read.table(cwd(x)))
@@ -95,28 +96,25 @@ plts = list()
 for (i_file in 1:length(WP_fnames)) {
     cat(WP_fnames[i_file], "\n")
     WP = fread(WP_fnames[i_file])
+    KPs = names(WP)[2:ncol(WP)]
     # melt
-    KP_edges = melt(WP)
+    names(WP)[1] = "Target"
+    KP_edges = melt(WP, variable.name="P", id.vars="Target", value.name="pred")
+    KP_edges = KP_edges[P!=Target]
+    KP_edges[, substrate:="TF"]
+    KP_edges[Target%in%KPs, substrate:="KP"]
     
-    #KP_edges$infer = KP_edges$q < .05  # replaced further down
-    KP_edges[,q:=NULL]
+    # join with eval data
+    KP_eval[, eval:=TRUE]
+    DT = KP_eval[KP_edges, on=c("P", "Target")]
+    DT[is.na(eval), eval:=FALSE]
     
-    # add eval data
-    KP_edges = cbind(KP_edges, KP_eval[,!c("Source", "Target")])
-    # filter for possible edges and remove then redundant column
-    KP_edges = KP_edges[possible==T,][,possible:=NULL]
+    for t 
+    DT[, infer:=abs(pred) > quantile(abs(pred), .8), by=substrate]  # top 20%
     
-    KP_edges[Target%in%KP, Target:="KP"]
-    KP_edges[Target%in%TF, Target:="TF"]
-    KP_edges[, KP:=NULL]
-    KP_edges[, infer:=abs(marker) > quantile(abs(marker), .8), by=Target]  # top 20%
+    ps = c(get_p(DT[substrate=="KP", eval], DT[substrate=="KP", infer]), 
+           get_p(DT[substrate=="TF", eval], DT[substrate=="TF", infer]))
     
-    DT = KP_edges[, c("Target", "infer", evalname), with=F]
-    ps = c(get_p(DT[Target=="KP"], DT[Target=="KP"][["infer"]]), 
-                       get_p(DT[Target=="TF"], DT[Target=="TF"][["infer"]]))
-    
-    setnames(DT, "Target", "substrate")
-    setnames(DT, evalname, "eval")
     plts[[i_file]] = plot_square_euler(DT, ps)
     write(-sum(log10(unlist(ps))), "score.txt")
 }
