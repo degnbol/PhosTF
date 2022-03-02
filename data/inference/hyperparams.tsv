@@ -1,4 +1,4 @@
-folder	X	J	epochs  lr  decay	lambda	lambdaW	lambdaWT	trainWT	WT_reg	WT_mask	WP_mask	WT	WP
+folder	X	J	epochs	lr	decay	lambda	lambdaW	lambdaWT	trainWT	WT_reg	WT_mask	WP_mask	WT	WP
 01	~/cwd/data/perturbation/logFC_inner_1.mat	~/cwd/data/perturbation/J_inner.mat	100	0.001	0	0.1	0	true	true		~/cwd/data/network/WT_mask.mat	~/cwd/data/network/KP_mask.mat	~/cwd/data/network/WT_FDR20_sign.mat	~/cwd/data/network/KP_priors/WP_gauss001.mat
 02	~/cwd/data/perturbation/logFC_inner_1.mat	~/cwd/data/perturbation/J_inner.mat	100	0.001	0	0.1	0	true	true		~/cwd/data/network/WT_mask.mat	~/cwd/data/network/KP_mask.mat	~/cwd/data/network/WT_FDR20_sign.mat	~/cwd/data/network/KP_priors/WP_KP2TF_gauss001.mat
 03	~/cwd/data/perturbation/logFC_inner_1.mat	~/cwd/data/perturbation/J_inner.mat	100	0.001	0	1.0	0	true	true		~/cwd/data/network/WT_mask.mat	~/cwd/data/network/KP_mask.mat	~/cwd/data/network/WT_FDR20_sign.mat	~/cwd/data/network/KP_priors/WP_KP2TF_gauss001.mat
