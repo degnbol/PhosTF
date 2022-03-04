@@ -1,5 +1,6 @@
 #!/usr/bin/env zsh
-# these are any undirected interactions in STRING
+# REQUIRES: fig4B_ORF.tsv, STRING files interactions.tsv, actions.tsv, directed.tsv
+# WRITES: fig4B_{inSTRING,inSTRING-score500,actions,directed,undirected-ptmod}.tsv
 STRING="`git root`/data/STRING"
 # since undirected we match against protein1 and protein2 as either source or target
 mlr --tsv --from fig4B_ORF.tsv join -j P,target -r P,Target -l protein1,protein2 -f $STRING/interactions.tsv then \
