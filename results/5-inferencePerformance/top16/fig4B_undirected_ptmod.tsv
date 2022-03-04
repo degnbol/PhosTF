@@ -1,0 +1,3 @@
+P	target	mode	action	is_directional	a_is_acting	score	P_gene	Target_gene	EvalSet
+YNR031C	YHR206W	ptmod		f	f	307	SSK2	SKN7	0
+YBR160W	YLR182W	ptmod		f	f	848	CDC28	SWI6	1
