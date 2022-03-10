@@ -33,11 +33,9 @@ get_sign_mask = function(adjacency) {
     out = sign(adjacency)
     out[out == +1] = "+"
     out[out == -1] = "-"
+    out[out ==  0] = "."
     out
 }
-
-
-setwd("~/cwd/data/network")
 
 # read
 edges = read.table("TF_priors/TF_edges.tsv", sep="\t", header=T, quote="")
@@ -80,10 +78,9 @@ get_p_adjacency = function(edges, weight) {
 }
 
 WT_mask = get_sign_mask(get_adjacency(edges, "gauss001"))
-write.table(WT_mask, "WT_mask.csv", sep=",", quote=F)
-write.table(WT_mask, "WT_mask.mat", sep=" ", quote=F, col.names=F, row.names=F)
+write.table(WT_mask, "WT_mask.ssv", sep=" ", quote=F)
 
-fwrite(sparsematrix(edges$Target, edges$TF, edges$gauss01), "WT_gauss01.mat", sep=" ", row.names=F, col.names=F)
-fwrite(sparsematrix(edges_FDR20$Target, edges_FDR20$TF, edges_FDR20$gauss001), "WT_FDR20_gauss001.mat", sep=" ", row.names=F, col.names=F)
+fwrite(sparsematrix(edges$Target, edges$TF, edges$gauss01), "WT_gauss01.ssv", sep=" ")
+fwrite(sparsematrix(edges_FDR20$Target, edges_FDR20$TF, edges_FDR20$gauss001), "WT_FDR20_gauss001.ssv", sep=" ")
 
 
