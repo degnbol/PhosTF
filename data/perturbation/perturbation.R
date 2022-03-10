@@ -3,7 +3,7 @@
 library(dplyr)
 library(Matrix)
 library(ggplot2)
-library(reshape2) # acast. before data.table to use data.table melt
+library(reshape2) # acast. loaded before data.table to use data.table melt
 library(data.table)
 
 ## functions
