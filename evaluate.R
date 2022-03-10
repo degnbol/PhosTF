@@ -1,6 +1,4 @@
 #!/usr/bin/env Rscript
-
-# packages
 library(data.table)
 suppressPackageStartupMessages(library(reshape2))
 suppressPackageStartupMessages(library(Matrix))
@@ -101,7 +99,7 @@ for (WP_fname in WP_fnames) {
     if(masking_KP) {
         venndata[P_eval$Target%in%KP_targets_noknownsite,] = FALSE
     }
-
+    
     # write KP targets that are in the evaluation dataset. This was used before to make KP_targets_noknownsite, not sure if we still use it now.
     # write.table(PT[PT%in%P_eval$Target[venndata$invitro]], "~/cwd/data/evaluation/KP_targets.txt", row.names=F, col.names=F, quote=F)
     
@@ -214,7 +212,7 @@ for (WP_fname in WP_fnames) {
     
     
     plot_logp = function(plt.p) {
-
+        
         second_axis = dup_axis(name="substrates/KP", breaks=quantiles_plot, labels=round(quantiles_plot*nrow(venndata)/length(KP),1))
         
         ggplot(data=plt.p, aes(x=quantile, y=-log10(p), color=substrate)) +
