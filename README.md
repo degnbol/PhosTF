@@ -2,7 +2,7 @@
 Simulation and inference of networks of gene regulation with Protein Kinase, Transcription Factor and gene elements. Most functions can be called through simulation.jl and inference.jl.
 
 ## REQUIRMENTS
-- Julia. Currently on 1.7.2
+- Julia. Currently on 1.7.1
 
 ## INSTALL
 - Run `./install.sh` which sets command `git root`
