@@ -4,13 +4,17 @@ rm("Project.toml")
 rm("Manifest.toml")
 
 using Pkg
+
+Pkg.add(url="https://github.com/mortenpi/ProjectX.jl.git")
+Pkg.add("Revise")
+
 Pkg.activate(".")
 
-Pkg.add("DifferentialEquations")
-Pkg.add("Flux")
-
 # precompile major packages to make sure they work before running jobs.
-using Flux, DifferentialEquations
+Pkg.add("DifferentialEquations")
+using DifferentialEquations
+Pkg.add("Flux")
+using Flux
 
 Pkg.add([
 "ArgParse",
@@ -36,7 +40,6 @@ Pkg.add([
 "Logging",
 "NamedTupleTools",
 "Random",
-"Revise",
 "SparseArrays",
 "Statistics",
 "StatsBase",
@@ -44,7 +47,6 @@ Pkg.add([
 ])
 
 Pkg.add(url="https://github.com/diegozea/ROC.jl")
-Pkg.add(url="https://github.com/mortenpi/ProjectX.jl.git")
 
 # Using ProjectX we can have project local startup code auto loaded.
 run(`cat Project.toml.projectx >> ./Project.toml`)
