@@ -1,0 +1,3 @@
+
+[juliaenv]
+startup = "include(readchomp(`git root`) * \"/src/utilities/include.jl\");"
