@@ -44,10 +44,12 @@ Pkg.add([
 "Statistics",
 "StatsBase",
 "Test",
+"Plots",
+"PlotlyJS",
 ])
 
 Pkg.add(url="https://github.com/diegozea/ROC.jl")
 
 # Using ProjectX we can have project local startup code auto loaded.
-run(`cat Project.toml.projectx >> ./Project.toml`)
+run(pipeline(`cat`; stdin="Project.toml.projectx", stdout="Project.toml", append=true))
 
