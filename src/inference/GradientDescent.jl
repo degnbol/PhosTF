@@ -90,7 +90,7 @@ function train(mdl, X::AbstractMatrix, log::IO=stdout; epochs::Integer=10000, λ
     epoch = 0
 	_cb(epoch) # epoch 0 print before we start
     for outer epoch in 1:epochs
-        Flux.train!(loss, params(mdl), ((X,),), opt)
+        Flux.train!(loss, Flux.params(mdl), ((X,),), opt)
         _cb(epoch) || break
     end
     cb(epoch) # last epoch print after finish
