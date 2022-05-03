@@ -1,8 +1,7 @@
+#!/usr/bin/env Rscript
 # packages
 library(ggplot2)
 library(ggpubr) # so we can take a colorbar from a plot and only plot that
-
-setwd("~/cwd/utilities")
 
 # load cmap
 rgbs = read.table("colormap_D7.txt")
