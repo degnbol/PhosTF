@@ -25,7 +25,7 @@ end
 # If any of the λs are zero then avoid adding that part to the loss, e.g. using ::Nothing
 get_loss_func(mdl, λBstar::Float64, λabsW::Float64, reg_Wₜ::Bool) = begin
     if λBstar == 0 return get_loss_func(mdl, nothing, λabsW, reg_Wₜ) end
-    if λabsW == 0 return get_loss_func(mdl, λabsW, nothing, reg_Wₜ) end
+    if λabsW == 0 return get_loss_func(mdl, λBstar, nothing, reg_Wₜ) end
 	if reg_Wₜ
         return X -> SSE(mdl, X) + λBstar * L1(_Bstar(mdl)) + λabsW * L1(mdl)
     else
