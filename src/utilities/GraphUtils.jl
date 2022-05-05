@@ -53,6 +53,11 @@ function xgmml_fills(nₜ::Integer, nₚ::Integer, nₒ::Integer)
 	    ["#e6dd47" for _ in 1:nₒ]
 	]
 end
+xgmml_fills(fill::String, nᵥ::Integer) = [fill for _ in 1:nᵥ]
+xgmml_fills(fills::Vector, nᵥ::Integer) = begin
+    @assert length(fills) == nᵥ
+    fills
+end
 "Get a hex color for each value in X where the color is a divergent color with limits min, max."
 xgmml_fills(X::Matrix, min=minimum(X), max=maximum(X)) = "#" .* hex.(divergent_lerp.(X, min, max))
 
@@ -65,9 +70,18 @@ function xgmml_shapes(nₜ::Integer, nₚ::Integer, nₒ::Integer)
 end
 
 
-function xgmml_nodes(nₜ::Integer, nₚ::Integer, nₒ::Integer; x=xgmml_x(nₜ, nₚ, nₒ), y=xgmml_y(nₜ, nₚ, nₒ), labels=nothing, fills=xgmml_fills(nₜ, nₚ, nₒ), shapes=xgmml_shapes(nₜ, nₚ, nₒ), extra_atts...)
-    if labels === nothing labels = xgmml_labels(nₜ, nₚ, nₒ) end
-	[XGMML.Node(x[i], y[i]; label=labels[i], fill=fills[i], shape=shapes[i], (k=>v[i] for (k,v) in extra_atts)...) for i in 1:nₜ+nₚ+nₒ]
+function xgmml_nodes(nₜ::Integer, nₚ::Integer, nₒ::Integer; x=xgmml_x(nₜ, nₚ, nₒ), y=xgmml_y(nₜ, nₚ, nₒ), labels=nothing, fills=nothing, shapes=xgmml_shapes(nₜ, nₚ, nₒ), extra_atts...)
+    nᵥ = nₜ+nₚ+nₒ
+    # labels = nothing -> default labels. labels = [] -> no labels.
+    if labels === nothing labels = xgmml_labels(nₜ, nₚ, nₒ)
+    elseif labels == [] labels = ["" for _ in 1:nᵥ] end
+    if fills === nothing
+        fills = xgmml_fills(nₜ, nₚ, nₒ)
+    else
+        fills = xgmml_fills(fills, nᵥ)
+    end
+    
+	[XGMML.Node(x[i], y[i]; label=labels[i], fill=fills[i], shape=shapes[i], (k=>v[i] for (k,v) in extra_atts)...) for i in 1:nᵥ]
 end
 xgmml_nodes(Wₜ, Wₚ; kwargs...) = xgmml_nodes(nₜnₚnₒ(Wₜ, Wₚ)...; kwargs...)
 # allow WₜWₚ tuple so we can use net as either a Network or as (Wₜ, Wₚ) in the function xgmml(net, ...)
@@ -111,7 +125,7 @@ function xgmml_edges(Wₜ::Matrix, Wₚ::Matrix)
     ]
 
 	[KP_edges; TF_edges]
-end
+end;
 # allow WₜWₚ tuple so we can use net as either a Network or as (Wₜ, Wₚ) in the function xgmml(net, ...)
 xgmml_edges(WₜWₚ::Tuple) = xgmml_edges(WₜWₚ...)
 xgmml_edges(net) = xgmml_edges(estimate_Wₜ(net), net.Wₚ₊ - net.Wₚ₋)
@@ -138,17 +152,17 @@ Model.nₜnₚnₒ(net) = net.nₜ, net.nₚ, net.nₒ
 """
 - net: either (Wₜ, Wₚ) or simulation Network
 """
-function _graph(net; title="net")
-	graph = XGMML.Graph(title, xgmml_nodes(net), xgmml_edges(net))
+function _graph(net; title="net", fills=nothing, labels=nothing)
+    graph = XGMML.Graph(title, xgmml_nodes(net; fills=fills, labels=labels), xgmml_edges(net))
 	xgmml_bend!(graph)
 	graph
 end
-_graph(Wₜ::Matrix, Wₚ::Matrix; title="net") = _graph((Wₜ, Wₚ); title=title)
+_graph(Wₜ::Matrix, Wₚ::Matrix; title="net", fills=nothing, labels=nothing) = _graph((Wₜ, Wₚ); title=title, fills=fills, labels=labels)
 
 "Get a TF, KP, O network defined by its Wₜ and Wₚ in .xgmml format which can be imported into Cytoscape."
-xgmml(Wₜ::Matrix, Wₚ::Matrix; title="net") = XGMML.xgmml(_graph(Wₜ, Wₚ; title=title))
-xgmml(Wₜ::Matrix, Wₚ::Matrix, X::Nothing; title="net") = xgmml(Wₜ, Wₚ; title=title)
-xgmml(net; title="net") = XGMML.xgmml(_graph(net; title=title))
+xgmml(Wₜ::Matrix, Wₚ::Matrix; title="net", fills=nothing, labels=nothing) = XGMML.xgmml(_graph(Wₜ, Wₚ; title=title, fills=fills, labels=labels))
+xgmml(Wₜ::Matrix, Wₚ::Matrix, X::Nothing; title="net", fills=nothing, labels=nothing) = xgmml(Wₜ, Wₚ; title=title, fills=fills, labels=labels)
+xgmml(net; title="net", fills=nothing, labels=nothing) = XGMML.xgmml(_graph(net; title=title, fills=fills, labels=labels))
 
 """
 - net: either (Wₜ, Wₚ) or simulation Network
@@ -158,7 +172,7 @@ xgmml(net; title="net") = XGMML.xgmml(_graph(net; title=title))
 function xgmml(net, X::Matrix, highlight::Union{Nothing,Vector{Int}}=nothing; title="net", labels=nothing)
 	nₜ, nₚ, nₒ = nₜnₚnₒ(net)
 	K = size(X, 2)
-	fills = xgmml_fills(X, -1, 1)
+    fills = xgmml_fills(X, -1, 1)
 	
 	graphs::Vector{XGMML.Graph} = []
 	for k in 1:K
