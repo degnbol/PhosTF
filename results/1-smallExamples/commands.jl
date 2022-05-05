@@ -22,7 +22,7 @@ end
 logFC("net.bson", "sim_logFC.tsv")
 
 @src "inference/infer"
-infer("sim_logFC.tsv", r"T.*", r"P.*"; epochs=10000, lambda_Bstar=0., lambda_absW=1.)
+infer("sim_logFC.tsv", r"T.*", r"P.*"; epochs=10000, lambda_Bstar=.1, lambda_absW=0.)
 
 @src "visualization/W2graph"
 xgmml("net.bson"; o="net.xgmml")
