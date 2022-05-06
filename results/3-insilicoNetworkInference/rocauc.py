@@ -14,11 +14,11 @@ assert len(fnames_true) == len(fnames_score), (len(fnames_true), len(fnames_scor
 
 for fname_true, fname_score in zip(fnames_true, fnames_score):
     assert(basename(fname_true) == basename(fname_score))
-    trues = pd.read_table(fname_true, sep="\s", header=0, engine="python")
-    scores = pd.read_table(fname_score, sep="\s", header=0, engine="python")
+    trues = pd.read_table(fname_true, sep="\s", header=0, engine="python", index_col=0)
+    scores = pd.read_table(fname_score, sep="\s", header=0, engine="python", index_col=0)
 
-    trues = np.asarray(trues.drop(columns="_"))
-    scores = np.asarray(scores.drop(columns="_"))
+    trues = np.asarray(trues)
+    scores = np.asarray(scores)
 
     trues[trues == '.'] = 0
     trues[trues == '+'] = +1

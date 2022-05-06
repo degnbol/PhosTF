@@ -47,14 +47,17 @@ convertORparse(T::Type, val) = convert(T, val)
 
 
 function hasRownames(df::DataFrame)
-    # when empty column name it will be renamed to "Column1" by CSV.read(path, DataFrame)
-    df |> names |> first |> lowercase in ["_", "rownames", "row", "", " ", "column1"] 
+    df |> names |> first |> lowercase in ["_", "rownames", "row", "", " "]
 end
 
 function loaddlm(fname::String, T::Union{Type,Nothing}=nothing; header::Bool=false)
     delim = ext2delim(fname)
     if header
         df = CSV.read(fname, DataFrame; delim=delim)
+        # when empty column name it will be renamed to "Column1" by CSV.read.
+        # We name it back to "" as it was in the file, 
+        # although only if there is only a single column name missing as the first one.
+        if first(names(df)) == "Column1" && "Column2" ∉ names(df) rename!(df, 1 => "") end
         matFirstCol = hasRownames(df) ? 2 : 1
         # if all elements are numbers then there is no strings to parse.
         if !all(eltype.(eachcol(df[!, matFirstCol:end])) .<: Real)

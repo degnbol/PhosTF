@@ -18,7 +18,7 @@ Create random W from a adjacency matrix containing B.
         Wₜ = ReadWrite.pretty_matrix(Wₜ)
         Wₚ = ReadWrite.pretty_matrix(Wₚ)
     end
-	# the nodes gets sorted TF, KP, O so we can add some row and column names
+	# the nodes gets sorted T, P, O so we can add some row and column names
     nₜ, nₚ, nₒ = Model.nₜnₚnₒ(Wₜ, Wₚ)
     names = vcat(["T$i" for i in 1:nₜ], ["P$i" for i in 1:nₚ], ["O$i" for i in 1:nₒ])
     savedlm(WT, Wₜ; colnames=names[1:nₜ], rownames=names)
