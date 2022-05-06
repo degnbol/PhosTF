@@ -1,0 +1,322 @@
+2022-05-05 19:23:01,310 [DEBUG] py4...: Calling cytoscape_ping()
+2022-05-05 19:23:01,311 [DEBUG] py4...: ǀCalling cytoscape_version_info(base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:01,311 [DEBUG] py4...: ǀǀCalling cyrest_get('version', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:01,311 [DEBUG] py4...: ǀǀHTTP GET(http://127.0.0.1:1234/v1/version)
+2022-05-05 19:23:01,381 [DEBUG] py4...: ǀǀOK[200], content: {"apiVersion":"v1","cytoscapeVersion":"3.9.0"}
+2022-05-05 19:23:01,382 [DEBUG] py4...: ǀǀReturning 'cyrest_get': {'apiVersion': 'v1', 'cytoscapeVersion': '3.9.0'}
+2022-05-05 19:23:01,382 [DEBUG] py4...: ǀReturning 'cytoscape_version_info': {'apiVersion': 'v1', 'cytoscapeVersion': '3.9.0', 'automationAPIVersion': '1.4.0', 'py4cytoscapeVersion': '1.2.0'}
+2022-05-05 19:23:01,384 [DEBUG] py4...: Returning 'cytoscape_ping': 'You are connected to Cytoscape!'
+2022-05-05 19:23:01,384 [DEBUG] py4...: --------------------
+2022-05-05 19:23:01,384 [DEBUG] py4...: Calling import_network_from_file('infer4-B2.0-W0.0.xgmml')
+2022-05-05 19:23:01,385 [DEBUG] py4...: ǀCalling commands_post('network load file file="/Users/degnbol/PhosTF/results/1-smallExamples/2-4types/regTests/infer4-B2.0-W0.0.xgmml"', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:01,386 [DEBUG] py4...: ǀHTTP POST(http://127.0.0.1:1234/v1/commands/network/load%20file), json: {'file': '/Users/degnbol/PhosTF/results/1-smallExamples/2-4types/regTests/infer4-B2.0-W0.0.xgmml'}
+2022-05-05 19:23:02,010 [DEBUG] py4...: ǀOK[200], content: {
+ "data": { "networks":[
+  132594
+], "views":[
+  132970
+]},
+ "errors":[]
+}
+2022-05-05 19:23:02,011 [DEBUG] py4...: ǀReturning 'commands_post': {'networks': [132594], 'views': [132970]}
+2022-05-05 19:23:06,011 [DEBUG] py4...: Returning 'import_network_from_file': {'networks': [132594], 'views': [132970]}
+2022-05-05 19:23:06,012 [DEBUG] py4...: --------------------
+2022-05-05 19:23:06,012 [DEBUG] py4...: Calling fit_content()
+2022-05-05 19:23:06,012 [DEBUG] py4...: ǀCalling get_network_view_suid(None, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,012 [DEBUG] py4...: ǀǀCalling get_network_views(None, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,013 [DEBUG] py4...: ǀǀǀCalling get_network_suid(None, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,013 [DEBUG] py4...: ǀǀǀǀCalling commands_post('network get attribute network="current" namespace="default" columnList="SUID"', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,013 [DEBUG] py4...: ǀǀǀǀHTTP POST(http://127.0.0.1:1234/v1/commands/network/get%20attribute), json: {'network': 'current', 'namespace': 'default', 'columnList': 'SUID'}
+2022-05-05 19:23:06,039 [DEBUG] py4...: ǀǀǀǀOK[200], content: {
+ "data": [ {
+  "SUID": 132594
+}
+],
+ "errors":[]
+}
+2022-05-05 19:23:06,040 [DEBUG] py4...: ǀǀǀǀReturning 'commands_post': [{'SUID': 132594}]
+2022-05-05 19:23:06,040 [DEBUG] py4...: ǀǀǀReturning 'get_network_suid': 132594
+2022-05-05 19:23:06,041 [DEBUG] py4...: ǀǀǀCalling cyrest_get('networks/132594/views', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,041 [DEBUG] py4...: ǀǀǀHTTP GET(http://127.0.0.1:1234/v1/networks/132594/views)
+2022-05-05 19:23:06,057 [DEBUG] py4...: ǀǀǀOK[200], content: [132970]
+2022-05-05 19:23:06,058 [DEBUG] py4...: ǀǀǀReturning 'cyrest_get': [132970]
+2022-05-05 19:23:06,058 [DEBUG] py4...: ǀǀReturning 'get_network_views': [132970]
+2022-05-05 19:23:06,058 [DEBUG] py4...: ǀReturning 'get_network_view_suid': 132970
+2022-05-05 19:23:06,058 [DEBUG] py4...: ǀCalling commands_post('view fit content view="SUID:132970"', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,058 [DEBUG] py4...: ǀHTTP POST(http://127.0.0.1:1234/v1/commands/view/fit%20content), json: {'view': 'SUID:132970'}
+2022-05-05 19:23:06,079 [DEBUG] py4...: ǀOK[200], content: {
+ "data": {},
+ "errors":[]
+}
+2022-05-05 19:23:06,080 [DEBUG] py4...: ǀReturning 'commands_post': {}
+2022-05-05 19:23:06,081 [DEBUG] py4...: Returning 'fit_content': {}
+2022-05-05 19:23:06,082 [DEBUG] py4...: --------------------
+2022-05-05 19:23:06,083 [DEBUG] py4...: Calling get_network_zoom()
+2022-05-05 19:23:06,084 [DEBUG] py4...: ǀCalling get_network_property('NETWORK_SCALE_FACTOR', network=None, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,084 [DEBUG] py4...: ǀǀCalling get_network_suid(None, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,085 [DEBUG] py4...: ǀǀǀCalling commands_post('network get attribute network="current" namespace="default" columnList="SUID"', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,086 [DEBUG] py4...: ǀǀǀHTTP POST(http://127.0.0.1:1234/v1/commands/network/get%20attribute), json: {'network': 'current', 'namespace': 'default', 'columnList': 'SUID'}
+2022-05-05 19:23:06,107 [DEBUG] py4...: ǀǀǀOK[200], content: {
+ "data": [ {
+  "SUID": 132594
+}
+],
+ "errors":[]
+}
+2022-05-05 19:23:06,107 [DEBUG] py4...: ǀǀǀReturning 'commands_post': [{'SUID': 132594}]
+2022-05-05 19:23:06,107 [DEBUG] py4...: ǀǀReturning 'get_network_suid': 132594
+2022-05-05 19:23:06,107 [DEBUG] py4...: ǀǀCalling get_network_views(132594, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,108 [DEBUG] py4...: ǀǀǀCalling get_network_suid(132594, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,109 [DEBUG] py4...: ǀǀǀǀCalling cyrest_get('networks', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,109 [DEBUG] py4...: ǀǀǀǀHTTP GET(http://127.0.0.1:1234/v1/networks)
+2022-05-05 19:23:06,130 [DEBUG] py4...: ǀǀǀǀOK[200], content: [109314,52484,99845,43015,122125,24077,74764,14608,112656,55826,103187,46357,124953,27419,78106,17950,115998,106529,49699,97058,128295,81448,71979,21292,119340,109871,53041,100402,43572,132405,75321,24634,122682,113213,15165,103744,46914,78663,125510,27976,116555,18507,107086,50256,97617,82005,128852,119897,21849,72536,110428,53598,100959,44129,123239,25191,75878,15722,113770,104301,47471,131187,126067,79220,19064,117112,107643,132216,50813,98174,129409,82562,73093,22406,120454,110985,54155,101516,44686,76435,25748,114327,16279,104858,48028,79777,126624,117669,19621,70308,108200,51370,98731,83119,129966,121011,22963,73650,111542,54712,102073,45243,123837,26305,76992,16836,114884,105415,48585,127181,80334,70865,20178,118226,108757,51927,99288,42458,83676,74207,23520,121568,112099,55269,102630,45800,77549,124396,26862,115441,132594,17393,105972,49142,80891,127738,118783,20735,71422]
+2022-05-05 19:23:06,131 [DEBUG] py4...: ǀǀǀǀReturning 'cyrest_get': [109314, 52484, 99845, 43015, 122125, 24077, 74764, 14608, 112656, 55826, 103187, 46357, 124953, 27419, 78106, 17950, 115998, 106529, 49699, 97058, 128295, 81448, 71979, 21292, 119340, 109871, 53041, 100402, 43572, 132405, 75321, 24634, 122682, 113213, 15165, 103744, 46914, 78663, 125510, 27976, 116555, 18507, 107086, 50256, 97617, 82005, 128852, 119897, 21849, 72536, 110428, 53598, 100959, 44129, 123239, 25191, 75878, 15722, 113770, 104301, 47471, 131187, 126067, 79220, 19064, 117112, 107643, 132216, 50813, 98174, 129409, 82562, 73093, 22406, 120454, 110985, 54155, 101516, 44686, 76435, 25748, 114327, 16279, 104858, 48028, 79777, 126624, 117669, 19621, 70308, 108200, 51370, 98731, 83119, 129966, 121011, 22963, 73650, 111542, 54712, 102073, 45243, 123837, 26305, 76992, 16836, 114884, 105415, 48585, 127181, 80334, 70865, 20178, 118226, 108757, 51927, 99288, 42458, 83676, 74207, 23520, 121568, 112099, 55269, 102630, 45800, 77549, 124396, 26862, 115441, 132594, 17393, 105972, 49142, 80891, 127738, 118783, 20735, 71422]
+2022-05-05 19:23:06,131 [DEBUG] py4...: ǀǀǀReturning 'get_network_suid': 132594
+2022-05-05 19:23:06,131 [DEBUG] py4...: ǀǀǀCalling cyrest_get('networks/132594/views', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,132 [DEBUG] py4...: ǀǀǀHTTP GET(http://127.0.0.1:1234/v1/networks/132594/views)
+2022-05-05 19:23:06,150 [DEBUG] py4...: ǀǀǀOK[200], content: [132970]
+2022-05-05 19:23:06,151 [DEBUG] py4...: ǀǀǀReturning 'cyrest_get': [132970]
+2022-05-05 19:23:06,152 [DEBUG] py4...: ǀǀReturning 'get_network_views': [132970]
+2022-05-05 19:23:06,152 [DEBUG] py4...: ǀǀCalling cyrest_get('networks/132594/views/132970/network/NETWORK_SCALE_FACTOR', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,152 [DEBUG] py4...: ǀǀHTTP GET(http://127.0.0.1:1234/v1/networks/132594/views/132970/network/NETWORK_SCALE_FACTOR)
+2022-05-05 19:23:06,169 [DEBUG] py4...: ǀǀOK[200], content: {
+  "visualProperty" : "NETWORK_SCALE_FACTOR",
+  "value" : 3.284324324324324
+}
+2022-05-05 19:23:06,170 [DEBUG] py4...: ǀǀReturning 'cyrest_get': {'visualProperty': 'NETWORK_SCALE_FACTOR', 'value': 3.284324324324324}
+2022-05-05 19:23:06,170 [DEBUG] py4...: ǀReturning 'get_network_property': 3.284324324324324
+2022-05-05 19:23:06,170 [DEBUG] py4...: Returning 'get_network_zoom': 3.284324324324324
+2022-05-05 19:23:06,170 [DEBUG] py4...: --------------------
+2022-05-05 19:23:06,170 [DEBUG] py4...: Calling set_network_zoom_bypass(2.9558918918918917)
+2022-05-05 19:23:06,170 [DEBUG] py4...: ǀCalling set_network_property_bypass(2.9558918918918917, 'NETWORK_SCALE_FACTOR', bypass=False, network=None, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,170 [DEBUG] py4...: ǀǀCalling get_network_suid(None, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,170 [DEBUG] py4...: ǀǀǀCalling commands_post('network get attribute network="current" namespace="default" columnList="SUID"', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,170 [DEBUG] py4...: ǀǀǀHTTP POST(http://127.0.0.1:1234/v1/commands/network/get%20attribute), json: {'network': 'current', 'namespace': 'default', 'columnList': 'SUID'}
+2022-05-05 19:23:06,189 [DEBUG] py4...: ǀǀǀOK[200], content: {
+ "data": [ {
+  "SUID": 132594
+}
+],
+ "errors":[]
+}
+2022-05-05 19:23:06,190 [DEBUG] py4...: ǀǀǀReturning 'commands_post': [{'SUID': 132594}]
+2022-05-05 19:23:06,190 [DEBUG] py4...: ǀǀReturning 'get_network_suid': 132594
+2022-05-05 19:23:06,190 [DEBUG] py4...: ǀǀCalling get_network_views(132594, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,190 [DEBUG] py4...: ǀǀǀCalling get_network_suid(132594, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,190 [DEBUG] py4...: ǀǀǀǀCalling cyrest_get('networks', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,191 [DEBUG] py4...: ǀǀǀǀHTTP GET(http://127.0.0.1:1234/v1/networks)
+2022-05-05 19:23:06,205 [DEBUG] py4...: ǀǀǀǀOK[200], content: [109314,52484,99845,43015,122125,24077,74764,14608,112656,55826,103187,46357,124953,27419,78106,17950,115998,106529,49699,97058,128295,81448,71979,21292,119340,109871,53041,100402,43572,132405,75321,24634,122682,113213,15165,103744,46914,78663,125510,27976,116555,18507,107086,50256,97617,82005,128852,119897,21849,72536,110428,53598,100959,44129,123239,25191,75878,15722,113770,104301,47471,131187,126067,79220,19064,117112,107643,132216,50813,98174,129409,82562,73093,22406,120454,110985,54155,101516,44686,76435,25748,114327,16279,104858,48028,79777,126624,117669,19621,70308,108200,51370,98731,83119,129966,121011,22963,73650,111542,54712,102073,45243,123837,26305,76992,16836,114884,105415,48585,127181,80334,70865,20178,118226,108757,51927,99288,42458,83676,74207,23520,121568,112099,55269,102630,45800,77549,124396,26862,115441,132594,17393,105972,49142,80891,127738,118783,20735,71422]
+2022-05-05 19:23:06,206 [DEBUG] py4...: ǀǀǀǀReturning 'cyrest_get': [109314, 52484, 99845, 43015, 122125, 24077, 74764, 14608, 112656, 55826, 103187, 46357, 124953, 27419, 78106, 17950, 115998, 106529, 49699, 97058, 128295, 81448, 71979, 21292, 119340, 109871, 53041, 100402, 43572, 132405, 75321, 24634, 122682, 113213, 15165, 103744, 46914, 78663, 125510, 27976, 116555, 18507, 107086, 50256, 97617, 82005, 128852, 119897, 21849, 72536, 110428, 53598, 100959, 44129, 123239, 25191, 75878, 15722, 113770, 104301, 47471, 131187, 126067, 79220, 19064, 117112, 107643, 132216, 50813, 98174, 129409, 82562, 73093, 22406, 120454, 110985, 54155, 101516, 44686, 76435, 25748, 114327, 16279, 104858, 48028, 79777, 126624, 117669, 19621, 70308, 108200, 51370, 98731, 83119, 129966, 121011, 22963, 73650, 111542, 54712, 102073, 45243, 123837, 26305, 76992, 16836, 114884, 105415, 48585, 127181, 80334, 70865, 20178, 118226, 108757, 51927, 99288, 42458, 83676, 74207, 23520, 121568, 112099, 55269, 102630, 45800, 77549, 124396, 26862, 115441, 132594, 17393, 105972, 49142, 80891, 127738, 118783, 20735, 71422]
+2022-05-05 19:23:06,206 [DEBUG] py4...: ǀǀǀReturning 'get_network_suid': 132594
+2022-05-05 19:23:06,206 [DEBUG] py4...: ǀǀǀCalling cyrest_get('networks/132594/views', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,206 [DEBUG] py4...: ǀǀǀHTTP GET(http://127.0.0.1:1234/v1/networks/132594/views)
+2022-05-05 19:23:06,217 [DEBUG] py4...: ǀǀǀOK[200], content: [132970]
+2022-05-05 19:23:06,217 [DEBUG] py4...: ǀǀǀReturning 'cyrest_get': [132970]
+2022-05-05 19:23:06,217 [DEBUG] py4...: ǀǀReturning 'get_network_views': [132970]
+2022-05-05 19:23:06,217 [DEBUG] py4...: ǀǀCalling cyrest_put('networks/132594/views/132970/network', parameters={'bypass': False}, body=[{'visualProperty': 'NETWORK_SCALE_FACTOR', 'value': 2.9558918918918917}], base_url='http://127.0.0.1:1234/v1', require_json=False)
+2022-05-05 19:23:06,218 [DEBUG] py4...: ǀǀHTTP PUT(http://127.0.0.1:1234/v1/networks/132594/views/132970/network), params: {'bypass': False}, json: [{'visualProperty': 'NETWORK_SCALE_FACTOR', 'value': 2.9558918918918917}]
+2022-05-05 19:23:06,248 [DEBUG] py4...: ǀǀOK[200], content: 
+2022-05-05 19:23:06,249 [DEBUG] py4...: ǀǀReturning 'cyrest_put': ''
+2022-05-05 19:23:06,249 [DEBUG] py4...: ǀReturning 'set_network_property_bypass': ''
+2022-05-05 19:23:06,249 [DEBUG] py4...: Returning 'set_network_zoom_bypass': ''
+2022-05-05 19:23:06,249 [DEBUG] py4...: --------------------
+2022-05-05 19:23:06,250 [DEBUG] py4...: Calling export_image('infer4-B2.0-W0.0.png', overwrite_file=True, type='png', units='cm', width=4, height=4, resolution=150)
+2022-05-05 19:23:06,250 [DEBUG] py4...: ǀCalling get_network_view_suid(None, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,250 [DEBUG] py4...: ǀǀCalling get_network_views(None, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,250 [DEBUG] py4...: ǀǀǀCalling get_network_suid(None, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,250 [DEBUG] py4...: ǀǀǀǀCalling commands_post('network get attribute network="current" namespace="default" columnList="SUID"', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,251 [DEBUG] py4...: ǀǀǀǀHTTP POST(http://127.0.0.1:1234/v1/commands/network/get%20attribute), json: {'network': 'current', 'namespace': 'default', 'columnList': 'SUID'}
+2022-05-05 19:23:06,283 [DEBUG] py4...: ǀǀǀǀOK[200], content: {
+ "data": [ {
+  "SUID": 132594
+}
+],
+ "errors":[]
+}
+2022-05-05 19:23:06,284 [DEBUG] py4...: ǀǀǀǀReturning 'commands_post': [{'SUID': 132594}]
+2022-05-05 19:23:06,284 [DEBUG] py4...: ǀǀǀReturning 'get_network_suid': 132594
+2022-05-05 19:23:06,284 [DEBUG] py4...: ǀǀǀCalling cyrest_get('networks/132594/views', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,284 [DEBUG] py4...: ǀǀǀHTTP GET(http://127.0.0.1:1234/v1/networks/132594/views)
+2022-05-05 19:23:06,311 [DEBUG] py4...: ǀǀǀOK[200], content: [132970]
+2022-05-05 19:23:06,311 [DEBUG] py4...: ǀǀǀReturning 'cyrest_get': [132970]
+2022-05-05 19:23:06,312 [DEBUG] py4...: ǀǀReturning 'get_network_views': [132970]
+2022-05-05 19:23:06,312 [DEBUG] py4...: ǀReturning 'get_network_view_suid': 132970
+2022-05-05 19:23:06,315 [DEBUG] py4...: ǀCalling sandbox_get_file_info('infer4-B2.0-W0.0.png', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,315 [DEBUG] py4...: ǀǀCalling commands_post('filetransfer getFileInfo fileName="/Users/degnbol/PhosTF/results/1-smallExamples/2-4types/regTests/infer4-B2.0-W0.0.png"', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,316 [DEBUG] py4...: ǀǀHTTP POST(http://127.0.0.1:1234/v1/commands/filetransfer/getFileInfo), json: {'fileName': '/Users/degnbol/PhosTF/results/1-smallExamples/2-4types/regTests/infer4-B2.0-W0.0.png'}
+2022-05-05 19:23:06,343 [DEBUG] py4...: ǀǀOK[200], content: {
+ "data": {"filePath":"/Users/degnbol/PhosTF/results/1-smallExamples/2-4types/regTests/infer4-B2.0-W0.0.png","modifiedTime":"","isFile":false},
+ "errors":[]
+}
+2022-05-05 19:23:06,344 [DEBUG] py4...: ǀǀReturning 'commands_post': {'filePath': '/Users/degnbol/PhosTF/results/1-smallExamples/2-4types/regTests/infer4-B2.0-W0.0.png', 'modifiedTime': '', 'isFile': False}
+2022-05-05 19:23:06,345 [DEBUG] py4...: ǀReturning 'sandbox_get_file_info': {'filePath': '/Users/degnbol/PhosTF/results/1-smallExamples/2-4types/regTests/infer4-B2.0-W0.0.png', 'modifiedTime': '', 'isFile': False}
+2022-05-05 19:23:06,346 [DEBUG] py4...: ǀCalling commands_post('view export Resolution="150" Units="cm" Height="4" Width="4" OutputFile="/Users/degnbol/PhosTF/results/1-smallExamples/2-4types/regTests/infer4-B2.0-W0.0.png" options="PNG" view="SUID:132970"', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:06,346 [DEBUG] py4...: ǀHTTP POST(http://127.0.0.1:1234/v1/commands/view/export), json: {'Resolution': '150', 'Units': 'cm', 'Height': '4', 'Width': '4', 'OutputFile': '/Users/degnbol/PhosTF/results/1-smallExamples/2-4types/regTests/infer4-B2.0-W0.0.png', 'options': 'PNG', 'view': 'SUID:132970'}
+2022-05-05 19:23:06,525 [DEBUG] py4...: ǀOK[200], content: {
+ "data": {"file":"/Users/degnbol/PhosTF/results/1-smallExamples/2-4types/regTests/infer4-B2.0-W0.0.png"},
+ "errors":[]
+}
+2022-05-05 19:23:06,525 [DEBUG] py4...: ǀReturning 'commands_post': {'file': '/Users/degnbol/PhosTF/results/1-smallExamples/2-4types/regTests/infer4-B2.0-W0.0.png'}
+2022-05-05 19:23:06,526 [DEBUG] py4...: Returning 'export_image': {'file': '/Users/degnbol/PhosTF/results/1-smallExamples/2-4types/regTests/infer4-B2.0-W0.0.png'}
+2022-05-05 19:23:06,526 [DEBUG] py4...: --------------------
+2022-05-05 19:23:11,757 [DEBUG] py4...: Calling cytoscape_ping()
+2022-05-05 19:23:11,757 [DEBUG] py4...: ǀCalling cytoscape_version_info(base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:11,758 [DEBUG] py4...: ǀǀCalling cyrest_get('version', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:11,759 [DEBUG] py4...: ǀǀHTTP GET(http://127.0.0.1:1234/v1/version)
+2022-05-05 19:23:11,784 [DEBUG] py4...: ǀǀOK[200], content: {"apiVersion":"v1","cytoscapeVersion":"3.9.0"}
+2022-05-05 19:23:11,785 [DEBUG] py4...: ǀǀReturning 'cyrest_get': {'apiVersion': 'v1', 'cytoscapeVersion': '3.9.0'}
+2022-05-05 19:23:11,785 [DEBUG] py4...: ǀReturning 'cytoscape_version_info': {'apiVersion': 'v1', 'cytoscapeVersion': '3.9.0', 'automationAPIVersion': '1.4.0', 'py4cytoscapeVersion': '1.2.0'}
+2022-05-05 19:23:11,786 [DEBUG] py4...: Returning 'cytoscape_ping': 'You are connected to Cytoscape!'
+2022-05-05 19:23:11,787 [DEBUG] py4...: --------------------
+2022-05-05 19:23:11,787 [DEBUG] py4...: Calling import_network_from_file('infer4-B10.0-W0.0.xgmml')
+2022-05-05 19:23:11,787 [DEBUG] py4...: ǀCalling commands_post('network load file file="/Users/degnbol/PhosTF/results/1-smallExamples/2-4types/regTests/infer4-B10.0-W0.0.xgmml"', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:11,789 [DEBUG] py4...: ǀHTTP POST(http://127.0.0.1:1234/v1/commands/network/load%20file), json: {'file': '/Users/degnbol/PhosTF/results/1-smallExamples/2-4types/regTests/infer4-B10.0-W0.0.xgmml'}
+2022-05-05 19:23:11,991 [DEBUG] py4...: ǀOK[200], content: {
+ "data": { "networks":[
+  133167
+], "views":[
+  133543
+]},
+ "errors":[]
+}
+2022-05-05 19:23:11,991 [DEBUG] py4...: ǀReturning 'commands_post': {'networks': [133167], 'views': [133543]}
+2022-05-05 19:23:15,995 [DEBUG] py4...: Returning 'import_network_from_file': {'networks': [133167], 'views': [133543]}
+2022-05-05 19:23:15,995 [DEBUG] py4...: --------------------
+2022-05-05 19:23:15,995 [DEBUG] py4...: Calling fit_content()
+2022-05-05 19:23:15,995 [DEBUG] py4...: ǀCalling get_network_view_suid(None, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:15,995 [DEBUG] py4...: ǀǀCalling get_network_views(None, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:15,995 [DEBUG] py4...: ǀǀǀCalling get_network_suid(None, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:15,995 [DEBUG] py4...: ǀǀǀǀCalling commands_post('network get attribute network="current" namespace="default" columnList="SUID"', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:15,996 [DEBUG] py4...: ǀǀǀǀHTTP POST(http://127.0.0.1:1234/v1/commands/network/get%20attribute), json: {'network': 'current', 'namespace': 'default', 'columnList': 'SUID'}
+2022-05-05 19:23:16,011 [DEBUG] py4...: ǀǀǀǀOK[200], content: {
+ "data": [ {
+  "SUID": 133167
+}
+],
+ "errors":[]
+}
+2022-05-05 19:23:16,012 [DEBUG] py4...: ǀǀǀǀReturning 'commands_post': [{'SUID': 133167}]
+2022-05-05 19:23:16,012 [DEBUG] py4...: ǀǀǀReturning 'get_network_suid': 133167
+2022-05-05 19:23:16,012 [DEBUG] py4...: ǀǀǀCalling cyrest_get('networks/133167/views', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:16,012 [DEBUG] py4...: ǀǀǀHTTP GET(http://127.0.0.1:1234/v1/networks/133167/views)
+2022-05-05 19:23:16,031 [DEBUG] py4...: ǀǀǀOK[200], content: [133543]
+2022-05-05 19:23:16,031 [DEBUG] py4...: ǀǀǀReturning 'cyrest_get': [133543]
+2022-05-05 19:23:16,032 [DEBUG] py4...: ǀǀReturning 'get_network_views': [133543]
+2022-05-05 19:23:16,032 [DEBUG] py4...: ǀReturning 'get_network_view_suid': 133543
+2022-05-05 19:23:16,032 [DEBUG] py4...: ǀCalling commands_post('view fit content view="SUID:133543"', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:16,032 [DEBUG] py4...: ǀHTTP POST(http://127.0.0.1:1234/v1/commands/view/fit%20content), json: {'view': 'SUID:133543'}
+2022-05-05 19:23:16,056 [DEBUG] py4...: ǀOK[200], content: {
+ "data": {},
+ "errors":[]
+}
+2022-05-05 19:23:16,056 [DEBUG] py4...: ǀReturning 'commands_post': {}
+2022-05-05 19:23:16,056 [DEBUG] py4...: Returning 'fit_content': {}
+2022-05-05 19:23:16,056 [DEBUG] py4...: --------------------
+2022-05-05 19:23:16,057 [DEBUG] py4...: Calling get_network_zoom()
+2022-05-05 19:23:16,057 [DEBUG] py4...: ǀCalling get_network_property('NETWORK_SCALE_FACTOR', network=None, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:16,057 [DEBUG] py4...: ǀǀCalling get_network_suid(None, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:16,057 [DEBUG] py4...: ǀǀǀCalling commands_post('network get attribute network="current" namespace="default" columnList="SUID"', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:16,058 [DEBUG] py4...: ǀǀǀHTTP POST(http://127.0.0.1:1234/v1/commands/network/get%20attribute), json: {'network': 'current', 'namespace': 'default', 'columnList': 'SUID'}
+2022-05-05 19:23:16,085 [DEBUG] py4...: ǀǀǀOK[200], content: {
+ "data": [ {
+  "SUID": 133167
+}
+],
+ "errors":[]
+}
+2022-05-05 19:23:16,086 [DEBUG] py4...: ǀǀǀReturning 'commands_post': [{'SUID': 133167}]
+2022-05-05 19:23:16,086 [DEBUG] py4...: ǀǀReturning 'get_network_suid': 133167
+2022-05-05 19:23:16,086 [DEBUG] py4...: ǀǀCalling get_network_views(133167, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:16,086 [DEBUG] py4...: ǀǀǀCalling get_network_suid(133167, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:16,086 [DEBUG] py4...: ǀǀǀǀCalling cyrest_get('networks', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:16,086 [DEBUG] py4...: ǀǀǀǀHTTP GET(http://127.0.0.1:1234/v1/networks)
+2022-05-05 19:23:16,108 [DEBUG] py4...: ǀǀǀǀOK[200], content: [109314,52484,99845,43015,122125,24077,74764,14608,112656,55826,103187,46357,124953,27419,78106,17950,115998,106529,49699,97058,128295,81448,71979,21292,119340,133167,109871,53041,100402,43572,132405,75321,24634,122682,113213,15165,103744,46914,78663,125510,27976,116555,18507,107086,50256,97617,82005,128852,119897,21849,72536,110428,53598,100959,44129,123239,25191,75878,15722,113770,104301,47471,131187,126067,79220,19064,117112,107643,132216,50813,98174,129409,82562,73093,22406,120454,110985,54155,101516,44686,76435,25748,114327,16279,104858,48028,79777,126624,117669,19621,70308,108200,51370,98731,83119,129966,121011,22963,73650,111542,54712,102073,45243,123837,26305,76992,16836,114884,105415,48585,127181,80334,70865,20178,118226,108757,51927,99288,42458,83676,74207,23520,121568,112099,55269,102630,45800,77549,124396,26862,115441,132594,17393,105972,49142,80891,127738,118783,20735,71422]
+2022-05-05 19:23:16,109 [DEBUG] py4...: ǀǀǀǀReturning 'cyrest_get': [109314, 52484, 99845, 43015, 122125, 24077, 74764, 14608, 112656, 55826, 103187, 46357, 124953, 27419, 78106, 17950, 115998, 106529, 49699, 97058, 128295, 81448, 71979, 21292, 119340, 133167, 109871, 53041, 100402, 43572, 132405, 75321, 24634, 122682, 113213, 15165, 103744, 46914, 78663, 125510, 27976, 116555, 18507, 107086, 50256, 97617, 82005, 128852, 119897, 21849, 72536, 110428, 53598, 100959, 44129, 123239, 25191, 75878, 15722, 113770, 104301, 47471, 131187, 126067, 79220, 19064, 117112, 107643, 132216, 50813, 98174, 129409, 82562, 73093, 22406, 120454, 110985, 54155, 101516, 44686, 76435, 25748, 114327, 16279, 104858, 48028, 79777, 126624, 117669, 19621, 70308, 108200, 51370, 98731, 83119, 129966, 121011, 22963, 73650, 111542, 54712, 102073, 45243, 123837, 26305, 76992, 16836, 114884, 105415, 48585, 127181, 80334, 70865, 20178, 118226, 108757, 51927, 99288, 42458, 83676, 74207, 23520, 121568, 112099, 55269, 102630, 45800, 77549, 124396, 26862, 115441, 132594, 17393, 105972, 49142, 80891, 127738, 118783, 20735, 71422]
+2022-05-05 19:23:16,109 [DEBUG] py4...: ǀǀǀReturning 'get_network_suid': 133167
+2022-05-05 19:23:16,110 [DEBUG] py4...: ǀǀǀCalling cyrest_get('networks/133167/views', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:16,110 [DEBUG] py4...: ǀǀǀHTTP GET(http://127.0.0.1:1234/v1/networks/133167/views)
+2022-05-05 19:23:16,124 [DEBUG] py4...: ǀǀǀOK[200], content: [133543]
+2022-05-05 19:23:16,125 [DEBUG] py4...: ǀǀǀReturning 'cyrest_get': [133543]
+2022-05-05 19:23:16,125 [DEBUG] py4...: ǀǀReturning 'get_network_views': [133543]
+2022-05-05 19:23:16,125 [DEBUG] py4...: ǀǀCalling cyrest_get('networks/133167/views/133543/network/NETWORK_SCALE_FACTOR', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:16,126 [DEBUG] py4...: ǀǀHTTP GET(http://127.0.0.1:1234/v1/networks/133167/views/133543/network/NETWORK_SCALE_FACTOR)
+2022-05-05 19:23:16,139 [DEBUG] py4...: ǀǀOK[200], content: {
+  "visualProperty" : "NETWORK_SCALE_FACTOR",
+  "value" : 3.284324324324324
+}
+2022-05-05 19:23:16,139 [DEBUG] py4...: ǀǀReturning 'cyrest_get': {'visualProperty': 'NETWORK_SCALE_FACTOR', 'value': 3.284324324324324}
+2022-05-05 19:23:16,140 [DEBUG] py4...: ǀReturning 'get_network_property': 3.284324324324324
+2022-05-05 19:23:16,140 [DEBUG] py4...: Returning 'get_network_zoom': 3.284324324324324
+2022-05-05 19:23:16,140 [DEBUG] py4...: --------------------
+2022-05-05 19:23:16,140 [DEBUG] py4...: Calling set_network_zoom_bypass(2.9558918918918917)
+2022-05-05 19:23:16,141 [DEBUG] py4...: ǀCalling set_network_property_bypass(2.9558918918918917, 'NETWORK_SCALE_FACTOR', bypass=False, network=None, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:16,141 [DEBUG] py4...: ǀǀCalling get_network_suid(None, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:16,141 [DEBUG] py4...: ǀǀǀCalling commands_post('network get attribute network="current" namespace="default" columnList="SUID"', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:16,141 [DEBUG] py4...: ǀǀǀHTTP POST(http://127.0.0.1:1234/v1/commands/network/get%20attribute), json: {'network': 'current', 'namespace': 'default', 'columnList': 'SUID'}
+2022-05-05 19:23:16,160 [DEBUG] py4...: ǀǀǀOK[200], content: {
+ "data": [ {
+  "SUID": 133167
+}
+],
+ "errors":[]
+}
+2022-05-05 19:23:16,161 [DEBUG] py4...: ǀǀǀReturning 'commands_post': [{'SUID': 133167}]
+2022-05-05 19:23:16,161 [DEBUG] py4...: ǀǀReturning 'get_network_suid': 133167
+2022-05-05 19:23:16,161 [DEBUG] py4...: ǀǀCalling get_network_views(133167, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:16,161 [DEBUG] py4...: ǀǀǀCalling get_network_suid(133167, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:16,161 [DEBUG] py4...: ǀǀǀǀCalling cyrest_get('networks', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:16,162 [DEBUG] py4...: ǀǀǀǀHTTP GET(http://127.0.0.1:1234/v1/networks)
+2022-05-05 19:23:16,174 [DEBUG] py4...: ǀǀǀǀOK[200], content: [109314,52484,99845,43015,122125,24077,74764,14608,112656,55826,103187,46357,124953,27419,78106,17950,115998,106529,49699,97058,128295,81448,71979,21292,119340,133167,109871,53041,100402,43572,132405,75321,24634,122682,113213,15165,103744,46914,78663,125510,27976,116555,18507,107086,50256,97617,82005,128852,119897,21849,72536,110428,53598,100959,44129,123239,25191,75878,15722,113770,104301,47471,131187,126067,79220,19064,117112,107643,132216,50813,98174,129409,82562,73093,22406,120454,110985,54155,101516,44686,76435,25748,114327,16279,104858,48028,79777,126624,117669,19621,70308,108200,51370,98731,83119,129966,121011,22963,73650,111542,54712,102073,45243,123837,26305,76992,16836,114884,105415,48585,127181,80334,70865,20178,118226,108757,51927,99288,42458,83676,74207,23520,121568,112099,55269,102630,45800,77549,124396,26862,115441,132594,17393,105972,49142,80891,127738,118783,20735,71422]
+2022-05-05 19:23:16,175 [DEBUG] py4...: ǀǀǀǀReturning 'cyrest_get': [109314, 52484, 99845, 43015, 122125, 24077, 74764, 14608, 112656, 55826, 103187, 46357, 124953, 27419, 78106, 17950, 115998, 106529, 49699, 97058, 128295, 81448, 71979, 21292, 119340, 133167, 109871, 53041, 100402, 43572, 132405, 75321, 24634, 122682, 113213, 15165, 103744, 46914, 78663, 125510, 27976, 116555, 18507, 107086, 50256, 97617, 82005, 128852, 119897, 21849, 72536, 110428, 53598, 100959, 44129, 123239, 25191, 75878, 15722, 113770, 104301, 47471, 131187, 126067, 79220, 19064, 117112, 107643, 132216, 50813, 98174, 129409, 82562, 73093, 22406, 120454, 110985, 54155, 101516, 44686, 76435, 25748, 114327, 16279, 104858, 48028, 79777, 126624, 117669, 19621, 70308, 108200, 51370, 98731, 83119, 129966, 121011, 22963, 73650, 111542, 54712, 102073, 45243, 123837, 26305, 76992, 16836, 114884, 105415, 48585, 127181, 80334, 70865, 20178, 118226, 108757, 51927, 99288, 42458, 83676, 74207, 23520, 121568, 112099, 55269, 102630, 45800, 77549, 124396, 26862, 115441, 132594, 17393, 105972, 49142, 80891, 127738, 118783, 20735, 71422]
+2022-05-05 19:23:16,176 [DEBUG] py4...: ǀǀǀReturning 'get_network_suid': 133167
+2022-05-05 19:23:16,177 [DEBUG] py4...: ǀǀǀCalling cyrest_get('networks/133167/views', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:16,177 [DEBUG] py4...: ǀǀǀHTTP GET(http://127.0.0.1:1234/v1/networks/133167/views)
+2022-05-05 19:23:16,190 [DEBUG] py4...: ǀǀǀOK[200], content: [133543]
+2022-05-05 19:23:16,190 [DEBUG] py4...: ǀǀǀReturning 'cyrest_get': [133543]
+2022-05-05 19:23:16,191 [DEBUG] py4...: ǀǀReturning 'get_network_views': [133543]
+2022-05-05 19:23:16,191 [DEBUG] py4...: ǀǀCalling cyrest_put('networks/133167/views/133543/network', parameters={'bypass': False}, body=[{'visualProperty': 'NETWORK_SCALE_FACTOR', 'value': 2.9558918918918917}], base_url='http://127.0.0.1:1234/v1', require_json=False)
+2022-05-05 19:23:16,191 [DEBUG] py4...: ǀǀHTTP PUT(http://127.0.0.1:1234/v1/networks/133167/views/133543/network), params: {'bypass': False}, json: [{'visualProperty': 'NETWORK_SCALE_FACTOR', 'value': 2.9558918918918917}]
+2022-05-05 19:23:16,217 [DEBUG] py4...: ǀǀOK[200], content: 
+2022-05-05 19:23:16,220 [DEBUG] py4...: ǀǀReturning 'cyrest_put': ''
+2022-05-05 19:23:16,229 [DEBUG] py4...: ǀReturning 'set_network_property_bypass': ''
+2022-05-05 19:23:16,229 [DEBUG] py4...: Returning 'set_network_zoom_bypass': ''
+2022-05-05 19:23:16,230 [DEBUG] py4...: --------------------
+2022-05-05 19:23:16,230 [DEBUG] py4...: Calling export_image('infer4-B10.0-W0.0.png', overwrite_file=True, type='png', units='cm', width=4, height=4, resolution=150)
+2022-05-05 19:23:16,230 [DEBUG] py4...: ǀCalling get_network_view_suid(None, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:16,230 [DEBUG] py4...: ǀǀCalling get_network_views(None, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:16,230 [DEBUG] py4...: ǀǀǀCalling get_network_suid(None, base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:16,230 [DEBUG] py4...: ǀǀǀǀCalling commands_post('network get attribute network="current" namespace="default" columnList="SUID"', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:16,231 [DEBUG] py4...: ǀǀǀǀHTTP POST(http://127.0.0.1:1234/v1/commands/network/get%20attribute), json: {'network': 'current', 'namespace': 'default', 'columnList': 'SUID'}
+2022-05-05 19:23:16,261 [DEBUG] py4...: ǀǀǀǀOK[200], content: {
+ "data": [ {
+  "SUID": 133167
+}
+],
+ "errors":[]
+}
+2022-05-05 19:23:16,263 [DEBUG] py4...: ǀǀǀǀReturning 'commands_post': [{'SUID': 133167}]
+2022-05-05 19:23:16,264 [DEBUG] py4...: ǀǀǀReturning 'get_network_suid': 133167
+2022-05-05 19:23:16,264 [DEBUG] py4...: ǀǀǀCalling cyrest_get('networks/133167/views', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:16,264 [DEBUG] py4...: ǀǀǀHTTP GET(http://127.0.0.1:1234/v1/networks/133167/views)
+2022-05-05 19:23:16,282 [DEBUG] py4...: ǀǀǀOK[200], content: [133543]
+2022-05-05 19:23:16,282 [DEBUG] py4...: ǀǀǀReturning 'cyrest_get': [133543]
+2022-05-05 19:23:16,282 [DEBUG] py4...: ǀǀReturning 'get_network_views': [133543]
+2022-05-05 19:23:16,282 [DEBUG] py4...: ǀReturning 'get_network_view_suid': 133543
+2022-05-05 19:23:16,283 [DEBUG] py4...: ǀCalling sandbox_get_file_info('infer4-B10.0-W0.0.png', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:16,283 [DEBUG] py4...: ǀǀCalling commands_post('filetransfer getFileInfo fileName="/Users/degnbol/PhosTF/results/1-smallExamples/2-4types/regTests/infer4-B10.0-W0.0.png"', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:16,283 [DEBUG] py4...: ǀǀHTTP POST(http://127.0.0.1:1234/v1/commands/filetransfer/getFileInfo), json: {'fileName': '/Users/degnbol/PhosTF/results/1-smallExamples/2-4types/regTests/infer4-B10.0-W0.0.png'}
+2022-05-05 19:23:16,299 [DEBUG] py4...: ǀǀOK[200], content: {
+ "data": {"filePath":"/Users/degnbol/PhosTF/results/1-smallExamples/2-4types/regTests/infer4-B10.0-W0.0.png","modifiedTime":"","isFile":false},
+ "errors":[]
+}
+2022-05-05 19:23:16,299 [DEBUG] py4...: ǀǀReturning 'commands_post': {'filePath': '/Users/degnbol/PhosTF/results/1-smallExamples/2-4types/regTests/infer4-B10.0-W0.0.png', 'modifiedTime': '', 'isFile': False}
+2022-05-05 19:23:16,300 [DEBUG] py4...: ǀReturning 'sandbox_get_file_info': {'filePath': '/Users/degnbol/PhosTF/results/1-smallExamples/2-4types/regTests/infer4-B10.0-W0.0.png', 'modifiedTime': '', 'isFile': False}
+2022-05-05 19:23:16,300 [DEBUG] py4...: ǀCalling commands_post('view export Resolution="150" Units="cm" Height="4" Width="4" OutputFile="/Users/degnbol/PhosTF/results/1-smallExamples/2-4types/regTests/infer4-B10.0-W0.0.png" options="PNG" view="SUID:133543"', base_url='http://127.0.0.1:1234/v1')
+2022-05-05 19:23:16,300 [DEBUG] py4...: ǀHTTP POST(http://127.0.0.1:1234/v1/commands/view/export), json: {'Resolution': '150', 'Units': 'cm', 'Height': '4', 'Width': '4', 'OutputFile': '/Users/degnbol/PhosTF/results/1-smallExamples/2-4types/regTests/infer4-B10.0-W0.0.png', 'options': 'PNG', 'view': 'SUID:133543'}
+2022-05-05 19:23:16,448 [DEBUG] py4...: ǀOK[200], content: {
+ "data": {"file":"/Users/degnbol/PhosTF/results/1-smallExamples/2-4types/regTests/infer4-B10.0-W0.0.png"},
+ "errors":[]
+}
+2022-05-05 19:23:16,449 [DEBUG] py4...: ǀReturning 'commands_post': {'file': '/Users/degnbol/PhosTF/results/1-smallExamples/2-4types/regTests/infer4-B10.0-W0.0.png'}
+2022-05-05 19:23:16,449 [DEBUG] py4...: Returning 'export_image': {'file': '/Users/degnbol/PhosTF/results/1-smallExamples/2-4types/regTests/infer4-B10.0-W0.0.png'}
+2022-05-05 19:23:16,449 [DEBUG] py4...: --------------------
