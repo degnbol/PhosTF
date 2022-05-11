@@ -15,7 +15,10 @@ if WT_mask == ""
 else
     WT_mask = "../WT_$(WT_mask).ssv"
 end
-infer("../logFC_$suff.csv", "../TF.txt", "../KP.txt", "W_infer/WT_infer-$suff-$λB-$λW.tsv", "W_infer/WP_infer-$suff-$λB-$λW.tsv"; 
+
+infer("../logFC_$suff.csv",
+"../TF.txt", "../KP.txt",
+"W_infer/WT_infer-$ARGS.tsv", "W_infer/WP_infer-$ARGS.tsv"; 
 delim_mut='_', col_match=r"^[\w-]+",
 lambda_Bstar=parse(Float64, λB),
 lambda_absW=parse(Float64, λW),

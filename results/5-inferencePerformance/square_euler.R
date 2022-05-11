@@ -91,6 +91,8 @@ plot_square_euler = function(DT, ps) {
 
 # read evaluation files
 KP_eval = fread(cwd("results/4-yeastNetworkReconstruction/P_edges/P_edges.tsv"))
+KP_eval[, Ref:=NULL]
+KP_eval = unique(KP_eval)
 
 plts = list()
 for (i_file in 1:length(WP_fnames)) {
@@ -106,7 +108,7 @@ for (i_file in 1:length(WP_fnames)) {
     
     # join with eval data
     KP_eval[, eval:=TRUE]
-    DT = KP_eval[KP_edges, on=c("P", "Target")]
+    DT = merge(KP_edges, KP_eval, by=c("P", "Target"), all.x=TRUE)
     DT[is.na(eval), eval:=FALSE]
     
     ps = c(1, 1)
@@ -121,7 +123,7 @@ for (i_file in 1:length(WP_fnames)) {
         
     
     # plts[[i_file]] = plot_square_euler(DT, ps)
-    cat(paste(sprintf("%.3f", -log10(ps)), collapse=" "), "\n")
+    cat(paste(sprintf("%.3f", min(ps)), collapse=" "), "\n")
     
 }
 
