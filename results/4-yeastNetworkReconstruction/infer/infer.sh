@@ -1,5 +1,5 @@
 #!/usr/bin/env zsh
-# USAGE: ./infer.sh 'inner+-strict+0.0+0.1'
+# USAGE: ./infer.sh 'inner+-strict+0.0+0.1++'
 OUT=logs/$@.log
 {
     echo "### cmdline:"
