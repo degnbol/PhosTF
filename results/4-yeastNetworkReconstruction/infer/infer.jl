@@ -1,4 +1,7 @@
 #!/usr/bin/env julia
+using Base.Threads
+println("#threads = ", nthreads())
+
 iORo, logFC, λB, λW, WT, WT_mask = [v for ARG in ARGS for v in split(ARG, '+')]
 args = join(ARGS, ' ')
 
@@ -22,7 +25,7 @@ infer("../logFC_$suff.csv",
 delim_mut='_', col_match=r"^[\w-]+",
 lambda_Bstar=parse(Float64, λB),
 lambda_absW=parse(Float64, λW),
-epochs=1,
+epochs=200,
 WT=WT, train_WT=WT===nothing,
 WT_mask=WT_mask)
 
