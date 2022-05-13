@@ -1,5 +1,6 @@
 #!/usr/bin/env julia
 iORo, logFC, λB, λW, WT, WT_mask = [v for ARG in ARGS for v in split(ARG, '+')]
+args = join(ARGS, ' ')
 
 
 suff = "$iORo$logFC"
@@ -17,7 +18,7 @@ end
 @src "inference/infer"
 infer("../logFC_$suff.csv",
 "../TF.txt", "../KP.txt",
-"W_infer/WT_infer-$ARGS.tsv", "W_infer/WP_infer-$ARGS.tsv"; 
+"W_infer/WT_infer-$args.tsv", "W_infer/WP_infer-$args.tsv"; 
 delim_mut='_', col_match=r"^[\w-]+",
 lambda_Bstar=parse(Float64, λB),
 lambda_absW=parse(Float64, λW),

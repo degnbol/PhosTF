@@ -12,4 +12,4 @@ OUT=logs/$@.log
 } > $OUT
 ./infer.jl $@ |& cat >> $OUT
 ./aucWP.R W_infer/WP_infer-$@.tsv >> $OUT
-../../5-inferencePerformance/square_euler.R WP_infer/WP_infer-$@.tsv >> $OUT
+../../5-inferencePerformance/square_euler.R W_infer/WP_infer-$@.tsv >> $OUT

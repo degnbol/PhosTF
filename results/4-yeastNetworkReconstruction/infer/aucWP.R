@@ -15,8 +15,9 @@ dt.pred = fread(commandArgs(TRUE))
 dt.true[, Ref:=NULL]
 dt.true$True = TRUE
 
-dt.pred.melt = melt(dt.pred, id.vars="_", variable.name="P", value.name="Pred", variable.factor=FALSE)
-setnames(dt.pred.melt, "_", "Target")
+# first name should be _, "", rownames or something like that.
+setnames(dt.pred, names(dt.pred)[1], "Target")
+dt.pred.melt = melt(dt.pred, id.vars="Target", variable.name="P", value.name="Pred", variable.factor=FALSE)
 
 dt = merge(dt.pred.melt, dt.true, by=c("P", "Target"), all.x=TRUE)
 dt[is.na(True), True:=FALSE]

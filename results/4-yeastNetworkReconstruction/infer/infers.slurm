@@ -2,7 +2,7 @@
 #SBATCH -N 1
 #SBATCH --ntasks=8
 #SBATCH --cpus-per-task=4
-#SBATCH --time=0-00:10:00
+#SBATCH --time=0-00:50:00
 
 # loadr
 module load foss/2020b 2> /dev/null
