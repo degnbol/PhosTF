@@ -24,7 +24,7 @@ do
     #SBATCH --cpus-per-task=4
     #SBATCH --mem=40G
     #SBATCH --time=0-20:00:00
-    #SBATCH --name=$params
+    #SBATCH --job-name=$params
 
     # loadr
     module load foss/2020b 2> /dev/null
