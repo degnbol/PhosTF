@@ -25,7 +25,7 @@ infer("../logFC_$suff.csv",
 delim_mut='_', col_match=r"^[\w-]+",
 lambda_Bstar=parse(Float64, λB),
 lambda_absW=parse(Float64, λW),
-epochs=200,
+epochs=1000,
 WT=WT, train_WT=WT===nothing,
 WT_mask=WT_mask)
 

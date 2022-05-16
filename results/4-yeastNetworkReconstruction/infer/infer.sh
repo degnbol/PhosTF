@@ -10,6 +10,6 @@ OUT=logs/$@.log
     cat ./infer.jl
     echo "\n### stdout:"
 } > $OUT
-./infer.jl $@ |& cat >> $OUT
+julia -t 4 ./infer.jl $@ |& cat >> $OUT
 ./aucWP.R W_infer/WP_infer-$@.tsv >> $OUT
 ../../5-inferencePerformance/square_euler.R W_infer/WP_infer-$@.tsv >> $OUT
