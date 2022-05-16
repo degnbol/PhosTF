@@ -26,6 +26,6 @@ delim_mut='_', col_match=r"^[\w-]+",
 lambda_Bstar=parse(Float64, λB),
 lambda_absW=parse(Float64, λW),
 epochs=1000,
-WT=WT, train_WT=WT===nothing,
+WT=WT, train_WT=true,
 WT_mask=WT_mask)
 
