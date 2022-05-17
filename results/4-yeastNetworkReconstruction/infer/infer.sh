@@ -11,5 +11,5 @@ OUT=logs/$@.log
     echo "\n### stdout:"
 } > $OUT
 julia -t 4 ./infer.jl $@ |& cat >> $OUT
-./aucWP.R W_infer/WP_infer-$@.tsv >> $OUT
+# ./aucWP.R W_infer/WP_infer-$@.tsv >> $OUT
 ../../5-inferencePerformance/square_euler.R W_infer/WP_infer-$@.tsv >> $OUT
