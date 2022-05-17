@@ -96,7 +96,7 @@ KP_eval = unique(KP_eval)
 
 plts = list()
 for (i_file in 1:length(WP_fnames)) {
-    cat(basename(WP_fnames[i_file]), "\t")
+    cat(basename(WP_fnames[i_file]), "\t", sep='')
     WP = fread(WP_fnames[i_file])
     KPs = names(WP)[2:ncol(WP)]
     # melt
@@ -123,7 +123,7 @@ for (i_file in 1:length(WP_fnames)) {
         
     
     # plts[[i_file]] = plot_square_euler(DT, ps)
-    cat(paste(sprintf("%.3f", min(ps)), collapse=" "), "\n")
+    cat(sprintf("%.5e", min(ps)), "\n", sep='')
     
 }
 
