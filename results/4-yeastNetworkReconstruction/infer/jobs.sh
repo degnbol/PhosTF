@@ -1,31 +1,30 @@
 #!/usr/bin/env zsh
 
-# 'inner+-strict+1.0+0.0+FDR20+' \
-# 'inner+-strict+0.1+0.0+FDR20+' \
-# 'inner+-strict+0.0+1.0+FDR20+' \
-# 'inner+-strict+0.0+0.1+FDR20+' \
-# 'outer+-strict+1.0+0.0+FDR20+' \
-# 'outer+-strict+0.1+0.0+FDR20+' \
-# 'outer+-strict+0.0+1.0+FDR20+' \
-# 'outer+-strict+0.0+0.1+FDR20+' \
-# 'inner+-strict+1.0+0.0+FDR20+FDR20_abssign_mask' \
-# 'inner+-strict+0.1+0.0+FDR20+FDR20_abssign_mask' \
-# 'inner+-strict+0.0+1.0+FDR20+FDR20_abssign_mask' \
-# 'inner+-strict+0.0+0.1+FDR20+FDR20_abssign_mask' \
-# 'outer+-strict+1.0+0.0+FDR20+FDR20_abssign_mask' \
-# 'outer+-strict+0.1+0.0+FDR20+FDR20_abssign_mask' \
-# 'outer+-strict+0.0+1.0+FDR20+FDR20_abssign_mask' \
-# 'outer+-strict+0.0+0.1+FDR20+FDR20_abssign_mask'
-
 for params in \
-'inner+-strict+1.0+0.0++FDR20_abssign_mask' \
-'inner+-strict+0.1+0.0++FDR20_abssign_mask' \
-'inner+-strict+0.0+1.0++FDR20_abssign_mask' \
-'inner+-strict+0.0+0.1++FDR20_abssign_mask' \
-'outer+-strict+1.0+0.0++FDR20_abssign_mask' \
-'outer+-strict+0.1+0.0++FDR20_abssign_mask' \
-'outer+-strict+0.0+1.0++FDR20_abssign_mask' \
-'outer+-strict+0.0+0.1++FDR20_abssign_mask'
+'inner+-strict_norm+1.0+0.0++' \
+'inner+-strict_norm+0.1+0.0++' \
+'inner+-strict_norm+0.0+1.0++' \
+'inner+-strict_norm+0.0+0.1++' \
+'outer+-strict_norm+1.0+0.0++' \
+'outer+-strict_norm+0.1+0.0++' \
+'outer+-strict_norm+0.0+1.0++' \
+'outer+-strict_norm+0.0+0.1++' \
+'inner+-strict_norm+1.0+0.0+FDR20+' \
+'inner+-strict_norm+0.1+0.0+FDR20+' \
+'inner+-strict_norm+0.0+1.0+FDR20+' \
+'inner+-strict_norm+0.0+0.1+FDR20+' \
+'outer+-strict_norm+1.0+0.0+FDR20+' \
+'outer+-strict_norm+0.1+0.0+FDR20+' \
+'outer+-strict_norm+0.0+1.0+FDR20+' \
+'outer+-strict_norm+0.0+0.1+FDR20+' \
+'inner+-strict_norm+1.0+0.0++FDR20_abssign_mask' \
+'inner+-strict_norm+0.1+0.0++FDR20_abssign_mask' \
+'inner+-strict_norm+0.0+1.0++FDR20_abssign_mask' \
+'inner+-strict_norm+0.0+0.1++FDR20_abssign_mask' \
+'outer+-strict_norm+1.0+0.0++FDR20_abssign_mask' \
+'outer+-strict_norm+0.1+0.0++FDR20_abssign_mask' \
+'outer+-strict_norm+0.0+1.0++FDR20_abssign_mask' \
+'outer+-strict_norm+0.0+0.1++FDR20_abssign_mask'
 do
 echo "#!/usr/bin/env bash
 #SBATCH -N 1
