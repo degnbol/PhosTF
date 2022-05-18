@@ -1,5 +1,5 @@
 #!/usr/bin/env zsh
-# USAGE: ./infer.sh 'inner+-strict+0.0+0.1'
+# USAGE: ./infer.sh 'inner+-strict+0.0+0.1++'
 OUT=logs/$@.log
 {
     echo "### cmdline:"
@@ -10,6 +10,6 @@ OUT=logs/$@.log
     cat ./infer.jl
     echo "\n### stdout:"
 } > $OUT
-./infer.jl $@ |& cat >> $OUT
-./aucWP.R W_infer/WP_infer-$@.tsv >> $OUT
-../../5-inferencePerformance/square_euler.R WP_infer/WP_infer-$@.tsv >> $OUT
+julia -t 4 ./infer.jl $@ |& cat >> $OUT
+# ./aucWP.R W_infer/WP_infer-$@.tsv >> $OUT
+../../5-inferencePerformance/square_euler.R W_infer/WP_infer-$@.tsv >> $OUT
